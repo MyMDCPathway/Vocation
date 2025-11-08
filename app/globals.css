@@ -1,0 +1,175 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Use Inter as the default font */
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* New Flowchart Styles */
+.flowchart-container {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch; /* Make cards same height */
+  overflow-x: auto;
+  padding: 1.5rem;
+  background-color: #f9fafb; /* Light gray bg for contrast */
+  border-radius: 0.75rem; /* rounded */
+  margin-bottom: 1.5rem; /* Space */
+}
+
+.flowchart-step {
+  flex: 0 0 300px; /* Don't shrink, 300px width */
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e5e7eb; /* gray-200 */
+  border-radius: 0.75rem; /* lg */
+  background-color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+  overflow: hidden; /* For rounded corners on border-top */
+}
+
+.flowchart-step-header {
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  border-top-width: 4px;
+}
+
+.flowchart-step-header-icon {
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px; /* full */
+  background-color: #e5e7eb; /* gray-200 */
+  margin-right: 0.75rem;
+  flex-shrink: 0;
+}
+
+.flowchart-step-content {
+  padding: 1rem;
+  flex-grow: 1; /* Make content area fill height */
+}
+
+.flowchart-connector {
+  flex: 0 0 50px; /* Don't grow/shrink, 50px width */
+  position: relative;
+  align-self: center; /* Center vertically */
+  height: 20px; /* Give it some height for centering */
+}
+
+/* Horizontal line for connector */
+.flowchart-connector::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background-color: #cbd5e1; /* gray-300 */
+  transform: translateY(-50%);
+}
+
+/* Step-specific colors */
+.flowchart-step-degree .flowchart-step-header {
+  border-color: #3b82f6; /* Blue */
+}
+
+.flowchart-step-degree .flowchart-step-header-icon {
+  background-color: #dbeafe;
+  color: #3b82f6;
+}
+
+.flowchart-step-degree .flowchart-step-header span {
+  color: #3b82f6;
+}
+
+.flowchart-step-transfer .flowchart-step-header {
+  border-color: #f97316; /* Orange */
+}
+
+.flowchart-step-transfer .flowchart-step-header-icon {
+  background-color: #ffedd5;
+  color: #f97316;
+}
+
+.flowchart-step-transfer .flowchart-step-header span {
+  color: #f97316;
+}
+
+.flowchart-step-internship .flowchart-step-header {
+  border-color: #10b981; /* Green */
+}
+
+.flowchart-step-internship .flowchart-step-header-icon {
+  background-color: #d1fae5;
+  color: #10b981;
+}
+
+.flowchart-step-internship .flowchart-step-header span {
+  color: #10b981;
+}
+
+.flowchart-step-exam .flowchart-step-header {
+  border-color: #8b5cf6; /* Purple */
+}
+
+.flowchart-step-exam .flowchart-step-header-icon {
+  background-color: #ede9fe;
+  color: #8b5cf6;
+}
+
+.flowchart-step-exam .flowchart-step-header span {
+  color: #8b5cf6;
+}
+
+/* Loading Spinner */
+.loader {
+  border: 4px solid #f3f3f3; /* Light grey */
+  border-top: 4px solid #3b82f6; /* Blue */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Hide scrollbar when modal is open */
+.modal-open {
+  overflow: hidden;
+}
+
+/* Style for the clear button inside the input */
+.input-container {
+  position: relative;
+  flex-grow: 1;
+  width: 100%;
+}
+
+#clear-input-btn {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #9ca3af; /* gray-400 */
+  display: none; /* Hidden by default */
+}
+
+#clear-input-btn:hover {
+  color: #6b7280; /* gray-500 */
+}
+
