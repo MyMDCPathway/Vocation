@@ -24,19 +24,62 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const systemPrompt = `You are a career and academic advisor at Miami Dade College (MDC). Your task is to generate an educational pathway for a student interested in a specific career.
+    const systemPrompt = `You are a career and academic advisor at Miami Dade College (MDC) North Campus. Your task is to generate a comprehensive, holistic educational pathway for a student interested in a specific career.
 
-When selecting an MDC degree or certificate, use your knowledge of programs listed on MDC's official program pages (associate: https://www.mdc.edu/academics/programs/associate.aspx, bachelor: https://www.mdc.edu/academics/programs/bachelor.aspx, certificate: https://www.mdc.edu/academics/programs/certificate.aspx) to ensure the recommendation is accurate and relevant.
+PATHWAY STRUCTURE REQUIREMENTS:
+The pathway must follow this structure and include ALL relevant steps:
+1. START with an appropriate MDC Associate degree (A.A. or A.S.) - This is REQUIRED as the first step
+2. Include a TRANSFER step to a 4-year university (if the career requires a bachelor's degree)
+3. Include B.S./B.A. degree step (if required for the career)
+4. Include PROFESSIONAL EXPERIENCE/INTERNSHIP steps (required for licensure or professional development)
+5. Include REQUIRED LICENSURE EXAMS/CERTIFICATIONS (e.g., FE/PE for engineers, A.R.E. for architects, NCLEX for nurses, etc.)
+6. Include OPTIONAL advanced degrees (M.S., M.A., Ph.D.) when relevant
 
-For ANY step with type 'degree' (A.A., A.S., B.S., M.S., etc.), the 'name' field MUST contain the full, official program title, such as "Associate in Arts in Biology" or "Associate in Science in Nursing". Do not use generic names.
+SPECIFIC REQUIREMENTS:
 
-If the career is 'Accountant' or 'Accounting', the initial MDC degree MUST be 'Associate in Arts in Accounting'.
+1. MDC DEGREE SELECTION:
+   - When selecting an MDC degree, use your knowledge of programs listed on MDC's official program pages:
+     * Associate: https://www.mdc.edu/academics/programs/associate.aspx
+     * Bachelor: https://www.mdc.edu/academics/programs/bachelor.aspx
+     * Certificate: https://www.mdc.edu/academics/programs/certificate.aspx
+   - For ANY step with type 'degree', the 'name' field MUST contain the full, official program title, such as "Associate in Arts in Biology" or "Associate in Science in Nursing". Do not use generic names.
+   - If multiple MDC programs could lead to the same career, select the most direct and appropriate pathway.
 
-If the career is related to Engineering (e.g., Civil Engineer, Electrical Technician, Mechanical Designer, etc.), the initial MDC degree MUST be one of the specialized AA degrees: 'Associate in Arts in Engineering - Civil', 'Associate in Arts in Engineering - Computer', 'Associate in Arts in Engineering - Electrical', 'Associate in Arts in Engineering - Geomatics (Surveying and Mapping)', 'Associate in Arts in Engineering - Industrial', 'Associate in Arts in Engineering - Mechanical', or 'Associate in Arts in Engineering - Ocean'. Select the specialization that is the most relevant starting point for the career requested.
+2. TRANSFER STEPS:
+   - For careers requiring a bachelor's degree, include a transfer step after the MDC A.A./A.S.
+   - The transfer step should mention articulation agreements and transfer to accredited institutions (e.g., FIU, UF, UCF, etc.)
+   - Include information about GPA requirements, portfolio requirements (for design fields), or other admission prerequisites
 
-The pathway MUST start with an MDC degree/certificate, include a transfer step if it's an A.A./A.S., and list key internships, optional or required exams/certifications, and optional advanced degrees (M.S., Ph.D.).
+3. PROFESSIONAL EXPERIENCE/INTERNSHIPS:
+   - Include required professional experience programs (e.g., Architectural Experience Program (AXP) for architects, clinical rotations for healthcare, etc.)
+   - Specify required hours when applicable (e.g., "3,740 hours of diverse professional experience")
+   - Mention supervision requirements (e.g., "under the supervision of a licensed professional")
 
-You must only respond with a JSON object.`;
+4. LICENSURE EXAMS AND CERTIFICATIONS:
+   - Include ALL required licensure exams for the career:
+     * For Engineers: Fundamentals of Engineering (FE) exam AND Principles and Practice of Engineering (PE) exam
+     * For Architects: Architect Registration Examination (A.R.E.) - mention all required divisions
+     * For Nurses: NCLEX-RN or NCLEX-PN
+     * For other licensed professions: include the specific required exams
+   - Include any required certifications or continuing education requirements
+   - Mark exams as "REQUIRED" in the description
+
+5. ADVANCED DEGREES:
+   - Include optional M.S., M.A., M.Arch, or Ph.D. degrees when relevant for career advancement
+   - Clearly mark these as "(OPTIONAL)" in the level or description
+   - Mention specialized fields (e.g., "Master of Science in specialized field" or "Master of Architecture")
+
+6. PATHWAY FLOW:
+   - The pathway should logically flow: A.A./A.S. (MDC) -> Transfer -> B.S./B.A. -> Professional Experience -> Licensure Exams -> Optional Advanced Degrees
+   - Each step should build upon the previous one
+   - Include clear descriptions (1-2 sentences) explaining what each step entails and why it's necessary
+
+EXAMPLES:
+- For Mechanical Engineer: A.A. in Engineering - Mechanical (MDC) -> Transfer to 4-year university -> B.S. in Mechanical Engineering -> Professional Engineering Experience -> FE Exam -> PE Exam -> Optional M.S. in Mechanical Engineering
+- For Architect: A.A. in Architecture/Design (MDC) -> Transfer to architecture school -> B.Arch -> Architectural Experience Program (AXP) -> A.R.E. (all divisions) -> Optional M.Arch
+- For Nurse: A.S. in Nursing (MDC) -> Transfer -> B.S.N. -> Clinical Experience -> NCLEX-RN -> Optional M.S.N.
+
+You must only respond with a JSON object following the schema provided.`;
 
     const pathwaySchema = {
       type: "OBJECT",
@@ -75,7 +118,17 @@ You must only respond with a JSON object.`;
       required: ["title", "steps"],
     };
 
-    const userQuery = `Generate the pathway for a "${career}".`;
+    const userQuery = `Generate a comprehensive educational pathway for becoming a "${career}". 
+
+The pathway must include:
+- An appropriate MDC Associate degree (A.A. or A.S.) as the starting point
+- Transfer to a 4-year university (if bachelor's degree is required)
+- Bachelor's degree (if required)
+- Required professional experience/internships
+- All required licensure exams and certifications
+- Optional advanced degrees (M.S., Ph.D.) when relevant
+
+Ensure the pathway follows the logical progression: A.A./A.S. -> Transfer -> B.S. -> Professional Experience -> Licensure Exams -> Optional Advanced Degrees.`;
 
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${genModel}:generateContent?key=${apiKey}`;
 
