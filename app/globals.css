@@ -9,10 +9,10 @@ body {
   font-family: 'Inter', sans-serif;
   background-color: #e8e8e8;
   background-image: repeating-linear-gradient(
-    145deg,
+    135deg,
     transparent,
-    transparent 5px,
-    rgba(255, 255, 255, 0.5) 5px,
+    transparent 3px,
+    rgba(255, 255, 255, 0.523) 5px,
     rgba(255, 255, 255, 0.5) 9px
   );
   min-height: 100vh;
