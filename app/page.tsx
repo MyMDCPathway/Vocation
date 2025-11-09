@@ -88,6 +88,12 @@ interface PathwayData {
   pathways: PathwayOption[];
 }
 
+interface CareerPathway {
+  career: string;
+  data: PathwayData;
+  selectedPathwayIndex: number;
+}
+
 // Mapping of MDC bachelor's programs to their exact URLs
 // Key: program name (normalized for matching), Value: exact URL
 const MDC_BACHELORS_URL_MAPPING: Record<string, string> = {
@@ -1234,6 +1240,97 @@ function getCertificationInfo(examName: string): CertificationInfo | null {
   return null;
 }
 
+// Helper function to parse requirements from description or generate meaningful requirements
+function parseRequirementsFromDescription(description: string | undefined, examName: string): string[] {
+  if (!description) {
+    return generateGenericRequirements(examName);
+  }
+
+  // Try to extract requirements from description
+  const desc = description.toLowerCase();
+  
+  // Check if description contains "requirements:" or similar indicators
+  if (desc.includes("requirements:") || desc.includes("requirements include") || desc.includes("must")) {
+    // Try to split by common separators
+    const requirements: string[] = [];
+    const parts = description.split(/[;•\n-]/).map(p => p.trim()).filter(p => p.length > 0);
+    
+    for (const part of parts) {
+      const lowerPart = part.toLowerCase();
+      // Look for requirement-like phrases
+      if (lowerPart.includes("bachelor") || lowerPart.includes("degree") || 
+          lowerPart.includes("pass") || lowerPart.includes("exam") ||
+          lowerPart.includes("apply") || lowerPart.includes("licensure") ||
+          lowerPart.includes("experience") || lowerPart.includes("hours") ||
+          lowerPart.includes("accredited") || lowerPart.includes("state")) {
+        requirements.push(part);
+      }
+    }
+    
+    if (requirements.length > 0) {
+      return requirements;
+    }
+  }
+  
+  // If description doesn't contain structured requirements, generate based on exam type
+  return generateGenericRequirements(examName);
+}
+
+// Helper function to generate generic requirements based on exam name
+function generateGenericRequirements(examName: string): string[] {
+  const name = examName.toLowerCase();
+  const requirements: string[] = [];
+  
+  // Engineering exams
+  if (name.includes("fe") || name.includes("fundamentals of engineering")) {
+    requirements.push("Bachelor's degree in engineering or related field (or in final year)");
+    requirements.push("Registration with state engineering board");
+    requirements.push("Pass the FE exam (6-hour computer-based exam)");
+  } else if (name.includes("pe") || name.includes("professional engineering") || name.includes("principles and practice")) {
+    requirements.push("Passed the FE exam");
+    requirements.push("Bachelor's degree in engineering from ABET-accredited program");
+    requirements.push("4 years of progressive engineering experience under a PE");
+    requirements.push("Pass the PE exam (8-hour exam in specific discipline)");
+  }
+  // Nursing exams
+  else if (name.includes("nclex")) {
+    requirements.push("Graduate from an accredited nursing program (ADN or BSN)");
+    requirements.push("Apply for licensure with state board of nursing");
+    requirements.push("Receive Authorization to Test (ATT)");
+    requirements.push("Pass the NCLEX exam");
+  }
+  // Architecture exams
+  else if (name.includes("are") || name.includes("architect registration")) {
+    requirements.push("Complete accredited architecture degree (B.Arch or M.Arch)");
+    requirements.push("Complete Architectural Experience Program (AXP) - 3,740 hours");
+    requirements.push("Pass all 6 divisions of the A.R.E.");
+  }
+  // CPA exams
+  else if (name.includes("cpa") || name.includes("certified public accountant")) {
+    requirements.push("Bachelor's degree (150 semester hours total)");
+    requirements.push("Complete accounting coursework requirements");
+    requirements.push("Pass all 4 sections of the Uniform CPA Examination");
+    requirements.push("Meet state-specific experience requirements");
+  }
+  // Medical exams
+  else if (name.includes("usmle") || name.includes("medical licensing")) {
+    requirements.push("Medical degree (MD) from accredited medical school");
+    requirements.push("Pass Step 1, Step 2 CK, Step 2 CS, and Step 3");
+    requirements.push("Complete clinical rotations");
+  }
+  // Generic fallback
+  else {
+    requirements.push("Check the official certification website for specific education prerequisites");
+    requirements.push("Complete required coursework or training program");
+    requirements.push("Apply for examination with the certifying organization");
+    requirements.push("Pass the required examination(s)");
+    requirements.push("Meet state-specific or jurisdiction-specific requirements");
+    requirements.push("Complete any required professional experience or internships");
+  }
+  
+  return requirements;
+}
+
 // Helper function to convert program name to MDC URL slug
 function getMDCProgramUrl(programName: string): string {
   // Extract the first program option if multiple are listed
@@ -1297,6 +1394,118 @@ function getMDCProgramUrl(programName: string): string {
   return `https://www.mdc.edu/${slug}/`;
 }
 
+// Global cache for exam info (shared across all instances)
+const examInfoGlobalCache: Record<string, CertificationInfo> = {};
+
+// Component for exam steps that fetches info dynamically
+function ExamStepComponent({ 
+  examName, 
+  examDescription, 
+  careerIndex,
+  onShowRequirements 
+}: { 
+  examName: string; 
+  examDescription?: string; 
+  careerIndex?: number;
+  onShowRequirements: (name: string, info: CertificationInfo, careerIndex?: number) => void;
+}) {
+  const [examInfo, setExamInfo] = useState<CertificationInfo | null>(null);
+  const [loadingExamInfo, setLoadingExamInfo] = useState(false);
+
+  const fetchExamInfo = async () => {
+    const cacheKey = examName.toLowerCase();
+    
+    // Check global cache first
+    if (examInfoGlobalCache[cacheKey]) {
+      setExamInfo(examInfoGlobalCache[cacheKey]);
+      return;
+    }
+
+    setLoadingExamInfo(true);
+    try {
+      const response = await fetch("/api/get-exam-info", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ examName }),
+      });
+
+      const data = await response.json();
+      
+      if (response.ok && !data.error) {
+        setExamInfo(data);
+        // Cache the result globally
+        examInfoGlobalCache[cacheKey] = data;
+      } else {
+        // Fallback to search URL and generic requirements
+        const fallbackInfo: CertificationInfo = {
+          url: data.url || `https://www.google.com/search?q=${encodeURIComponent(examName + " official website")}`,
+          requirements: data.requirements || parseRequirementsFromDescription(examDescription, examName)
+        };
+        setExamInfo(fallbackInfo);
+        examInfoGlobalCache[cacheKey] = fallbackInfo;
+      }
+    } catch (error) {
+      console.error("Error fetching exam info:", error);
+      // Fallback
+      const fallbackInfo: CertificationInfo = {
+        url: `https://www.google.com/search?q=${encodeURIComponent(examName + " official website")}`,
+        requirements: parseRequirementsFromDescription(examDescription, examName)
+      };
+      setExamInfo(fallbackInfo);
+      examInfoGlobalCache[cacheKey] = fallbackInfo;
+    } finally {
+      setLoadingExamInfo(false);
+    }
+  };
+
+  const handleRequirementsClick = async () => {
+    const cacheKey = examName.toLowerCase();
+    let infoToShow = examInfo || examInfoGlobalCache[cacheKey];
+    
+    if (!infoToShow) {
+      // Fetch if not available
+      await fetchExamInfo();
+      infoToShow = examInfo || examInfoGlobalCache[cacheKey] || {
+        url: `https://www.google.com/search?q=${encodeURIComponent(examName + " official website")}`,
+        requirements: parseRequirementsFromDescription(examDescription, examName)
+      };
+    }
+
+    onShowRequirements(examName, infoToShow, careerIndex);
+  };
+
+  // Pre-fetch exam info when component mounts
+  useEffect(() => {
+    fetchExamInfo();
+  }, [examName]);
+
+  const examUrl = examInfo?.url || examInfoGlobalCache[examName.toLowerCase()]?.url || `https://www.google.com/search?q=${encodeURIComponent(examName + " official website")}`;
+
+  return (
+    <div className="mt-4 space-y-2">
+      <button
+        onClick={handleRequirementsClick}
+        disabled={loadingExamInfo}
+        className="w-full text-left text-sm font-semibold text-purple-700 hover:text-purple-800 focus:outline-none focus:underline flex items-center disabled:opacity-50"
+      >
+        <i className="fas fa-info-circle mr-2" />
+        {loadingExamInfo ? "Loading Requirements..." : "Requirements"}
+      </button>
+      <a
+        href={examUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-150"
+      >
+        <i className="fas fa-external-link-alt mr-2" />{" "}
+        View Certification Website
+      </a>
+    </div>
+  );
+}
+
 export default function Home() {
   const [careerInput, setCareerInput] = useState("");
   const [showClearBtn, setShowClearBtn] = useState(false);
@@ -1306,9 +1515,13 @@ export default function Home() {
   const [modalTitle, setModalTitle] = useState("MDC Details");
   const [modalContent, setModalContent] = useState<string>("");
   const [pathwayData, setPathwayData] = useState<PathwayData | null>(null);
+  const [comparisonPathways, setComparisonPathways] = useState<CareerPathway[]>([]);
+  const [showAddCareerInput, setShowAddCareerInput] = useState<boolean>(false);
+  const [addCareerInput, setAddCareerInput] = useState<string>("");
   const [certificationPopup, setCertificationPopup] = useState<{
     name: string;
     info: CertificationInfo;
+    careerIndex?: number;
   } | null>(null);
   const [transferRecommendationsPopup, setTransferRecommendationsPopup] =
     useState<boolean>(false);
@@ -1421,6 +1634,7 @@ export default function Home() {
         pathwayDataToSet = generatedData as PathwayData;
       }
       
+      // First/main pathway (always set when using main search)
       setPathwayData(pathwayDataToSet);
       // Set selected pathway to primary (or first if no primary)
       if (pathwayDataToSet.pathways && pathwayDataToSet.pathways.length > 0) {
@@ -1429,6 +1643,10 @@ export default function Home() {
         );
         setSelectedPathwayIndex(primaryIndex >= 0 ? primaryIndex : 0);
       }
+      // Clear any previous comparisons when starting a new main search
+      setComparisonPathways([]);
+      setShowAddCareerInput(false);
+      setAddCareerInput("");
       setCertificationPopup(null); // Close popup when new pathway is generated
       setTransferRecommendationsPopup(false); // Close transfer popup when new pathway is generated
     } catch (error: any) {
@@ -1457,9 +1675,16 @@ export default function Home() {
       "How to use MyMDC Pathway?",
       `
       <div class="space-y-4 text-gray-700">
+        <p><strong>Generate a Pathway:</strong></p>
         <p>1. Type your desired career (e.g., "Software Engineer" or "Nurse") into the text box.</p>
         <p>2. Press <kbd class="px-2 py-1 bg-gray-200 rounded-md text-sm">Enter</kbd> or click the blue arrow button to generate a personalized educational pathway.</p>
         <p>3. The pathway will show you recommended degrees from MDC, potential transfer steps to universities, and other milestones like internships and exams.</p>
+        <p class="mt-4"><strong>Compare Careers:</strong></p>
+        <p>1. After generating a pathway, click the "+ Compare Another Career" button below the flowchart.</p>
+        <p>2. Enter another career (e.g., "Electrical Engineer") in the search bar that appears.</p>
+        <p>3. The new pathway will appear below the first one, allowing you to compare them side by side.</p>
+        <p>4. You can add up to 4 careers total (1 main + 3 additional).</p>
+        <p>5. Click the X button on any additional career to remove it from comparison.</p>
       </div>
     `
     );
@@ -1472,8 +1697,104 @@ export default function Home() {
 
   const handleClearPathway = () => {
     setPathwayData(null);
+    // Don't clear comparison pathways - only clear the main pathway
+    setShowAddCareerInput(false);
+    setAddCareerInput("");
     setCertificationPopup(null); // Close popup when pathway is cleared
     setTransferRecommendationsPopup(false); // Close transfer popup when pathway is cleared
+  };
+
+  const handleRemoveFromComparison = (index: number) => {
+    setComparisonPathways(comparisonPathways.filter((_, i) => i !== index));
+  };
+
+  const handlePathwaySelectInComparison = (careerIndex: number, pathwayIndex: number) => {
+    const updated = [...comparisonPathways];
+    updated[careerIndex].selectedPathwayIndex = pathwayIndex;
+    setComparisonPathways(updated);
+  };
+
+  const handleAddCareerClick = () => {
+    setShowAddCareerInput(true);
+  };
+
+  const handleAddCareerGenerate = async () => {
+    if (!addCareerInput.trim()) {
+      return;
+    }
+    const career = addCareerInput.trim();
+    await handleGeneratePathwayForCareer(career);
+  };
+
+  const handleGeneratePathwayForCareer = async (career: string) => {
+    showLoading("Generating pathway...");
+    try {
+      const generatedData = await callAPI(career);
+      
+      let pathwayDataToSet: PathwayData;
+      
+      // Handle backward compatibility
+      if ((generatedData as any).steps) {
+        // Old format - convert to new format
+        pathwayDataToSet = {
+          title: (generatedData as any).title || `Pathway to becoming a ${career}`,
+          pathways: [
+            {
+              title: "Primary Pathway",
+              isPrimary: true,
+              steps: (generatedData as any).steps,
+            },
+          ],
+        };
+      } else {
+        // New format
+        pathwayDataToSet = generatedData as PathwayData;
+      }
+      
+      // Adding a career to comparison
+      const primaryIndex = pathwayDataToSet.pathways.findIndex(
+        (p: PathwayOption) => p.isPrimary
+      );
+      const selectedIndex = primaryIndex >= 0 ? primaryIndex : 0;
+      
+      if (comparisonPathways.length < 3) { // Max 4 total (1 main + 3 additional)
+        setComparisonPathways([
+          ...comparisonPathways,
+          {
+            career: career,
+            data: pathwayDataToSet,
+            selectedPathwayIndex: selectedIndex,
+          },
+        ]);
+        setAddCareerInput(""); // Clear input
+        setShowAddCareerInput(false); // Hide input
+      } else {
+        showModal(
+          "Maximum Reached",
+          '<p class="text-red-600">You can compare up to 4 careers at a time. Please remove one before adding another.</p>'
+        );
+      }
+      
+      setCertificationPopup(null);
+      setTransferRecommendationsPopup(false);
+    } catch (error: any) {
+      if (error.name !== "AbortError") {
+        console.error("Error generating pathway:", error);
+        showModal(
+          "Generation Failed",
+          `<p class="text-red-600">Failed to generate pathway. Please try again.</p>`
+        );
+      }
+    } finally {
+      hideLoading();
+    }
+  };
+
+  const handleAddCareerKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleAddCareerGenerate();
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -1550,6 +1871,7 @@ export default function Home() {
 
       {/* Infographic Display Area */}
       <div id="pathway-display" className="p-6 md:p-8">
+        {/* Main Pathway */}
         {pathwayData && pathwayData.pathways && pathwayData.pathways.length > 0 && (
           <>
             <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
@@ -1558,9 +1880,10 @@ export default function Home() {
               </h2>
               <button
                 onClick={handleClearPathway}
-                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm font-medium rounded-lg shadow w-full sm:w-auto flex-shrink-0"
+                className="text-gray-400 hover:text-gray-600"
+                title="Clear Pathway"
               >
-                <i className="fas fa-times mr-2" /> Clear Pathway
+                <i className="fas fa-times text-xl" />
               </button>
             </div>
 
@@ -1652,34 +1975,11 @@ export default function Home() {
                             </a>
                           )}
                         {step.type === "exam" && (
-                          (() => {
-                            const certInfo = getCertificationInfo(step.name);
-                            return certInfo ? (
-                              <div className="mt-4 space-y-2">
-                                <button
-                                  onClick={() =>
-                                    setCertificationPopup({
-                                      name: step.name,
-                                      info: certInfo,
-                                    })
-                                  }
-                                  className="w-full text-left text-sm font-semibold text-purple-700 hover:text-purple-800 focus:outline-none focus:underline flex items-center"
-                                >
-                                  <i className="fas fa-info-circle mr-2" />
-                                  Requirements
-                                </button>
-                                <a
-                                  href={certInfo.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-150"
-                                >
-                                  <i className="fas fa-external-link-alt mr-2" />{" "}
-                                  View Certification Website
-                                </a>
-                              </div>
-                            ) : null;
-                          })()
+                          <ExamStepComponent 
+                            examName={step.name} 
+                            examDescription={step.description}
+                            onShowRequirements={(name, info) => setCertificationPopup({ name, info })}
+                          />
                         )}
                       </div>
                     </div>
@@ -1687,7 +1987,229 @@ export default function Home() {
                 );
               })}
             </div>
+
+            {/* Add Career Button - Only show if no additional careers have been added yet */}
+            {comparisonPathways.length === 0 && !showAddCareerInput && (
+              <div className="mt-8 flex justify-center">
+                <button
+                  onClick={handleAddCareerClick}
+                  className="flex items-center justify-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md transition-colors"
+                >
+                  <i className="fas fa-plus mr-2" />
+                  Compare Another Career
+                </button>
+              </div>
+            )}
+
+            {/* Add Career Input */}
+            {showAddCareerInput && (
+              <div className="mt-8 flex justify-center">
+                <div className="w-full max-w-md">
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={addCareerInput}
+                      onChange={(e) => setAddCareerInput(e.target.value)}
+                      onKeyDown={handleAddCareerKeyDown}
+                      placeholder="Enter another career (e.g., Electrical Engineer)"
+                      className="flex-1 py-2 pl-4 pr-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      autoFocus
+                    />
+                    <button
+                      onClick={handleAddCareerGenerate}
+                      disabled={!addCareerInput.trim()}
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-full transition-colors"
+                    >
+                      <i className="fas fa-arrow-right" />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowAddCareerInput(false);
+                        setAddCareerInput("");
+                      }}
+                      className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full transition-colors"
+                    >
+                      <i className="fas fa-times" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
+        )}
+
+        {/* Additional Career Pathways - Render independently of main pathway */}
+        {comparisonPathways.length > 0 && (
+          <div className={pathwayData ? "mt-12 space-y-12" : "space-y-12"}>
+            {comparisonPathways.map((careerPathway, careerIndex) => (
+              <div key={careerIndex} className={pathwayData ? "border-t border-gray-300 pt-8" : ""}>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-bold text-gray-800">
+                    {careerPathway.career}
+                  </h2>
+                  <button
+                    onClick={() => handleRemoveFromComparison(careerIndex)}
+                    className="text-gray-400 hover:text-gray-600"
+                    title="Remove from comparison"
+                  >
+                    <i className="fas fa-times text-xl" />
+                  </button>
+                </div>
+
+                {/* Pathway Tabs for this career */}
+                {careerPathway.data.pathways.length > 1 && (
+                  <div className="mb-6 border-b border-gray-200">
+                    <nav className="flex space-x-1 overflow-x-auto" aria-label="Pathway Tabs">
+                      {careerPathway.data.pathways.map((pathway, pathwayIndex) => (
+                        <button
+                          key={pathwayIndex}
+                          onClick={() => handlePathwaySelectInComparison(careerIndex, pathwayIndex)}
+                          className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                            careerPathway.selectedPathwayIndex === pathwayIndex
+                              ? "border-blue-500 text-blue-600"
+                              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                          }`}
+                        >
+                          {pathway.isPrimary && (
+                            <span className="mr-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
+                              Recommended
+                            </span>
+                          )}
+                          {pathway.title}
+                        </button>
+                      ))}
+                    </nav>
+                  </div>
+                )}
+
+                {/* Pathway Flowchart */}
+                <div className="flowchart-container">
+                  {careerPathway.data.pathways[careerPathway.selectedPathwayIndex].steps.map(
+                    (step, stepIndex) => {
+                      const stepTypeClass = `flowchart-step-${step.type}`;
+                      const IconComponent = icons[step.type];
+
+                      return (
+                        <div key={stepIndex}>
+                          {stepIndex > 0 && <div className="flowchart-connector" />}
+                          <div className={`flowchart-step ${stepTypeClass}`}>
+                            <div className="flowchart-step-header">
+                              <div className="flowchart-step-header-icon">
+                                {IconComponent}
+                              </div>
+                              <span className="text-xs font-semibold uppercase tracking-wider">
+                                {step.level || step.type}
+                              </span>
+                            </div>
+                            <div className="flowchart-step-content">
+                              <h3 className="text-lg font-semibold text-gray-900">
+                                {step.name}
+                              </h3>
+                              <p className="text-gray-600 mt-2">{step.description}</p>
+                              {step.type === "transfer" && (
+                                <div className="mt-4 space-y-2">
+                                  <button
+                                    onClick={() => setTransferRecommendationsPopup(true)}
+                                    className="w-full text-left text-sm font-semibold text-orange-700 hover:text-orange-800 focus:outline-none focus:underline flex items-center"
+                                  >
+                                    <i className="fas fa-info-circle mr-2" />
+                                    Recommendations
+                                  </button>
+                                  <a
+                                    href="https://www.mdc.edu/transfer-information/transfer-agreements/"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-150"
+                                  >
+                                    <i className="fas fa-external-link-alt mr-2" /> View
+                                    Transfer Agreements
+                                  </a>
+                                </div>
+                              )}
+                              {step.type === "degree" &&
+                                ((step.level.includes("MDC") &&
+                                  !step.name.toLowerCase().includes("bachelor") &&
+                                  (isMDCAssociateInScienceProgram(step.name) ||
+                                    isMDCAssociateInArtsProgram(step.name))) ||
+                                  step.name.toLowerCase().includes("certificate") ||
+                                  (step.name.toLowerCase().includes("bachelor") &&
+                                    isMDCBachelorsProgram(step.name))) && (
+                                  <a
+                                    href={getMDCProgramUrl(step.name)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
+                                  >
+                                    <i className="fas fa-external-link-alt mr-2" />{" "}
+                                    View Program Page
+                                  </a>
+                                )}
+                              {step.type === "exam" && (
+                                <ExamStepComponent 
+                                  examName={step.name} 
+                                  examDescription={step.description} 
+                                  careerIndex={careerIndex}
+                                  onShowRequirements={(name, info, idx) => setCertificationPopup({ name, info, careerIndex: idx })}
+                                />
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                  )}
+                </div>
+
+                {/* Add Career Button after last additional pathway - Only show if under limit */}
+                {careerIndex === comparisonPathways.length - 1 && comparisonPathways.length < 3 && !showAddCareerInput && (
+                  <div className="mt-8 flex justify-center">
+                    <button
+                      onClick={handleAddCareerClick}
+                      className="flex items-center justify-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-md transition-colors"
+                    >
+                      <i className="fas fa-plus mr-2" />
+                      Compare Another Career
+                    </button>
+                  </div>
+                )}
+
+                {/* Add Career Input after last pathway */}
+                {careerIndex === comparisonPathways.length - 1 && showAddCareerInput && (
+                  <div className="mt-8 flex justify-center">
+                    <div className="w-full max-w-md">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="text"
+                          value={addCareerInput}
+                          onChange={(e) => setAddCareerInput(e.target.value)}
+                          onKeyDown={handleAddCareerKeyDown}
+                          placeholder="Enter another career (e.g., Electrical Engineer)"
+                          className="flex-1 py-2 pl-4 pr-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          autoFocus
+                        />
+                        <button
+                          onClick={handleAddCareerGenerate}
+                          disabled={!addCareerInput.trim()}
+                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-full transition-colors"
+                        >
+                          <i className="fas fa-arrow-right" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            setShowAddCareerInput(false);
+                            setAddCareerInput("");
+                          }}
+                          className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full transition-colors"
+                        >
+                          <i className="fas fa-times" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         )}
       </div>
 

@@ -97,6 +97,10 @@ SPECIFIC REQUIREMENTS:
      * For other licensed professions: include the specific required exams
    - Include any required certifications or continuing education requirements
    - Mark exams as "REQUIRED" in the description
+   - CRITICAL: For exam steps, the 'description' field MUST include specific requirements in a structured format. List requirements as separate bullet points or numbered items, such as:
+     * "Requirements: Bachelor's degree in engineering (or in final year), Registration with state engineering board, Pass the FE exam (6-hour computer-based exam)"
+     * "Requirements: Graduate from accredited nursing program, Apply for licensure with state board, Receive Authorization to Test (ATT), Pass the NCLEX-RN exam"
+     * Include education prerequisites, application steps, exam format, and any state-specific requirements when known
 
 5. ADVANCED DEGREES:
    - Include optional M.S., M.A., M.Arch, or Ph.D. degrees when relevant for career advancement
