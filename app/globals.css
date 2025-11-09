@@ -7,14 +7,7 @@
 /* Use Inter as the default font */
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #e8e8e8;
-  background-image: repeating-linear-gradient(
-    135deg,
-    transparent,
-    transparent 3px,
-    rgba(255, 255, 255, 0.523) 5px,
-    rgba(255, 255, 255, 0.5) 9px
-  );
+  background-color: #ffffff;
   min-height: 100vh;
 }
 
@@ -71,6 +64,64 @@ body {
   background-color: white;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
   overflow: hidden; /* For rounded corners on border-top */
+  animation: slideInUp 0.6s ease-out forwards;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.flowchart-step:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Staggered animation delays for sequential appearance */
+/* Each step wrapper appears with increasing delay for cascading effect */
+.flowchart-container > div:nth-child(1) .flowchart-step {
+  animation-delay: 0.1s;
+}
+
+.flowchart-container > div:nth-child(2) .flowchart-step {
+  animation-delay: 0.2s;
+}
+
+.flowchart-container > div:nth-child(3) .flowchart-step {
+  animation-delay: 0.3s;
+}
+
+.flowchart-container > div:nth-child(4) .flowchart-step {
+  animation-delay: 0.4s;
+}
+
+.flowchart-container > div:nth-child(5) .flowchart-step {
+  animation-delay: 0.5s;
+}
+
+.flowchart-container > div:nth-child(6) .flowchart-step {
+  animation-delay: 0.6s;
+}
+
+.flowchart-container > div:nth-child(7) .flowchart-step {
+  animation-delay: 0.7s;
+}
+
+.flowchart-container > div:nth-child(8) .flowchart-step {
+  animation-delay: 0.8s;
+}
+
+.flowchart-container > div:nth-child(n+9) .flowchart-step {
+  animation-delay: 0.9s;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .flowchart-step-header {

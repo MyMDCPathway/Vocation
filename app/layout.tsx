@@ -20,7 +20,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="bg-gray-100 min-h-screen">{children}</body>
+      <body className="min-h-screen">{children}</body>
     </html>
   )
 }
