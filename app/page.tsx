@@ -114,12 +114,12 @@ function isMDCBachelorsProgram(programName: string): boolean {
 // A.A. programs follow the pattern: "Associate in Arts in [Subject]" or "Associate in Arts in Engineering - [Specialization]"
 function isMDCAssociateInArtsProgram(programName: string): boolean {
   const normalizedName = programName.toLowerCase().trim();
-  
+
   // Must start with "Associate in Arts"
   if (!normalizedName.startsWith("associate in arts")) {
     return false;
   }
-  
+
   // Must have a subject after "Associate in Arts in"
   // Valid patterns:
   // - "Associate in Arts in [Subject]"
@@ -127,22 +127,22 @@ function isMDCAssociateInArtsProgram(programName: string): boolean {
   if (normalizedName.includes("associate in arts in")) {
     // Extract the part after "Associate in Arts in"
     const afterPrefix = normalizedName.replace(/^associate in arts in\s*/, "");
-    
+
     // Must have some content after the prefix
     if (afterPrefix.trim().length === 0) {
       return false;
     }
-    
+
     // For engineering programs, must have a specialization after the dash
     if (afterPrefix.includes("engineering -")) {
       const specialization = afterPrefix.split("engineering -")[1]?.trim();
-      return specialization && specialization.length > 0;
+      return Boolean(specialization && specialization.length > 0);
     }
-    
+
     // For other programs, just need a subject name
     return afterPrefix.trim().length > 0;
   }
-  
+
   return false;
 }
 
@@ -158,16 +158,16 @@ const PROGRAM_URL_MAPPINGS: Record<string, string> = {
   "ocean engineering": "oceanengineering",
   "geomatics engineering": "geomaticsengineering",
   "surveying and mapping": "geomaticsengineering",
-  
+
   // Common program name variations
-  "nursing": "nursing",
+  nursing: "nursing",
   "computer science": "computerscience",
   "information systems technology": "informationsystemstechnology",
   "information technology": "informationsystemstechnology",
-  "cybersecurity": "cybersecurity",
+  cybersecurity: "cybersecurity",
   "data analytics": "dataanalytics",
   "biological sciences": "biologicalsciences",
-  "biology": "biology",
+  biology: "biology",
   "early childhood education": "earlychildhoodeducation",
   "exceptional student education": "exceptionalstudenteducation",
   "secondary mathematics education": "secondarymathematicseducation",
@@ -178,7 +178,8 @@ const PROGRAM_URL_MAPPINGS: Record<string, string> = {
   "supply chain management": "supplychainmanagement",
   "film television digital production": "filmtvdigitalproduction",
   "applied artificial intelligence": "appliedartificialintelligence",
-  "electrical and computer engineering technology": "electricalandcomputerengineeringtechnology",
+  "electrical and computer engineering technology":
+    "electricalandcomputerengineeringtechnology",
 };
 
 // Helper function to extract the first program option when multiple are listed
@@ -186,7 +187,7 @@ const PROGRAM_URL_MAPPINGS: Record<string, string> = {
 function extractFirstProgramOption(programName: string): string {
   // Check for common separators: " or ", " and ", ", "
   const separators = [/\s+or\s+/i, /\s+and\s+/i, /,\s+/];
-  
+
   for (const separator of separators) {
     if (separator.test(programName)) {
       // Split and take the first option
@@ -197,7 +198,7 @@ function extractFirstProgramOption(programName: string): string {
       }
     }
   }
-  
+
   // If no separator found, return the original name
   return programName.trim();
 }
@@ -205,14 +206,14 @@ function extractFirstProgramOption(programName: string): string {
 // Helper function to find the best matching URL for a program
 function findBestProgramUrl(programName: string): string | null {
   const normalized = programName.toLowerCase().trim();
-  
+
   // Check for exact matches in mapping
   for (const [key, url] of Object.entries(PROGRAM_URL_MAPPINGS)) {
     if (normalized.includes(key)) {
       return `https://www.mdc.edu/${url}/`;
     }
   }
-  
+
   return null;
 }
 
@@ -221,13 +222,13 @@ function getMDCProgramUrl(programName: string): string {
   // Extract the first program option if multiple are listed
   // This allows the title to show all options, but the link goes to one specific program
   const singleProgram = extractFirstProgramOption(programName);
-  
+
   // First, try to find a mapped URL (handles multiple options)
   const mappedUrl = findBestProgramUrl(singleProgram);
   if (mappedUrl) {
     return mappedUrl;
   }
-  
+
   // Remove common prefixes
   let slug = singleProgram
     .replace(/^Associate in Arts in /i, "")
@@ -531,7 +532,9 @@ export default function Home() {
                         {step.type === "degree" &&
                           ((step.level.includes("MDC") &&
                             !step.name.toLowerCase().includes("bachelor") &&
-                            (step.name.toLowerCase().includes("associate in science") ||
+                            (step.name
+                              .toLowerCase()
+                              .includes("associate in science") ||
                               isMDCAssociateInArtsProgram(step.name))) ||
                             step.name.toLowerCase().includes("certificate") ||
                             (step.name.toLowerCase().includes("bachelor") &&
