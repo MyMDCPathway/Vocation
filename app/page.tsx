@@ -137,7 +137,8 @@ const MDC_BACHELORS_URL_MAPPING: Record<string, string> = {
   // School of Engineering, Technology, and Design
   "bachelor of science in applied artificial intelligence":
     "https://www.mdc.edu/appliedaibs/",
-  "bachelor of science in cybersecurity": "https://www.mdc.edu/cybersecuritybs/",
+  "bachelor of science in cybersecurity":
+    "https://www.mdc.edu/cybersecuritybs/",
   "bachelor of science in data analytics": "https://www.mdc.edu/dataanalytics/",
   "bachelor of science in electrical and computer engineering technology":
     "https://www.mdc.edu/electronicsengineeringbs/",
@@ -284,7 +285,8 @@ const MDC_ASSOCIATE_ARTS_URL_MAPPING: Record<string, string> = {
   history: "https://www.mdc.edu/history",
   "hospitality administration/travel & tourism":
     "https://www.mdc.edu/hospitalityadministration/",
-  "hospitality administration": "https://www.mdc.edu/hospitalityadministration/",
+  "hospitality administration":
+    "https://www.mdc.edu/hospitalityadministration/",
   "travel & tourism": "https://www.mdc.edu/hospitalityadministration/",
   "interior design": "https://www.mdc.edu/interiordesign/",
   "international relations": "https://www.mdc.edu/internationalrelations/",
@@ -336,7 +338,8 @@ const MDC_ASSOCIATE_ARTS_URL_MAPPING: Record<string, string> = {
   "pre-elementary": "https://www.mdc.edu/teachingearlychildhood",
   "teaching (secondary)": "https://www.mdc.edu/teachingsecondary",
   "teaching secondary": "https://www.mdc.edu/teachingsecondary",
-  "teaching secondary (biology)": "https://www.mdc.edu/teachingsecondarybiology",
+  "teaching secondary (biology)":
+    "https://www.mdc.edu/teachingsecondarybiology",
   "teaching secondary biology": "https://www.mdc.edu/teachingsecondarybiology",
   "teaching secondary (chemistry)":
     "https://www.mdc.edu/teachingsecondarychemistry",
@@ -351,8 +354,7 @@ const MDC_ASSOCIATE_ARTS_URL_MAPPING: Record<string, string> = {
   "teaching secondary english": "https://www.mdc.edu/teachingsecondaryenglish",
   "teaching secondary (mathematics education)":
     "https://www.mdc.edu/teachingsecondarymath",
-  "teaching secondary mathematics":
-    "https://www.mdc.edu/teachingsecondarymath",
+  "teaching secondary mathematics": "https://www.mdc.edu/teachingsecondarymath",
   "teaching secondary (physics)":
     "https://www.mdc.edu/teachingsecondaryphysics",
   "teaching secondary physics": "https://www.mdc.edu/teachingsecondaryphysics",
@@ -389,9 +391,11 @@ function getMDCAssociateArtsProgramUrl(programName: string): string | null {
   // Try to find an exact or partial match in the mapping
   // But be more strict: don't match if subject contains words that strongly suggest it's an A.S. program
   // (A.S. programs often have "Technology" in the name, which A.A. programs don't)
-  const asIndicators = ['technology', 'technician'];
-  const hasAsIndicator = asIndicators.some(indicator => subject.includes(indicator));
-  
+  const asIndicators = ["technology", "technician"];
+  const hasAsIndicator = asIndicators.some((indicator) =>
+    subject.includes(indicator)
+  );
+
   for (const [key, url] of Object.entries(MDC_ASSOCIATE_ARTS_URL_MAPPING)) {
     // Exact match always works
     if (subject === key) {
@@ -446,8 +450,7 @@ const MDC_ASSOCIATE_SCIENCE_URL_MAPPING: Record<string, string> = {
   "architectural design and construction technology":
     "https://www.mdc.edu/architecturaldesign/",
   "aviation administration": "https://www.mdc.edu/aviationadministration/",
-  "aviation maintenance management":
-    "https://www.mdc.edu/aviationmaintenance/",
+  "aviation maintenance management": "https://www.mdc.edu/aviationmaintenance/",
   "biomedical engineering technology":
     "https://www.mdc.edu/biomedicalengineering",
   biotechnology: "https://www.mdc.edu/biotechnologyas",
@@ -463,7 +466,8 @@ const MDC_ASSOCIATE_SCIENCE_URL_MAPPING: Record<string, string> = {
   "clinical laboratory science": "https://www.mdc.edu/medicaltechnology/",
   "computer crime investigation":
     "https://www.mdc.edu/computercrimeinvestigation/",
-  "computer engineering technology": "https://www.mdc.edu/computerengineeringas",
+  "computer engineering technology":
+    "https://www.mdc.edu/computerengineeringas",
   "computer information technology":
     "https://www.mdc.edu/computerinformationtechnology/",
   "computer programming and analysis - business application programming":
@@ -513,7 +517,8 @@ const MDC_ASSOCIATE_SCIENCE_URL_MAPPING: Record<string, string> = {
   "health sciences": "https://www.mdc.edu/healthsciencesas",
   "histologic technology": "https://www.mdc.edu/histotechnology/",
   "hospitality & tourism management": "https://www.mdc.edu/tourismmanagement/",
-  "hospitality and tourism management": "https://www.mdc.edu/tourismmanagement/",
+  "hospitality and tourism management":
+    "https://www.mdc.edu/tourismmanagement/",
   "interior design technology": "https://www.mdc.edu/interiordesigntechnology/",
   "landscape & horticulture technology": "https://www.mdc.edu/landscapeas",
   "landscape and horticulture technology": "https://www.mdc.edu/landscapeas",
@@ -542,7 +547,8 @@ const MDC_ASSOCIATE_SCIENCE_URL_MAPPING: Record<string, string> = {
   "professional pilot technology": "https://www.mdc.edu/professionalpilot/",
   "radiation therapy": "https://www.mdc.edu/radiation",
   "radio & television broadcast programming": "https://www.mdc.edu/broadcast/",
-  "radio and television broadcast programming": "https://www.mdc.edu/broadcast/",
+  "radio and television broadcast programming":
+    "https://www.mdc.edu/broadcast/",
   radiography: "https://www.mdc.edu/radiography/",
   "respiratory care": "https://www.mdc.edu/respiratorycare/",
   "respiratory care (accelerated) - crt to rrt":
@@ -558,7 +564,8 @@ const MDC_ASSOCIATE_SCIENCE_URL_MAPPING: Record<string, string> = {
     "https://www.mdc.edu/translationinterpretation/",
   "translation interpretation studies":
     "https://www.mdc.edu/translationinterpretation/",
-  "transportation and logistics": "https://www.mdc.edu/transportationlogistics/",
+  "transportation and logistics":
+    "https://www.mdc.edu/transportationlogistics/",
   "veterinary technology": "https://www.mdc.edu/veterinarytechnology/",
 };
 
@@ -628,8 +635,8 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Bachelor's degree in engineering or related field (or in final year)",
       "Registration with state engineering board",
       "Pass the FE exam (6-hour computer-based exam)",
-      "Valid for lifetime once passed"
-    ]
+      "Valid for lifetime once passed",
+    ],
   },
   "fe exam": {
     url: "https://ncees.org/engineering/fe/",
@@ -637,8 +644,8 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Bachelor's degree in engineering or related field (or in final year)",
       "Registration with state engineering board",
       "Pass the FE exam (6-hour computer-based exam)",
-      "Valid for lifetime once passed"
-    ]
+      "Valid for lifetime once passed",
+    ],
   },
   "principles and practice of engineering": {
     url: "https://ncees.org/engineering/pe/",
@@ -647,8 +654,8 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Bachelor's degree in engineering from ABET-accredited program",
       "4 years of progressive engineering experience under a PE",
       "Pass the PE exam (8-hour exam in specific discipline)",
-      "State-specific additional requirements may apply"
-    ]
+      "State-specific additional requirements may apply",
+    ],
   },
   "pe exam": {
     url: "https://ncees.org/engineering/pe/",
@@ -657,8 +664,8 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Bachelor's degree in engineering from ABET-accredited program",
       "4 years of progressive engineering experience under a PE",
       "Pass the PE exam (8-hour exam in specific discipline)",
-      "State-specific additional requirements may apply"
-    ]
+      "State-specific additional requirements may apply",
+    ],
   },
   "professional engineering": {
     url: "https://ncees.org/engineering/pe/",
@@ -667,10 +674,10 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Bachelor's degree in engineering from ABET-accredited program",
       "4 years of progressive engineering experience under a PE",
       "Pass the PE exam (8-hour exam in specific discipline)",
-      "State-specific additional requirements may apply"
-    ]
+      "State-specific additional requirements may apply",
+    ],
   },
-  
+
   // Architecture Exams
   "architect registration examination": {
     url: "https://www.ncarb.org/get-licensed/are",
@@ -678,8 +685,8 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Completed AXP (Architectural Experience Program) - 3,740 hours",
       "Professional degree in architecture (B.Arch or M.Arch)",
       "Pass all 6 divisions of the ARE",
-      "Meet state-specific requirements"
-    ]
+      "Meet state-specific requirements",
+    ],
   },
   "a.r.e.": {
     url: "https://www.ncarb.org/get-licensed/are",
@@ -687,8 +694,8 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Completed AXP (Architectural Experience Program) - 3,740 hours",
       "Professional degree in architecture (B.Arch or M.Arch)",
       "Pass all 6 divisions of the ARE",
-      "Meet state-specific requirements"
-    ]
+      "Meet state-specific requirements",
+    ],
   },
   "are exam": {
     url: "https://www.ncarb.org/get-licensed/are",
@@ -696,8 +703,8 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Completed AXP (Architectural Experience Program) - 3,740 hours",
       "Professional degree in architecture (B.Arch or M.Arch)",
       "Pass all 6 divisions of the ARE",
-      "Meet state-specific requirements"
-    ]
+      "Meet state-specific requirements",
+    ],
   },
   "architectural experience program": {
     url: "https://www.ncarb.org/get-licensed/axp",
@@ -705,29 +712,29 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "3,740 hours of diverse professional experience",
       "Experience must be under the supervision of a licensed architect",
       "Documented across 6 experience areas",
-      "Can be completed while in school or after graduation"
-    ]
+      "Can be completed while in school or after graduation",
+    ],
   },
-  "axp": {
+  axp: {
     url: "https://www.ncarb.org/get-licensed/axp",
     requirements: [
       "3,740 hours of diverse professional experience",
       "Experience must be under the supervision of a licensed architect",
       "Documented across 6 experience areas",
-      "Can be completed while in school or after graduation"
-    ]
+      "Can be completed while in school or after graduation",
+    ],
   },
-  
+
   // Nursing Exams
-  "nclex": {
+  nclex: {
     url: "https://www.ncsbn.org/nclex.htm",
     requirements: [
       "Graduate from an accredited nursing program (ADN or BSN)",
       "Apply for licensure with state board of nursing",
       "Receive Authorization to Test (ATT)",
       "Pass the NCLEX exam (computerized adaptive test)",
-      "Meet state-specific requirements"
-    ]
+      "Meet state-specific requirements",
+    ],
   },
   "nclex-rn": {
     url: "https://www.ncsbn.org/nclex.htm",
@@ -736,8 +743,8 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Apply for RN licensure with state board of nursing",
       "Receive Authorization to Test (ATT)",
       "Pass the NCLEX-RN exam (up to 265 questions)",
-      "Meet state-specific requirements"
-    ]
+      "Meet state-specific requirements",
+    ],
   },
   "nclex-pn": {
     url: "https://www.ncsbn.org/nclex.htm",
@@ -746,8 +753,8 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Apply for PN/LVN licensure with state board of nursing",
       "Receive Authorization to Test (ATT)",
       "Pass the NCLEX-PN exam (up to 205 questions)",
-      "Meet state-specific requirements"
-    ]
+      "Meet state-specific requirements",
+    ],
   },
   "national council licensure examination": {
     url: "https://www.ncsbn.org/nclex.htm",
@@ -756,19 +763,19 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Apply for licensure with state board of nursing",
       "Receive Authorization to Test (ATT)",
       "Pass the NCLEX exam",
-      "Meet state-specific requirements"
-    ]
+      "Meet state-specific requirements",
+    ],
   },
-  
+
   // Medical/Healthcare
-  "usmle": {
+  usmle: {
     url: "https://www.usmle.org/",
     requirements: [
       "Medical degree (MD) from accredited medical school",
       "Pass Step 1, Step 2 CK, Step 2 CS, and Step 3",
       "Complete clinical rotations",
-      "Meet state-specific requirements"
-    ]
+      "Meet state-specific requirements",
+    ],
   },
   "united states medical licensing examination": {
     url: "https://www.usmle.org/",
@@ -776,18 +783,18 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Medical degree (MD) from accredited medical school",
       "Pass Step 1, Step 2 CK, Step 2 CS, and Step 3",
       "Complete clinical rotations",
-      "Meet state-specific requirements"
-    ]
+      "Meet state-specific requirements",
+    ],
   },
-  "naplex": {
+  naplex: {
     url: "https://nabp.pharmacy/programs/examinations/naplex/",
     requirements: [
       "Pharmacy degree (PharmD) from accredited program",
       "Complete required pharmacy internships",
       "Pass the NAPLEX exam (250 questions)",
       "Pass state-specific MPJE exam",
-      "Meet state-specific requirements"
-    ]
+      "Meet state-specific requirements",
+    ],
   },
   "north american pharmacist licensure examination": {
     url: "https://nabp.pharmacy/programs/examinations/naplex/",
@@ -796,8 +803,8 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Complete required pharmacy internships",
       "Pass the NAPLEX exam (250 questions)",
       "Pass state-specific MPJE exam",
-      "Meet state-specific requirements"
-    ]
+      "Meet state-specific requirements",
+    ],
   },
   "dental hygiene national board": {
     url: "https://www.ada.org/en/education-careers/dental-hygiene-national-board-examination",
@@ -805,8 +812,8 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Graduate from accredited dental hygiene program",
       "Pass the National Board Dental Hygiene Examination (NBDHE)",
       "Pass state-specific clinical and written exams",
-      "Meet state-specific requirements"
-    ]
+      "Meet state-specific requirements",
+    ],
   },
   "dental hygiene exam": {
     url: "https://www.ada.org/en/education-careers/dental-hygiene-national-board-examination",
@@ -814,17 +821,17 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Graduate from accredited dental hygiene program",
       "Pass the National Board Dental Hygiene Examination (NBDHE)",
       "Pass state-specific clinical and written exams",
-      "Meet state-specific requirements"
-    ]
+      "Meet state-specific requirements",
+    ],
   },
-  "ardms": {
+  ardms: {
     url: "https://www.ardms.org/",
     requirements: [
       "Graduate from accredited diagnostic medical sonography program",
       "Complete clinical experience requirements",
       "Pass ARDMS certification exam in specialty area",
-      "Maintain continuing education credits"
-    ]
+      "Maintain continuing education credits",
+    ],
   },
   "american registry for diagnostic medical sonography": {
     url: "https://www.ardms.org/",
@@ -832,18 +839,18 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Graduate from accredited diagnostic medical sonography program",
       "Complete clinical experience requirements",
       "Pass ARDMS certification exam in specialty area",
-      "Maintain continuing education credits"
-    ]
+      "Maintain continuing education credits",
+    ],
   },
-  "arrt": {
+  arrt: {
     url: "https://www.arrt.org/",
     requirements: [
       "Graduate from accredited radiologic technology program",
       "Complete clinical experience requirements",
       "Pass ARRT certification exam",
       "Meet ethics requirements",
-      "Maintain continuing education credits"
-    ]
+      "Maintain continuing education credits",
+    ],
   },
   "american registry of radiologic technologists": {
     url: "https://www.arrt.org/",
@@ -852,17 +859,17 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Complete clinical experience requirements",
       "Pass ARRT certification exam",
       "Meet ethics requirements",
-      "Maintain continuing education credits"
-    ]
+      "Maintain continuing education credits",
+    ],
   },
-  "nbrc": {
+  nbrc: {
     url: "https://www.nbrc.org/",
     requirements: [
       "Graduate from accredited respiratory care program",
       "Pass CRT (Certified Respiratory Therapist) exam",
       "For RRT: Pass additional advanced level exams",
-      "Maintain continuing education credits"
-    ]
+      "Maintain continuing education credits",
+    ],
   },
   "national board for respiratory care": {
     url: "https://www.nbrc.org/",
@@ -870,35 +877,35 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Graduate from accredited respiratory care program",
       "Pass CRT (Certified Respiratory Therapist) exam",
       "For RRT: Pass additional advanced level exams",
-      "Maintain continuing education credits"
-    ]
+      "Maintain continuing education credits",
+    ],
   },
-  "crt": {
+  crt: {
     url: "https://www.nbrc.org/",
     requirements: [
       "Graduate from accredited respiratory care program",
       "Pass CRT (Certified Respiratory Therapist) exam",
-      "Maintain continuing education credits"
-    ]
+      "Maintain continuing education credits",
+    ],
   },
-  "rrt": {
+  rrt: {
     url: "https://www.nbrc.org/",
     requirements: [
       "Hold CRT certification",
       "Pass RRT (Registered Respiratory Therapist) written exam",
       "Pass RRT clinical simulation exam",
-      "Maintain continuing education credits"
-    ]
+      "Maintain continuing education credits",
+    ],
   },
-  "npte": {
+  npte: {
     url: "https://www.fsbpt.org/",
     requirements: [
       "Graduate from accredited physical therapy program (DPT)",
       "Complete required clinical hours",
       "Pass the NPTE (National Physical Therapy Examination)",
       "Meet state-specific requirements",
-      "Pass state jurisprudence exam (if required)"
-    ]
+      "Pass state jurisprudence exam (if required)",
+    ],
   },
   "national physical therapy examination": {
     url: "https://www.fsbpt.org/",
@@ -907,10 +914,10 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Complete required clinical hours",
       "Pass the NPTE (National Physical Therapy Examination)",
       "Meet state-specific requirements",
-      "Pass state jurisprudence exam (if required)"
-    ]
+      "Pass state jurisprudence exam (if required)",
+    ],
   },
-  
+
   // Legal
   "bar exam": {
     url: "https://www.ncbex.org/",
@@ -919,8 +926,8 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Pass the Multistate Bar Examination (MBE)",
       "Pass state-specific bar exam components",
       "Pass Multistate Professional Responsibility Examination (MPRE)",
-      "Meet state-specific character and fitness requirements"
-    ]
+      "Meet state-specific character and fitness requirements",
+    ],
   },
   "florida bar": {
     url: "https://www.floridabar.org/",
@@ -929,10 +936,10 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Pass the Florida Bar Examination",
       "Pass the Multistate Professional Responsibility Examination (MPRE)",
       "Complete Florida Law Component",
-      "Meet character and fitness requirements"
-    ]
+      "Meet character and fitness requirements",
+    ],
   },
-  
+
   // IT/Cybersecurity
   "comptia a+": {
     url: "https://www.comptia.org/certifications/a",
@@ -940,8 +947,8 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "No formal prerequisites required",
       "Recommended: 9-12 months hands-on experience",
       "Pass two exams: Core 1 and Core 2",
-      "Renew every 3 years through continuing education"
-    ]
+      "Renew every 3 years through continuing education",
+    ],
   },
   "a+": {
     url: "https://www.comptia.org/certifications/a",
@@ -949,26 +956,26 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "No formal prerequisites required",
       "Recommended: 9-12 months hands-on experience",
       "Pass two exams: Core 1 and Core 2",
-      "Renew every 3 years through continuing education"
-    ]
+      "Renew every 3 years through continuing education",
+    ],
   },
   "security+": {
     url: "https://www.comptia.org/certifications/security",
     requirements: [
       "Recommended: Network+ and 2 years IT security experience",
       "Pass one exam covering security concepts",
-      "Renew every 3 years through continuing education"
-    ]
+      "Renew every 3 years through continuing education",
+    ],
   },
-  "cissp": {
+  cissp: {
     url: "https://www.isc2.org/certifications/cissp",
     requirements: [
       "5 years of cumulative paid work experience in 2+ domains",
       "OR 4 years with a college degree or approved credential",
       "Pass the CISSP exam (250 questions, 6 hours)",
       "Endorsement from another CISSP",
-      "Maintain continuing education credits"
-    ]
+      "Maintain continuing education credits",
+    ],
   },
   "certified information systems security professional": {
     url: "https://www.isc2.org/certifications/cissp",
@@ -977,17 +984,17 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "OR 4 years with a college degree or approved credential",
       "Pass the CISSP exam (250 questions, 6 hours)",
       "Endorsement from another CISSP",
-      "Maintain continuing education credits"
-    ]
+      "Maintain continuing education credits",
+    ],
   },
-  "pmp": {
+  pmp: {
     url: "https://www.pmi.org/certifications/project-management-pmp",
     requirements: [
       "4-year degree + 36 months leading projects + 35 hours project management education",
       "OR High school diploma + 60 months leading projects + 35 hours project management education",
       "Pass the PMP exam (180 questions, 230 minutes)",
-      "Maintain continuing education credits (60 PDUs every 3 years)"
-    ]
+      "Maintain continuing education credits (60 PDUs every 3 years)",
+    ],
   },
   "project management professional": {
     url: "https://www.pmi.org/certifications/project-management-pmp",
@@ -995,12 +1002,12 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "4-year degree + 36 months leading projects + 35 hours project management education",
       "OR High school diploma + 60 months leading projects + 35 hours project management education",
       "Pass the PMP exam (180 questions, 230 minutes)",
-      "Maintain continuing education credits (60 PDUs every 3 years)"
-    ]
+      "Maintain continuing education credits (60 PDUs every 3 years)",
+    ],
   },
-  
+
   // Teaching
-  "ftce": {
+  ftce: {
     url: "https://www.fl.nesinc.com/",
     requirements: [
       "Bachelor's degree from accredited institution",
@@ -1008,8 +1015,8 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Pass Florida Teacher Certification Examinations (FTCE)",
       "Pass subject area exam for certification field",
       "Pass General Knowledge Test",
-      "Pass Professional Education Test"
-    ]
+      "Pass Professional Education Test",
+    ],
   },
   "florida teacher certification examinations": {
     url: "https://www.fl.nesinc.com/",
@@ -1019,12 +1026,12 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Pass Florida Teacher Certification Examinations (FTCE)",
       "Pass subject area exam for certification field",
       "Pass General Knowledge Test",
-      "Pass Professional Education Test"
-    ]
+      "Pass Professional Education Test",
+    ],
   },
-  
+
   // Aviation
-  "atp": {
+  atp: {
     url: "https://www.faa.gov/licenses_certificates/airmen_certification/airline_transport_pilot/",
     requirements: [
       "Be at least 23 years old",
@@ -1033,8 +1040,8 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "500 hours cross-country flight time",
       "100 hours night flight time",
       "75 hours instrument time",
-      "Pass written, oral, and flight tests"
-    ]
+      "Pass written, oral, and flight tests",
+    ],
   },
   "airline transport pilot": {
     url: "https://www.faa.gov/licenses_certificates/airmen_certification/airline_transport_pilot/",
@@ -1045,12 +1052,12 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "500 hours cross-country flight time",
       "100 hours night flight time",
       "75 hours instrument time",
-      "Pass written, oral, and flight tests"
-    ]
+      "Pass written, oral, and flight tests",
+    ],
   },
-  
+
   // Other Professional
-  "cpa": {
+  cpa: {
     url: "https://www.aicpa-cima.com/cpa-exam",
     requirements: [
       "Bachelor's degree (150 semester hours total)",
@@ -1058,8 +1065,8 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Pass all 4 sections of the Uniform CPA Examination",
       "Complete ethics exam (state-specific)",
       "Meet state-specific experience requirements",
-      "Meet state-specific residency requirements"
-    ]
+      "Meet state-specific residency requirements",
+    ],
   },
   "certified public accountant": {
     url: "https://www.aicpa-cima.com/cpa-exam",
@@ -1069,8 +1076,8 @@ const CERTIFICATION_MAPPING: Record<string, CertificationInfo> = {
       "Pass all 4 sections of the Uniform CPA Examination",
       "Complete ethics exam (state-specific)",
       "Meet state-specific experience requirements",
-      "Meet state-specific residency requirements"
-    ]
+      "Meet state-specific residency requirements",
+    ],
   },
 };
 
@@ -1117,21 +1124,24 @@ const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     website: "https://www.ucf.edu/",
     location: "Orlando",
     type: "Public",
-    notes: "Largest university in Florida, excellent engineering and hospitality programs",
+    notes:
+      "Largest university in Florida, excellent engineering and hospitality programs",
   },
   {
     name: "Florida Atlantic University (FAU)",
     website: "https://www.fau.edu/",
     location: "Boca Raton",
     type: "Public",
-    notes: "Multiple campuses in South Florida, strong business and engineering programs",
+    notes:
+      "Multiple campuses in South Florida, strong business and engineering programs",
   },
   {
     name: "Florida A&M University (FAMU)",
     website: "https://www.famu.edu/",
     location: "Tallahassee",
     type: "Public",
-    notes: "Historically Black University, strong programs in pharmacy and engineering",
+    notes:
+      "Historically Black University, strong programs in pharmacy and engineering",
   },
   {
     name: "University of North Florida (UNF)",
@@ -1166,7 +1176,8 @@ const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     website: "https://www.floridapoly.edu/",
     location: "Lakeland",
     type: "Public",
-    notes: "STEM-focused university, strong engineering and technology programs",
+    notes:
+      "STEM-focused university, strong engineering and technology programs",
   },
   {
     name: "University of Miami",
@@ -1187,7 +1198,8 @@ const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     website: "https://www.fit.edu/",
     location: "Melbourne",
     type: "Private",
-    notes: "STEM-focused private university, strong engineering and aviation programs",
+    notes:
+      "STEM-focused private university, strong engineering and aviation programs",
   },
   {
     name: "Rollins College",
@@ -1208,7 +1220,8 @@ const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     website: "https://www.barry.edu/",
     location: "Miami Shores",
     type: "Private",
-    notes: "Private Catholic university, strong health sciences and education programs",
+    notes:
+      "Private Catholic university, strong health sciences and education programs",
   },
   {
     name: "St. Thomas University",
@@ -1229,14 +1242,14 @@ const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
 // Helper function to get certification/exam info (URL and requirements)
 function getCertificationInfo(examName: string): CertificationInfo | null {
   const normalizedName = examName.toLowerCase().trim();
-  
+
   // Try to find a match in the mapping
   for (const [key, info] of Object.entries(CERTIFICATION_MAPPING)) {
     if (normalizedName.includes(key) || key.includes(normalizedName)) {
       return info;
     }
   }
-  
+
   return null;
 }
 
@@ -1616,18 +1629,20 @@ export default function Home() {
 
     try {
       const generatedData = await callAPI(career);
-      
+
       // Handle backward compatibility: if old format (with "steps"), convert to new format
       let pathwayDataToSet: PathwayData;
-      if ('steps' in generatedData && !('pathways' in generatedData)) {
+      if ("steps" in generatedData && !("pathways" in generatedData)) {
         // Old format - convert to new format
         pathwayDataToSet = {
           title: generatedData.title,
-          pathways: [{
-            title: generatedData.title,
-            isPrimary: true,
-            steps: generatedData.steps
-          }]
+          pathways: [
+            {
+              title: generatedData.title,
+              isPrimary: true,
+              steps: generatedData.steps,
+            },
+          ],
         };
       } else {
         // New format
@@ -1805,7 +1820,7 @@ export default function Home() {
   };
 
   return (
-    <div className="bg-white min-h-screen">
+    <div className="min-h-screen">
       {/* Header Section */}
       <header className="p-6 md:p-8 text-center">
         <img
@@ -1915,77 +1930,79 @@ export default function Home() {
 
             {/* Selected Pathway Display */}
             <div className="flowchart-container">
-              {pathwayData.pathways[selectedPathwayIndex].steps.map((step, stepIndex) => {
-                const stepTypeClass = `flowchart-step-${step.type}`;
-                const IconComponent = icons[step.type];
+              {pathwayData.pathways[selectedPathwayIndex].steps.map(
+                (step, stepIndex) => {
+                  const stepTypeClass = `flowchart-step-${step.type}`;
+                  const IconComponent = icons[step.type];
 
-                return (
-                  <div key={stepIndex}>
-                    {stepIndex > 0 && <div className="flowchart-connector" />}
-                    <div className={`flowchart-step ${stepTypeClass}`}>
-                      <div className="flowchart-step-header">
-                        <div className="flowchart-step-header-icon">
-                          {IconComponent}
-                        </div>
-                        <span className="text-xs font-semibold uppercase tracking-wider">
-                          {step.level || step.type}
-                        </span>
-                      </div>
-                      <div className="flowchart-step-content">
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {step.name}
-                        </h3>
-                        <p className="text-gray-600 mt-2">{step.description}</p>
-                        {step.type === "transfer" && (
-                          <div className="mt-4 space-y-2">
-                            <button
-                              onClick={() => setTransferRecommendationsPopup(true)}
-                              className="w-full text-left text-sm font-semibold text-orange-700 hover:text-orange-800 focus:outline-none focus:underline flex items-center"
-                            >
-                              <i className="fas fa-info-circle mr-2" />
-                              Recommendations
-                            </button>
-                            <a
-                              href="https://www.mdc.edu/transfer-information/transfer-agreements/"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-150"
-                            >
-                              <i className="fas fa-external-link-alt mr-2" /> View
-                              Transfer Agreements
-                            </a>
+                  return (
+                    <div key={stepIndex}>
+                      {stepIndex > 0 && <div className="flowchart-connector" />}
+                      <div className={`flowchart-step ${stepTypeClass}`}>
+                        <div className="flowchart-step-header">
+                          <div className="flowchart-step-header-icon">
+                            {IconComponent}
                           </div>
-                        )}
-                        {step.type === "degree" &&
-                          ((step.level.includes("MDC") &&
-                            !step.name.toLowerCase().includes("bachelor") &&
-                            (isMDCAssociateInScienceProgram(step.name) ||
-                              isMDCAssociateInArtsProgram(step.name))) ||
-                            step.name.toLowerCase().includes("certificate") ||
-                            (step.name.toLowerCase().includes("bachelor") &&
-                              isMDCBachelorsProgram(step.name))) && (
-                            <a
-                              href={getMDCProgramUrl(step.name)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
-                            >
-                              <i className="fas fa-external-link-alt mr-2" />{" "}
-                              View Program Page
-                            </a>
+                          <span className="text-xs font-semibold uppercase tracking-wider">
+                            {step.level || step.type}
+                          </span>
+                        </div>
+                        <div className="flowchart-step-content">
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            {step.name}
+                          </h3>
+                          <p className="text-gray-600 mt-2">{step.description}</p>
+                          {step.type === "transfer" && (
+                            <div className="mt-4 space-y-2">
+                              <button
+                                onClick={() => setTransferRecommendationsPopup(true)}
+                                className="w-full text-left text-sm font-semibold text-orange-700 hover:text-orange-800 focus:outline-none focus:underline flex items-center"
+                              >
+                                <i className="fas fa-info-circle mr-2" />
+                                Recommendations
+                              </button>
+                              <a
+                                href="https://www.mdc.edu/transfer-information/transfer-agreements/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-150"
+                              >
+                                <i className="fas fa-external-link-alt mr-2" /> View
+                                Transfer Agreements
+                              </a>
+                            </div>
                           )}
-                        {step.type === "exam" && (
-                          <ExamStepComponent 
-                            examName={step.name} 
-                            examDescription={step.description}
-                            onShowRequirements={(name, info) => setCertificationPopup({ name, info })}
-                          />
-                        )}
+                          {step.type === "degree" &&
+                            ((step.level.includes("MDC") &&
+                              !step.name.toLowerCase().includes("bachelor") &&
+                              (isMDCAssociateInScienceProgram(step.name) ||
+                                isMDCAssociateInArtsProgram(step.name))) ||
+                              step.name.toLowerCase().includes("certificate") ||
+                              (step.name.toLowerCase().includes("bachelor") &&
+                                isMDCBachelorsProgram(step.name))) && (
+                              <a
+                                href={getMDCProgramUrl(step.name)}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
+                              >
+                                <i className="fas fa-external-link-alt mr-2" />{" "}
+                                View Program Page
+                              </a>
+                            )}
+                          {step.type === "exam" && (
+                            <ExamStepComponent 
+                              examName={step.name} 
+                              examDescription={step.description}
+                              onShowRequirements={(name, info) => setCertificationPopup({ name, info })}
+                            />
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                }
+              )}
             </div>
 
             {/* Add Career Button - Only show if no additional careers have been added yet */}
@@ -2280,7 +2297,8 @@ export default function Home() {
                         rel="noopener noreferrer"
                         className="text-orange-600 hover:text-orange-700 text-sm font-medium flex items-center"
                       >
-                        Visit <i className="fas fa-external-link-alt ml-1 text-xs" />
+                        Visit{" "}
+                        <i className="fas fa-external-link-alt ml-1 text-xs" />
                       </a>
                     </div>
                     {university.notes && (
@@ -2331,7 +2349,10 @@ export default function Home() {
             <main className="p-6 overflow-y-auto">
               <ul className="space-y-2 text-sm text-gray-700 pl-5">
                 {certificationPopup.info.requirements.map((req, idx) => (
-                  <li key={idx} className="leading-relaxed list-disc list-outside">
+                  <li
+                    key={idx}
+                    className="leading-relaxed list-disc list-outside"
+                  >
                     {req}
                   </li>
                 ))}
@@ -2343,8 +2364,8 @@ export default function Home() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-150"
                 >
-                  <i className="fas fa-external-link-alt mr-2" />{" "}
-                  Visit Official Website
+                  <i className="fas fa-external-link-alt mr-2" /> Visit Official
+                  Website
                 </a>
               </div>
             </main>
