@@ -15,14 +15,46 @@ body {
   flex-direction: row;
   align-items: stretch; /* Make cards same height */
   overflow-x: auto;
+  overflow-y: hidden;
   padding: 1.5rem;
   background-color: #f9fafb; /* Light gray bg for contrast */
   border-radius: 0.75rem; /* rounded */
   margin-bottom: 1.5rem; /* Space */
+  /* gap removed - connector element now provides spacing */
+  scrollbar-width: thin; /* For Firefox */
+  scrollbar-color: #cbd5e1 #f9fafb; /* For Firefox */
+}
+
+/* Custom scrollbar for Chrome/Edge */
+.flowchart-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.flowchart-container::-webkit-scrollbar-track {
+  background: #f9fafb;
+  border-radius: 4px;
+}
+
+.flowchart-container::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+.flowchart-container::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Wrapper for step and connector to ensure proper stretching */
+.flowchart-container > div {
+  display: flex;
+  align-items: stretch;
+  flex-shrink: 0;
+  /* align-items: stretch on parent will make all wrappers same height */
 }
 
 .flowchart-step {
-  flex: 0 0 300px; /* Don't shrink, 300px width */
+  flex: 0 0 380px; /* Fixed width */
+  align-self: stretch; /* Stretch to match wrapper height */
   display: flex;
   flex-direction: column;
   border: 1px solid #e5e7eb; /* gray-200 */
@@ -57,19 +89,22 @@ body {
 }
 
 .flowchart-connector {
-  flex: 0 0 50px; /* Don't grow/shrink, 50px width */
+  flex: 0 0 1.5rem; /* Fixed width to span the gap between boxes */
   position: relative;
-  align-self: center; /* Center vertically */
-  height: 20px; /* Give it some height for centering */
+  align-self: stretch; /* Stretch to match box height */
+  pointer-events: none; /* Don't interfere with interactions */
+  display: flex;
+  align-items: center; /* Center the line vertically */
+  justify-content: center;
 }
 
-/* Horizontal line for connector */
+/* Horizontal line for connector - spans the gap between cards */
 .flowchart-connector::after {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 0;
-  width: 100%;
+  top: 50%; /* Center vertically - perfectly in the middle */
+  left: 0; /* Start from the left edge of the connector */
+  width: 100%; /* Span the full width of the connector */
   height: 3px;
   background-color: #cbd5e1; /* gray-300 */
   transform: translateY(-50%);
