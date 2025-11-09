@@ -82,32 +82,106 @@ interface PathwayData {
   steps: PathwayStep[];
 }
 
-// List of MDC's actual bachelor's programs (from https://www.mdc.edu/academics/programs/bachelors.aspx)
-const MDC_BACHELORS_PROGRAMS = [
-  "Bachelor of Science in Nursing",
-  "Bachelor of Applied Sciences in Leadership and Management Innovation",
-  "Bachelor of Applied Sciences in Supply Chain Management",
-  "Bachelor of Science in Early Childhood Education",
-  "Bachelor of Science in Exceptional Student Education",
-  "Bachelor of Science in Secondary Mathematics Education",
-  "Bachelor of Science in Secondary Science Education",
-  "Bachelor of Science in Applied Artificial Intelligence",
-  "Bachelor of Science in Cybersecurity",
-  "Bachelor of Science in Data Analytics",
-  "Bachelor of Science in Electrical and Computer Engineering Technology",
-  "Bachelor of Applied Science in Film, Television & Digital Production",
-  "Bachelor of Science in Information Systems Technology",
-  "Bachelor of Applied Sciences in Health Sciences",
-  "Bachelor of Applied Sciences in Public Safety Management",
-  "Bachelor of Science in Biological Sciences",
-];
+// Mapping of MDC bachelor's programs to their exact URLs
+// Key: program name (normalized for matching), Value: exact URL
+const MDC_BACHELORS_URL_MAPPING: Record<string, string> = {
+  // Benjamin León School of Nursing
+  "bachelor of science in nursing": "https://www.mdc.edu/bsn/",
+  "bachelor of science in nursing (rn to bsn)": "https://www.mdc.edu/bsn/",
+  "rn to bsn": "https://www.mdc.edu/bsn/",
+
+  // Miguel B. Fernandez Family School of Global Business, Trade and Transportation
+  "bachelor of applied sciences in leadership and management innovation":
+    "https://www.mdc.edu/leadershipandmanagementinnovation/",
+  "leadership and management innovation - accounting":
+    "https://www.mdc.edu/accountingmanagement/",
+  "leadership and management innovation - hospitality management":
+    "https://www.mdc.edu/hospitalitymanagement/",
+  "leadership and management innovation - human resource management":
+    "https://www.mdc.edu/humanresourcemanagement/",
+  "leadership and management innovation - digital marketing concentration":
+    "https://www.mdc.edu/digitalmarketingbas/",
+  "bachelor of applied sciences in supply chain management":
+    "https://www.mdc.edu/supplychainmanagement/",
+  "supply chain management – procurement management":
+    "https://www.mdc.edu/procurement-management/",
+  "supply chain management – project management":
+    "https://www.mdc.edu/project-management/",
+  "supply chain management – supply chain analytics":
+    "https://www.mdc.edu/supplychainanalytics/",
+
+  // School of Education
+  "bachelor of science in early childhood education":
+    "https://www.mdc.edu/earlychildhood/",
+  "bachelor of science in exceptional student education":
+    "https://www.mdc.edu/ese/",
+  "bachelor of science in exceptional student education (k-12)":
+    "https://www.mdc.edu/ese/",
+  "bachelor of science in secondary mathematics education":
+    "https://www.mdc.edu/secondarymath/",
+  "bachelor of science in secondary science education - biology":
+    "https://www.mdc.edu/secondarybiology/",
+
+  // School of Engineering, Technology, and Design
+  "bachelor of science in applied artificial intelligence":
+    "https://www.mdc.edu/appliedaibs/",
+  "bachelor of science in cybersecurity": "https://www.mdc.edu/cybersecuritybs/",
+  "bachelor of science in data analytics": "https://www.mdc.edu/dataanalytics/",
+  "bachelor of science in electrical and computer engineering technology":
+    "https://www.mdc.edu/electronicsengineeringbs/",
+  "bachelor of applied science in film, television & digital production":
+    "https://www.mdc.edu/filmtvproduction/",
+  "bachelor of science in information systems technology – networking":
+    "https://www.mdc.edu/informationsystemsnetworking/",
+  "bachelor of science in information systems technology – software engineering":
+    "https://www.mdc.edu/softwareengineering/",
+
+  // School of Health Sciences
+  "bachelor of applied sciences in health sciences – clinical laboratory science":
+    "https://www.mdc.edu/medicallaboratorysciences/",
+  "bachelor of applied sciences in health sciences – histotechnology":
+    "https://www.mdc.edu/histotechnologybas/",
+  "bachelor of applied sciences in health sciences – physician assistant studies":
+    "https://www.mdc.edu/physicianassistant/",
+
+  // School of Justice, Public Safety, and Law Studies
+  "bachelor of applied sciences in public safety management – crime scene investigation":
+    "https://www.mdc.edu/csi/",
+  "bachelor of applied sciences in public safety management – emergency management":
+    "https://www.mdc.edu/emergencymanagement/",
+  "bachelor of applied sciences in criminal justice":
+    "https://www.mdc.edu/criminaljusticebas/",
+
+  // School of Science
+  "bachelor of science in biological sciences – biopharmaceutical sciences":
+    "https://www.mdc.edu/biopharmaceutical/",
+  "bachelor of science in biological sciences – biotechnology":
+    "https://www.mdc.edu/biotechnology/",
+  "bachelor of science in biological sciences – science education":
+    "https://www.mdc.edu/scienceeducation/",
+};
 
 // Helper function to check if a program is an MDC bachelor's program
 function isMDCBachelorsProgram(programName: string): boolean {
   const normalizedName = programName.toLowerCase().trim();
-  return MDC_BACHELORS_PROGRAMS.some((program) =>
-    normalizedName.includes(program.toLowerCase())
+  // Check if any key in the mapping matches the program name
+  return Object.keys(MDC_BACHELORS_URL_MAPPING).some((key) =>
+    normalizedName.includes(key)
   );
+}
+
+// Helper function to get the exact URL for an MDC bachelor's program
+function getMDCBachelorsProgramUrl(programName: string): string | null {
+  const normalizedName = programName.toLowerCase().trim();
+
+  // Try to find an exact or partial match
+  for (const [key, url] of Object.entries(MDC_BACHELORS_URL_MAPPING)) {
+    if (normalizedName.includes(key)) {
+      return url;
+    }
+  }
+
+  return null;
 }
 
 // Helper function to check if a program is a valid MDC Associate in Arts (A.A.) program
@@ -223,7 +297,13 @@ function getMDCProgramUrl(programName: string): string {
   // This allows the title to show all options, but the link goes to one specific program
   const singleProgram = extractFirstProgramOption(programName);
 
-  // First, try to find a mapped URL (handles multiple options)
+  // Check if it's a bachelor's program first - use exact URL mapping
+  const bachelorsUrl = getMDCBachelorsProgramUrl(singleProgram);
+  if (bachelorsUrl) {
+    return bachelorsUrl;
+  }
+
+  // For non-bachelor's programs, try to find a mapped URL (handles multiple options)
   const mappedUrl = findBestProgramUrl(singleProgram);
   if (mappedUrl) {
     return mappedUrl;
