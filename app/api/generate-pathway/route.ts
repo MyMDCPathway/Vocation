@@ -28,25 +28,48 @@ export async function POST(request: NextRequest) {
 
 PATHWAY STRUCTURE REQUIREMENTS:
 The pathway must follow this structure and include ALL relevant steps:
-1. START with an appropriate MDC Associate degree (A.A. or A.S.) - This is REQUIRED as the first step
-2. Include a TRANSFER step to a 4-year university (if the career requires a bachelor's degree)
-3. Include B.S./B.A. degree step (if required for the career)
+1. START with an appropriate MDC program - Choose the BEST starting point from:
+   * Associate of Science (A.S.) programs - for technical/vocational careers
+   * Associate of Arts (A.A.) programs - for transfer-oriented careers
+   * Certificate Programs - for quick entry into specific careers or as stepping stones
+   * Bachelor's programs (B.S./B.A.) - when MDC offers a bachelor's degree that directly leads to the career
+   Select the program type that provides the most direct and effective pathway to the career.
+2. Include a TRANSFER step to a 4-year university (if the career requires a bachelor's degree and MDC doesn't offer one, or if transfer is the better pathway)
+3. Include B.S./B.A. degree step (if required for the career and not already completed at MDC)
 4. Include PROFESSIONAL EXPERIENCE/INTERNSHIP steps (required for licensure or professional development)
 5. Include REQUIRED LICENSURE EXAMS/CERTIFICATIONS (e.g., FE/PE for engineers, A.R.E. for architects, NCLEX for nurses, etc.)
 6. Include OPTIONAL advanced degrees (M.S., M.A., Ph.D.) when relevant
 
 SPECIFIC REQUIREMENTS:
 
-1. MDC DEGREE SELECTION:
-   - When selecting an MDC degree, use your knowledge of programs listed on MDC's official program pages:
-     * Associate: https://www.mdc.edu/academics/programs/associate.aspx
-     * Bachelor: https://www.mdc.edu/academics/programs/bachelor.aspx
-     * Certificate: https://www.mdc.edu/academics/programs/certificate.aspx
-   - For ANY step with type 'degree', the 'name' field MUST contain the full, official program title, such as "Associate in Arts in Biology" or "Associate in Science in Nursing". Do not use generic names.
-   - If multiple MDC programs could lead to the same career, select the most direct and appropriate pathway.
+1. MDC PROGRAM SELECTION:
+   - When selecting an MDC program, use your knowledge of programs listed on MDC's official program pages:
+     * Associate Programs: https://www.mdc.edu/academics/programs/associate.aspx (includes both A.A. and A.S.)
+     * Bachelor Programs: https://www.mdc.edu/academics/programs/bachelor.aspx
+     * Certificate Programs: https://www.mdc.edu/academics/programs/certificate.aspx
+   - CONSIDER ALL PROGRAM TYPES when determining the best pathway:
+     * Associate of Science (A.S.) - Often better for technical careers (e.g., Nursing, Engineering Technology, Computer Science)
+     * Associate of Arts (A.A.) - Better for transfer-oriented paths (e.g., Pre-Med, Pre-Law, General Education)
+     * Certificate Programs - Can be excellent starting points for specific careers or can be combined with degrees
+     * Bachelor's Programs - Use when MDC offers a bachelor's degree that directly leads to the career (e.g., B.S. in Nursing, B.S. in Information Systems Technology)
+   - For ANY step with type 'degree', the 'name' field MUST contain the full, official program title, such as:
+     * "Associate in Science in Nursing"
+     * "Associate in Arts in Engineering - Mechanical"
+     * "Certificate in [Program Name]"
+     * "Bachelor of Science in [Program Name]"
+     Do not use generic names.
+   - If multiple MDC programs could lead to the same career, select the MOST DIRECT and EFFECTIVE pathway. Consider:
+     * Which program provides the fastest route to employment?
+     * Which program best prepares for required licensure/certifications?
+     * Which program offers the best transfer opportunities if needed?
+     * Can a certificate program serve as a stepping stone or entry point?
 
 2. TRANSFER STEPS:
-   - For careers requiring a bachelor's degree, include a transfer step after the MDC A.A./A.S.
+   - Include a transfer step ONLY if:
+     * The career requires a bachelor's degree AND MDC doesn't offer a bachelor's program in that field, OR
+     * Transfer to a specialized program (e.g., architecture, pharmacy) is required, OR
+     * Transfer provides a better pathway than completing a bachelor's at MDC
+   - If MDC offers a bachelor's degree that directly leads to the career, DO NOT include a transfer step - use MDC's bachelor's program instead
    - The transfer step should mention articulation agreements and transfer to accredited institutions (e.g., FIU, UF, UCF, etc.)
    - Include information about GPA requirements, portfolio requirements (for design fields), or other admission prerequisites
 
@@ -70,14 +93,20 @@ SPECIFIC REQUIREMENTS:
    - Mention specialized fields (e.g., "Master of Science in specialized field" or "Master of Architecture")
 
 6. PATHWAY FLOW:
-   - The pathway should logically flow: A.A./A.S. (MDC) -> Transfer -> B.S./B.A. -> Professional Experience -> Licensure Exams -> Optional Advanced Degrees
+   - The pathway should logically flow based on the best route:
+     * Certificate (MDC) -> A.S./A.A. (MDC) -> Transfer -> B.S./B.A. -> Professional Experience -> Licensure Exams -> Optional Advanced Degrees
+     * OR: A.S./A.A. (MDC) -> B.S./B.A. (MDC) -> Professional Experience -> Licensure Exams -> Optional Advanced Degrees
+     * OR: Certificate (MDC) -> Direct Employment -> Optional Further Education
    - Each step should build upon the previous one
    - Include clear descriptions (1-2 sentences) explaining what each step entails and why it's necessary
+   - When MDC offers a bachelor's program, prefer using it over transfer when it directly leads to the career
 
 EXAMPLES:
 - For Mechanical Engineer: A.A. in Engineering - Mechanical (MDC) -> Transfer to 4-year university -> B.S. in Mechanical Engineering -> Professional Engineering Experience -> FE Exam -> PE Exam -> Optional M.S. in Mechanical Engineering
 - For Architect: A.A. in Architecture/Design (MDC) -> Transfer to architecture school -> B.Arch -> Architectural Experience Program (AXP) -> A.R.E. (all divisions) -> Optional M.Arch
-- For Nurse: A.S. in Nursing (MDC) -> Transfer -> B.S.N. -> Clinical Experience -> NCLEX-RN -> Optional M.S.N.
+- For Nurse: A.S. in Nursing (MDC) -> B.S.N. (MDC, if available) OR Transfer -> B.S.N. -> Clinical Experience -> NCLEX-RN -> Optional M.S.N.
+- For IT Professional: Certificate in Information Technology (MDC) -> A.S. in Information Systems Technology (MDC) -> B.S. in Information Systems Technology (MDC) -> Professional Experience -> Optional Certifications
+- For Medical Assistant: Certificate in Medical Assisting (MDC) -> Direct Employment -> Optional A.S. in Health Sciences for advancement
 
 You must only respond with a JSON object following the schema provided.`;
 
@@ -121,14 +150,14 @@ You must only respond with a JSON object following the schema provided.`;
     const userQuery = `Generate a comprehensive educational pathway for becoming a "${career}". 
 
 The pathway must include:
-- An appropriate MDC Associate degree (A.A. or A.S.) as the starting point
-- Transfer to a 4-year university (if bachelor's degree is required)
-- Bachelor's degree (if required)
+- The BEST starting point from MDC: Associate of Science (A.S.), Associate of Arts (A.A.), Certificate Program, or Bachelor's Program (when MDC offers one)
+- Transfer to a 4-year university (ONLY if bachelor's degree is required AND MDC doesn't offer a bachelor's program in that field)
+- Bachelor's degree (if required - prefer MDC's bachelor's program if available)
 - Required professional experience/internships
 - All required licensure exams and certifications
 - Optional advanced degrees (M.S., Ph.D.) when relevant
 
-Ensure the pathway follows the logical progression: A.A./A.S. -> Transfer -> B.S. -> Professional Experience -> Licensure Exams -> Optional Advanced Degrees.`;
+Consider all MDC program types (A.S., A.A., Certificates, and Bachelor's) and select the most direct and effective pathway. When MDC offers a bachelor's degree that directly leads to the career, use it instead of transfer.`;
 
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${genModel}:generateContent?key=${apiKey}`;
 

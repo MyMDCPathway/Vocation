@@ -82,6 +82,188 @@ interface PathwayData {
   steps: PathwayStep[];
 }
 
+// List of MDC's actual bachelor's programs (from https://www.mdc.edu/academics/programs/bachelors.aspx)
+const MDC_BACHELORS_PROGRAMS = [
+  "Bachelor of Science in Nursing",
+  "Bachelor of Applied Sciences in Leadership and Management Innovation",
+  "Bachelor of Applied Sciences in Supply Chain Management",
+  "Bachelor of Science in Early Childhood Education",
+  "Bachelor of Science in Exceptional Student Education",
+  "Bachelor of Science in Secondary Mathematics Education",
+  "Bachelor of Science in Secondary Science Education",
+  "Bachelor of Science in Applied Artificial Intelligence",
+  "Bachelor of Science in Cybersecurity",
+  "Bachelor of Science in Data Analytics",
+  "Bachelor of Science in Electrical and Computer Engineering Technology",
+  "Bachelor of Applied Science in Film, Television & Digital Production",
+  "Bachelor of Science in Information Systems Technology",
+  "Bachelor of Applied Sciences in Health Sciences",
+  "Bachelor of Applied Sciences in Public Safety Management",
+  "Bachelor of Science in Biological Sciences",
+];
+
+// Helper function to check if a program is an MDC bachelor's program
+function isMDCBachelorsProgram(programName: string): boolean {
+  const normalizedName = programName.toLowerCase().trim();
+  return MDC_BACHELORS_PROGRAMS.some((program) =>
+    normalizedName.includes(program.toLowerCase())
+  );
+}
+
+// Helper function to check if a program is a valid MDC Associate in Arts (A.A.) program
+// A.A. programs follow the pattern: "Associate in Arts in [Subject]" or "Associate in Arts in Engineering - [Specialization]"
+function isMDCAssociateInArtsProgram(programName: string): boolean {
+  const normalizedName = programName.toLowerCase().trim();
+  
+  // Must start with "Associate in Arts"
+  if (!normalizedName.startsWith("associate in arts")) {
+    return false;
+  }
+  
+  // Must have a subject after "Associate in Arts in"
+  // Valid patterns:
+  // - "Associate in Arts in [Subject]"
+  // - "Associate in Arts in Engineering - [Specialization]"
+  if (normalizedName.includes("associate in arts in")) {
+    // Extract the part after "Associate in Arts in"
+    const afterPrefix = normalizedName.replace(/^associate in arts in\s*/, "");
+    
+    // Must have some content after the prefix
+    if (afterPrefix.trim().length === 0) {
+      return false;
+    }
+    
+    // For engineering programs, must have a specialization after the dash
+    if (afterPrefix.includes("engineering -")) {
+      const specialization = afterPrefix.split("engineering -")[1]?.trim();
+      return specialization && specialization.length > 0;
+    }
+    
+    // For other programs, just need a subject name
+    return afterPrefix.trim().length > 0;
+  }
+  
+  return false;
+}
+
+// Mapping of program name variations to their preferred MDC URLs
+// When multiple options exist, this selects the most appropriate one
+const PROGRAM_URL_MAPPINGS: Record<string, string> = {
+  // Engineering programs - prefer the specific engineering specialization
+  "mechanical engineering": "mechanicalengineering",
+  "civil engineering": "civilengineering",
+  "electrical engineering": "electricalengineering",
+  "computer engineering": "computerengineering",
+  "industrial engineering": "industrialengineering",
+  "ocean engineering": "oceanengineering",
+  "geomatics engineering": "geomaticsengineering",
+  "surveying and mapping": "geomaticsengineering",
+  
+  // Common program name variations
+  "nursing": "nursing",
+  "computer science": "computerscience",
+  "information systems technology": "informationsystemstechnology",
+  "information technology": "informationsystemstechnology",
+  "cybersecurity": "cybersecurity",
+  "data analytics": "dataanalytics",
+  "biological sciences": "biologicalsciences",
+  "biology": "biology",
+  "early childhood education": "earlychildhoodeducation",
+  "exceptional student education": "exceptionalstudenteducation",
+  "secondary mathematics education": "secondarymathematicseducation",
+  "secondary science education": "secondaryscienceeducation",
+  "health sciences": "healthsciences",
+  "public safety management": "publicsafetymanagement",
+  "leadership and management innovation": "leadershipandmanagementinnovation",
+  "supply chain management": "supplychainmanagement",
+  "film television digital production": "filmtvdigitalproduction",
+  "applied artificial intelligence": "appliedartificialintelligence",
+  "electrical and computer engineering technology": "electricalandcomputerengineeringtechnology",
+};
+
+// Helper function to extract the first program option when multiple are listed
+// Handles patterns like: "Engineering - Mechanical or Civil" or "Biology or Chemistry"
+function extractFirstProgramOption(programName: string): string {
+  // Check for common separators: " or ", " and ", ", "
+  const separators = [/\s+or\s+/i, /\s+and\s+/i, /,\s+/];
+  
+  for (const separator of separators) {
+    if (separator.test(programName)) {
+      // Split and take the first option
+      const parts = programName.split(separator);
+      if (parts.length > 1) {
+        // Return the first part, which should be the first program option
+        return parts[0].trim();
+      }
+    }
+  }
+  
+  // If no separator found, return the original name
+  return programName.trim();
+}
+
+// Helper function to find the best matching URL for a program
+function findBestProgramUrl(programName: string): string | null {
+  const normalized = programName.toLowerCase().trim();
+  
+  // Check for exact matches in mapping
+  for (const [key, url] of Object.entries(PROGRAM_URL_MAPPINGS)) {
+    if (normalized.includes(key)) {
+      return `https://www.mdc.edu/${url}/`;
+    }
+  }
+  
+  return null;
+}
+
+// Helper function to convert program name to MDC URL slug
+function getMDCProgramUrl(programName: string): string {
+  // Extract the first program option if multiple are listed
+  // This allows the title to show all options, but the link goes to one specific program
+  const singleProgram = extractFirstProgramOption(programName);
+  
+  // First, try to find a mapped URL (handles multiple options)
+  const mappedUrl = findBestProgramUrl(singleProgram);
+  if (mappedUrl) {
+    return mappedUrl;
+  }
+  
+  // Remove common prefixes
+  let slug = singleProgram
+    .replace(/^Associate in Arts in /i, "")
+    .replace(/^Associate in Science in /i, "")
+    .replace(/^Associate in /i, "")
+    .replace(/^Bachelor of Science in /i, "")
+    .replace(/^Bachelor of Arts in /i, "")
+    .replace(/^Bachelor of Applied Sciences in /i, "")
+    .replace(/^Bachelor of Applied Science in /i, "")
+    .replace(/^Bachelor of /i, "")
+    .replace(/^Certificate in /i, "")
+    .replace(/^Certificate /i, "")
+    .trim();
+
+  // Handle special cases for engineering programs
+  // Extract the engineering specialization (e.g., "Engineering - Mechanical" -> "Mechanical Engineering")
+  if (slug.includes("Engineering - ")) {
+    const specialization = slug.split("Engineering - ")[1]?.trim();
+    if (specialization) {
+      // Handle cases like "Mechanical or Civil" - take the first one
+      const firstSpecialization = extractFirstProgramOption(specialization);
+      slug = `${firstSpecialization} Engineering`;
+    }
+  }
+
+  // Convert to URL-friendly format: lowercase, remove spaces and special characters
+  slug = slug
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, "") // Remove special characters except spaces and hyphens
+    .replace(/\s+/g, "") // Remove all spaces
+    .replace(/-/g, ""); // Remove hyphens
+
+  // Return the MDC program URL
+  return `https://www.mdc.edu/${slug}/`;
+}
+
 export default function Home() {
   const [careerInput, setCareerInput] = useState("");
   const [showClearBtn, setShowClearBtn] = useState(false);
@@ -347,11 +529,15 @@ export default function Home() {
                           </a>
                         )}
                         {step.type === "degree" &&
-                          step.level.includes("MDC") && (
+                          ((step.level.includes("MDC") &&
+                            !step.name.toLowerCase().includes("bachelor") &&
+                            (step.name.toLowerCase().includes("associate in science") ||
+                              isMDCAssociateInArtsProgram(step.name))) ||
+                            step.name.toLowerCase().includes("certificate") ||
+                            (step.name.toLowerCase().includes("bachelor") &&
+                              isMDCBachelorsProgram(step.name))) && (
                             <a
-                              href={`https://www.mdc.edu/search/?q=${encodeURIComponent(
-                                step.name
-                              )}`}
+                              href={getMDCProgramUrl(step.name)}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
