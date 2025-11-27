@@ -1820,71 +1820,54 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen">
-      {/* Header Section */}
-      <header className="p-6 md:p-8 text-center">
-        <img
-          src="https://mdcwap.mdc.edu/apply/assets/mdc-logo.png"
-          alt="Miami Dade College Logo"
-          className="h-16 w-auto mx-auto mb-4"
-        />
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-800">
-          MyMDC Pathway
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Generate an educational pathway for your career.
-        </p>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header Bar - Centered Logo */}
+      <header className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-center">
+          <img
+            src="https://mdcwap.mdc.edu/apply/assets/mdc-logo.png"
+            alt="Miami Dade College Logo"
+            className="h-10 w-auto"
+          />
+        </div>
       </header>
 
-      {/* Control Section */}
-      <div className="px-6 pb-6 md:px-8 md:pb-8">
-        <hr className="max-w-2xl mx-auto border-gray-200 mb-8" />
-
-        <div className="max-w-2xl mx-auto">
-          <label
-            htmlFor="custom-career-input"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Specify your Career Choice:
-            <i
-              onClick={handleHelp}
-              className="fas fa-question-circle text-blue-500 hover:text-blue-700 cursor-pointer ml-1"
-            />
-          </label>
-          <div className="flex flex-col sm:flex-row items-center sm:space-x-2 space-y-2 sm:space-y-0">
-            <div className="input-container">
-              <input
-                type="text"
-                id="custom-career-input"
-                value={careerInput}
-                onChange={(e) => setCareerInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="e.g., Mechanical Engineer"
-                className="w-full py-3 pl-5 pr-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              {showClearBtn && (
+      {/* Hero Section */}
+      <section className="px-6 md:px-8 pt-24 md:pt-32 pb-12 md:pb-16 text-center">
+        <div className="max-w-4xl mx-auto">
+          {/* Main Title - Vocation */}
+          <h1 className="text-7xl md:text-9xl font-bold mb-2 select-none">
+            <span className="inline-flex text-blue-600">
+              {"Vocation".split("").map((letter, index) => (
                 <span
-                  id="clear-input-btn"
-                  onClick={handleClearInput}
-                  title="Clear input"
-                  style={{ display: "block" }}
+                  key={index}
+                  className="letter-fade-in"
+                  style={{ animationDelay: `${index * 0.15}s` }}
                 >
-                  <i className="fas fa-times-circle" />
+                  {letter === " " ? "\u00A0" : letter}
                 </span>
-              )}
-            </div>
+              ))}
+            </span>
+          </h1>
+          
+          {/* Subtitle */}
+          <p className="text-base md:text-lg text-gray-700 mb-6">
+            A powerful way to explore career pathways with AI
+          </p>
+
+          {/* Start Button */}
+          <div className="flex justify-center">
             <button
-              id="generate-pathway-btn"
               onClick={handleGeneratePathway}
-              className="flex-shrink-0 w-full sm:w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-md transition duration-200 flex items-center justify-center p-0"
+              className="px-12 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition duration-200 text-lg"
             >
-              <i className="fas fa-arrow-right" />
+              Start
             </button>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Infographic Display Area */}
+      {/* Infographic Display Area - Shows right after search when pathway exists */}
       <div id="pathway-display" className="p-6 md:p-8">
         {/* Main Pathway */}
         {pathwayData && pathwayData.pathways && pathwayData.pathways.length > 0 && (
@@ -2228,6 +2211,55 @@ export default function Home() {
             ))}
           </div>
         )}
+      </div>
+
+      {/* How Vocation Works Section */}
+      <div className={`px-6 md:px-8 pb-12 ${pathwayData ? 'pt-8' : 'pt-4'}`}>
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
+            How Vocation Works
+          </h2>
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Step 1 */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-4">
+                <span className="text-2xl font-bold text-blue-600">1</span>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Enter Your Career
+              </h3>
+              <p className="text-gray-600 text-sm">
+                Type in the career you're interested in pursuing, such as "Mechanical Engineer" or "Registered Nurse".
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-4">
+                <span className="text-2xl font-bold text-blue-600">2</span>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Get Your Pathway
+              </h3>
+              <p className="text-gray-600 text-sm">
+                Vocation generates a personalized educational pathway showing all the steps needed, from MDC programs to licensure exams.
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-4">
+                <span className="text-2xl font-bold text-blue-600">3</span>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                Explore & Compare
+              </h3>
+              <p className="text-gray-600 text-sm">
+                Click on program links, view exam requirements, explore transfer options, and compare multiple career paths side-by-side.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Loading Overlay */}

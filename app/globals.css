@@ -4,6 +4,68 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+/* Animated gradient for Vocation title */
+@keyframes gradient-flow {
+  0% {
+    background-position: 200% 50%;
+  }
+  100% {
+    background-position: -200% 50%;
+  }
+}
+
+.vocation-gradient-wrapper {
+  background: linear-gradient(
+    90deg,
+    #2563eb 0%,
+    #3b82f6 20%,
+    #10b981 40%,
+    #3b82f6 60%,
+    #2563eb 80%,
+    #2563eb 100%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-flow 6s linear infinite;
+}
+
+.vocation-gradient {
+  background: linear-gradient(
+    90deg,
+    #2563eb 0%,
+    #3b82f6 20%,
+    #10b981 40%,
+    #3b82f6 60%,
+    #2563eb 80%,
+    #2563eb 100%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-flow 6s linear infinite;
+}
+
+/* Letter fade-in animation - move up into frame */
+@keyframes letter-fade-in {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.letter-fade-in {
+  display: inline-block;
+  animation: letter-fade-in 0.8s ease-out forwards;
+  opacity: 0;
+}
+
 /* Use Inter as the default font */
 body {
   font-family: 'Inter', sans-serif;
@@ -257,11 +319,13 @@ body {
 #clear-input-btn {
   position: absolute;
   top: 50%;
-  right: 1rem;
+  right: 1.5rem;
   transform: translateY(-50%);
   cursor: pointer;
   color: #9ca3af; /* gray-400 */
   display: none; /* Hidden by default */
+  font-size: 1.25rem;
+  z-index: 10;
 }
 
 #clear-input-btn:hover {
