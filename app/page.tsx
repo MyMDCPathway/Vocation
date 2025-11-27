@@ -1820,69 +1820,80 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen">
-      {/* Header Section */}
-      <header className="p-6 md:p-8 text-center">
-        <img
-          src="https://mdcwap.mdc.edu/apply/assets/mdc-logo.png"
-          alt="Miami Dade College Logo"
-          className="h-16 w-auto mx-auto mb-4"
-        />
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-800">
-          MyMDC Pathway
-        </h1>
-        <p className="text-gray-600 mt-2">
-          Generate an educational pathway for your career.
-        </p>
-      </header>
-
-      {/* Control Section */}
-      <div className="px-6 pb-6 md:px-8 md:pb-8">
-        <hr className="max-w-2xl mx-auto border-gray-200 mb-8" />
-
-        <div className="max-w-2xl mx-auto">
-          <label
-            htmlFor="custom-career-input"
-            className="block text-sm font-medium text-gray-700 mb-2"
-          >
-            Specify your Career Choice:
-            <i
-              onClick={handleHelp}
-              className="fas fa-question-circle text-blue-500 hover:text-blue-700 cursor-pointer ml-1"
+    <div className="min-h-screen bg-gray-50">
+      {/* Hero Section - Google Career Dreamer Style */}
+      <section className="hero-section py-12 md:py-20 px-6 relative bg-white">
+        {/* Decorative circles */}
+        <div className="hero-circle" style={{ width: '300px', height: '300px', top: '10%', right: '15%' }} />
+        <div className="hero-circle" style={{ width: '200px', height: '200px', bottom: '20%', left: '10%', animationDelay: '1s' }} />
+        
+        <div className="max-w-6xl mx-auto relative z-10">
+          {/* School Logo + Powered by Vocation */}
+          <div className="flex items-center justify-center gap-3 mb-8">
+            <img
+              src="https://mdcwap.mdc.edu/apply/assets/mdc-logo.png"
+              alt="Miami Dade College"
+              className="h-12 md:h-14"
             />
-          </label>
-          <div className="flex flex-col sm:flex-row items-center sm:space-x-2 space-y-2 sm:space-y-0">
-            <div className="input-container">
-              <input
-                type="text"
-                id="custom-career-input"
-                value={careerInput}
-                onChange={(e) => setCareerInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="e.g., Mechanical Engineer"
-                className="w-full py-3 pl-5 pr-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              {showClearBtn && (
-                <span
-                  id="clear-input-btn"
-                  onClick={handleClearInput}
-                  title="Clear input"
-                  style={{ display: "block" }}
-                >
-                  <i className="fas fa-times-circle" />
-                </span>
-              )}
+            <div className="w-px h-8 bg-gray-300" />
+            <div className="text-left">
+              <div className="text-xs text-gray-500 uppercase tracking-wider font-medium">Powered by</div>
+              <div className="text-xl font-bold text-blue-900">Vocation</div>
             </div>
-            <button
-              id="generate-pathway-btn"
-              onClick={handleGeneratePathway}
-              className="flex-shrink-0 w-full sm:w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-full shadow-md transition duration-200 flex items-center justify-center p-0"
-            >
-              <i className="fas fa-arrow-right" />
-            </button>
+          </div>
+
+          <div className="text-center max-w-3xl mx-auto">
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Plan your path to
+              <span className="block mt-2 text-blue-900">your dream career</span>
+            </h1>
+            <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+              Discover your complete educational journey from Miami Dade College to your future — with programs, transfers, and certifications mapped out.
+            </p>
+
+            {/* Search Box */}
+            <div className="max-w-2xl mx-auto">
+              <div className="bg-white rounded-2xl shadow-lg p-2 border border-gray-100">
+                <div className="flex flex-col sm:flex-row items-center gap-2">
+                  <div className="input-container flex-1 w-full">
+                    <input
+                      type="text"
+                      id="custom-career-input"
+                      value={careerInput}
+                      onChange={(e) => setCareerInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="What career do you want to explore?"
+                      className="w-full py-4 px-6 border-0 text-lg rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {showClearBtn && (
+                      <span
+                        id="clear-input-btn"
+                        onClick={handleClearInput}
+                        title="Clear input"
+                        style={{ display: "block", right: "1.5rem" }}
+                      >
+                        <svg className="w-5 h-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    id="generate-pathway-btn"
+                    onClick={handleGeneratePathway}
+                    className="btn-primary flex-shrink-0 w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 text-lg rounded-xl"
+                  >
+                    <span>Explore</span>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </section>
 
       {/* Infographic Display Area */}
       <div id="pathway-display" className="p-6 md:p-8">

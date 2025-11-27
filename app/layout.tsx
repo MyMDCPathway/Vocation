@@ -3,8 +3,9 @@ import './globals.css'
 import Script from 'next/script'
 
 export const metadata: Metadata = {
-  title: 'MDC Career Pathway Infographic',
-  description: 'Generate an educational pathway for your career',
+  title: 'Vocation | Career Planning for Miami Dade College',
+  description: 'Plan your complete educational journey from Miami Dade College to your dream career. AI-powered pathway generation with programs, transfers, and certifications.',
+  keywords: 'Vocation, Miami Dade College, MDC, career planning, educational pathway',
 }
 
 export default function RootLayout({
