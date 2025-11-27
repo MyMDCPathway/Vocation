@@ -1821,6 +1821,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+<<<<<<< HEAD
       {/* Header Bar - Centered Logo */}
       <header className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-center">
@@ -1863,6 +1864,78 @@ export default function Home() {
             >
               Start
             </button>
+=======
+      {/* Hero Section - Google Career Dreamer Style */}
+      <section className="hero-section py-12 md:py-20 px-6 relative bg-white">
+        {/* Decorative circles */}
+        <div className="hero-circle" style={{ width: '300px', height: '300px', top: '10%', right: '15%' }} />
+        <div className="hero-circle" style={{ width: '200px', height: '200px', bottom: '20%', left: '10%', animationDelay: '1s' }} />
+        
+        <div className="max-w-6xl mx-auto relative z-10">
+          {/* School Logo + Powered by Vocation */}
+          <div className="flex items-center justify-center gap-3 mb-8">
+            <img
+              src="https://mdcwap.mdc.edu/apply/assets/mdc-logo.png"
+              alt="Miami Dade College"
+              className="h-12 md:h-14"
+            />
+            <div className="w-px h-8 bg-gray-300" />
+            <div className="text-left">
+              <div className="text-xs text-gray-500 uppercase tracking-wider font-medium">Powered by</div>
+              <div className="text-xl font-bold text-blue-900">Vocation</div>
+            </div>
+          </div>
+
+          <div className="text-center max-w-3xl mx-auto">
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+              Plan your path to
+              <span className="block mt-2 text-blue-900">your dream career</span>
+            </h1>
+            <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+              Discover your complete educational journey from Miami Dade College to your future — with programs, transfers, and certifications mapped out.
+            </p>
+
+            {/* Search Box */}
+            <div className="max-w-2xl mx-auto">
+              <div className="bg-white rounded-2xl shadow-lg p-2 border border-gray-100">
+                <div className="flex flex-col sm:flex-row items-center gap-2">
+                  <div className="input-container flex-1 w-full">
+                    <input
+                      type="text"
+                      id="custom-career-input"
+                      value={careerInput}
+                      onChange={(e) => setCareerInput(e.target.value)}
+                      onKeyDown={handleKeyDown}
+                      placeholder="What career do you want to explore?"
+                      className="w-full py-4 px-6 border-0 text-lg rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    {showClearBtn && (
+                      <span
+                        id="clear-input-btn"
+                        onClick={handleClearInput}
+                        title="Clear input"
+                        style={{ display: "block", right: "1.5rem" }}
+                      >
+                        <svg className="w-5 h-5 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </span>
+                    )}
+                  </div>
+                  <button
+                    id="generate-pathway-btn"
+                    onClick={handleGeneratePathway}
+                    className="btn-primary flex-shrink-0 w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 text-lg rounded-xl"
+                  >
+                    <span>Explore</span>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+>>>>>>> 348dac6f4e8af424d2cf034d5c4b65d964264168
           </div>
         </div>
       </section>
