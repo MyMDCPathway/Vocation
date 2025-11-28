@@ -1520,9 +1520,22 @@ function ExamStepComponent({
   );
 }
 
-export default function Home() {
+const SUGGESTIONS = [
+  "project manager",
+  "parent",
+  "software engineer",
+  "rideshare driver",
+  "MOS 09L",
+  "retail clerk"
+];
+
+export default function PathwayPage() {
   const [careerInput, setCareerInput] = useState("");
   const [showClearBtn, setShowClearBtn] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
+  const [currentSuggestionIndex, setCurrentSuggestionIndex] = useState(0);
+  const [placeholderOpacity, setPlaceholderOpacity] = useState(1);
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Loading...");
   const [modalOpen, setModalOpen] = useState(false);
@@ -1544,6 +1557,38 @@ export default function Home() {
 
   useEffect(() => {
     setShowClearBtn(careerInput.length > 0);
+    
+    // Filter suggestions based on input
+    if (careerInput.length > 0) {
+      const filtered = SUGGESTIONS.filter(suggestion =>
+        suggestion.toLowerCase().includes(careerInput.toLowerCase())
+      );
+      setFilteredSuggestions(filtered);
+      setShowSuggestions(filtered.length > 0 && careerInput !== filtered[0]);
+    } else {
+      setFilteredSuggestions(SUGGESTIONS);
+      setShowSuggestions(true);
+    }
+  }, [careerInput]);
+
+  // Cycle through suggestions in placeholder with smooth fade
+  useEffect(() => {
+    if (careerInput.length === 0) {
+      const interval = setInterval(() => {
+        // Fade out
+        setPlaceholderOpacity(0);
+        
+        // After fade out, change suggestion and fade in
+        setTimeout(() => {
+          setCurrentSuggestionIndex((prevIndex) => (prevIndex + 1) % SUGGESTIONS.length);
+          setPlaceholderOpacity(1);
+        }, 300); // Half of transition time
+      }, 1000); // Change every 1 second
+
+      return () => clearInterval(interval);
+    } else {
+      setPlaceholderOpacity(1);
+    }
   }, [careerInput]);
 
   useEffect(() => {
@@ -1825,52 +1870,66 @@ export default function Home() {
       {/* Header Bar - Centered Logo */}
       <header className="bg-white border-b border-gray-200 px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-center">
-          <img
-            src="https://mdcwap.mdc.edu/apply/assets/mdc-logo.png"
-            alt="Miami Dade College Logo"
-            className="h-10 w-auto"
-          />
+          <Link href="/">
+            <img
+              src="https://mdcwap.mdc.edu/apply/assets/mdc-logo.png"
+              alt="Miami Dade College Logo"
+              className="h-10 w-auto cursor-pointer"
+            />
+          </Link>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="px-6 md:px-8 pt-24 md:pt-32 pb-12 md:pb-16 text-center">
-        <div className="max-w-4xl mx-auto">
-          {/* Main Title - Vocation */}
-          <h1 className="text-7xl md:text-9xl font-bold mb-2 select-none">
-            <span className="inline-flex text-blue-600">
-              {"Vocation".split("").map((letter, index) => (
-                <span
-                  key={index}
-                  className="letter-fade-in"
-                  style={{ animationDelay: `${index * 0.15}s` }}
-                >
-                  {letter === " " ? "\u00A0" : letter}
-                </span>
-              ))}
-            </span>
-          </h1>
-          
-          {/* Subtitle */}
-          <p className="text-base md:text-lg text-gray-700 mb-6">
-            A powerful way to explore career pathways with AI
+      {/* Search Section */}
+      <section className="px-6 md:px-8 pt-24 md:pt-32 pb-24 md:pb-32">
+        <div className="max-w-2xl mx-auto">
+          {/* Instruction Text */}
+          <p className="text-gray-700 mb-2 text-left text-xl md:text-2xl">
+            👋 To start, share a current or previous role:
           </p>
 
-          {/* Start Button */}
-          <div className="flex justify-center">
-            <Link
-              href="/pathway"
-              className="px-12 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition duration-200 text-lg inline-block"
-            >
-              Start
-            </Link>
+          {/* Search Bar */}
+          <div className="mb-2 relative">
+            <div className="input-container w-full relative">
+              <input
+                type="text"
+                id="custom-career-input"
+                value={careerInput}
+                onChange={(e) => setCareerInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                onFocus={() => setShowSuggestions(true)}
+                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                placeholder={careerInput.length === 0 ? SUGGESTIONS[currentSuggestionIndex] : "project manager"}
+                className={`w-full py-2 min-h-[60px] bg-transparent border-none outline-none focus:outline-none text-[20px] md:text-[50px] leading-[1.1] text-gray-900 placeholder:text-gray-300 placeholder-transition ${
+                  placeholderOpacity === 0 ? 'placeholder-opacity-0' : 'placeholder-opacity-50'
+                }`}
+                autoFocus
+              />
+              {showClearBtn && (
+                <span
+                  id="clear-input-btn"
+                  onClick={handleClearInput}
+                  className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-600"
+                  title="Clear input"
+                >
+                  <i className="fas fa-times-circle"></i>
+                </span>
+              )}
+            </div>
           </div>
+
+          {/* Next Button */}
+          <button
+            onClick={handleGeneratePathway}
+            className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition duration-200 text-base"
+          >
+            Next
+          </button>
         </div>
       </section>
 
-      {/* Pathway display moved to /pathway page */}
-      {/* Infographic Display Area - Hidden on home page */}
-      <div id="pathway-display" className="p-6 md:p-8 hidden">
+      {/* Infographic Display Area - Shows right after search when pathway exists */}
+      <div id="pathway-display" className="p-6 md:p-8">
         {/* Main Pathway */}
         {pathwayData && pathwayData.pathways && pathwayData.pathways.length > 0 && (
           <>
@@ -2213,55 +2272,6 @@ export default function Home() {
             ))}
           </div>
         )}
-      </div>
-
-      {/* How Vocation Works Section */}
-      <div className={`px-6 md:px-8 pb-12 ${pathwayData ? 'pt-16' : 'pt-24 md:pt-32'}`}>
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-            How Vocation Works
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Step 1 */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-4">
-                <span className="text-2xl font-bold text-blue-600">1</span>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Enter Your Career
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Type in the career you're interested in pursuing, such as "Mechanical Engineer" or "Registered Nurse".
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-4">
-                <span className="text-2xl font-bold text-blue-600">2</span>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Get Your Pathway
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Vocation generates a personalized educational pathway showing all the steps needed, from MDC programs to licensure exams.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-full mb-4">
-                <span className="text-2xl font-bold text-blue-600">3</span>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Explore & Compare
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Click on program links, view exam requirements, explore transfer options, and compare multiple career paths side-by-side.
-              </p>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Loading Overlay */}
