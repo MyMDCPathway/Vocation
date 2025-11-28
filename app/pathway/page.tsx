@@ -1536,6 +1536,7 @@ export default function PathwayPage() {
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const [currentSuggestionIndex, setCurrentSuggestionIndex] = useState(0);
   const [placeholderOpacity, setPlaceholderOpacity] = useState(1);
+  const [displayedText, setDisplayedText] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Loading...");
   const [modalOpen, setModalOpen] = useState(false);
@@ -1570,6 +1571,29 @@ export default function PathwayPage() {
       setShowSuggestions(true);
     }
   }, [careerInput]);
+
+  // Typewriter effect for instruction text
+  useEffect(() => {
+    const fullText = " To start, share a current or previous role:";
+    setDisplayedText("");
+    
+    // Start typing after wave animation (1 second)
+    const timeout = setTimeout(() => {
+      let currentIndex = 0;
+      const typingInterval = setInterval(() => {
+        if (currentIndex < fullText.length) {
+          setDisplayedText(fullText.slice(0, currentIndex + 1));
+          currentIndex++;
+        } else {
+          clearInterval(typingInterval);
+        }
+      }, 50); // Speed of typing (50ms per letter)
+
+      return () => clearInterval(typingInterval);
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   // Cycle through suggestions in placeholder with smooth fade
   useEffect(() => {
@@ -1884,12 +1908,16 @@ export default function PathwayPage() {
       <section className="px-6 md:px-8 pt-24 md:pt-32 pb-24 md:pb-32">
         <div className="max-w-2xl mx-auto">
           {/* Instruction Text */}
-          <p className="text-gray-700 mb-2 text-left text-xl md:text-2xl">
-            👋 To start, share a current or previous role:
+          <p className="text-gray-700 mb-6 text-left text-xl md:text-3xl">
+            <span className="wave-emoji">👋</span>
+            <span>{displayedText}</span>
+            {displayedText.length > 0 && displayedText.length < " To start, share a current or previous role:".length && (
+              <span className="inline-block w-0.5 h-5 bg-gray-700 ml-1 animate-blink">|</span>
+            )}
           </p>
 
           {/* Search Bar */}
-          <div className="mb-2 relative">
+          <div className="mb-6 relative fade-in-delay-2">
             <div className="input-container w-full relative">
               <input
                 type="text"
@@ -1900,7 +1928,7 @@ export default function PathwayPage() {
                 onFocus={() => setShowSuggestions(true)}
                 onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                 placeholder={careerInput.length === 0 ? SUGGESTIONS[currentSuggestionIndex] : "project manager"}
-                className={`w-full py-2 min-h-[60px] bg-transparent border-none outline-none focus:outline-none text-[20px] md:text-[50px] leading-[1.1] text-gray-900 placeholder:text-gray-300 placeholder-transition ${
+                className={`w-full py-2 min-h-[60px] bg-transparent border-none outline-none focus:outline-none text-[20px] md:text-[55px] leading-[1.1] text-gray-900 placeholder:text-gray-300 placeholder-transition ${
                   placeholderOpacity === 0 ? 'placeholder-opacity-0' : 'placeholder-opacity-50'
                 }`}
                 autoFocus
@@ -1921,7 +1949,12 @@ export default function PathwayPage() {
           {/* Next Button */}
           <button
             onClick={handleGeneratePathway}
-            className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition duration-200 text-base"
+            disabled={!careerInput.trim()}
+            className={`px-16 py-4 rounded-lg shadow-md transition duration-200 text-base fade-in-delay-2 ${
+              careerInput.trim()
+                ? 'bg-blue-600 hover:bg-blue-700 text-white font-semibold cursor-pointer'
+                : 'bg-blue-200 text-white font-semibold cursor-not-allowed'
+            }`}
           >
             Next
           </button>
