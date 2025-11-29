@@ -1558,10 +1558,15 @@ export default function PathwayPage() {
   const [showEmptyError, setShowEmptyError] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [charCount, setCharCount] = useState(0);
-  const [showGeneratingIndicator, setShowGeneratingIndicator] = useState(false);
   const [canType, setCanType] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
-  const [careerSuggestions, setCareerSuggestions] = useState<string[]>([]);
+  const [careerSuggestions, setCareerSuggestions] = useState<Array<{ 
+    title: string; 
+    description: string;
+    salary?: string;
+    jobOutlook?: string;
+    competitiveness?: string;
+  }>>([]);
   const [showCareerOptions, setShowCareerOptions] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -1647,22 +1652,16 @@ export default function PathwayPage() {
     setLoadingMessage(message || "Loading...");
     // Start fade-out animation
     setIsFadingOut(true);
-    setShowGeneratingIndicator(false);
-    // After fade-out completes, show loading state and then the generating indicator
+    // After fade-out completes, show loading state
     setTimeout(() => {
       setLoading(true);
       setIsFadingOut(false);
-      // Wait for the input move-up animation to finish (~3s) before showing indicator
-      setTimeout(() => {
-        setShowGeneratingIndicator(true);
-      }, 3000);
     }, 600); // Match fade-out animation duration
   };
 
   const hideLoading = () => {
     setLoading(false);
     setIsFadingOut(false);
-    setShowGeneratingIndicator(false);
   };
 
   const showModal = (title: string, content: string) => {
@@ -1733,7 +1732,27 @@ export default function PathwayPage() {
       const data = await response.json();
       const suggestions = data.suggestions || [];
       setLoadingSuggestions(false);
-      return suggestions;
+      
+      console.log("Received suggestions from API:", suggestions);
+      
+      // Ensure suggestions are in the correct format
+      const formattedSuggestions = suggestions.map((s: any) => {
+        if (typeof s === "string") {
+          return { title: s, description: "", salary: "", jobOutlook: "", competitiveness: "" };
+        }
+        const formatted = {
+          title: s.title || s.name || "",
+          description: s.description || "",
+          salary: s.salary || "",
+          jobOutlook: s.jobOutlook || s.job_outlook || "",
+          competitiveness: s.competitiveness || "",
+        };
+        console.log("Formatted suggestion:", formatted);
+        return formatted;
+      });
+      
+      console.log("Final formatted suggestions:", formattedSuggestions);
+      return formattedSuggestions;
     } catch (error: any) {
       console.error("Error getting career suggestions:", error);
       setLoadingSuggestions(false);
@@ -1773,8 +1792,10 @@ export default function PathwayPage() {
     setShowCareerOptions(true);
   };
 
-  const handleGeneratePathway = async (selectedCareer?: string) => {
-    const career = selectedCareer || careerInput.trim();
+  const handleGeneratePathway = async (selectedCareer?: string | { title: string; description: string }) => {
+    const career = typeof selectedCareer === "string" 
+      ? selectedCareer 
+      : selectedCareer?.title || careerInput.trim();
     if (!career) {
       showModal(
         "Error",
@@ -1998,12 +2019,186 @@ export default function PathwayPage() {
 
       {/* Search Section / Loading / Flowchart Display Area */}
       <section className="px-6 md:px-8 pt-24 md:pt-32 pb-24 md:pb-32">
-        {!pathwayData && (
-          <div
-            className={`max-w-2xl mx-auto min-h-[260px] transition-transform duration-[3000ms] ease-out ${
-              loading ? "-translate-y-16" : "translate-y-0"
-            }`}
-          >
+        {/* Career Options View - Shows when options are available */}
+        {!pathwayData && showCareerOptions && (
+          <div className="max-w-6xl mx-auto">
+            {/* Centered Input at Top */}
+            <div className="max-w-2xl mx-auto mb-12">
+              <div className="input-container w-full relative">
+                <input
+                  ref={inputRef}
+                  type="text"
+                  id="custom-career-input"
+                  value={careerInput}
+                  onChange={(e) => {
+                    if (!canType) return;
+                    let value = e.target.value;
+
+                    // Enforce character limit (max 50)
+                    if (value.length > 50) {
+                      value = value.slice(0, 50);
+                    }
+
+                    // Enforce word limit (max 5 words)
+                    let words = value.trim().split(/\s+/).filter(Boolean);
+                    if (words.length > 5) {
+                      words = words.slice(0, 5);
+                      value = words.join(" ");
+                    }
+
+                    setCareerInput(value);
+                  }}
+                  placeholder={careerInput.length === 0 ? SUGGESTIONS[currentSuggestionIndex] : "project manager"}
+                  className={`w-full py-2 min-h-[60px] bg-transparent border-none outline-none focus:outline-none text-center text-[20px] md:text-[55px] leading-[1.1] text-gray-900 placeholder:text-gray-300 placeholder-transition ${
+                    placeholderOpacity === 0 ? 'placeholder-opacity-0' : 'placeholder-opacity-50'
+                  }`}
+                  disabled={!canType || loading}
+                />
+                {showClearBtn && (
+                  <span
+                    id="clear-input-btn"
+                    onClick={handleClearInput}
+                    className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-600"
+                    title="Clear input"
+                  >
+                    <i className="fas fa-times-circle"></i>
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Loading indicator while fetching career suggestions */}
+            {loadingSuggestions && (
+              <div className="flex items-center justify-center space-x-3 mb-12">
+                <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-gray-600">Finding specific career options...</span>
+              </div>
+            )}
+
+            {/* Career Option Cards */}
+            {!loadingSuggestions && careerSuggestions.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {careerSuggestions
+                  .filter((s) => s && typeof s === "object" && s.title)
+                  .map((suggestion, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleGeneratePathway(suggestion)}
+                    className="bg-white border border-gray-200 rounded-lg p-6 hover:border-blue-500 hover:shadow-lg transition-all text-left group"
+                  >
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                      {suggestion.title || "Unknown Career"}
+                    </h3>
+                    {suggestion.description && (
+                      <p className="text-sm text-gray-600 mb-3">
+                        {suggestion.description}
+                      </p>
+                    )}
+                    {(suggestion.salary || suggestion.jobOutlook || suggestion.competitiveness) && (
+                      <div className="flex flex-col gap-2 mt-3 pt-3 border-t border-gray-100">
+                        {suggestion.salary && (
+                          <div className="flex items-center gap-2">
+                            <i className="fas fa-dollar-sign text-green-600 text-xs"></i>
+                            <span className="text-sm font-medium text-gray-700">{suggestion.salary}</span>
+                          </div>
+                        )}
+                        {suggestion.jobOutlook && (
+                          <div className="flex items-center gap-2">
+                            <i className="fas fa-chart-line text-blue-600 text-xs"></i>
+                            <span className="text-sm text-gray-600">{suggestion.jobOutlook}</span>
+                          </div>
+                        )}
+                        {suggestion.competitiveness && (
+                          <div className="flex items-center gap-2">
+                            <i className="fas fa-trophy text-purple-600 text-xs"></i>
+                            <span className="text-sm text-gray-600">{suggestion.competitiveness}</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Cancel Button */}
+            {!loadingSuggestions && (
+              <div className="mt-8 text-center">
+                <button
+                  onClick={() => {
+                    setShowCareerOptions(false);
+                    setCareerSuggestions([]);
+                  }}
+                  className="text-sm text-gray-500 hover:text-gray-700"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Loading indicator while fetching career suggestions - Centered */}
+        {!pathwayData && !showCareerOptions && loadingSuggestions && (
+          <div className="flex flex-col items-center justify-center min-h-[400px]">
+            <div className="flex items-center justify-center space-x-3 mb-4">
+              {/* Gemini Star/Sparkle Icon */}
+              <svg
+                className="w-8 h-8 animate-spin-slow"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <defs>
+                  <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#10b981" />
+                    <stop offset="100%" stopColor="#06b6d4" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                  fill="url(#gemini-gradient)"
+                />
+              </svg>
+              <span className="text-green-600 font-medium text-xl">
+                Generating Careers
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Loading Indicator for Pathway Generation - Centered */}
+        {!pathwayData && !showCareerOptions && !loadingSuggestions && loading && (
+          <div className="flex flex-col items-center justify-center min-h-[400px]">
+            <div className="flex items-center justify-center space-x-3">
+              {/* Gemini Star/Sparkle Icon */}
+              <svg
+                className="w-8 h-8 animate-spin-slow"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <defs>
+                  <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#10b981" />
+                    <stop offset="100%" stopColor="#06b6d4" />
+                  </linearGradient>
+                </defs>
+                <path
+                  d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                  fill="url(#gemini-gradient)"
+                />
+              </svg>
+              <span className="text-green-600 font-medium text-xl">
+                Generating pathway
+              </span>
+            </div>
+          </div>
+        )}
+
+        {/* Search Section - Only show when NOT showing career options, NOT loading suggestions, and NOT generating pathway */}
+        {!pathwayData && !showCareerOptions && !loadingSuggestions && !loading && (
+          <div className="max-w-2xl mx-auto min-h-[260px]">
             {/* Instruction Text - Fades out when loading */}
             {!loading && (
               <p className={`text-gray-700 mb-1 text-left text-xl md:text-3xl ${isFadingOut ? 'fade-out' : ''}`}>
@@ -2111,45 +2306,8 @@ export default function PathwayPage() {
               </span>
             </div>
 
-            {/* Loading indicator while fetching career suggestions */}
-            {loadingSuggestions && (
-              <div className="mb-4 flex items-center justify-start space-x-3">
-                <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                <span className="text-gray-600">Finding specific career options...</span>
-              </div>
-            )}
-
-            {/* Career Options - Show when suggestions are available */}
-            {!loadingSuggestions && showCareerOptions && careerSuggestions.length > 0 && !loading && (
-              <div className="mb-4">
-                <p className="text-sm text-gray-600 mb-3">
-                  Please select a specific career:
-                </p>
-                <div className="space-y-2">
-                  {careerSuggestions.map((suggestion, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleGeneratePathway(suggestion)}
-                      className="w-full text-left px-4 py-3 bg-white border border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
-                    >
-                      <span className="text-gray-900 font-medium">{suggestion}</span>
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={() => {
-                    setShowCareerOptions(false);
-                    setCareerSuggestions([]);
-                  }}
-                  className="mt-3 text-sm text-gray-500 hover:text-gray-700"
-                >
-                  Cancel
-                </button>
-              </div>
-            )}
-
             {/* Next Button - Fades out when loading */}
-            {!loading && !showCareerOptions && (
+            {!loading && (
               <button
                 onClick={handleNextClick}
                 disabled={!careerInput.trim() || loadingSuggestions}
@@ -2177,34 +2335,6 @@ export default function PathwayPage() {
               </div>
             )}
 
-            {/* Loading Indicator - Fades in only after move-up animation completes */}
-            {loading && showGeneratingIndicator && !isFadingOut && (
-              <div className="fade-in-flowchart mt-1">
-                <div className="flex items-center justify-start space-x-3">
-                  {/* Gemini Star/Sparkle Icon */}
-                  <svg
-                    className="w-6 h-6 animate-spin-slow"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <defs>
-                      <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stopColor="#10b981" />
-                        <stop offset="100%" stopColor="#06b6d4" />
-                      </linearGradient>
-                    </defs>
-                    <path
-                      d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-                      fill="url(#gemini-gradient)"
-                    />
-                  </svg>
-                  <span className="text-green-600 font-medium text-lg">
-                    Generating pathway
-                  </span>
-                </div>
-              </div>
-            )}
           </div>
         )}
         
