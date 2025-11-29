@@ -1558,8 +1558,12 @@ export default function PathwayPage() {
   const [showEmptyError, setShowEmptyError] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [charCount, setCharCount] = useState(0);
+  const [showGeneratingIndicator, setShowGeneratingIndicator] = useState(false);
   const [canType, setCanType] = useState(false);
   const [isInputFocused, setIsInputFocused] = useState(false);
+  const [careerSuggestions, setCareerSuggestions] = useState<string[]>([]);
+  const [showCareerOptions, setShowCareerOptions] = useState(false);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -1643,16 +1647,22 @@ export default function PathwayPage() {
     setLoadingMessage(message || "Loading...");
     // Start fade-out animation
     setIsFadingOut(true);
-    // After fade-out completes, show loading state
+    setShowGeneratingIndicator(false);
+    // After fade-out completes, show loading state and then the generating indicator
     setTimeout(() => {
       setLoading(true);
       setIsFadingOut(false);
+      // Wait for the input move-up animation to finish (~3s) before showing indicator
+      setTimeout(() => {
+        setShowGeneratingIndicator(true);
+      }, 3000);
     }, 600); // Match fade-out animation duration
   };
 
   const hideLoading = () => {
     setLoading(false);
     setIsFadingOut(false);
+    setShowGeneratingIndicator(false);
   };
 
   const showModal = (title: string, content: string) => {
@@ -1705,8 +1715,66 @@ export default function PathwayPage() {
     }
   };
 
-  const handleGeneratePathway = async () => {
-    const career = careerInput.trim();
+  const getCareerSuggestions = async (input: string) => {
+    setLoadingSuggestions(true);
+    try {
+      const response = await fetch("/api/get-career-suggestions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ input }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to get career suggestions");
+      }
+
+      const data = await response.json();
+      const suggestions = data.suggestions || [];
+      setLoadingSuggestions(false);
+      return suggestions;
+    } catch (error: any) {
+      console.error("Error getting career suggestions:", error);
+      setLoadingSuggestions(false);
+      return [];
+    }
+  };
+
+  const handleNextClick = async () => {
+    const input = careerInput.trim();
+    if (!input) {
+      showModal(
+        "Error",
+        '<p class="text-red-600">Please enter a career title.</p>'
+      );
+      return;
+    }
+
+    // Clear any existing pathway data when starting new search
+    setPathwayData(null);
+    setShowCareerOptions(false);
+    setCareerSuggestions([]);
+
+    // First, get career suggestions
+    const suggestions = await getCareerSuggestions(input);
+    
+    if (suggestions.length === 0) {
+      // No suggestions found, show error
+      showModal(
+        "Invalid Input",
+        '<p class="text-red-600">Please enter a valid career title.</p>'
+      );
+      return;
+    }
+
+    // Always show suggestions (even if just one) so user can confirm
+    setCareerSuggestions(suggestions);
+    setShowCareerOptions(true);
+  };
+
+  const handleGeneratePathway = async (selectedCareer?: string) => {
+    const career = selectedCareer || careerInput.trim();
     if (!career) {
       showModal(
         "Error",
@@ -1714,6 +1782,10 @@ export default function PathwayPage() {
       );
       return;
     }
+
+    // If we have suggestions showing, hide them
+    setShowCareerOptions(false);
+    setCareerSuggestions([]);
 
     showLoading("Generating pathway");
 
@@ -1905,7 +1977,7 @@ export default function PathwayPage() {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      handleGeneratePathway();
+      handleNextClick(); // Go through career options first
     }
   };
 
@@ -1944,7 +2016,7 @@ export default function PathwayPage() {
             )}
 
             {/* Search Bar - Always visible when no pathway */}
-            <div className="mb-1 relative fade-in-delay-2">
+            <div className={`relative fade-in-delay-2 ${loading ? 'mb-0' : 'mb-1'}`}>
               <div className="input-container w-full relative">
                 <input
                 ref={inputRef}
@@ -2039,11 +2111,48 @@ export default function PathwayPage() {
               </span>
             </div>
 
+            {/* Loading indicator while fetching career suggestions */}
+            {loadingSuggestions && (
+              <div className="mb-4 flex items-center justify-start space-x-3">
+                <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <span className="text-gray-600">Finding specific career options...</span>
+              </div>
+            )}
+
+            {/* Career Options - Show when suggestions are available */}
+            {!loadingSuggestions && showCareerOptions && careerSuggestions.length > 0 && !loading && (
+              <div className="mb-4">
+                <p className="text-sm text-gray-600 mb-3">
+                  Please select a specific career:
+                </p>
+                <div className="space-y-2">
+                  {careerSuggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleGeneratePathway(suggestion)}
+                      className="w-full text-left px-4 py-3 bg-white border border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors"
+                    >
+                      <span className="text-gray-900 font-medium">{suggestion}</span>
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={() => {
+                    setShowCareerOptions(false);
+                    setCareerSuggestions([]);
+                  }}
+                  className="mt-3 text-sm text-gray-500 hover:text-gray-700"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
             {/* Next Button - Fades out when loading */}
-            {!loading && (
+            {!loading && !showCareerOptions && (
               <button
-                onClick={handleGeneratePathway}
-                disabled={!careerInput.trim()}
+                onClick={handleNextClick}
+                disabled={!careerInput.trim() || loadingSuggestions}
                 className={`px-16 py-4 rounded-lg shadow-md transition duration-200 text-base fade-in-delay-2 ${isFadingOut ? 'fade-out' : ''} ${
                   careerInput.trim()
                     ? 'bg-blue-600 hover:bg-blue-700 text-white font-semibold cursor-pointer'
@@ -2068,10 +2177,10 @@ export default function PathwayPage() {
               </div>
             )}
 
-            {/* Loading Indicator - Fades in when loading */}
-            {loading && !isFadingOut && (
-              <div className="fade-in-flowchart">
-                <div className="flex items-center justify-start space-x-3 mb-6">
+            {/* Loading Indicator - Fades in only after move-up animation completes */}
+            {loading && showGeneratingIndicator && !isFadingOut && (
+              <div className="fade-in-flowchart mt-1">
+                <div className="flex items-center justify-start space-x-3">
                   {/* Gemini Star/Sparkle Icon */}
                   <svg
                     className="w-6 h-6 animate-spin-slow"
@@ -2099,8 +2208,8 @@ export default function PathwayPage() {
           </div>
         )}
         
-        {/* Flowchart Display - Shows when pathway data exists */}
-        {pathwayData && !loading && (
+        {/* Flowchart Display - Shows when pathway data exists and no career options are showing */}
+        {pathwayData && !loading && !showCareerOptions && (
           <div id="pathway-display" className={`max-w-4xl mx-auto fade-in-flowchart`}>
             {/* Main Pathway */}
             {pathwayData && pathwayData.pathways && pathwayData.pathways.length > 0 && (
