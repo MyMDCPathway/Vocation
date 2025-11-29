@@ -1521,12 +1521,12 @@ function ExamStepComponent({
 }
 
 const SUGGESTIONS = [
-  "project manager",
-  "parent",
-  "software engineer",
+  "mechanical engineer",
+  "nurse",
+  "software developer",
   "rideshare driver",
   "MOS 09L",
-  "retail clerk"
+  "program manager"
 ];
 
 export default function PathwayPage() {
@@ -1539,6 +1539,7 @@ export default function PathwayPage() {
   const [displayedText, setDisplayedText] = useState("");
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState("Loading...");
+  const [isFadingOut, setIsFadingOut] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalTitle, setModalTitle] = useState("MDC Details");
   const [modalContent, setModalContent] = useState<string>("");
@@ -1574,7 +1575,7 @@ export default function PathwayPage() {
 
   // Typewriter effect for instruction text
   useEffect(() => {
-    const fullText = " To start, share a current or previous role:";
+    const fullText = " Generate a pathway for your career:";
     setDisplayedText("");
     
     // Start typing after wave animation (1 second)
@@ -1628,11 +1629,18 @@ export default function PathwayPage() {
 
   const showLoading = (message: string) => {
     setLoadingMessage(message || "Loading...");
-    setLoading(true);
+    // Start fade-out animation
+    setIsFadingOut(true);
+    // After fade-out completes, show loading state
+    setTimeout(() => {
+      setLoading(true);
+      setIsFadingOut(false);
+    }, 600); // Match fade-out animation duration
   };
 
   const hideLoading = () => {
     setLoading(false);
+    setIsFadingOut(false);
   };
 
   const showModal = (title: string, content: string) => {
@@ -1695,7 +1703,7 @@ export default function PathwayPage() {
       return;
     }
 
-    showLoading(`Generating pathway for ${career}...`);
+    showLoading("Generating pathway");
 
     try {
       const generatedData = await callAPI(career);
@@ -1812,7 +1820,7 @@ export default function PathwayPage() {
   };
 
   const handleGeneratePathwayForCareer = async (career: string) => {
-    showLoading(`Generating pathway for ${career}...`);
+    showLoading("Generating pathway");
     try {
       const generatedData = await callAPI(career);
       
@@ -1904,68 +1912,118 @@ export default function PathwayPage() {
         </div>
       </header>
 
-      {/* Search Section */}
+      {/* Search Section / Loading / Flowchart Display Area */}
       <section className="px-6 md:px-8 pt-24 md:pt-32 pb-24 md:pb-32">
-        <div className="max-w-2xl mx-auto">
-          {/* Instruction Text */}
-          <p className="text-gray-700 mb-6 text-left text-xl md:text-3xl">
-            <span className="wave-emoji">👋</span>
-            <span>{displayedText}</span>
-            {displayedText.length > 0 && displayedText.length < " To start, share a current or previous role:".length && (
-              <span className="inline-block w-0.5 h-5 bg-gray-700 ml-1 animate-blink">|</span>
+        {!pathwayData && (
+          <div className="max-w-2xl mx-auto">
+            {/* Instruction Text - Fades out when loading */}
+            {!loading && (
+              <p className={`text-gray-700 mb-6 text-left text-xl md:text-3xl ${isFadingOut ? 'fade-out' : ''}`}>
+                <span className="wave-emoji">👋</span>
+                <span>{displayedText}</span>
+                {displayedText.length > 0 && displayedText.length < " Generate a pathway for your career:".length && (
+                  <span className="inline-block w-0.5 h-5 bg-gray-700 ml-1 animate-blink">|</span>
+                )}
+              </p>
             )}
-          </p>
 
-          {/* Search Bar */}
-          <div className="mb-6 relative fade-in-delay-2">
-            <div className="input-container w-full relative">
-              <input
-                type="text"
-                id="custom-career-input"
-                value={careerInput}
-                onChange={(e) => setCareerInput(e.target.value)}
-                onKeyDown={handleKeyDown}
-                onFocus={() => setShowSuggestions(true)}
-                onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                placeholder={careerInput.length === 0 ? SUGGESTIONS[currentSuggestionIndex] : "project manager"}
-                className={`w-full py-2 min-h-[60px] bg-transparent border-none outline-none focus:outline-none text-[20px] md:text-[55px] leading-[1.1] text-gray-900 placeholder:text-gray-300 placeholder-transition ${
-                  placeholderOpacity === 0 ? 'placeholder-opacity-0' : 'placeholder-opacity-50'
-                }`}
-                autoFocus
-              />
-              {showClearBtn && (
-                <span
-                  id="clear-input-btn"
-                  onClick={handleClearInput}
-                  className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-600"
-                  title="Clear input"
-                >
-                  <i className="fas fa-times-circle"></i>
-                </span>
-              )}
+            {/* Search Bar - Always visible when no pathway */}
+            <div className="mb-6 relative fade-in-delay-2">
+              <div className="input-container w-full relative">
+                <input
+                  type="text"
+                  id="custom-career-input"
+                  value={careerInput}
+                  onChange={(e) => setCareerInput(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                  placeholder={careerInput.length === 0 ? SUGGESTIONS[currentSuggestionIndex] : "project manager"}
+                  className={`w-full py-2 min-h-[60px] bg-transparent border-none outline-none focus:outline-none text-[20px] md:text-[55px] leading-[1.1] text-gray-900 placeholder:text-gray-300 placeholder-transition ${
+                    placeholderOpacity === 0 ? 'placeholder-opacity-0' : 'placeholder-opacity-50'
+                  }`}
+                  autoFocus
+                  disabled={loading}
+                />
+                {!loading && showClearBtn && (
+                  <span
+                    id="clear-input-btn"
+                    onClick={handleClearInput}
+                    className="absolute top-1/2 right-3 transform -translate-y-1/2 cursor-pointer text-gray-400 hover:text-gray-600"
+                    title="Clear input"
+                  >
+                    <i className="fas fa-times-circle"></i>
+                  </span>
+                )}
+              </div>
             </div>
+
+            {/* Next Button - Fades out when loading */}
+            {!loading && (
+              <button
+                onClick={handleGeneratePathway}
+                disabled={!careerInput.trim()}
+                className={`px-16 py-4 rounded-lg shadow-md transition duration-200 text-base fade-in-delay-2 ${isFadingOut ? 'fade-out' : ''} ${
+                  careerInput.trim()
+                    ? 'bg-blue-600 hover:bg-blue-700 text-white font-semibold cursor-pointer'
+                    : 'bg-blue-200 text-white font-semibold cursor-not-allowed'
+                }`}
+              >
+                Next
+              </button>
+            )}
+
+            {/* Subtitle - Fades out when loading */}
+            {!loading && (
+              <div className={`mt-4 flex items-start gap-3 fade-in-delay-2 ${isFadingOut ? 'fade-out' : ''}`}>
+                <i className="fas fa-lightbulb text-gray-400 mt-0.5 flex-shrink-0"></i>
+                <p className="text-sm text-gray-400">
+                  Undecided? Discover the right career for you by clicking{" "}
+                  <Link href="/career-discovery" className="text-gray-400 hover:text-gray-500 underline">
+                    here
+                  </Link>
+                  .
+                </p>
+              </div>
+            )}
+
+            {/* Loading Indicator - Fades in when loading */}
+            {loading && !isFadingOut && (
+              <div className="fade-in-flowchart">
+                <div className="flex items-center justify-start space-x-3 mb-6">
+                  {/* Gemini Star/Sparkle Icon */}
+                  <svg
+                    className="w-6 h-6 animate-spin-slow"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <defs>
+                      <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stopColor="#10b981" />
+                        <stop offset="100%" stopColor="#06b6d4" />
+                      </linearGradient>
+                    </defs>
+                    <path
+                      d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                      fill="url(#gemini-gradient)"
+                    />
+                  </svg>
+                  <span className="text-green-600 font-medium text-lg">
+                    Generating pathway
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
-
-          {/* Next Button */}
-          <button
-            onClick={handleGeneratePathway}
-            disabled={!careerInput.trim()}
-            className={`px-16 py-4 rounded-lg shadow-md transition duration-200 text-base fade-in-delay-2 ${
-              careerInput.trim()
-                ? 'bg-blue-600 hover:bg-blue-700 text-white font-semibold cursor-pointer'
-                : 'bg-blue-200 text-white font-semibold cursor-not-allowed'
-            }`}
-          >
-            Next
-          </button>
-        </div>
-      </section>
-
-      {/* Infographic Display Area - Shows right after search when pathway exists */}
-      <div id="pathway-display" className="p-6 md:p-8">
-        {/* Main Pathway */}
-        {pathwayData && pathwayData.pathways && pathwayData.pathways.length > 0 && (
-          <>
+        )}
+        
+        {/* Flowchart Display - Shows when pathway data exists */}
+        {pathwayData && !loading && (
+          <div id="pathway-display" className={`max-w-4xl mx-auto fade-in-flowchart`}>
+            {/* Main Pathway */}
+            {pathwayData && pathwayData.pathways && pathwayData.pathways.length > 0 && (
+              <>
             <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
               <h2 className="text-2xl font-bold text-gray-800">
                 {pathwayData.title.replace(/^(Educational\s+)?Pathway\s+to\s+becoming\s+(a\s+|an\s+)?/i, '')}
@@ -2305,27 +2363,10 @@ export default function PathwayPage() {
             ))}
           </div>
         )}
-      </div>
-
-      {/* Loading Overlay */}
-      {loading && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
-          <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center space-y-4">
-            <div className="flex items-center space-x-4">
-              <div className="loader" />
-              <span className="text-gray-700 font-medium">
-                {loadingMessage}
-              </span>
-            </div>
-            <button
-              onClick={handleCancelLoad}
-              className="mt-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium rounded-lg"
-            >
-              Cancel
-            </button>
           </div>
-        </div>
-      )}
+        )}
+      </section>
+
 
       {/* Transfer Recommendations Popup */}
       {transferRecommendationsPopup && (

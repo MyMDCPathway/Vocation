@@ -418,3 +418,44 @@ body {
   animation: blink 1s infinite;
 }
 
+/* Fade out animation */
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.fade-out {
+  animation: fadeOut 0.6s ease-out forwards;
+  pointer-events: none;
+}
+
+/* Fade in for flowchart */
+.fade-in-flowchart {
+  animation: fadeIn 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+/* Spin animation for star icon */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin 2s linear infinite;
+}
+
+/* Smooth transition for section padding */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: ease-in-out;
+}
+
