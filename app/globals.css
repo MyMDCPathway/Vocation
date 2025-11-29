@@ -4,6 +4,24 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+/* Color variables for flowchart steps */
+:root {
+  /* MDC blue for degree steps */
+  --school-primary: #0054a6;
+  --school-primary-rgb: 0, 84, 166;
+
+  /* Orange for transfer steps */
+  --school-secondary: #f97316; /* orange-500 */
+  --school-secondary-rgb: 249, 115, 22;
+  --school-secondary-dark: #c05621;
+
+  /* Green for clinical / experience / internships */
+  --success: #16a34a; /* green-600 */
+
+  /* Purple for exams / certifications */
+  --info: #7c3aed; /* purple-600 */
+}
+
 /* Animated gradient for Vocation title */
 @keyframes gradient-flow {
   0% {
@@ -69,7 +87,8 @@
 /* Use Inter as the default font */
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #ffffff;
+  /* Soft app background to match Canvas-style cards */
+  background-color: #f7fafc; /* tailwind gray-50 */
   min-height: 100vh;
 }
 
@@ -123,7 +142,8 @@ body {
   flex-direction: column;
   border: 1px solid #e5e7eb; /* gray-200 */
   border-radius: 0.75rem; /* lg */
-  background-color: white;
+  /* Soft top-to-bottom background like the reference cards */
+  background: linear-gradient(180deg, #f9fafb 0%, #ffffff 55%);
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
   overflow: hidden; /* For rounded corners on border-top */
   animation: slideInUp 0.6s ease-out forwards;
@@ -235,7 +255,8 @@ body {
 /* Step-specific colors - School Themed */
 .flowchart-step-degree .flowchart-step-header {
   border-color: var(--school-primary);
-  background: linear-gradient(135deg, rgba(var(--school-primary-rgb, 0, 51, 102), 0.05) 0%, white 100%);
+  /* Solid light blue background (no gradient) */
+  background-color: rgba(var(--school-primary-rgb, 0, 51, 102), 0.10);
 }
 
 .flowchart-step-degree .flowchart-step-header-icon {
@@ -250,12 +271,13 @@ body {
 
 .flowchart-step-transfer .flowchart-step-header {
   border-color: var(--school-secondary);
-  background: linear-gradient(135deg, rgba(var(--school-secondary-rgb, 255, 184, 28), 0.05) 0%, white 100%);
+  /* Solid orange background (no gradient) */
+  background-color: rgba(var(--school-secondary-rgb, 249, 115, 22), 0.10);
 }
 
 .flowchart-step-transfer .flowchart-step-header-icon {
   background-color: var(--school-secondary);
-  color: var(--school-primary);
+  color: white;
 }
 
 .flowchart-step-transfer .flowchart-step-header span {
@@ -265,7 +287,8 @@ body {
 
 .flowchart-step-internship .flowchart-step-header {
   border-color: var(--success);
-  background: linear-gradient(135deg, rgba(72, 187, 120, 0.05) 0%, white 100%);
+  /* Solid green background (no gradient) */
+  background-color: rgba(22, 163, 74, 0.10);
 }
 
 .flowchart-step-internship .flowchart-step-header-icon {
@@ -280,7 +303,8 @@ body {
 
 .flowchart-step-exam .flowchart-step-header {
   border-color: var(--info);
-  background: linear-gradient(135deg, rgba(66, 153, 225, 0.05) 0%, white 100%);
+  /* Solid purple background (no gradient) */
+  background-color: rgba(124, 58, 237, 0.10);
 }
 
 .flowchart-step-exam .flowchart-step-header-icon {

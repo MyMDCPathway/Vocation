@@ -1555,7 +1555,13 @@ export default function PathwayPage() {
   const [transferRecommendationsPopup, setTransferRecommendationsPopup] =
     useState<boolean>(false);
   const [selectedPathwayIndex, setSelectedPathwayIndex] = useState<number>(0);
+  const [showEmptyError, setShowEmptyError] = useState(false);
+  const [wordCount, setWordCount] = useState(0);
+  const [charCount, setCharCount] = useState(0);
+  const [canType, setCanType] = useState(false);
+  const [isInputFocused, setIsInputFocused] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     setShowClearBtn(careerInput.length > 0);
@@ -1577,6 +1583,7 @@ export default function PathwayPage() {
   useEffect(() => {
     const fullText = " Generate a pathway for your career:";
     setDisplayedText("");
+    setCanType(false); // block typing until animation finishes
     
     // Start typing after wave animation (1 second)
     const timeout = setTimeout(() => {
@@ -1587,6 +1594,11 @@ export default function PathwayPage() {
           currentIndex++;
         } else {
           clearInterval(typingInterval);
+          // allow typing shortly after text finishes
+          setTimeout(() => {
+            setCanType(true);
+            inputRef.current?.focus();
+          }, 200);
         }
       }, 50); // Speed of typing (50ms per letter)
 
@@ -1915,10 +1927,14 @@ export default function PathwayPage() {
       {/* Search Section / Loading / Flowchart Display Area */}
       <section className="px-6 md:px-8 pt-24 md:pt-32 pb-24 md:pb-32">
         {!pathwayData && (
-          <div className="max-w-2xl mx-auto">
+          <div
+            className={`max-w-2xl mx-auto min-h-[260px] transition-transform duration-[3000ms] ease-out ${
+              loading ? "-translate-y-16" : "translate-y-0"
+            }`}
+          >
             {/* Instruction Text - Fades out when loading */}
             {!loading && (
-              <p className={`text-gray-700 mb-6 text-left text-xl md:text-3xl ${isFadingOut ? 'fade-out' : ''}`}>
+              <p className={`text-gray-700 mb-1 text-left text-xl md:text-3xl ${isFadingOut ? 'fade-out' : ''}`}>
                 <span className="wave-emoji">👋</span>
                 <span>{displayedText}</span>
                 {displayedText.length > 0 && displayedText.length < " Generate a pathway for your career:".length && (
@@ -1928,22 +1944,64 @@ export default function PathwayPage() {
             )}
 
             {/* Search Bar - Always visible when no pathway */}
-            <div className="mb-6 relative fade-in-delay-2">
+            <div className="mb-1 relative fade-in-delay-2">
               <div className="input-container w-full relative">
                 <input
+                ref={inputRef}
                   type="text"
                   id="custom-career-input"
                   value={careerInput}
-                  onChange={(e) => setCareerInput(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  onFocus={() => setShowSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                onChange={(e) => {
+                  if (!canType) return; // ignore typing until intro finishes
+                  let value = e.target.value;
+
+                  // Enforce character limit (max 50)
+                  if (value.length > 50) {
+                    value = value.slice(0, 50);
+                  }
+
+                  // Enforce word limit (max 5 words)
+                  let words = value.trim().split(/\s+/).filter(Boolean);
+                  if (words.length > 5) {
+                    words = words.slice(0, 5);
+                    value = words.join(" ");
+                  }
+
+                  // Track counts
+                  setWordCount(words.length);
+                  setCharCount(value.length);
+
+                  // If user had typed and then clears everything, show error
+                  if (careerInput.length > 0 && value.trim().length === 0) {
+                    setShowEmptyError(true);
+                  } else if (value.trim().length > 0) {
+                    setShowEmptyError(false);
+                  }
+
+                  setCareerInput(value);
+                }}
+                onKeyDown={(e) => {
+                  if (!canType) {
+                    e.preventDefault();
+                    return;
+                  }
+                  handleKeyDown(e);
+                }}
+                onFocus={() => {
+                  if (canType) {
+                    setShowSuggestions(true);
+                    setIsInputFocused(true);
+                  }
+                }}
+                onBlur={() => {
+                  setTimeout(() => setShowSuggestions(false), 200);
+                  setIsInputFocused(false);
+                }}
                   placeholder={careerInput.length === 0 ? SUGGESTIONS[currentSuggestionIndex] : "project manager"}
                   className={`w-full py-2 min-h-[60px] bg-transparent border-none outline-none focus:outline-none text-[20px] md:text-[55px] leading-[1.1] text-gray-900 placeholder:text-gray-300 placeholder-transition ${
                     placeholderOpacity === 0 ? 'placeholder-opacity-0' : 'placeholder-opacity-50'
                   }`}
-                  autoFocus
-                  disabled={loading}
+                disabled={!canType || loading}
                 />
                 {!loading && showClearBtn && (
                   <span
@@ -1956,6 +2014,29 @@ export default function PathwayPage() {
                   </span>
                 )}
               </div>
+            </div>
+            {/* Validation / helper text area - keeps spacing even when empty */}
+            {/* Both messages occupy the exact same spot; opacity handles cross-fade */}
+            <div className="relative min-h-[1.5rem] mt-0 mb-3 text-sm">
+              {/* Error text (red) */}
+              <span
+                className={`absolute left-0 font-semibold text-red-400 transition-opacity duration-300 ${
+                  showEmptyError && !loading ? "opacity-100" : "opacity-0"
+                }`}
+              >
+                Please fill out this field.
+              </span>
+
+              {/* Helper text (gray counter) */}
+              <span
+                className={`absolute left-0 text-gray-200 transition-opacity duration-300 ${
+                  !showEmptyError && charCount > 0 && isInputFocused && !loading
+                    ? "opacity-100"
+                    : "opacity-0"
+                }`}
+              >
+                {wordCount}/5 words or {charCount}/50 characters
+              </span>
             </div>
 
             {/* Next Button - Fades out when loading */}
