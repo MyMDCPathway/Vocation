@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 // SVG Icons
 const icons = {
@@ -1530,6 +1531,7 @@ const SUGGESTIONS = [
 ];
 
 export default function PathwayPage() {
+  const searchParams = useSearchParams();
   const [careerInput, setCareerInput] = useState("");
   const [showClearBtn, setShowClearBtn] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -1569,6 +1571,7 @@ export default function PathwayPage() {
   }>>([]);
   const [showCareerOptions, setShowCareerOptions] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [autoGenerating, setAutoGenerating] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -1647,6 +1650,7 @@ export default function PathwayPage() {
       document.body.classList.remove("modal-open");
     };
   }, [modalOpen]);
+
 
   const showLoading = (message: string) => {
     setLoadingMessage(message || "Loading...");
@@ -1804,11 +1808,14 @@ export default function PathwayPage() {
       return;
     }
 
-    // If we have suggestions showing, hide them
+    // If we have suggestions showing, hide them immediately
     setShowCareerOptions(false);
     setCareerSuggestions([]);
-
-    showLoading("Generating pathway");
+    
+    // Immediately hide search bar and show loading to prevent flash
+    setIsFadingOut(true);
+    setLoading(true);
+    setLoadingMessage("Generating pathway");
 
     try {
       const generatedData = await callAPI(career);
@@ -1847,6 +1854,7 @@ export default function PathwayPage() {
       setAddCareerInput("");
       setCertificationPopup(null); // Close popup when new pathway is generated
       setTransferRecommendationsPopup(false); // Close transfer popup when new pathway is generated
+      setAutoGenerating(false); // Reset auto-generating flag
     } catch (error: any) {
       if (error.name !== "AbortError") {
         console.error("Error generating custom pathway:", error);
@@ -1855,10 +1863,32 @@ export default function PathwayPage() {
           `<p class="text-red-600">Sorry, I couldn't generate a pathway for that career. Please try a different prompt.<br><br><small>Error: ${error.message}</small></p>`
         );
       }
+      setAutoGenerating(false); // Reset auto-generating flag on error
     } finally {
       hideLoading();
     }
   };
+
+  // Handle career parameter from URL (e.g., from career discovery page)
+  useEffect(() => {
+    const careerParam = searchParams.get("career");
+    if (careerParam && !autoGenerating && !pathwayData) {
+      const decodedCareer = decodeURIComponent(careerParam);
+      setCareerInput(decodedCareer);
+      // Update word and character counts
+      const words = decodedCareer.trim().split(/\s+/).filter(Boolean);
+      setWordCount(words.length);
+      setCharCount(decodedCareer.length);
+      
+      // Automatically generate pathway without showing search bar
+      setAutoGenerating(true);
+      setIsFadingOut(true);
+      // Wait for fade-out, then start generating
+      setTimeout(() => {
+        handleGeneratePathway(decodedCareer);
+      }, 300);
+    }
+  }, [searchParams, autoGenerating, pathwayData]);
 
   const handleCancelLoad = () => {
     if (abortControllerRef.current) {
@@ -2196,8 +2226,8 @@ export default function PathwayPage() {
           </div>
         )}
 
-        {/* Search Section - Only show when NOT showing career options, NOT loading suggestions, and NOT generating pathway */}
-        {!pathwayData && !showCareerOptions && !loadingSuggestions && !loading && (
+        {/* Search Section - Only show when NOT showing career options, NOT loading suggestions, NOT generating pathway, and NOT auto-generating from URL */}
+        {!pathwayData && !showCareerOptions && !loadingSuggestions && !loading && !autoGenerating && (
           <div className="max-w-2xl mx-auto min-h-[260px]">
             {/* Instruction Text - Fades out when loading */}
             {!loading && (
@@ -2340,7 +2370,7 @@ export default function PathwayPage() {
         
         {/* Flowchart Display - Shows when pathway data exists and no career options are showing */}
         {pathwayData && !loading && !showCareerOptions && (
-          <div id="pathway-display" className={`max-w-4xl mx-auto fade-in-flowchart`}>
+          <div id="pathway-display" className={`w-full fade-in-flowchart`}>
             {/* Main Pathway */}
             {pathwayData && pathwayData.pathways && pathwayData.pathways.length > 0 && (
               <>
