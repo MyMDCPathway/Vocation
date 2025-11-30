@@ -1530,6 +1530,64 @@ const SUGGESTIONS = [
   "program manager"
 ];
 
+// Calculate estimated cost for a pathway step
+const calculateStepCost = (step: PathwayStep): number => {
+  // MDC Associate programs (A.A. or A.S.)
+  if (step.type === "degree" && step.level.includes("MDC")) {
+    if (step.name.toLowerCase().includes("associate")) {
+      // MDC Associate degree: ~$6,000 - $8,000 for 60 credits
+      // MDC in-state tuition: ~$100-120 per credit hour
+      return 7200; // 60 credits × $120
+    }
+    if (step.name.toLowerCase().includes("certificate")) {
+      // MDC Certificate: ~$2,000 - $4,000 (typically 15-30 credits)
+      return 3000;
+    }
+    if (step.name.toLowerCase().includes("bachelor")) {
+      // MDC Bachelor's: ~$12,000 - $15,000 for remaining 60 credits after A.A./A.S.
+      return 13500; // 60 credits × $120 + fees
+    }
+  }
+  
+  // Transfer to 4-year university
+  if (step.type === "transfer") {
+    // No direct cost for transfer step itself, but prepare for university costs
+    return 0;
+  }
+  
+  // Bachelor's degree at 4-year university (after transfer)
+  if (step.type === "degree" && (step.name.toLowerCase().includes("b.s") || 
+      step.name.toLowerCase().includes("b.a") || 
+      step.name.toLowerCase().includes("bachelor"))) {
+    // If not MDC, estimate 4-year university cost
+    if (!step.level.includes("MDC")) {
+      // Average public university in Florida: ~$6,000-7,000 per year for in-state
+      // For 2 years after transfer: ~$12,000-14,000
+      return 13000; // 2 years × $6,500
+    }
+  }
+  
+  // Licensure exams
+  if (step.type === "exam") {
+    // Exam fees typically $100 - $500, some are more expensive
+    const examName = step.name.toLowerCase();
+    if (examName.includes("nclex")) return 200; // NCLEX-RN/PN
+    if (examName.includes("pe exam") || examName.includes("principles and practice")) return 375; // PE exam
+    if (examName.includes("fe exam") || examName.includes("fundamentals")) return 175; // FE exam
+    if (examName.includes("are") || examName.includes("architect registration")) return 1200; // A.R.E. has multiple divisions (5-6 exams × $200)
+    if (examName.includes("bar exam")) return 1000; // Bar exam
+    if (examName.includes("cpa")) return 800; // CPA exam (4 parts)
+    return 300; // Default exam fee
+  }
+  
+  // Internships (usually unpaid or minimal cost)
+  if (step.type === "internship") {
+    return 0; // Typically no cost, might have opportunity cost but not direct tuition
+  }
+  
+  return 0;
+};
+
 export default function PathwayPage() {
   const searchParams = useSearchParams();
   const [careerInput, setCareerInput] = useState("");
@@ -1572,6 +1630,7 @@ export default function PathwayPage() {
   const [showCareerOptions, setShowCareerOptions] = useState(false);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [autoGenerating, setAutoGenerating] = useState(false);
+  const [showCostBreakdown, setShowCostBreakdown] = useState(false);
   const abortControllerRef = useRef<AbortController | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -1924,12 +1983,9 @@ export default function PathwayPage() {
   };
 
   const handleClearPathway = () => {
-    setPathwayData(null);
-    // Don't clear comparison pathways - only clear the main pathway
-    setShowAddCareerInput(false);
-    setAddCareerInput("");
-    setCertificationPopup(null); // Close popup when pathway is cleared
-    setTransferRecommendationsPopup(false); // Close transfer popup when pathway is cleared
+    // Navigate to /pathway to reset everything, same as the Start button on home page
+    // This ensures a fresh page load with the typewriter effect and no previous input
+    window.location.href = '/pathway';
   };
 
   const handleRemoveFromComparison = (index: number) => {
@@ -2413,6 +2469,70 @@ export default function PathwayPage() {
               </div>
             )}
 
+            {/* Total Cost Summary */}
+            {pathwayData && pathwayData.pathways[selectedPathwayIndex] && (
+              <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900">Total Pathway Cost</h3>
+                    <p className="text-sm text-gray-600">Estimated total for this pathway</p>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p className="text-3xl font-bold text-green-600">
+                        ${pathwayData.pathways[selectedPathwayIndex].steps
+                          .reduce((total, step) => total + calculateStepCost(step), 0)
+                          .toLocaleString()}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1">*Estimates only</p>
+                    </div>
+                    <button
+                      onClick={() => setShowCostBreakdown(!showCostBreakdown)}
+                      className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 hover:bg-green-200 rounded-md transition-colors"
+                    >
+                      {showCostBreakdown ? (
+                        <>
+                          <i className="fas fa-chevron-up mr-1"></i>
+                          Hide Breakdown
+                        </>
+                      ) : (
+                        <>
+                          <i className="fas fa-chevron-down mr-1"></i>
+                          Show Breakdown
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
+                
+                {/* Cost Breakdown */}
+                {showCostBreakdown && (
+                  <div className="mt-4 pt-4 border-t border-green-200">
+                    <div className="space-y-2">
+                      {pathwayData.pathways[selectedPathwayIndex].steps.map((step, idx) => {
+                        const stepCost = calculateStepCost(step);
+                        if (stepCost === 0) return null;
+                        return (
+                          <div key={idx} className="flex justify-between items-center text-sm py-1">
+                            <span className="text-gray-700">{step.name}</span>
+                            <span className="font-semibold text-gray-900">${stepCost.toLocaleString()}</span>
+                          </div>
+                        );
+                      })}
+                      <div className="flex justify-between items-center pt-2 mt-2 border-t border-green-200 font-semibold">
+                        <span className="text-gray-900">Total</span>
+                        <span className="text-green-600">
+                          ${pathwayData.pathways[selectedPathwayIndex].steps
+                            .reduce((total, step) => total + calculateStepCost(step), 0)
+                            .toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Selected Pathway Display */}
             <div className="flowchart-container">
               {pathwayData.pathways[selectedPathwayIndex].steps.map(
@@ -2437,6 +2557,22 @@ export default function PathwayPage() {
                             {step.name}
                           </h3>
                           <p className="text-gray-600 mt-2">{step.description}</p>
+                          
+                          {/* Cost Display */}
+                          {calculateStepCost(step) > 0 && (
+                            <div className="mt-3 pt-3 border-t border-gray-200">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium text-gray-700 flex items-center">
+                                  <i className="fas fa-dollar-sign text-green-600 mr-1"></i>
+                                  Estimated Cost:
+                                </span>
+                                <span className="text-lg font-bold text-green-600">
+                                  ${calculateStepCost(step).toLocaleString()}
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                          
                           {step.type === "transfer" && (
                             <div className="mt-4 space-y-2">
                               <button
@@ -2584,6 +2720,26 @@ export default function PathwayPage() {
                   </div>
                 )}
 
+                {/* Total Cost Summary for Comparison Pathway */}
+                {careerPathway.data.pathways[careerPathway.selectedPathwayIndex] && (
+                  <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">Total Pathway Cost</h3>
+                        <p className="text-sm text-gray-600">Estimated total for this pathway</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-3xl font-bold text-green-600">
+                          ${careerPathway.data.pathways[careerPathway.selectedPathwayIndex].steps
+                            .reduce((total, step) => total + calculateStepCost(step), 0)
+                            .toLocaleString()}
+                        </p>
+                        <p className="text-xs text-gray-500 mt-1">*Estimates only</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Pathway Flowchart */}
                 <div className="flowchart-container">
                   {careerPathway.data.pathways[careerPathway.selectedPathwayIndex].steps.map(
@@ -2608,6 +2764,22 @@ export default function PathwayPage() {
                                 {step.name}
                               </h3>
                               <p className="text-gray-600 mt-2">{step.description}</p>
+                              
+                              {/* Cost Display */}
+                              {calculateStepCost(step) > 0 && (
+                                <div className="mt-3 pt-3 border-t border-gray-200">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium text-gray-700 flex items-center">
+                                      <i className="fas fa-dollar-sign text-green-600 mr-1"></i>
+                                      Estimated Cost:
+                                    </span>
+                                    <span className="text-lg font-bold text-green-600">
+                                      ${calculateStepCost(step).toLocaleString()}
+                                    </span>
+                                  </div>
+                                </div>
+                              )}
+                              
                               {step.type === "transfer" && (
                                 <div className="mt-4 space-y-2">
                                   <button
