@@ -1,6 +1,6 @@
-# 🧭 MyMDC Pathway
+# 🧭 Vocation
 
-**MyMDC Pathway** is an AI-driven educational planner designed to help Miami Dade College students clearly understand their complete academic and professional journey — from their first MDC program to their dream career.
+**Vocation** is an AI-driven educational planner designed to help Miami Dade College students clearly understand their complete academic and professional journey — from their first MDC program to their dream career.
 
 ---
 
@@ -49,7 +49,7 @@ Highlights crucial milestones including **certification exams**, **licenses**, a
 
 ## 🛠️ How We Built It
 
-We designed and built **MyMDC Pathway** using:
+We designed and built **Vocation** using:
 
 - 🖥️ **Next.js (Node.js, React, Tailwind)** – for the web application  
 - 🤖 **Google Gemini API & Canvas** – for AI-driven pathway generation and visualization  
