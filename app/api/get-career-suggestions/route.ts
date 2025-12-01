@@ -6,9 +6,11 @@ const genModel = "gemini-2.5-flash-preview-09-2025";
 
 export async function POST(request: NextRequest) {
   if (!apiKey) {
+    console.error("GEMINI_API_KEY not configured");
+    // Return empty suggestions instead of error to prevent UI breaking
     return NextResponse.json(
-      { error: "API key not configured" },
-      { status: 500 }
+      { suggestions: [], error: "API key not configured" },
+      { status: 200 }
     );
   }
 
@@ -16,11 +18,13 @@ export async function POST(request: NextRequest) {
     const { input } = await request.json();
 
     if (!input || typeof input !== "string" || input.trim() === "") {
+      // Return empty suggestions instead of error to prevent UI breaking
       return NextResponse.json(
         {
+          suggestions: [],
           error: "Input parameter is required and must be a non-empty string.",
         },
-        { status: 400 }
+        { status: 200 }
       );
     }
 
@@ -85,9 +89,10 @@ Return the JSON array (never empty unless input is completely nonsensical):`;
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Gemini API error:", errorText);
+      // Return empty suggestions instead of error to prevent UI breaking
       return NextResponse.json(
-        { error: `Gemini API error: ${response.statusText}` },
-        { status: response.status }
+        { suggestions: [], error: `Gemini API error: ${response.statusText}` },
+        { status: 200 }
       );
     }
 
@@ -96,9 +101,11 @@ Return the JSON array (never empty unless input is completely nonsensical):`;
       data.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
     if (!generatedText) {
+      console.warn("No response from Gemini API");
+      // Return empty suggestions instead of error
       return NextResponse.json(
-        { error: "No response from Gemini API" },
-        { status: 500 }
+        { suggestions: [], error: "No response from Gemini API" },
+        { status: 200 }
       );
     }
 
@@ -302,12 +309,19 @@ Return the JSON array (never empty unless input is completely nonsensical):`;
       console.error("No suggestions parsed! Full response:", generatedText);
     }
 
+    // If we have no suggestions after all parsing attempts, return empty array instead of error
+    if (suggestions.length === 0) {
+      console.warn("No suggestions parsed, returning empty array");
+      return NextResponse.json({ suggestions: [] });
+    }
+
     return NextResponse.json({ suggestions });
   } catch (error: any) {
     console.error("Error getting career suggestions:", error);
+    // Return empty array instead of error to prevent UI breaking
     return NextResponse.json(
-      { error: error.message || "Failed to get career suggestions" },
-      { status: 500 }
+      { suggestions: [], error: error.message || "Failed to get career suggestions" },
+      { status: 200 } // Return 200 with empty array instead of 500
     );
   }
 }

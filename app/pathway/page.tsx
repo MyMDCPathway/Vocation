@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import FinancialTracker from "../components/FinancialTracker";
 
 // SVG Icons
 const icons = {
@@ -1788,11 +1789,15 @@ export default function PathwayPage() {
         body: JSON.stringify({ input }),
       });
 
-      if (!response.ok) {
-        throw new Error("Failed to get career suggestions");
-      }
-
       const data = await response.json();
+      
+      // Handle errors gracefully - check for error in response but don't throw
+      if (data.error) {
+        console.warn("Career suggestions API error:", data.error);
+        setLoadingSuggestions(false);
+        return []; // Return empty array instead of breaking
+      }
+      
       const suggestions = data.suggestions || [];
       setLoadingSuggestions(false);
       
@@ -2531,6 +2536,16 @@ export default function PathwayPage() {
                   </div>
                 )}
               </div>
+            )}
+
+            {/* Financial Tracker Component */}
+            {pathwayData && pathwayData.pathways[selectedPathwayIndex] && (
+              <FinancialTracker
+                pathwaySteps={pathwayData.pathways[selectedPathwayIndex].steps}
+                careerName={pathwayData.title.replace(/^(Educational\s+)?Pathway\s+to\s+becoming\s+(a\s+|an\s+)?/i, '')}
+                totalCost={pathwayData.pathways[selectedPathwayIndex].steps
+                  .reduce((total, step) => total + calculateStepCost(step), 0)}
+              />
             )}
 
             {/* Selected Pathway Display */}

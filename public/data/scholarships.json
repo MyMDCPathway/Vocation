@@ -1,0 +1,151 @@
+[
+  {
+    "id": "mdc-foundation",
+    "name": "MDC Foundation Scholarship",
+    "amount": {
+      "min": 1000,
+      "max": 5000,
+      "type": "annual"
+    },
+    "eligibility": {
+      "gpa": 3.0,
+      "financialNeed": true,
+      "enrollment": "full-time",
+      "residency": "any"
+    },
+    "deadline": "2025-03-01",
+    "url": "https://www.mdc.edu/foundation/scholarships/",
+    "description": "Merit and need-based scholarships for MDC students",
+    "categories": ["general", "mdc"]
+  },
+  {
+    "id": "bright-futures",
+    "name": "Florida Bright Futures Scholarship",
+    "amount": {
+      "min": 0,
+      "max": 100,
+      "type": "percentage",
+      "coverage": "tuition"
+    },
+    "eligibility": {
+      "gpa": 3.5,
+      "serviceHours": 100,
+      "residency": "florida",
+      "sat": 1330,
+      "act": 29
+    },
+    "deadline": "2025-08-31",
+    "url": "https://www.floridastudentfinancialaid.org/SSFAD/bf/",
+    "description": "Covers up to 100% of tuition at Florida public colleges",
+    "categories": ["state", "florida", "merit"]
+  },
+  {
+    "id": "nspe-engineering",
+    "name": "NSPE Engineering Scholarship",
+    "amount": {
+      "min": 2500,
+      "max": 2500,
+      "type": "one-time"
+    },
+    "eligibility": {
+      "major": ["engineering", "mechanical", "civil", "electrical", "computer"],
+      "gpa": 3.2,
+      "enrollment": "any"
+    },
+    "deadline": "2025-05-15",
+    "url": "https://www.nspe.org/resources/students/scholarships",
+    "description": "For students pursuing engineering degrees",
+    "categories": ["engineering", "professional"]
+  },
+  {
+    "id": "fiu-transfer",
+    "name": "FIU Transfer Scholarship",
+    "amount": {
+      "min": 4000,
+      "max": 4000,
+      "type": "annual"
+    },
+    "eligibility": {
+      "transferFrom": "mdc",
+      "gpa": 3.0,
+      "enrollment": "full-time"
+    },
+    "deadline": "2025-03-01",
+    "url": "https://admissions.fiu.edu/how-to-apply/transfer/",
+    "description": "Scholarship for students transferring from MDC to FIU",
+    "categories": ["transfer", "fiu"]
+  },
+  {
+    "id": "uf-transfer",
+    "name": "UF Transfer Excellence Scholarship",
+    "amount": {
+      "min": 3000,
+      "max": 5000,
+      "type": "annual"
+    },
+    "eligibility": {
+      "transferFrom": "mdc",
+      "gpa": 3.5,
+      "enrollment": "full-time"
+    },
+    "deadline": "2025-02-15",
+    "url": "https://www.admissions.ufl.edu/apply/transfer/",
+    "description": "Merit-based scholarship for high-achieving transfer students",
+    "categories": ["transfer", "uf"]
+  },
+  {
+    "id": "nursing-scholarship",
+    "name": "Nursing Education Scholarship",
+    "amount": {
+      "min": 2000,
+      "max": 4000,
+      "type": "annual"
+    },
+    "eligibility": {
+      "major": ["nursing", "registered nurse", "bsn"],
+      "gpa": 3.0,
+      "enrollment": "full-time"
+    },
+    "deadline": "2025-04-01",
+    "url": "https://www.floridanurse.org/scholarships",
+    "description": "For students pursuing nursing degrees",
+    "categories": ["nursing", "healthcare"]
+  },
+  {
+    "id": "architecture-scholarship",
+    "name": "AIA Architecture Scholarship",
+    "amount": {
+      "min": 3000,
+      "max": 5000,
+      "type": "annual"
+    },
+    "eligibility": {
+      "major": ["architecture", "architectural"],
+      "gpa": 3.0,
+      "enrollment": "any"
+    },
+    "deadline": "2025-05-01",
+    "url": "https://www.aia.org/resources/education/scholarships",
+    "description": "For students pursuing architecture degrees",
+    "categories": ["architecture", "professional"]
+  },
+  {
+    "id": "computer-science",
+    "name": "STEM Excellence Scholarship",
+    "amount": {
+      "min": 1500,
+      "max": 3000,
+      "type": "annual"
+    },
+    "eligibility": {
+      "major": ["computer science", "software", "cybersecurity", "information technology"],
+      "gpa": 3.2,
+      "enrollment": "full-time"
+    },
+    "deadline": "2025-04-15",
+    "url": "https://www.floridastudentfinancialaid.org/",
+    "description": "For students in computer science and IT fields",
+    "categories": ["stem", "technology"]
+  }
+]
+

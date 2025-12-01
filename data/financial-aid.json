@@ -1,0 +1,90 @@
+{
+  "federalAid": {
+    "pellGrant": {
+      "maxAmount": 7395,
+      "minAmount": 0,
+      "type": "grant",
+      "repayment": false,
+      "eligibility": {
+        "efcThreshold": 6000,
+        "enrollment": "any"
+      },
+      "description": "Need-based federal grant that doesn't need to be repaid"
+    },
+    "workStudy": {
+      "maxAmount": 3000,
+      "minAmount": 1000,
+      "type": "work-study",
+      "repayment": false,
+      "eligibility": {
+        "financialNeed": true,
+        "enrollment": "part-time"
+      },
+      "description": "Part-time work on campus to earn money for education"
+    },
+    "subsidizedLoans": {
+      "maxAmount": 5500,
+      "minAmount": 3500,
+      "type": "loan",
+      "repayment": true,
+      "interestRate": 5.5,
+      "eligibility": {
+        "financialNeed": true,
+        "year": "undergraduate"
+      },
+      "description": "Federal loan with interest paid by government while in school"
+    },
+    "unsubsidizedLoans": {
+      "maxAmount": 20000,
+      "minAmount": 5500,
+      "type": "loan",
+      "repayment": true,
+      "interestRate": 5.5,
+      "eligibility": {
+        "financialNeed": false,
+        "year": "any"
+      },
+      "description": "Federal loan available regardless of financial need"
+    }
+  },
+  "stateAid": {
+    "floridaStudentGrant": {
+      "maxAmount": 2000,
+      "minAmount": 2000,
+      "type": "grant",
+      "repayment": false,
+      "eligibility": {
+        "residency": "florida",
+        "financialNeed": true,
+        "enrollment": "full-time"
+      },
+      "description": "State need-based grant for Florida residents"
+    },
+    "brightFutures": {
+      "coverage": "percentage",
+      "maxPercentage": 100,
+      "type": "scholarship",
+      "repayment": false,
+      "eligibility": {
+        "gpa": 3.5,
+        "serviceHours": 100,
+        "residency": "florida"
+      },
+      "description": "Covers up to 100% of tuition at Florida public colleges"
+    }
+  },
+  "calculation": {
+    "efcRanges": [
+      { "max": 0, "pellGrant": 7395 },
+      { "max": 1000, "pellGrant": 7000 },
+      { "max": 2000, "pellGrant": 6000 },
+      { "max": 3000, "pellGrant": 5000 },
+      { "max": 4000, "pellGrant": 4000 },
+      { "max": 5000, "pellGrant": 3000 },
+      { "max": 6000, "pellGrant": 2000 },
+      { "max": 7000, "pellGrant": 1000 },
+      { "max": 10000, "pellGrant": 0 }
+    ]
+  }
+}
+
