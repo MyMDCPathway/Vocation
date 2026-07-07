@@ -4,6 +4,10 @@ Vocation is an AI-powered planning tool that helps Miami Dade College students s
 
 Picking a major is hard when you can't see where it leads. Most students never get a clear, end-to-end picture of how programs, transfers, licensing exams, and advanced degrees actually fit together. Vocation fills that gap: you type in a career, and it lays out a complete, step-by-step path, with the real MDC programs, transfer options, internships, and certification exams you'll need along the way.
 
+![Vocation home page](Images/Vocation%20Main.png)
+
+![Vocation demo](Images/VocationPresentation-ezgif.com-optimize.gif)
+
 ## What it does
 
 - **Career-to-pathway planning.** Enter a career like "Architect" or "Mechanical Engineer" and get a full academic pathway generated for you, starting with the most relevant MDC program.
