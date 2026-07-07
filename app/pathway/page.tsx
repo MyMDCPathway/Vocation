@@ -728,6 +728,37 @@ function PathwayPageContent() {
           </div>
         )}
 
+        {/* Overlay shown while generating an additional career to compare — the
+            existing pathway is still mounted, so without this the screen would
+            appear blank during the wait. */}
+        {loading && pathwayData && (
+          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/85 backdrop-blur-sm">
+            <svg
+              className="w-10 h-10 animate-spin-slow"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <linearGradient id="gemini-gradient-overlay" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#10b981" />
+                  <stop offset="100%" stopColor="#06b6d4" />
+                </linearGradient>
+              </defs>
+              <path
+                d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
+                fill="url(#gemini-gradient-overlay)"
+              />
+            </svg>
+            <span className="text-green-600 font-medium text-xl mt-4">
+              Please wait — generating pathway
+            </span>
+            <span className="text-gray-500 text-sm mt-1">
+              This can take a few seconds.
+            </span>
+          </div>
+        )}
+
         {/* Search Section - Only show when NOT showing career options, NOT loading suggestions, NOT generating pathway, and NOT auto-generating from URL */}
         {!pathwayData && !showCareerOptions && !loadingSuggestions && !loading && !autoGenerating && (
           <div className="max-w-2xl mx-auto min-h-[260px]">

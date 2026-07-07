@@ -1,61 +1,27 @@
-# 🧭 Vocation
+# Vocation
 
-**Vocation** is an AI-driven educational planner designed to help Miami Dade College students clearly understand their complete academic and professional journey — from their first MDC program to their dream career.
+Vocation is an AI-powered planning tool that helps Miami Dade College students see the whole road ahead — from the MDC program they start with all the way to the career they're aiming for.
 
----
+Picking a major is hard when you can't see where it leads. Most students never get a clear, end-to-end picture of how programs, transfers, licensing exams, and advanced degrees actually fit together. Vocation fills that gap: you type in a career, and it lays out a complete, step-by-step path, with the real MDC programs, transfer options, internships, and certification exams you'll need along the way.
 
-## 🌟 Inspiration
+## What it does
 
-When students evaluate career choices, they often feel lost trying to understand the full academic and professional journey required to reach them.  
+- **Career-to-pathway planning.** Enter a career like "Architect" or "Mechanical Engineer" and get a full academic pathway generated for you, starting with the most relevant MDC program.
+- **Transfer planning.** See recommended bachelor's and graduate options, partner universities, and articulation details, with links to dig deeper.
+- **Licensing and certifications.** Pathways call out the exams and credentials a career actually requires (FE and PE for engineers, NCLEX for nurses, the A.R.E. for architects, and so on), with links to the official sources.
+- **Cost estimates.** Each pathway shows a rough tuition-and-fees range, priced per university so a public school and a private one don't look the same. These are estimates only — the app says so, and points you to financial aid resources.
+- **Career comparison.** Generate several pathways side by side to weigh different careers against each other.
+- **"What fits me" quiz.** Answer a short set of questions and get career suggestions matched to your responses.
 
-We wanted to create something meaningful that brings **clarity to every step**. This led us to build **Vocation**, an AI-powered platform that lays out complete educational pathways — starting with the right MDC program and including **transfer plans, articulation agreements, internships, and required exams or certifications**.  
-
-By providing clear options and personalized routes, we help students turn **long-term ambitions into organized, guided plans**.
-
----
-
-## 💡 Problem Statement
-
-Many students struggle to understand the full academic and professional pathway needed to reach their desired careers. Most people lack exposure to a clear, systematic approach to career planning — one that shows how **programs, transfer routes, certification exams, and advanced study options** fit together.  
-
-Without this clarity, students often feel unsure about their next steps, leading to confusion, delays, and incomplete decision-making.
-
----
-
-## 🚀 Elevator Pitch
-
-> **Vocation** is a personalized, AI-powered educational planner that helps students map their complete journey from **Miami Dade College** to their **dream career** — integrating degrees, certifications, transfers, and professional milestones into one clear and interactive roadmap.
-
----
-
-## 🧩 Solution
-
-Vocation addresses the problem through four key features:
-
-### 1️⃣ Career-to-Educational Pathway  
-Students input a desired career such as **Architect** or **Mechanical Engineer**, and the system instantly generates a complete academic pathway.
-
-### 2️⃣ Integrated Transfer Planning  
-Displays recommended **bachelor's and graduate programs**, articulation agreements, partner universities, and links for in-depth transfer information.
-
-### 3️⃣ Professional Requirements  
-Highlights crucial milestones including **certification exams**, **licenses**, and **internships** (e.g., FE and PE exams for engineers) with direct links for more details.
-
-### 4️⃣ Beneficiaries  
-- **Primary:** MDC students seeking clarity on their academic and career pathways  
-- **Secondary:** Academic advisors supporting students in planning their journeys  
-
----
-
-## 🏁 Getting Started
-
-Run **Vocation** locally in four steps.
+## Getting started
 
 ### Prerequisites
-- **Node.js 18.17+** (required by Next.js 14)
-- A free **Google Gemini API key** — grab one at [Google AI Studio](https://aistudio.google.com/app/apikey)
+
+- Node.js 18.17 or newer (Next.js 14 requires it)
+- A Google Gemini API key — you can get one for free at [Google AI Studio](https://aistudio.google.com/app/apikey)
 
 ### 1. Clone and install
+
 ```bash
 git clone https://github.com/<your-username>/Vocation.git
 cd Vocation
@@ -63,86 +29,57 @@ npm install
 ```
 
 ### 2. Add your API key
-Copy the example env file and drop in your Gemini key:
+
+Copy the example environment file and paste in your key:
+
 ```bash
 cp .env.example .env.local
 ```
-Then edit `.env.local`:
+
+Then open `.env.local` and set the value:
+
 ```bash
 GEMINI_API_KEY=your_actual_key_here
 ```
-> ⚠️ All AI features (career suggestions, pathway generation, the career quiz, and exam lookups) require this key. Without it, those API routes return `"API key not configured"`. `.env.local` is gitignored, so your key stays private.
 
-### 3. Run the dev server
+Every AI feature — pathway generation, career suggestions, the quiz, and exam lookups — runs through this key. Without it, those routes return `"API key not configured"`. The `.env.local` file is gitignored, so your key never gets committed.
+
+### 3. Run it
+
 ```bash
 npm run dev
 ```
 
-### 4. Open the app
-Visit **[http://localhost:3000](http://localhost:3000)** in your browser.
+Then open [http://localhost:3000](http://localhost:3000).
 
-### Available scripts
-| Command | Description |
+### A note on rate limits
+
+The app uses Gemini's `gemini-2.5-flash` model. On the free tier, Google caps how many requests you can make per minute, and a single search makes several calls (suggestions, then the pathway, then a lookup for each exam). If you generate a lot of pathways quickly you may hit that limit and see a "please wait" message — give it a minute, or enable billing on your Google AI Studio project to lift the cap. Repeated queries are cached, so asking for the same career or exam again won't spend another request.
+
+## Scripts
+
+| Command | What it does |
 | --- | --- |
 | `npm run dev` | Start the development server |
 | `npm run build` | Create a production build |
 | `npm run start` | Serve the production build |
-| `npm run lint` | Run the Next.js linter |
-| `npm test` | Run the unit test suite (Vitest) |
+| `npm run lint` | Run the linter |
+| `npm test` | Run the test suite |
 | `npm run test:watch` | Run tests in watch mode |
 
----
+## How it's built
 
-## 🛠️ How We Built It
+- **Next.js 14** (App Router) with **React** and **TypeScript**
+- **Tailwind CSS** for styling
+- **Google Gemini API** for generating pathways, suggestions, and exam details
+- **Vitest** for unit tests
 
-We designed and built **Vocation** using:
+The curated MDC program catalog, certification data, and university list live in `app/lib`, and the Gemini calls are handled server-side in `app/api` so the API key is never exposed to the browser.
 
-- 🖥️ **Next.js (Node.js, React, Tailwind)** – for the web application  
-- 🤖 **Google Gemini API & Canvas** – for AI-driven pathway generation and visualization  
-- 🧑‍💻 **Cursor** – for development and pair programming  
-- 🗂️ **GitHub** – for version control  
-- 💬 **Discord / WhatsApp** – for team communication  
+## Project status
 
----
+Vocation started as a Miami Dade College hackathon project and is still evolving. The pathway generation, comparison, cost estimates, and quiz all work today. Planned next steps include richer visualizations (timelines and charts) and continued tuning of the pathway and cost accuracy.
 
-## ⚙️ Challenges We Ran Into
+## Disclaimer
 
-- ⚡ **Understanding and implementing the Gemini API** – Required deep research, testing, and debugging to ensure proper integration.  
-- 🔗 **Ensuring correct educational pathway links** – We validated every link for accuracy and reliability.  
-- 🎓 **Differentiating similar majors** – Handling programs with multiple variations was a challenge for categorization and display accuracy.
-
----
-
-## 🏆 Accomplishments We’re Proud Of
-
-- ✅ **Improved accuracy of pathway links** – All degree and program links are now reliable and functional.  
-- ✅ **Enhanced flowchart precision** – Pathway structures now accurately reflect academic progression.  
-- ✅ **Delivered under time constraints** – Built and deployed a working prototype within the hackathon timeframe.
-
----
-
-## 📚 What We Learned
-
-- 🕒 **Be more linear with time** – Sequential tasking proved far more effective than multitasking under time pressure.  
-- 🤝 **Stronger team collaboration** – Clear communication, shared responsibilities, and version control streamlined our workflow.  
-- 🎯 **Prioritize a single user flow first** – Focusing on one solid flow prevented unnecessary complexity and made iteration smoother.
-
----
-
-## 🔮 What’s Next
-
-- 📊 Add **new visualization options** for pathway structures (graphs, charts, timelines).  
-- 🔁 Implement **pathway comparison** so students can evaluate multiple routes side by side.  
-- ⚡ Continue **iterating and optimizing** the prototype for full deployment.
-
----
-
-## 👥 Team
-
-- **Developed by:** Team Vocation  
-- **Built for:** Miami Dade College Hackathon  
-- **Powered by:** Google Gemini API, Next.js, and Tailwind CSS  
-
----
-
-### 💬 “Helping students see the bigger picture, one pathway at a time.”
+Pathways and cost figures are AI-generated estimates and can contain inaccuracies. They're meant as a starting point — always confirm the details with an MDC academic advisor before making decisions.
