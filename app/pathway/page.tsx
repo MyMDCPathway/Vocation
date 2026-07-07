@@ -14,6 +14,7 @@ import {
 } from "@/app/lib/mdc-programs";
 import { FLORIDA_UNIVERSITIES } from "@/app/lib/universities";
 import { ExamStepComponent } from "@/app/components/ExamStep";
+import { calculateStepCost, calculatePathwayCost } from "@/app/lib/cost";
 
 const SUGGESTIONS = [
   "mechanical engineer",
@@ -23,64 +24,6 @@ const SUGGESTIONS = [
   "MOS 09L",
   "program manager"
 ];
-
-// Calculate estimated cost for a pathway step
-const calculateStepCost = (step: PathwayStep): number => {
-  // MDC Associate programs (A.A. or A.S.)
-  if (step.type === "degree" && step.level.includes("MDC")) {
-    if (step.name.toLowerCase().includes("associate")) {
-      // MDC Associate degree: ~$6,000 - $8,000 for 60 credits
-      // MDC in-state tuition: ~$100-120 per credit hour
-      return 7200; // 60 credits × $120
-    }
-    if (step.name.toLowerCase().includes("certificate")) {
-      // MDC Certificate: ~$2,000 - $4,000 (typically 15-30 credits)
-      return 3000;
-    }
-    if (step.name.toLowerCase().includes("bachelor")) {
-      // MDC Bachelor's: ~$12,000 - $15,000 for remaining 60 credits after A.A./A.S.
-      return 13500; // 60 credits × $120 + fees
-    }
-  }
-  
-  // Transfer to 4-year university
-  if (step.type === "transfer") {
-    // No direct cost for transfer step itself, but prepare for university costs
-    return 0;
-  }
-  
-  // Bachelor's degree at 4-year university (after transfer)
-  if (step.type === "degree" && (step.name.toLowerCase().includes("b.s") || 
-      step.name.toLowerCase().includes("b.a") || 
-      step.name.toLowerCase().includes("bachelor"))) {
-    // If not MDC, estimate 4-year university cost
-    if (!step.level.includes("MDC")) {
-      // Average public university in Florida: ~$6,000-7,000 per year for in-state
-      // For 2 years after transfer: ~$12,000-14,000
-      return 13000; // 2 years × $6,500
-    }
-  }
-  
-  // Licensure exams
-  if (step.type === "exam") {
-    // Exam fees typically $100 - $500, some are more expensive
-    const examName = step.name.toLowerCase();
-    if (examName.includes("nclex")) return 200; // NCLEX-RN/PN
-    if (examName.includes("pe exam") || examName.includes("principles and practice")) return 375; // PE exam
-    if (examName.includes("fe exam") || examName.includes("fundamentals")) return 175; // FE exam
-    if (examName.includes("are") || examName.includes("architect registration")) return 1200; // A.R.E. has multiple divisions (5-6 exams × $200)
-    if (examName.includes("bar exam")) return 1000; // Bar exam
-    if (examName.includes("cpa")) return 800; // CPA exam (4 parts)
-    return 300; // Default exam fee
-  }
-  
-  // Internships (usually unpaid or minimal cost)
-  if (step.type === "internship") {
-    return 0; // Typically no cost, might have opportunity cost but not direct tuition
-  }
-  
-  return 0;
-};
 
 function PathwayPageContent() {
   const searchParams = useSearchParams();
@@ -974,8 +917,7 @@ function PathwayPageContent() {
                   <div className="flex items-center gap-4">
                     <div className="text-right">
                       <p className="text-3xl font-bold text-green-600">
-                        ${pathwayData.pathways[selectedPathwayIndex].steps
-                          .reduce((total, step) => total + calculateStepCost(step), 0)
+                        ${calculatePathwayCost(pathwayData.pathways[selectedPathwayIndex].steps)
                           .toLocaleString()}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">*Estimates only</p>
@@ -1016,8 +958,7 @@ function PathwayPageContent() {
                       <div className="flex justify-between items-center pt-2 mt-2 border-t border-green-200 font-semibold">
                         <span className="text-gray-900">Total</span>
                         <span className="text-green-600">
-                          ${pathwayData.pathways[selectedPathwayIndex].steps
-                            .reduce((total, step) => total + calculateStepCost(step), 0)
+                          ${calculatePathwayCost(pathwayData.pathways[selectedPathwayIndex].steps)
                             .toLocaleString()}
                         </span>
                       </div>
@@ -1224,8 +1165,7 @@ function PathwayPageContent() {
                       </div>
                       <div className="text-right">
                         <p className="text-3xl font-bold text-green-600">
-                          ${careerPathway.data.pathways[careerPathway.selectedPathwayIndex].steps
-                            .reduce((total, step) => total + calculateStepCost(step), 0)
+                          ${calculatePathwayCost(careerPathway.data.pathways[careerPathway.selectedPathwayIndex].steps)
                             .toLocaleString()}
                         </p>
                         <p className="text-xs text-gray-500 mt-1">*Estimates only</p>

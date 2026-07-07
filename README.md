@@ -88,6 +88,8 @@ Visit **[http://localhost:3000](http://localhost:3000)** in your browser.
 | `npm run build` | Create a production build |
 | `npm run start` | Serve the production build |
 | `npm run lint` | Run the Next.js linter |
+| `npm test` | Run the unit test suite (Vitest) |
+| `npm run test:watch` | Run tests in watch mode |
 
 ---
 
