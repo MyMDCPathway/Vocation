@@ -189,9 +189,15 @@ function PathwayPageContent() {
 
         if (!response.ok) {
           const errorData = await response.json();
-          throw new Error(
+          const err = new Error(
             errorData.error || `HTTP error! status: ${response.status}`
           );
+          // Rate limited: retrying immediately only burns more quota, so
+          // surface the "please wait" message to the user right away.
+          if (response.status === 429) {
+            (err as any).rateLimited = true;
+          }
+          throw err;
         }
 
         const result = await response.json();
@@ -199,6 +205,9 @@ function PathwayPageContent() {
       } catch (error: any) {
         if (error.name === "AbortError") {
           console.log("Fetch aborted by user.");
+          throw error;
+        }
+        if (error.rateLimited) {
           throw error;
         }
         console.error(`API call attempt ${i + 1} failed:`, error);
@@ -503,7 +512,7 @@ function PathwayPageContent() {
         console.error("Error generating pathway:", error);
         showModal(
           "Generation Failed",
-          `<p class="text-red-600">Failed to generate pathway. Please try again.</p>`
+          `<p class="text-red-600">Failed to generate pathway.<br><br><small>${error.message}</small></p>`
         );
       }
     } finally {

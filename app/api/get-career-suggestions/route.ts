@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCached, setCached, cacheKey } from "@/app/lib/apiCache";
 
 // Server-side only - never exposed to the browser
 const apiKey = process.env.GEMINI_API_KEY;
@@ -22,6 +23,13 @@ export async function POST(request: NextRequest) {
         },
         { status: 400 }
       );
+    }
+
+    // Serve identical searches from cache to avoid the Gemini rate limit.
+    const key = cacheKey("suggestions", input);
+    const cachedSuggestions = getCached(key);
+    if (cachedSuggestions) {
+      return NextResponse.json({ suggestions: cachedSuggestions });
     }
 
     const prompt = `You are a career advisor. A user has entered "${input}" as a career interest. 
@@ -300,6 +308,11 @@ Return the JSON array (never empty unless input is completely nonsensical):`;
       console.log("First suggestion:", JSON.stringify(suggestions[0], null, 2));
     } else {
       console.error("No suggestions parsed! Full response:", generatedText);
+    }
+
+    // Only cache non-empty results so a transient parse failure isn't sticky.
+    if (suggestions.length > 0) {
+      setCached(key, suggestions);
     }
 
     return NextResponse.json({ suggestions });

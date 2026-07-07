@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCached, setCached, cacheKey } from "@/app/lib/apiCache";
 
 // Server-side only - never exposed to the browser
 const apiKey = process.env.GEMINI_API_KEY;
@@ -33,6 +34,14 @@ export async function POST(request: NextRequest) {
       },
       { status: 400 }
     );
+  }
+
+  // The same handful of exams (NCLEX, FE, PE, ...) recur across every pathway,
+  // so cache real lookups to avoid the Gemini rate limit.
+  const key = cacheKey("exam", examName);
+  const cachedExam = getCached(key);
+  if (cachedExam) {
+    return NextResponse.json(cachedExam);
   }
 
   try {
@@ -147,6 +156,12 @@ Respond ONLY with valid JSON, no additional text.`;
           "Meet state-specific or jurisdiction-specific requirements"
         ]
       };
+    }
+
+    // Cache only genuine lookups, not the Google-search fallback, so a future
+    // request can still try for the real official info.
+    if (typeof examInfo.url === "string" && !examInfo.url.includes("google.com/search")) {
+      setCached(key, examInfo);
     }
 
     return NextResponse.json(examInfo);

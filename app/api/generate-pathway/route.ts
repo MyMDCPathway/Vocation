@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCached, setCached, cacheKey } from "@/app/lib/apiCache";
 
 // Server-side only - never exposed to the browser
 const apiKey = process.env.GEMINI_API_KEY;
@@ -22,6 +23,14 @@ export async function POST(request: NextRequest) {
         },
         { status: 400 }
       );
+    }
+
+    // Return a previously generated pathway for the same career without
+    // spending a Gemini request (avoids the free-tier rate limit on repeats).
+    const key = cacheKey("pathway", career);
+    const cached = getCached(key);
+    if (cached) {
+      return NextResponse.json(cached);
     }
 
     const systemPrompt = `You are a career and academic advisor at Miami Dade College (MDC) North Campus. Your task is to generate a comprehensive, holistic educational pathway for a student interested in a specific career.
@@ -222,9 +231,20 @@ Remember: Only use actual MDC programs that exist. Provide alternative routes wh
     if (!response.ok) {
       const errorText = await response.text();
       console.error("Gemini API Error:", errorText);
+      // Surface rate limiting to the client so it can tell the user to wait
+      // instead of retrying immediately (free tier: ~20 requests/minute).
+      if (response.status === 429) {
+        return NextResponse.json(
+          {
+            error:
+              "The AI service is receiving too many requests right now. Please wait about 30 seconds and try again.",
+          },
+          { status: 429 }
+        );
+      }
       return NextResponse.json(
         { error: "Failed to generate pathway due to an external API error." },
-        { status: 500 }
+        { status: 502 }
       );
     }
 
@@ -233,6 +253,7 @@ Remember: Only use actual MDC programs that exist. Provide alternative routes wh
     if (result.candidates && result.candidates.length > 0) {
       const text = result.candidates[0].content.parts[0].text;
       const generatedData = JSON.parse(text);
+      setCached(key, generatedData);
       return NextResponse.json(generatedData);
     } else if (result.promptFeedback) {
       return NextResponse.json(
