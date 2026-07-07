@@ -14,7 +14,7 @@ import {
 } from "@/app/lib/mdc-programs";
 import { FLORIDA_UNIVERSITIES } from "@/app/lib/universities";
 import { ExamStepComponent } from "@/app/components/ExamStep";
-import { calculateStepCost, calculatePathwayCost } from "@/app/lib/cost";
+import { calculateStepCostRange, calculatePathwayCostRange, formatCostRange } from "@/app/lib/cost";
 
 const SUGGESTIONS = [
   "mechanical engineer",
@@ -916,11 +916,10 @@ function PathwayPageContent() {
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="text-right">
-                      <p className="text-3xl font-bold text-green-600">
-                        ${calculatePathwayCost(pathwayData.pathways[selectedPathwayIndex].steps)
-                          .toLocaleString()}
+                      <p className="text-2xl font-bold text-green-600">
+                        {formatCostRange(calculatePathwayCostRange(pathwayData.pathways[selectedPathwayIndex].steps))}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">*Estimates only</p>
+                      <p className="text-xs text-gray-500 mt-1">*Tuition &amp; fees only — excludes housing, books &amp; financial aid</p>
                     </div>
                     <button
                       onClick={() => setShowCostBreakdown(!showCostBreakdown)}
@@ -946,22 +945,35 @@ function PathwayPageContent() {
                   <div className="mt-4 pt-4 border-t border-green-200">
                     <div className="space-y-2">
                       {pathwayData.pathways[selectedPathwayIndex].steps.map((step, idx) => {
-                        const stepCost = calculateStepCost(step);
-                        if (stepCost === 0) return null;
+                        const stepCost = calculateStepCostRange(step);
+                        if (stepCost.high === 0) return null;
                         return (
                           <div key={idx} className="flex justify-between items-center text-sm py-1">
                             <span className="text-gray-700">{step.name}</span>
-                            <span className="font-semibold text-gray-900">${stepCost.toLocaleString()}</span>
+                            <span className="font-semibold text-gray-900">{formatCostRange(stepCost)}</span>
                           </div>
                         );
                       })}
                       <div className="flex justify-between items-center pt-2 mt-2 border-t border-green-200 font-semibold">
                         <span className="text-gray-900">Total</span>
                         <span className="text-green-600">
-                          ${calculatePathwayCost(pathwayData.pathways[selectedPathwayIndex].steps)
-                            .toLocaleString()}
+                          {formatCostRange(calculatePathwayCostRange(pathwayData.pathways[selectedPathwayIndex].steps))}
                         </span>
                       </div>
+                      <p className="text-xs text-gray-500 pt-2">
+                        Estimates cover in-state tuition &amp; fees only. Plan on roughly $1,200–$1,600/year
+                        extra for books &amp; supplies, plus living costs. Financial aid can significantly
+                        lower what you actually pay — check{" "}
+                        <a
+                          href="https://www.mdc.edu/financialaid/"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-green-700 underline hover:text-green-800"
+                        >
+                          MDC Financial Aid
+                        </a>{" "}
+                        and each university&apos;s net price calculator.
+                      </p>
                     </div>
                   </div>
                 )}
@@ -994,7 +1006,7 @@ function PathwayPageContent() {
                           <p className="text-gray-600 mt-2">{step.description}</p>
                           
                           {/* Cost Display */}
-                          {calculateStepCost(step) > 0 && (
+                          {calculateStepCostRange(step).high > 0 && (
                             <div className="mt-3 pt-3 border-t border-gray-200">
                               <div className="flex items-center justify-between">
                                 <span className="text-sm font-medium text-gray-700 flex items-center">
@@ -1002,7 +1014,7 @@ function PathwayPageContent() {
                                   Estimated Cost:
                                 </span>
                                 <span className="text-lg font-bold text-green-600">
-                                  ${calculateStepCost(step).toLocaleString()}
+                                  {formatCostRange(calculateStepCostRange(step))}
                                 </span>
                               </div>
                             </div>
@@ -1164,11 +1176,10 @@ function PathwayPageContent() {
                         <p className="text-sm text-gray-600">Estimated total for this pathway</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-3xl font-bold text-green-600">
-                          ${calculatePathwayCost(careerPathway.data.pathways[careerPathway.selectedPathwayIndex].steps)
-                            .toLocaleString()}
+                        <p className="text-2xl font-bold text-green-600">
+                          {formatCostRange(calculatePathwayCostRange(careerPathway.data.pathways[careerPathway.selectedPathwayIndex].steps))}
                         </p>
-                        <p className="text-xs text-gray-500 mt-1">*Estimates only</p>
+                        <p className="text-xs text-gray-500 mt-1">*Tuition &amp; fees only — excludes housing, books &amp; financial aid</p>
                       </div>
                     </div>
                   </div>
@@ -1200,7 +1211,7 @@ function PathwayPageContent() {
                               <p className="text-gray-600 mt-2">{step.description}</p>
                               
                               {/* Cost Display */}
-                              {calculateStepCost(step) > 0 && (
+                              {calculateStepCostRange(step).high > 0 && (
                                 <div className="mt-3 pt-3 border-t border-gray-200">
                                   <div className="flex items-center justify-between">
                                     <span className="text-sm font-medium text-gray-700 flex items-center">
@@ -1208,7 +1219,7 @@ function PathwayPageContent() {
                                       Estimated Cost:
                                     </span>
                                     <span className="text-lg font-bold text-green-600">
-                                      ${calculateStepCost(step).toLocaleString()}
+                                      {formatCostRange(calculateStepCostRange(step))}
                                     </span>
                                   </div>
                                 </div>

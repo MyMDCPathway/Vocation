@@ -1,13 +1,14 @@
 // Florida university transfer options shown on generated pathways.
 
-
-// Florida (In-State) University Transfer Recommendations
 export interface UniversityInfo {
   name: string;
   website: string;
   location: string;
   type: string; // "Public" or "Private"
   notes?: string;
+  // Approximate annual in-state tuition & fees (USD). Used to estimate the
+  // cost of a bachelor's completed at this university after transfer.
+  annualCost: { low: number; high: number };
 }
 
 export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
@@ -17,6 +18,7 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     location: "Gainesville",
     type: "Public",
     notes: "Flagship state university, strong articulation agreements with MDC",
+    annualCost: { low: 6400, high: 6900 },
   },
   {
     name: "Florida State University (FSU)",
@@ -24,6 +26,7 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     location: "Tallahassee",
     type: "Public",
     notes: "Major research university, excellent transfer pathways",
+    annualCost: { low: 6500, high: 7000 },
   },
   {
     name: "University of South Florida (USF)",
@@ -31,6 +34,7 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     location: "Tampa",
     type: "Public",
     notes: "Multiple campuses, strong engineering and business programs",
+    annualCost: { low: 6400, high: 6900 },
   },
   {
     name: "Florida International University (FIU)",
@@ -38,6 +42,7 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     location: "Miami",
     type: "Public",
     notes: "Local option in Miami, strong transfer agreements with MDC",
+    annualCost: { low: 6500, high: 7000 },
   },
   {
     name: "University of Central Florida (UCF)",
@@ -46,6 +51,7 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     type: "Public",
     notes:
       "Largest university in Florida, excellent engineering and hospitality programs",
+    annualCost: { low: 6400, high: 6900 },
   },
   {
     name: "Florida Atlantic University (FAU)",
@@ -54,6 +60,7 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     type: "Public",
     notes:
       "Multiple campuses in South Florida, strong business and engineering programs",
+    annualCost: { low: 6100, high: 6600 },
   },
   {
     name: "Florida A&M University (FAMU)",
@@ -62,6 +69,7 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     type: "Public",
     notes:
       "Historically Black University, strong programs in pharmacy and engineering",
+    annualCost: { low: 5800, high: 6300 },
   },
   {
     name: "University of North Florida (UNF)",
@@ -69,6 +77,7 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     location: "Jacksonville",
     type: "Public",
     notes: "Strong business and health sciences programs",
+    annualCost: { low: 6400, high: 6900 },
   },
   {
     name: "Florida Gulf Coast University (FGCU)",
@@ -76,6 +85,7 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     location: "Fort Myers",
     type: "Public",
     notes: "Growing university with strong environmental and business programs",
+    annualCost: { low: 6100, high: 6600 },
   },
   {
     name: "University of West Florida (UWF)",
@@ -83,6 +93,7 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     location: "Pensacola",
     type: "Public",
     notes: "Strong programs in business, education, and health sciences",
+    annualCost: { low: 6300, high: 6800 },
   },
   {
     name: "New College of Florida",
@@ -90,6 +101,7 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     location: "Sarasota",
     type: "Public",
     notes: "Small liberal arts honors college, unique academic structure",
+    annualCost: { low: 6900, high: 7400 },
   },
   {
     name: "Florida Polytechnic University",
@@ -98,6 +110,7 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     type: "Public",
     notes:
       "STEM-focused university, strong engineering and technology programs",
+    annualCost: { low: 4900, high: 5400 },
   },
   {
     name: "University of Miami",
@@ -105,6 +118,7 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     location: "Coral Gables",
     type: "Private",
     notes: "Private research university, strong programs across disciplines",
+    annualCost: { low: 57000, high: 62000 },
   },
   {
     name: "Nova Southeastern University (NSU)",
@@ -112,6 +126,7 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     location: "Fort Lauderdale",
     type: "Private",
     notes: "Private university with strong health sciences and law programs",
+    annualCost: { low: 34000, high: 38000 },
   },
   {
     name: "Florida Institute of Technology (FIT)",
@@ -120,6 +135,7 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     type: "Private",
     notes:
       "STEM-focused private university, strong engineering and aviation programs",
+    annualCost: { low: 43000, high: 47000 },
   },
   {
     name: "Rollins College",
@@ -127,6 +143,7 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     location: "Winter Park",
     type: "Private",
     notes: "Private liberal arts college, strong business and arts programs",
+    annualCost: { low: 55000, high: 60000 },
   },
   {
     name: "Stetson University",
@@ -134,6 +151,7 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     location: "DeLand",
     type: "Private",
     notes: "Private university, strong programs in business, law, and music",
+    annualCost: { low: 51000, high: 56000 },
   },
   {
     name: "Barry University",
@@ -142,6 +160,7 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     type: "Private",
     notes:
       "Private Catholic university, strong health sciences and education programs",
+    annualCost: { low: 30000, high: 34000 },
   },
   {
     name: "St. Thomas University",
@@ -149,6 +168,7 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     location: "Miami Gardens",
     type: "Private",
     notes: "Private Catholic university, strong business and law programs",
+    annualCost: { low: 31000, high: 35000 },
   },
   {
     name: "Lynn University",
@@ -156,5 +176,6 @@ export const FLORIDA_UNIVERSITIES: UniversityInfo[] = [
     location: "Boca Raton",
     type: "Private",
     notes: "Private university, strong hospitality and business programs",
+    annualCost: { low: 38000, high: 42000 },
   },
 ];
