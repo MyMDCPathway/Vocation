@@ -8,7 +8,7 @@
 
 When students evaluate career choices, they often feel lost trying to understand the full academic and professional journey required to reach them.  
 
-We wanted to create something meaningful that brings **clarity to every step**. This led us to build **MyMDC Pathway**, an AI-powered platform that lays out complete educational pathways — starting with the right MDC program and including **transfer plans, articulation agreements, internships, and required exams or certifications**.  
+We wanted to create something meaningful that brings **clarity to every step**. This led us to build **Vocation**, an AI-powered platform that lays out complete educational pathways — starting with the right MDC program and including **transfer plans, articulation agreements, internships, and required exams or certifications**.  
 
 By providing clear options and personalized routes, we help students turn **long-term ambitions into organized, guided plans**.
 
@@ -24,13 +24,13 @@ Without this clarity, students often feel unsure about their next steps, leading
 
 ## 🚀 Elevator Pitch
 
-> **MyMDC Pathway** is a personalized, AI-powered educational planner that helps students map their complete journey from **Miami Dade College** to their **dream career** — integrating degrees, certifications, transfers, and professional milestones into one clear and interactive roadmap.
+> **Vocation** is a personalized, AI-powered educational planner that helps students map their complete journey from **Miami Dade College** to their **dream career** — integrating degrees, certifications, transfers, and professional milestones into one clear and interactive roadmap.
 
 ---
 
 ## 🧩 Solution
 
-MyMDC Pathway addresses the problem through four key features:
+Vocation addresses the problem through four key features:
 
 ### 1️⃣ Career-to-Educational Pathway  
 Students input a desired career such as **Architect** or **Mechanical Engineer**, and the system instantly generates a complete academic pathway.
@@ -44,6 +44,50 @@ Highlights crucial milestones including **certification exams**, **licenses**, a
 ### 4️⃣ Beneficiaries  
 - **Primary:** MDC students seeking clarity on their academic and career pathways  
 - **Secondary:** Academic advisors supporting students in planning their journeys  
+
+---
+
+## 🏁 Getting Started
+
+Run **Vocation** locally in four steps.
+
+### Prerequisites
+- **Node.js 18.17+** (required by Next.js 14)
+- A free **Google Gemini API key** — grab one at [Google AI Studio](https://aistudio.google.com/app/apikey)
+
+### 1. Clone and install
+```bash
+git clone https://github.com/<your-username>/Vocation.git
+cd Vocation
+npm install
+```
+
+### 2. Add your API key
+Copy the example env file and drop in your Gemini key:
+```bash
+cp .env.example .env.local
+```
+Then edit `.env.local`:
+```bash
+GEMINI_API_KEY=your_actual_key_here
+```
+> ⚠️ All AI features (career suggestions, pathway generation, the career quiz, and exam lookups) require this key. Without it, those API routes return `"API key not configured"`. `.env.local` is gitignored, so your key stays private.
+
+### 3. Run the dev server
+```bash
+npm run dev
+```
+
+### 4. Open the app
+Visit **[http://localhost:3000](http://localhost:3000)** in your browser.
+
+### Available scripts
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Start the development server |
+| `npm run build` | Create a production build |
+| `npm run start` | Serve the production build |
+| `npm run lint` | Run the Next.js linter |
 
 ---
 
@@ -93,7 +137,7 @@ We designed and built **Vocation** using:
 
 ## 👥 Team
 
-- **Developed by:** Team MyMDC Pathway  
+- **Developed by:** Team Vocation  
 - **Built for:** Miami Dade College Hackathon  
 - **Powered by:** Google Gemini API, Next.js, and Tailwind CSS  
 

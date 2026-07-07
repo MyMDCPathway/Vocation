@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 // Server-side only - never exposed to the browser
 const apiKey = process.env.GEMINI_API_KEY;
-const genModel = "gemini-2.5-flash-preview-09-2025";
+const genModel = "gemini-2.5-flash";
 
 export async function POST(request: NextRequest) {
   if (!apiKey) {
