@@ -19,7 +19,13 @@ import seedCache from "@/data/seed-cache.json";
 
 // Keys here use the exact format produced by cacheKey(), e.g.
 // "pathway:registered nurse". Values are whatever the route stores.
-const SEED = seedCache as Record<string, unknown>;
+const COMMITTED_SEED = seedCache as Record<string, unknown>;
+
+// Swappable so tests can exercise the generation path deterministically. Once
+// a career is seeded, requests for it never reach Gemini — correct in
+// production, but it silently disables any test that mocks a Gemini response
+// for that career.
+let SEED: Record<string, unknown> = COMMITTED_SEED;
 
 interface CacheEntry {
   value: unknown;
@@ -82,4 +88,12 @@ export function seedSize(): number {
 // Test-only: clear the in-memory layer. The seed layer is static and stays.
 export function _clearCache(): void {
   store.clear();
+}
+
+/**
+ * Test-only: replace the seed layer. Pass {} to exercise code paths that run
+ * on a cache miss, or null to restore the committed seed file.
+ */
+export function _setSeedForTests(entries: Record<string, unknown> | null): void {
+  SEED = entries ?? COMMITTED_SEED;
 }

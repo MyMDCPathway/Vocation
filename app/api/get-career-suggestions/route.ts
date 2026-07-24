@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCached, setCached, cacheKey } from "@/app/lib/apiCache";
 import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
 import { geminiUrl } from "@/app/lib/geminiModel";
+import { logCacheMiss } from "@/app/lib/missLog";
 
 // Server-side only - never exposed to the browser
 const apiKey = process.env.GEMINI_API_KEY;
@@ -37,6 +38,7 @@ export async function POST(request: NextRequest) {
     const limited = enforceGenerationLimits(request);
     if (limited) return limited;
     recordGeneration();
+    logCacheMiss("suggestions", input);
 
     const prompt = `You are a career advisor. A user has entered "${input}" as a career interest. 
 

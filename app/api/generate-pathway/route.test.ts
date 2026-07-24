@@ -3,6 +3,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 // The route captures process.env.GEMINI_API_KEY at module-load time, so each
 // test sets the env and re-imports the module fresh via vi.resetModules().
 async function loadRoute() {
+  // These tests mock Gemini responses, so they need the request to actually
+  // reach Gemini. Real careers live in the committed seed file and would be
+  // served from there instead, so this run gets an empty seed. Both imports
+  // resolve from the same post-reset module registry as the route's own.
+  const { _setSeedForTests } = await import("@/app/lib/apiCache");
+  _setSeedForTests({});
   return await import("@/app/api/generate-pathway/route");
 }
 

@@ -77,13 +77,16 @@ describe("resolveCareer", () => {
 describe("generate-pathway shares one generation across spellings", () => {
   it("does not call Gemini again for a synonym of an already-generated career", async () => {
     const { vi } = await import("vitest");
-    const { _clearCache } = await import("@/app/lib/apiCache");
-    const { _resetRateLimits } = await import("@/app/lib/rateLimit");
-
-    _clearCache();
-    _resetRateLimits();
     vi.resetModules();
     process.env.GEMINI_API_KEY = "test-key";
+
+    const { _clearCache, _setSeedForTests } = await import("@/app/lib/apiCache");
+    const { _resetRateLimits } = await import("@/app/lib/rateLimit");
+    _clearCache();
+    _resetRateLimits();
+    // Nursing is in the committed seed file; empty it so the first request has
+    // to generate and the "only one Gemini call" assertion means something.
+    _setSeedForTests({});
 
     const pathwayData = { title: "Registered Nurse", pathways: [] };
     const fetchMock = vi.fn().mockResolvedValue({
