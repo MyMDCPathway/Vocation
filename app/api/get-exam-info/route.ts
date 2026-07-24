@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCached, setCached, cacheKey } from "@/app/lib/apiCache";
+import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
+import { geminiUrl } from "@/app/lib/geminiModel";
 
 // Server-side only - never exposed to the browser
 const apiKey = process.env.GEMINI_API_KEY;
-const genModel = "gemini-2.5-flash";
 
 export async function POST(request: NextRequest) {
   if (!apiKey) {
@@ -44,6 +45,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(cachedExam);
   }
 
+  // Past the cache, this route spends a Gemini request like the others.
+  const limited = enforceGenerationLimits(request);
+  if (limited) return limited;
+  recordGeneration();
+
   try {
 
     const prompt = `You are a helpful assistant that finds official information about professional exams and certifications.
@@ -73,7 +79,7 @@ Important:
 
 Respond ONLY with valid JSON, no additional text.`;
 
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${genModel}:generateContent?key=${apiKey}`;
+    const apiUrl = geminiUrl(apiKey);
 
     const response = await fetch(apiUrl, {
       method: "POST",

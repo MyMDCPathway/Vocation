@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCached, setCached, cacheKey } from "@/app/lib/apiCache";
+import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
+import { geminiUrl } from "@/app/lib/geminiModel";
 
 // Server-side only - never exposed to the browser
 const apiKey = process.env.GEMINI_API_KEY;
-const genModel = "gemini-2.5-flash";
 
 export async function POST(request: NextRequest) {
   if (!apiKey) {
@@ -31,6 +32,11 @@ export async function POST(request: NextRequest) {
     if (cachedSuggestions) {
       return NextResponse.json({ suggestions: cachedSuggestions });
     }
+
+    // Past the cache, this route spends a Gemini request like the others.
+    const limited = enforceGenerationLimits(request);
+    if (limited) return limited;
+    recordGeneration();
 
     const prompt = `You are a career advisor. A user has entered "${input}" as a career interest. 
 
@@ -64,7 +70,7 @@ Input: "${input}"
 Return the JSON array (never empty unless input is completely nonsensical):`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${genModel}:generateContent?key=${apiKey}`,
+      geminiUrl(apiKey),
       {
         method: "POST",
         headers: {

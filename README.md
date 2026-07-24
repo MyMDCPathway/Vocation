@@ -56,9 +56,29 @@ npm run dev
 
 Then open [http://localhost:3000](http://localhost:3000).
 
-### A note on rate limits
+### 4. Optional: pre-generate the common careers
 
-The app uses Gemini's `gemini-2.5-flash` model. On the free tier, Google caps how many requests you can make per minute, and a single search makes several calls (suggestions, then the pathway, then a lookup for each exam). If you generate a lot of pathways quickly you may hit that limit and see a "please wait" message — give it a minute, or enable billing on your Google AI Studio project to lift the cap. Repeated queries are cached, so asking for the same career or exam again won't spend another request.
+```bash
+# terminal 1 — dev server with seeding enabled
+SEED_MODE=1 npm run dev          # PowerShell: $env:SEED_MODE=1; npm run dev
+
+# terminal 2
+npm run seed
+```
+
+This walks the canonical career list, generates each pathway once, and writes the results to `data/seed-cache.json`. Those results are committed to the repo and served instantly to everyone afterward, so visitors never wait on a generation and the API key is never charged for a career that's already been covered. Re-running the script skips whatever is already in the file, so an interrupted run can just be started again.
+
+### A note on rate limits and cost
+
+The app uses Gemini's Flash model (`gemini-flash-latest` by default). On the free tier, Google caps how many requests you can make per minute, and a search that isn't already cached makes several calls (the pathway, then a lookup for each exam).
+
+Three things keep that under control:
+
+- **The seed file** (`data/seed-cache.json`) answers common careers with no API call at all.
+- **An in-memory cache** covers repeats within a running server.
+- **Rate limiting** in `app/lib/rateLimit.ts` caps requests per IP and enforces a daily ceiling on total generations, configurable in `app/api/rate-limit-config.ts`. Cached and seeded answers don't count against either limit.
+
+The rate limiter keeps its counters in process memory, so on a serverless host each instance counts separately and the limits are approximate. If you deploy this publicly, set a billing budget cap in Google Cloud — that's the only hard guarantee against a surprise bill.
 
 ## Scripts
 
@@ -68,6 +88,7 @@ The app uses Gemini's `gemini-2.5-flash` model. On the free tier, Google caps ho
 | `npm run build` | Create a production build |
 | `npm run start` | Serve the production build |
 | `npm run lint` | Run the linter |
+| `npm run seed` | Pre-generate pathways for the common careers into `data/seed-cache.json` |
 | `npm test` | Run the test suite |
 | `npm run test:watch` | Run tests in watch mode |
 
@@ -79,6 +100,11 @@ The app uses Gemini's `gemini-2.5-flash` model. On the free tier, Google caps ho
 - **Vitest** for unit tests
 
 The curated MDC program catalog, certification data, and university list live in `app/lib`, and the Gemini calls are handled server-side in `app/api` so the API key is never exposed to the browser.
+
+Two pieces are worth calling out because they're what keeps the app fast and cheap:
+
+- **`app/lib/careerCanonical.ts`** resolves free-text input to one canonical title, so "nurse", "Nurse", "RN", "nursing", and "I want to be a nurse" all share a single generated pathway instead of producing five. The synonym table it reads is `app/lib/careerAliases.ts`, and it's deliberately conservative — careers only collapse together when they genuinely share a degree and licensing route.
+- **`app/lib/apiCache.ts`** layers a committed seed file over an in-memory cache. The seed layer matters on serverless hosts, where route handlers run in short-lived processes with a read-only filesystem and the in-memory layer is wiped on every cold start.
 
 ## Project status
 

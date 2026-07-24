@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCached, setCached, cacheKey } from "@/app/lib/apiCache";
+import { resolveCareer } from "@/app/lib/careerCanonical";
+import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
+import { geminiUrl } from "@/app/lib/geminiModel";
 
 // Server-side only - never exposed to the browser
 const apiKey = process.env.GEMINI_API_KEY;
-const genModel = "gemini-2.5-flash";
 
 export async function POST(request: NextRequest) {
   if (!apiKey) {
@@ -25,13 +27,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Collapse the many ways a student might spell the same job ("RN",
+    // "nurse", "Registered Nurse") onto one title, so they share a single
+    // generated pathway instead of one per spelling.
+    const canonicalCareer = resolveCareer(career).canonical;
+
     // Return a previously generated pathway for the same career without
     // spending a Gemini request (avoids the free-tier rate limit on repeats).
-    const key = cacheKey("pathway", career);
+    const key = cacheKey("pathway", canonicalCareer);
     const cached = getCached(key);
     if (cached) {
       return NextResponse.json(cached);
     }
+
+    // Everything past here costs a Gemini request, so the limits apply from
+    // this point only — browsing seeded or already-cached careers stays free
+    // and unthrottled no matter how much someone clicks around.
+    const limited = enforceGenerationLimits(request);
+    if (limited) return limited;
+    recordGeneration();
 
     const systemPrompt = `You are a career and academic advisor at Miami Dade College (MDC) North Campus. Your task is to generate a comprehensive, holistic educational pathway for a student interested in a specific career.
 
@@ -140,7 +154,7 @@ You must only respond with a JSON object following the schema provided.`;
       properties: {
         title: {
           type: "STRING",
-          description: `The career name only (e.g., "${career}"). Do not include "Educational Pathway to becoming a" or similar prefixes.`,
+          description: `The career name only (e.g., "${canonicalCareer}"). Do not include "Educational Pathway to becoming a" or similar prefixes.`,
         },
         pathways: {
           type: "ARRAY",
@@ -190,7 +204,7 @@ You must only respond with a JSON object following the schema provided.`;
       required: ["title", "pathways"],
     };
 
-    const userQuery = `Generate comprehensive educational pathway(s) for becoming a "${career}". 
+    const userQuery = `Generate comprehensive educational pathway(s) for becoming a "${canonicalCareer}". 
 
 CRITICAL REQUIREMENTS:
 - You MUST provide MULTIPLE alternative pathways when different MDC programs can lead to the same career
@@ -209,9 +223,9 @@ CRITICAL REQUIREMENTS:
   * Optional advanced degrees (M.S., Ph.D.) when relevant
 - If only one MDC program clearly leads to this career, provide just one pathway (but still in the pathways array)
 
-Remember: Only use actual MDC programs that exist. Provide alternative routes when multiple programs are viable options for "${career}".`;
+Remember: Only use actual MDC programs that exist. Provide alternative routes when multiple programs are viable options for "${canonicalCareer}".`;
 
-    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${genModel}:generateContent?key=${apiKey}`;
+    const apiUrl = geminiUrl(apiKey);
 
     const payload = {
       contents: [{ parts: [{ text: userQuery }] }],

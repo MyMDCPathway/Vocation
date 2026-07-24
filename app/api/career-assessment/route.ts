@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
+import { geminiUrl } from "@/app/lib/geminiModel";
 
 // Server-side only - never exposed to the browser
 const apiKey = process.env.GEMINI_API_KEY;
-const genModel = "gemini-2.5-flash";
 
 interface QuizAnswer {
   question: string;
@@ -28,6 +29,12 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Quiz answers are unique per submission, so there is nothing to cache
+    // here — every request spends a Gemini call and the limits always apply.
+    const limited = enforceGenerationLimits(request);
+    if (limited) return limited;
+    recordGeneration();
 
     // Build a detailed prompt from the quiz answers
     let answersText = "User's Career Assessment Answers:\n\n";
@@ -57,7 +64,7 @@ Ensure the careers are diverse and cover different industries/roles that align w
 Return the JSON array now:`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${genModel}:generateContent?key=${apiKey}`,
+      geminiUrl(apiKey),
       {
         method: "POST",
         headers: {
