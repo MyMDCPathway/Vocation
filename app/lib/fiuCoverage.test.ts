@@ -54,7 +54,7 @@ describe("FIU catalog coverage of generated pathways", () => {
     for (const step of bachelors) {
       const program = findFIUProgram(step.name, step.level);
       if (!program) continue;
-      expect(program.level, `${step.name} (${step.level})`).toBe("undergraduate");
+      expect(program.level, `${step.name} (${step.level})`).toBe("bachelor");
     }
   });
 

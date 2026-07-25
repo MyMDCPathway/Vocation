@@ -10,9 +10,9 @@ import {
   type SchoolKind,
 } from "@/app/lib/floridaSchools";
 import { SCHOOL_STORAGE_KEY } from "@/app/lib/schoolStorage";
-import { applySchoolTheme } from "@/app/lib/schoolTheme";
 import { hasCatalog } from "@/app/lib/schoolCatalogs";
 import { SchoolMark } from "@/app/components/SchoolMark";
+import { useSelectedSchoolId } from "@/app/lib/useSelectedSchool";
 
 // The chosen school is sent with every generate-pathway request and decides
 // which catalog the pathway is built from. Pages other than this one read it
@@ -22,18 +22,14 @@ export { SCHOOL_STORAGE_KEY };
 const GROUP_ORDER: SchoolKind[] = ["state-college", "public-university", "private"];
 
 export default function SchoolSelector() {
-  const [selectedId, setSelectedId] = useState(DEFAULT_SCHOOL_ID);
+  // Shares the same pre-paint-corrected read as the header and pathway page,
+  // so this button and the rest of the chrome can never disagree about which
+  // school is selected.
+  const [selectedId, selectSchool] = useSelectedSchoolId();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const containerRef = useRef<HTMLDivElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
-
-  // localStorage is read after mount so the server render (which can't see it)
-  // matches the first client render.
-  useEffect(() => {
-    const stored = localStorage.getItem(SCHOOL_STORAGE_KEY);
-    if (stored && getSchoolById(stored)) setSelectedId(stored);
-  }, []);
 
   useEffect(() => {
     if (!open) return;
@@ -74,13 +70,19 @@ export default function SchoolSelector() {
   }, [query]);
 
   const choose = (school: School) => {
-    setSelectedId(school.id);
-    localStorage.setItem(SCHOOL_STORAGE_KEY, school.id);
-    // Retint immediately rather than waiting for a navigation; the pre-paint
-    // script in the layout handles subsequent page loads.
-    applySchoolTheme(school.color);
-    setOpen(false);
-    setQuery("");
+    if (school.id === selectedId) {
+      setOpen(false);
+      setQuery("");
+      return;
+    }
+
+    selectSchool(school.id);
+
+    // The reload is what carries the new cookie to the server, so the next
+    // render arrives with the right logo, colors, footer, and catalog already
+    // baked into the HTML — rather than every consumer correcting itself after
+    // the browser has painted.
+    window.location.reload();
   };
 
   return (

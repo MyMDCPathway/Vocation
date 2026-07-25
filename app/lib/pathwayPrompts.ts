@@ -17,13 +17,12 @@
 // The MDC prompt below was moved verbatim out of app/api/generate-pathway.
 
 import { FIU_PROGRAMS } from "./fiu-programs";
+import { BROWARD_PROGRAMS } from "./programs/broward";
+import type { SchoolProgram } from "./programCatalog";
+import { SCHOOLS_WITH_CATALOG, hasCatalog, type CatalogSchoolId } from "./schoolCatalogs";
 
-export const SCHOOLS_WITH_CATALOG = ["mdc", "fiu"] as const;
-export type CatalogSchoolId = (typeof SCHOOLS_WITH_CATALOG)[number];
-
-export function hasCatalog(schoolId: string): schoolId is CatalogSchoolId {
-  return (SCHOOLS_WITH_CATALOG as readonly string[]).includes(schoolId);
-}
+export { SCHOOLS_WITH_CATALOG, hasCatalog };
+export type { CatalogSchoolId };
 
 export interface PathwayPromptRequest {
   systemPrompt: string;
@@ -215,7 +214,7 @@ CRITICAL REQUIREMENTS:
 Remember: Only use actual MDC programs that exist. Provide alternative routes when multiple programs are viable options for "${canonicalCareer}".`;
 }
 
-const FIU_UNDERGRADUATE = FIU_PROGRAMS.filter((p) => p.level === "undergraduate")
+const FIU_UNDERGRADUATE = FIU_PROGRAMS.filter((p) => p.level === "bachelor")
   .map((p) => p.name)
   .join(", ");
 
@@ -272,6 +271,89 @@ REQUIREMENTS:
 - Provide multiple pathways when several FIU bachelor's programs lead to this career, marking the most direct one as primary.`;
 }
 
+// --- Generic state-college prompt -----------------------------------------
+//
+// MDC's prompt above is hand-tuned and its pathways are already seeded, so it
+// stays as-is. Every OTHER Florida College System school shares one shape —
+// start at an associate, transfer out for the bachelor's — so they share this
+// template, parameterized by the school's own catalog. Adding the next college
+// is then a scraper plus a registry entry, not another 13,000-character prompt.
+
+interface CollegeCatalog {
+  schoolName: string;
+  shortName: string;
+  programs: SchoolProgram[];
+}
+
+const COLLEGE_CATALOGS: Record<string, CollegeCatalog> = {
+  broward: {
+    schoolName: "Broward College",
+    shortName: "Broward",
+    programs: BROWARD_PROGRAMS,
+  },
+};
+
+function programList(programs: SchoolProgram[], level: SchoolProgram["level"]): string {
+  return programs
+    .filter((p) => p.level === level)
+    .map((p) => (p.credential ? `${p.name} (${p.credential})` : p.name))
+    .join(", ");
+}
+
+function collegeSystemPrompt(school: CollegeCatalog, canonicalCareer: string): string {
+  const associates = programList(school.programs, "associate");
+  const bachelors = programList(school.programs, "bachelor");
+  const certificates = programList(school.programs, "certificate");
+
+  return `You are an academic advisor at ${school.schoolName}, a Florida College System institution. Generate a comprehensive educational pathway for a student starting at ${school.shortName} who wants to become a "${canonicalCareer}".
+
+PATHWAY STRUCTURE REQUIREMENTS:
+${school.shortName} is a two-year college that also grants some bachelor's degrees. The pathway must follow this structure:
+1. START with the ${school.shortName} program that most directly serves the career:
+   * An Associate of Science (A.S.) for technical and career-focused paths
+   * The Associate of Arts (A.A.) when the career requires transferring to a university for a bachelor's
+   * A certificate when it is a genuine entry point or a stepping stone
+   * A ${school.shortName} bachelor's degree when one directly leads to the career
+2. Include a TRANSFER step to a four-year university when the career needs a bachelor's that ${school.shortName} does not itself offer.
+3. Include the BACHELOR'S degree step when the career requires one.
+4. Include PROFESSIONAL EXPERIENCE / INTERNSHIP steps required for the career or for licensure.
+5. Include REQUIRED LICENSURE EXAMS or CERTIFICATIONS (FE and PE for engineers, NCLEX for nurses, the CPA exam for accountants, and so on).
+6. Include OPTIONAL graduate degrees (M.S., M.A., Ph.D.) where they matter for advancement.
+
+CRITICAL — USE ONLY REAL ${school.shortName.toUpperCase()} PROGRAMS:
+Do NOT invent programs. Any step taken AT ${school.shortName} must use a program name EXACTLY as written in the lists below. Steps at a transfer university are not constrained by these lists.
+
+${school.shortName.toUpperCase()} ASSOCIATE DEGREES:
+${associates}
+
+${school.shortName.toUpperCase()} BACHELOR'S DEGREES:
+${bachelors}
+
+${school.shortName.toUpperCase()} CERTIFICATES:
+${certificates}
+
+STEP FIELD REQUIREMENTS:
+- 'type' must be one of: degree, transfer, internship, exam.
+- 'level' must state the credential and, for steps at ${school.shortName}, the school: "A.A. (${school.shortName})", "A.S. (${school.shortName})", "B.S. (${school.shortName})". For a bachelor's earned after transferring, use "B.S." or "B.A." without a school. For non-degree steps use a short label such as "Transfer", "Internship", or "Licensure Exam".
+- 'name' for a degree step at ${school.shortName} must be the exact program title from the lists above.
+- 'description' should be 1-3 sentences on what the student does at this step and why it matters.
+
+MULTIPLE PATHWAY OPTIONS:
+When more than one ${school.shortName} program leads to the career, provide a separate complete pathway for each viable option and mark the most direct one with isPrimary: true. If only one program clearly leads there, return a single pathway in the pathways array.
+
+Remember: only real ${school.shortName} programs, and always start at ${school.shortName}.`;
+}
+
+function collegeUserQuery(school: CollegeCatalog, canonicalCareer: string): string {
+  return `Generate comprehensive educational pathway(s) for becoming a "${canonicalCareer}", starting from ${school.schoolName}.
+
+REQUIREMENTS:
+- The FIRST step must be a ${school.shortName} program taken exactly from the approved lists.
+- Include a transfer step when the career requires a bachelor's that ${school.shortName} does not offer.
+- Include internships, required licensure exams, and graduate degrees where the career calls for them.
+- Provide multiple pathways when several ${school.shortName} programs lead to this career, marking the most direct one as primary.`;
+}
+
 /**
  * Builds the Gemini request for a career at a given school, or null when that
  * school has no program catalog and therefore cannot be planned against.
@@ -282,12 +364,28 @@ export function buildPathwayRequest(
 ): PathwayPromptRequest | null {
   if (!hasCatalog(schoolId)) return null;
 
-  const isFiu = schoolId === "fiu";
+  const responseSchema = buildResponseSchema(canonicalCareer);
+
+  if (schoolId === "fiu") {
+    return {
+      systemPrompt: fiuSystemPrompt(canonicalCareer),
+      userQuery: fiuUserQuery(canonicalCareer),
+      responseSchema,
+    };
+  }
+
+  const college = COLLEGE_CATALOGS[schoolId];
+  if (college) {
+    return {
+      systemPrompt: collegeSystemPrompt(college, canonicalCareer),
+      userQuery: collegeUserQuery(college, canonicalCareer),
+      responseSchema,
+    };
+  }
+
   return {
-    systemPrompt: isFiu
-      ? fiuSystemPrompt(canonicalCareer)
-      : mdcSystemPrompt(canonicalCareer),
-    userQuery: isFiu ? fiuUserQuery(canonicalCareer) : mdcUserQuery(canonicalCareer),
-    responseSchema: buildResponseSchema(canonicalCareer),
+    systemPrompt: mdcSystemPrompt(canonicalCareer),
+    userQuery: mdcUserQuery(canonicalCareer),
+    responseSchema,
   };
 }

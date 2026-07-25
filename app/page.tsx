@@ -14,8 +14,12 @@ import {
 import { FLORIDA_UNIVERSITIES } from "@/app/lib/universities";
 import { ExamStepComponent } from "@/app/components/ExamStep";
 import SchoolSelector from "@/app/components/SchoolSelector";
+import { useSelectedSchoolId } from "@/app/lib/useSelectedSchool";
+import { getSchoolInfo } from "@/app/lib/schoolInfo";
 
 export default function Home() {
+  const [schoolId] = useSelectedSchoolId();
+  const schoolInfo = getSchoolInfo(schoolId);
   const [careerInput, setCareerInput] = useState("");
   const [showClearBtn, setShowClearBtn] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -735,7 +739,7 @@ export default function Home() {
                 Get Your Pathway
               </h3>
               <p className="text-gray-600 text-sm">
-                Vocation generates a personalized educational pathway showing all the steps needed, from MDC programs to licensure exams.
+                Vocation generates a personalized educational pathway showing all the steps needed, from degree programs to licensure exams.
               </p>
             </div>
 
@@ -947,36 +951,18 @@ export default function Home() {
             <div>
               <h3 className="font-semibold text-gray-800 mb-3">Resources</h3>
               <ul className="space-y-2">
-                <li>
-                  <a 
-                    href="https://www.mdc.edu/" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="hover:text-school-600 transition-colors"
-                  >
-                    Miami Dade College
-                  </a>
-                </li>
-                <li>
-                  <a 
-                    href="https://www.mdc.edu/advisement/" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="hover:text-school-600 transition-colors"
-                  >
-                    Academic Advising
-                  </a>
-                </li>
-                <li>
-                  <a 
-                    href="https://www.mdc.edu/academics/programs/" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="hover:text-school-600 transition-colors"
-                  >
-                    Degree Programs
-                  </a>
-                </li>
+                {schoolInfo.resources.map((resource) => (
+                  <li key={resource.url}>
+                    <a
+                      href={resource.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-school-600 transition-colors"
+                    >
+                      {resource.label}
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
 
@@ -1002,7 +988,7 @@ export default function Home() {
                 </li>
                 <li>
                   <a 
-                    href="https://www.mdc.edu/accessibility/" 
+                    href={schoolInfo.accessibilityUrl} 
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="hover:text-school-600 transition-colors"
@@ -1016,14 +1002,21 @@ export default function Home() {
             {/* Contact & Disclaimer Column */}
             <div>
               <h3 className="font-semibold text-gray-800 mb-3">Contact</h3>
-              <p className="mb-4">
-                <a 
-                  href="mailto:advisement@mdc.edu" 
-                  className="hover:text-school-600 transition-colors"
-                >
-                  advisement@mdc.edu
-                </a>
-              </p>
+              <ul className="mb-4 space-y-1">
+                {schoolInfo.contacts.map((contact) => (
+                  <li key={contact.email}>
+                    {schoolInfo.contacts.length > 1 && (
+                      <span className="text-gray-500">{contact.label}: </span>
+                    )}
+                    <a
+                      href={`mailto:${contact.email}`}
+                      className="hover:text-school-600 transition-colors"
+                    >
+                      {contact.email}
+                    </a>
+                  </li>
+                ))}
+              </ul>
               <p className="text-xs text-gray-500 leading-relaxed">
                 <strong>Disclaimer:</strong> Pathways are AI-generated suggestions and should be verified with academic advisors. Content may contain inaccuracies.
               </p>
@@ -1032,7 +1025,7 @@ export default function Home() {
 
           {/* Bottom Bar */}
           <div className="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
-            <p>© {new Date().getFullYear()} Miami Dade College. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} Vocation. All rights reserved.</p>
             <p className="mt-1">Powered by Google Gemini AI</p>
           </div>
         </div>

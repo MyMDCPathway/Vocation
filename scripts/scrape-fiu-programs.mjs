@@ -94,7 +94,7 @@ function parse(html) {
     programs.push({
       name: stripTags(name[1]),
       url: cleanUrl(link[1]),
-      level: levelText.includes("under") ? "undergraduate" : "graduate",
+      level: levelText.includes("under") ? "bachelor" : "graduate",
       college: college ? stripTags(college[1]) : "",
       areaOfInterest: area ? stripTags(area[1]) : "",
     });
@@ -115,14 +115,14 @@ function parse(html) {
 
 function render(programs) {
   const today = new Date().toISOString().slice(0, 10);
-  const undergrad = programs.filter((p) => p.level === "undergraduate").length;
+  const undergrad = programs.filter((p) => p.level === "bachelor").length;
 
   const rows = programs
     .map(
       (p) =>
         `  { name: ${JSON.stringify(p.name)}, url: ${JSON.stringify(p.url)}, ` +
         `level: ${JSON.stringify(p.level)}, college: ${JSON.stringify(p.college)}, ` +
-        `areaOfInterest: ${JSON.stringify(p.areaOfInterest)} },`
+        `areaOfInterest: ${JSON.stringify(p.areaOfInterest)}, area: ${JSON.stringify(p.areaOfInterest)} },`
     )
     .join("\n");
 
@@ -133,21 +133,26 @@ function render(programs) {
 //
 // Source:     ${SOURCE_URL}
 // Scraped:    ${today}
-// Programs:   ${programs.length} (${undergrad} undergraduate, ${programs.length - undergrad} graduate)
+// Programs:   ${programs.length} (${undergrad} bachelor, ${programs.length - undergrad} graduate)
 //
 // This mirrors what app/lib/mdc-programs.ts does for Miami Dade College, so a
 // generated pathway can link the transfer and bachelor's steps to the real FIU
 // page instead of guessing a URL. FIU restructures its site periodically; if
 // links start 404ing, re-run the scraper.
 
-export type FIUProgramLevel = "undergraduate" | "graduate";
+import {
+  createProgramCatalog,
+  type ProgramLevel,
+  type SchoolProgram,
+} from "@/app/lib/programCatalog";
 
-export interface FIUProgram {
-  /** Program title exactly as FIU lists it, including its degree code. */
-  name: string;
-  url: string;
+export type FIUProgramLevel = Extract<ProgramLevel, "bachelor" | "graduate">;
+
+export interface FIUProgram extends SchoolProgram {
   level: FIUProgramLevel;
+  /** FIU college the program sits in, e.g. "Business". */
   college: string;
+  /** FIU's own browse category, e.g. "Business and Economics". */
   areaOfInterest: string;
 }
 
@@ -155,93 +160,34 @@ export const FIU_PROGRAMS: FIUProgram[] = [
 ${rows}
 ];
 
-// Matching has to survive the gap between how FIU names a program
-// ("Accounting (BACC)") and how a generated pathway names it ("Bachelor of
-// Science in Accounting"). Normalizing strips case, punctuation, the
-// parenthetical degree code, and the common degree prefixes.
-
-const DEGREE_PREFIX =
-  /^(bachelor|master|doctor)(s)?( of| in)?( science| arts| applied science| business administration| fine arts| public administration)?( in| of)?\\s+/;
-
-function normalize(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/\\([^)]*\\)/g, " ")
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim()
-    .replace(/\\s+/g, " ");
-}
-
-function matchKey(value: string): string {
-  return normalize(value).replace(DEGREE_PREFIX, "").trim();
-}
-
-const BY_KEY = new Map<string, FIUProgram[]>();
-for (const program of FIU_PROGRAMS) {
-  for (const key of new Set([normalize(program.name), matchKey(program.name)])) {
-    if (!key) continue;
-    const bucket = BY_KEY.get(key);
-    if (bucket) bucket.push(program);
-    else BY_KEY.set(key, [program]);
-  }
-}
-
-const GRADUATE_HINT =
-  /\\b(master|masters|m\\.?s\\.?|m\\.?a\\.?|mba|macc|m\\.?b\\.?a|ph\\.?d|doctor|doctoral|graduate)\\b/i;
-
-const UNDERGRADUATE_HINT =
-  /\\b(bachelor|bachelors|b\\.?s\\.?|b\\.?a\\.?|b\\.?b\\.?a|b\\.?f\\.?a|b\\.?a\\.?s|undergraduate)\\b/i;
+// FIU is a four-year university, so an unqualified program name should resolve
+// to the bachelor's rather than the master's of the same name.
+export const fiuCatalog = createProgramCatalog(FIU_PROGRAMS, { preferred: "bachelor" });
+const catalog = fiuCatalog;
 
 /**
  * Resolves a free-text program name to an FIU program.
  *
- * Many titles exist at both levels — "Accounting" is both a BACC and a MACC.
- * Undergraduate wins unless a graduate credential is named, because the app's
- * pathways reach FIU as a transfer destination for a bachelor's degree.
- *
- * \`levelHint\` carries a pathway step's level field ("B.S.", "M.B.A. / M.S.
- * (Optional)"), which often states the credential when the program name alone
- * doesn't. It is only consulted for choosing between levels, never for
- * matching, so it can't cause a false match.
+ * See app/lib/programCatalog.ts for the matching rules — in particular that a
+ * query naming a credential matches STRICTLY, returning nothing rather than a
+ * program at the wrong level.
  */
 export function findFIUProgram(
   programName: string,
   levelHint?: string
 ): FIUProgram | undefined {
-  if (!programName) return undefined;
-
-  const candidates =
-    BY_KEY.get(normalize(programName)) ?? BY_KEY.get(matchKey(programName));
-  if (!candidates?.length) return undefined;
-
-  const hints = \`\${programName} \${levelHint ?? ""}\`;
-
-  // When the caller states a credential, the match is STRICT: return nothing
-  // rather than the other level. Sending a student reading a master's step to
-  // a bachelor's page (or the reverse) is worse than showing no link at all.
-  if (GRADUATE_HINT.test(hints)) {
-    return candidates.find((p) => p.level === "graduate");
-  }
-  if (UNDERGRADUATE_HINT.test(hints)) {
-    return candidates.find((p) => p.level === "undergraduate");
-  }
-
-  // No credential stated ("Accounting"): prefer the bachelor's, since pathways
-  // reach FIU as a transfer destination, but take whatever exists.
-  return (
-    candidates.find((p) => p.level === "undergraduate") ?? candidates[0]
-  );
+  return catalog.find(programName, levelHint) as FIUProgram | undefined;
 }
 
 export function getFIUProgramUrl(
   programName: string,
   levelHint?: string
 ): string | null {
-  return findFIUProgram(programName, levelHint)?.url ?? null;
+  return catalog.getUrl(programName, levelHint);
 }
 
 export function isFIUProgram(programName: string, levelHint?: string): boolean {
-  return findFIUProgram(programName, levelHint) !== undefined;
+  return catalog.has(programName, levelHint);
 }
 
 /** Every distinct college, for grouping or filtering in the UI. */
@@ -283,9 +229,9 @@ async function main() {
 
   writeFileSync(OUT_FILE, render(programs), "utf8");
 
-  const undergrad = programs.filter((p) => p.level === "undergraduate").length;
+  const undergrad = programs.filter((p) => p.level === "bachelor").length;
   console.log(`\nWrote ${path.relative(ROOT, OUT_FILE)}`);
-  console.log(`  ${programs.length} programs (${undergrad} undergraduate, ${programs.length - undergrad} graduate)`);
+  console.log(`  ${programs.length} programs (${undergrad} bachelor, ${programs.length - undergrad} graduate)`);
   console.log(`  ${new Set(programs.map((p) => p.college)).size} colleges`);
   console.log(`  ${new Set(programs.map((p) => p.areaOfInterest)).size} areas of interest`);
 }

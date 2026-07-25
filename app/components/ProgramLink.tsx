@@ -1,6 +1,7 @@
 "use client";
 
 import { findFIUProgram } from "@/app/lib/fiu-programs";
+import { catalogFor } from "@/app/lib/programCatalogs";
 import { getMDCProgramUrl, hasMDCProgramPage } from "@/app/lib/mdc-programs";
 import type { PathwayStep } from "@/app/lib/types";
 
@@ -55,14 +56,18 @@ function LinkButton({
 export function ProgramLink({ step, schoolId }: Props) {
   if (step.type !== "degree") return null;
 
-  if (schoolId === "fiu") {
-    const program = findFIUProgram(step.name, step.level);
+  // Schools with a scraped catalog resolve their own steps directly. Every
+  // degree step in such a pathway is one of that school's programs, because the
+  // prompt only permits names from its catalog.
+  const catalog = catalogFor(schoolId);
+  if (catalog) {
+    const program = catalog.find(step.name, step.level);
     if (!program) return null;
     return (
       <LinkButton
         href={program.url}
         label="View Program Page"
-        title={`${program.name} — ${program.college}, Florida International University`}
+        title={program.area ? `${program.name} — ${program.area}` : program.name}
         variant="primary"
       />
     );

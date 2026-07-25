@@ -6,6 +6,7 @@ import {
 } from "@/app/lib/pathwayPrompts";
 import { FIU_PROGRAMS } from "@/app/lib/fiu-programs";
 import { FLORIDA_SCHOOLS } from "@/app/lib/floridaSchools";
+import { BROWARD_PROGRAMS } from "@/app/lib/programs/broward";
 
 describe("catalog gating", () => {
   it("recognizes only the schools with real program data", () => {
@@ -81,7 +82,7 @@ describe("FIU prompt", () => {
     // The whole point is constraining the model to programs that exist.
     expect(built.systemPrompt).not.toContain("${");
 
-    const undergrad = FIU_PROGRAMS.filter((p) => p.level === "undergraduate");
+    const undergrad = FIU_PROGRAMS.filter((p) => p.level === "bachelor");
     expect(undergrad.length).toBeGreaterThan(100);
     for (const program of undergrad.slice(0, 20)) {
       expect(built.systemPrompt, program.name).toContain(program.name);
@@ -106,5 +107,42 @@ describe("response schema", () => {
       expect(schema.required, id).toContain("pathways");
       expect(JSON.stringify(schema), id).toContain("Architect");
     }
+  });
+});
+
+describe("Broward prompt (generic state-college template)", () => {
+  const built = buildPathwayRequest("broward", "Registered Nurse")!;
+
+  it("builds a request", () => {
+    expect(built).not.toBeNull();
+  });
+
+  it("starts at Broward, not at a bachelor's", () => {
+    expect(built.systemPrompt).toMatch(/Broward College/);
+    expect(built.systemPrompt).toMatch(/START with the Broward program/i);
+    expect(built.userQuery).toMatch(/FIRST step must be a Broward program/i);
+  });
+
+  it("keeps the transfer step, since college students transfer out", () => {
+    expect(built.systemPrompt).toMatch(/TRANSFER step to a four-year university/i);
+  });
+
+  it("embeds Broward's real catalog rather than a placeholder", () => {
+    expect(built.systemPrompt).not.toContain("${");
+    const associates = BROWARD_PROGRAMS.filter((p) => p.level === "associate");
+    expect(associates.length).toBeGreaterThan(50);
+    for (const p of associates.slice(0, 15)) {
+      expect(built.systemPrompt, p.name).toContain(p.name);
+    }
+  });
+
+  it("does not leak MDC's catalog into Broward's prompt", () => {
+    expect(built.systemPrompt).not.toContain("Miami Dade College");
+    expect(built.systemPrompt).not.toContain("Associate in Arts in Engineering");
+  });
+
+  it("interpolates the career", () => {
+    expect(built.systemPrompt).toContain("Registered Nurse");
+    expect(built.userQuery).toContain("Registered Nurse");
   });
 });

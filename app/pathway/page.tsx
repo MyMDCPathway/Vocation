@@ -15,6 +15,7 @@ import {
 } from "@/app/lib/mdc-programs";
 import { ProgramLink } from "@/app/components/ProgramLink";
 import { useSelectedSchoolId } from "@/app/lib/useSelectedSchool";
+import { getSchoolInfo } from "@/app/lib/schoolInfo";
 import { FLORIDA_UNIVERSITIES } from "@/app/lib/universities";
 import { ExamStepComponent } from "@/app/components/ExamStep";
 import { calculateStepCostRange, calculatePathwayCostRange, formatCostRange } from "@/app/lib/cost";
@@ -35,6 +36,7 @@ function PathwayPageContent() {
   // Which school's catalog to plan against. Read after mount because
   // localStorage isn't available during the server render.
   const [schoolId] = useSelectedSchoolId();
+  const schoolInfo = getSchoolInfo(schoolId);
   const [showClearBtn, setShowClearBtn] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
@@ -1067,7 +1069,7 @@ function PathwayPageContent() {
                                 Recommendations
                               </button>
                               <a
-                                href="https://www.mdc.edu/transfer-information/transfer-agreements/"
+                                href={schoolInfo.transferAgreementsUrl}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-150"
@@ -1255,7 +1257,7 @@ function PathwayPageContent() {
                                     Recommendations
                                   </button>
                                   <a
-                                    href="https://www.mdc.edu/transfer-information/transfer-agreements/"
+                                    href={schoolInfo.transferAgreementsUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-150"
@@ -1361,8 +1363,8 @@ function PathwayPageContent() {
             </header>
             <main className="p-6 overflow-y-auto">
               <p className="text-sm text-gray-600 mb-4">
-                MDC has strong articulation agreements with these Florida
-                universities. Consider these options for your transfer:
+                {schoolInfo.shortName} has strong articulation agreements with these
+                Florida universities. Consider these options for your transfer:
               </p>
               <div className="space-y-4">
                 {FLORIDA_UNIVERSITIES.map((university, idx) => (
@@ -1399,13 +1401,13 @@ function PathwayPageContent() {
               </div>
               <div className="mt-6 pt-6 border-t border-gray-200">
                 <a
-                  href="https://www.mdc.edu/transfer-information/transfer-agreements/"
+                  href={schoolInfo.transferAgreementsUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-150"
                 >
-                  <i className="fas fa-external-link-alt mr-2" /> View MDC
-                  Transfer Agreements
+                  <i className="fas fa-external-link-alt mr-2" /> View{" "}
+                  {schoolInfo.shortName} Transfer Agreements
                 </a>
               </div>
             </main>
@@ -1510,36 +1512,18 @@ function PathwayPageContent() {
             <div>
               <h3 className="font-semibold text-gray-800 mb-3">Resources</h3>
               <ul className="space-y-2">
-                <li>
-                  <a 
-                    href="https://www.mdc.edu/" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="hover:text-school-600 transition-colors"
-                  >
-                    Miami Dade College
-                  </a>
-                </li>
-                <li>
-                  <a 
-                    href="https://www.mdc.edu/advisement/" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="hover:text-school-600 transition-colors"
-                  >
-                    Academic Advising
-                  </a>
-                </li>
-                <li>
-                  <a 
-                    href="https://www.mdc.edu/academics/programs/" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="hover:text-school-600 transition-colors"
-                  >
-                    Degree Programs
-                  </a>
-                </li>
+                {schoolInfo.resources.map((resource) => (
+                  <li key={resource.url}>
+                    <a
+                      href={resource.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-school-600 transition-colors"
+                    >
+                      {resource.label}
+                    </a>
+                  </li>
+                ))}
               </ul>
             </div>
 
@@ -1548,25 +1532,25 @@ function PathwayPageContent() {
               <h3 className="font-semibold text-gray-800 mb-3">Legal</h3>
               <ul className="space-y-2">
                 <li>
-                  <a 
-                    href="/privacy" 
+                  <a
+                    href="/privacy"
                     className="hover:text-school-600 transition-colors"
                   >
                     Privacy Policy
                   </a>
                 </li>
                 <li>
-                  <a 
-                    href="/terms" 
+                  <a
+                    href="/terms"
                     className="hover:text-school-600 transition-colors"
                   >
                     Terms of Service
                   </a>
                 </li>
                 <li>
-                  <a 
-                    href="https://www.mdc.edu/accessibility/" 
-                    target="_blank" 
+                  <a
+                    href={schoolInfo.accessibilityUrl}
+                    target="_blank"
                     rel="noopener noreferrer"
                     className="hover:text-school-600 transition-colors"
                   >
@@ -1579,14 +1563,21 @@ function PathwayPageContent() {
             {/* Contact & Disclaimer Column */}
             <div>
               <h3 className="font-semibold text-gray-800 mb-3">Contact</h3>
-              <p className="mb-4">
-                <a 
-                  href="mailto:advisement@mdc.edu" 
-                  className="hover:text-school-600 transition-colors"
-                >
-                  advisement@mdc.edu
-                </a>
-              </p>
+              <ul className="mb-4 space-y-1">
+                {schoolInfo.contacts.map((contact) => (
+                  <li key={contact.email}>
+                    {schoolInfo.contacts.length > 1 && (
+                      <span className="text-gray-500">{contact.label}: </span>
+                    )}
+                    <a
+                      href={`mailto:${contact.email}`}
+                      className="hover:text-school-600 transition-colors"
+                    >
+                      {contact.email}
+                    </a>
+                  </li>
+                ))}
+              </ul>
               <p className="text-xs text-gray-500 leading-relaxed">
                 <strong>Disclaimer:</strong> Pathways are AI-generated suggestions and should be verified with academic advisors. Content may contain inaccuracies.
               </p>
@@ -1595,7 +1586,7 @@ function PathwayPageContent() {
 
           {/* Bottom Bar */}
           <div className="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
-            <p>© {new Date().getFullYear()} Miami Dade College. All rights reserved.</p>
+            <p>© {new Date().getFullYear()} Vocation. All rights reserved.</p>
             <p className="mt-1">Powered by Google Gemini AI</p>
           </div>
         </div>

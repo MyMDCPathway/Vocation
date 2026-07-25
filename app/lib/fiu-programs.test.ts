@@ -42,7 +42,7 @@ describe("FIU catalog data", () => {
 
   it("classifies both undergraduate and graduate programs", () => {
     const levels = new Set(FIU_PROGRAMS.map((p) => p.level));
-    expect(levels).toEqual(new Set(["undergraduate", "graduate"]));
+    expect(levels).toEqual(new Set(["bachelor", "graduate"]));
   });
 });
 
@@ -67,13 +67,13 @@ describe("findFIUProgram", () => {
   it("strips degree prefixes the pathway generator adds", () => {
     // Gemini emits full titles; FIU lists bare names plus a code.
     expect(findFIUProgram("Bachelor of Science in Accounting")?.level).toBe(
-      "undergraduate"
+      "bachelor"
     );
   });
 
   it("prefers the undergraduate program when a name exists at both levels", () => {
     // "Accounting" is both a BACC and a MACC; transfers target the bachelor's.
-    expect(findFIUProgram("Accounting")?.level).toBe("undergraduate");
+    expect(findFIUProgram("Accounting")?.level).toBe("bachelor");
   });
 
   it("returns the graduate program when the query asks for one", () => {
