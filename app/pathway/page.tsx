@@ -1068,15 +1068,17 @@ function PathwayPageContent() {
                                 <i className="fas fa-info-circle mr-2" />
                                 Recommendations
                               </button>
-                              <a
-                                href={schoolInfo.transferAgreementsUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-150"
-                              >
-                                <i className="fas fa-external-link-alt mr-2" /> View
-                                Transfer Agreements
-                              </a>
+                              {schoolInfo.transferAgreementsUrl && (
+                                <a
+                                  href={schoolInfo.transferAgreementsUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-150"
+                                >
+                                  <i className="fas fa-external-link-alt mr-2" /> View
+                                  Transfer Agreements
+                                </a>
+                              )}
                             </div>
                           )}
                           <ProgramLink step={step} schoolId={schoolId} />
@@ -1256,15 +1258,17 @@ function PathwayPageContent() {
                                     <i className="fas fa-info-circle mr-2" />
                                     Recommendations
                                   </button>
-                                  <a
-                                    href={schoolInfo.transferAgreementsUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-150"
-                                  >
-                                    <i className="fas fa-external-link-alt mr-2" /> View
-                                    Transfer Agreements
-                                  </a>
+                                  {schoolInfo.transferAgreementsUrl && (
+                                    <a
+                                      href={schoolInfo.transferAgreementsUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-150"
+                                    >
+                                      <i className="fas fa-external-link-alt mr-2" /> View
+                                      Transfer Agreements
+                                    </a>
+                                  )}
                                 </div>
                               )}
                               <ProgramLink step={step} schoolId={schoolId} />
@@ -1399,17 +1403,19 @@ function PathwayPageContent() {
                   </div>
                 ))}
               </div>
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <a
-                  href={schoolInfo.transferAgreementsUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-150"
-                >
-                  <i className="fas fa-external-link-alt mr-2" /> View{" "}
-                  {schoolInfo.shortName} Transfer Agreements
-                </a>
-              </div>
+              {schoolInfo.transferAgreementsUrl && (
+                <div className="mt-6 pt-6 border-t border-gray-200">
+                  <a
+                    href={schoolInfo.transferAgreementsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-150"
+                  >
+                    <i className="fas fa-external-link-alt mr-2" /> View{" "}
+                    {schoolInfo.shortName} Transfer Agreements
+                  </a>
+                </div>
+              )}
             </main>
           </div>
         </div>
@@ -1562,24 +1568,30 @@ function PathwayPageContent() {
               </ul>
             </div>
 
-            {/* Contact & Disclaimer Column */}
+            {/* Contact & Disclaimer Column. Some schools publish no central
+                advising address at all, so the heading is dropped rather than
+                left standing over an empty list. */}
             <div>
-              <h3 className="font-semibold text-gray-800 mb-3">Contact</h3>
-              <ul className="mb-4 space-y-1">
-                {schoolInfo.contacts.map((contact) => (
-                  <li key={contact.email}>
-                    {schoolInfo.contacts.length > 1 && (
-                      <span className="text-gray-500">{contact.label}: </span>
-                    )}
-                    <a
-                      href={`mailto:${contact.email}`}
-                      className="hover:text-school-600 transition-colors"
-                    >
-                      {contact.email}
-                    </a>
-                  </li>
-                ))}
-              </ul>
+              {schoolInfo.contacts.length > 0 && (
+                <>
+                  <h3 className="font-semibold text-gray-800 mb-3">Contact</h3>
+                  <ul className="mb-4 space-y-1">
+                    {schoolInfo.contacts.map((contact) => (
+                      <li key={contact.email}>
+                        {schoolInfo.contacts.length > 1 && (
+                          <span className="text-gray-500">{contact.label}: </span>
+                        )}
+                        <a
+                          href={`mailto:${contact.email}`}
+                          className="hover:text-school-600 transition-colors"
+                        >
+                          {contact.email}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
               <p className="text-xs text-gray-500 leading-relaxed">
                 <strong>Disclaimer:</strong> Pathways are AI-generated suggestions and should be verified with academic advisors. Content may contain inaccuracies.
               </p>

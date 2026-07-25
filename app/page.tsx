@@ -16,6 +16,7 @@ import { ExamStepComponent } from "@/app/components/ExamStep";
 import SchoolSelector from "@/app/components/SchoolSelector";
 import { useSelectedSchoolId } from "@/app/lib/useSelectedSchool";
 import { getSchoolInfo } from "@/app/lib/schoolInfo";
+import { DEFAULT_SCHOOL_ID } from "@/app/lib/floridaSchools";
 
 export default function Home() {
   const [schoolId] = useSelectedSchoolId();
@@ -351,14 +352,32 @@ export default function Home() {
             A powerful way to explore career pathways with AI
           </p>
 
-          {/* Start Button */}
-          <div className="flex justify-center">
-            <Link
-              href="/pathway"
-              className="px-12 py-4 bg-school-600 hover:bg-school-700 text-white font-semibold rounded-lg shadow-md transition duration-200 text-lg inline-block"
-            >
-              Start
-            </Link>
+          {/* Start Button - disabled until a real school is picked, since
+              /pathway has nothing to generate against otherwise. */}
+          <div className="flex flex-col items-center gap-2">
+            {schoolId === DEFAULT_SCHOOL_ID ? (
+              <>
+                <button
+                  type="button"
+                  disabled
+                  aria-disabled="true"
+                  title="Choose your school above to get started"
+                  className="px-12 py-4 bg-gray-300 text-gray-500 font-semibold rounded-lg shadow-md text-lg inline-block cursor-not-allowed"
+                >
+                  Start
+                </button>
+                <p className="text-sm text-gray-500">
+                  Choose your school above to get started.
+                </p>
+              </>
+            ) : (
+              <Link
+                href="/pathway"
+                className="px-12 py-4 bg-school-600 hover:bg-school-700 text-white font-semibold rounded-lg shadow-md transition duration-200 text-lg inline-block"
+              >
+                Start
+              </Link>
+            )}
           </div>
         </div>
       </section>
@@ -1001,24 +1020,30 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* Contact & Disclaimer Column */}
+            {/* Contact & Disclaimer Column. Some schools publish no central
+                advising address at all, so the heading is dropped rather than
+                left standing over an empty list. */}
             <div>
-              <h3 className="font-semibold text-gray-800 mb-3">Contact</h3>
-              <ul className="mb-4 space-y-1">
-                {schoolInfo.contacts.map((contact) => (
-                  <li key={contact.email}>
-                    {schoolInfo.contacts.length > 1 && (
-                      <span className="text-gray-500">{contact.label}: </span>
-                    )}
-                    <a
-                      href={`mailto:${contact.email}`}
-                      className="hover:text-school-600 transition-colors"
-                    >
-                      {contact.email}
-                    </a>
-                  </li>
-                ))}
-              </ul>
+              {schoolInfo.contacts.length > 0 && (
+                <>
+                  <h3 className="font-semibold text-gray-800 mb-3">Contact</h3>
+                  <ul className="mb-4 space-y-1">
+                    {schoolInfo.contacts.map((contact) => (
+                      <li key={contact.email}>
+                        {schoolInfo.contacts.length > 1 && (
+                          <span className="text-gray-500">{contact.label}: </span>
+                        )}
+                        <a
+                          href={`mailto:${contact.email}`}
+                          className="hover:text-school-600 transition-colors"
+                        >
+                          {contact.email}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
               <p className="text-xs text-gray-500 leading-relaxed">
                 <strong>Disclaimer:</strong> Pathways are AI-generated suggestions and should be verified with academic advisors. Content may contain inaccuracies.
               </p>

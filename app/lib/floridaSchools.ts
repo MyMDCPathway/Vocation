@@ -70,7 +70,8 @@ export const FLORIDA_SCHOOLS: School[] = [
   { id: "chipola", name: "Chipola College", shortName: "CC", city: "Marianna", kind: "state-college", color: "#003087", logo: "/logos/chipola.png" },
   { id: "cf", name: "College of Central Florida", shortName: "CF", city: "Ocala", kind: "state-college", color: "#005CB9", logo: "/logos/cf.png" },
   { id: "cfk", name: "College of the Florida Keys", shortName: "CFK", city: "Key West", kind: "state-college", color: "#006A8E", logo: "/logos/cfk.png" },
-  { id: "daytona", name: "Daytona State College", shortName: "DSC", city: "Daytona Beach", kind: "state-college", color: "#9D2235", logo: "/logos/daytona.png" },
+  // Blue, sampled from the school's own logo wordmark (matches the site's blue too).
+  { id: "daytona", name: "Daytona State College", shortName: "DSC", city: "Daytona Beach", kind: "state-college", color: "#0079C2", logo: "/logos/daytona.png" },
   { id: "efsc", name: "Eastern Florida State College", shortName: "EFSC", city: "Cocoa", kind: "state-college", color: "#1B365D", logo: "/logos/efsc.png" },
   { id: "fgc", name: "Florida Gateway College", shortName: "FGC", city: "Lake City", kind: "state-college", color: "#00563F", logo: "/logos/fgc.png" },
   { id: "fsw", name: "Florida SouthWestern State College", shortName: "FSW", city: "Fort Myers", kind: "state-college", color: "#002F6C", logo: "/logos/fsw.png" },
@@ -88,17 +89,22 @@ export const FLORIDA_SCHOOLS: School[] = [
     color: "#0053A0",
     logo: "/logos/mdc.png",
   },
-  { id: "nfc", name: "North Florida College", shortName: "NFC", city: "Madison", kind: "state-college", color: "#046A38", logo: "/logos/nfc.png" },
+  // Burgundy, sampled from the school's own logo (its colors are burgundy/gray/black).
+  { id: "nfc", name: "North Florida College", shortName: "NFC", city: "Madison", kind: "state-college", color: "#8B1D41", logo: "/logos/nfc.png" },
   { id: "nwfsc", name: "Northwest Florida State College", shortName: "NWF", city: "Niceville", kind: "state-college", color: "#003087", logo: "/logos/nwfsc.png" },
   { id: "pbsc", name: "Palm Beach State College", shortName: "PBSC", city: "Lake Worth", kind: "state-college", color: "#007367", logo: "/logos/pbsc.png" },
-  { id: "phsc", name: "Pasco-Hernando State College", shortName: "PHSC", city: "New Port Richey", kind: "state-college", color: "#003865", logo: "/logos/phsc.png" },
+  // Gold, sampled from the school's own logo. Light enough that schoolTheme
+  // darkens step 600 for white-text contrast (same path as UCF's gold).
+  { id: "phsc", name: "Pasco-Hernando State College", shortName: "PHSC", city: "New Port Richey", kind: "state-college", color: "#D0B457", logo: "/logos/phsc.png" },
   { id: "psc", name: "Pensacola State College", shortName: "PSC", city: "Pensacola", kind: "state-college", color: "#00539B", logo: "/logos/psc.png" },
   { id: "polk", name: "Polk State College", shortName: "PSC", city: "Winter Haven", kind: "state-college", color: "#A6192E", logo: "/logos/polk.png" },
   { id: "sjr", name: "St. Johns River State College", shortName: "SJR", city: "Palatka", kind: "state-college", color: "#003DA5", logo: "/logos/sjr.png" },
   { id: "spc", name: "St. Petersburg College", shortName: "SPC", city: "St. Petersburg", kind: "state-college", color: "#0066A1", logo: "/logos/spc.png" },
   { id: "sf", name: "Santa Fe College", shortName: "SF", city: "Gainesville", kind: "state-college", color: "#003865", logo: "/logos/sf.png" },
   { id: "seminole", name: "Seminole State College of Florida", shortName: "SSC", city: "Sanford", kind: "state-college", color: "#003DA5", logo: "/logos/seminole.png" },
-  { id: "sfsc", name: "South Florida State College", shortName: "SFSC", city: "Avon Park", kind: "state-college", color: "#00447C", logo: "/logos/sfsc.png" },
+  // Purple, sampled from southflorida.edu's live styles (their dominant brand
+  // color). Note /logos/sfsc.png predates this and is still orange/navy.
+  { id: "sfsc", name: "South Florida State College", shortName: "SFSC", city: "Avon Park", kind: "state-college", color: "#373668", logo: "/logos/sfsc.png" },
   { id: "scf", name: "State College of Florida, Manatee-Sarasota", shortName: "SCF", city: "Bradenton", kind: "state-college", color: "#003E7E", logo: "/logos/scf.png" },
   { id: "tsc", name: "Tallahassee State College", shortName: "TSC", city: "Tallahassee", kind: "state-college", color: "#00539F", logo: "/logos/tsc.png" },
   { id: "valencia", name: "Valencia College", shortName: "VC", city: "Orlando", kind: "state-college", color: "#B0272E", logo: "/logos/valencia.png" },
