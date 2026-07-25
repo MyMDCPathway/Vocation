@@ -45,8 +45,24 @@ export const SCHOOL_KIND_LABELS: Record<SchoolKind, string> = {
   private: "Private Universities & Colleges",
 };
 
-/** The school the app's pathway data is actually built for today. */
-export const DEFAULT_SCHOOL_ID = "mdc";
+/** The identity shown before a visitor has picked a school. */
+export const DEFAULT_SCHOOL_ID = "default";
+
+// Not a real school, so it's deliberately NOT in FLORIDA_SCHOOLS — that's what
+// keeps it out of the selector dropdown and its search results. It exists so
+// a first-time visitor sees Vocation's own mark and a neutral blue instead of
+// one school's branding before they've chosen anything. `kind` is unused
+// here (nothing groups or filters this entry) and is set only to satisfy the
+// type.
+const DEFAULT_SCHOOL: School = {
+  id: DEFAULT_SCHOOL_ID,
+  name: "Vocation",
+  shortName: "VOC",
+  city: "",
+  kind: "state-college",
+  color: "#2563EB",
+  logo: "/logos/default.png",
+};
 
 export const FLORIDA_SCHOOLS: School[] = [
   // --- Florida College System (all 28) ------------------------------------
@@ -126,5 +142,6 @@ export const FLORIDA_SCHOOLS: School[] = [
 ];
 
 export function getSchoolById(id: string): School | undefined {
+  if (id === DEFAULT_SCHOOL_ID) return DEFAULT_SCHOOL;
   return FLORIDA_SCHOOLS.find((school) => school.id === id);
 }

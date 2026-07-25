@@ -11,10 +11,15 @@ describe("floridaSchools", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("includes MDC as the default school, with its logo", () => {
-    const mdc = getSchoolById(DEFAULT_SCHOOL_ID);
-    expect(mdc?.name).toBe("Miami Dade College");
-    expect(mdc?.logo).toBeTruthy();
+  it("resolves the default identity, but keeps it out of the school list", () => {
+    // First-time visitors (no cookie yet) get Vocation's own mark, not one
+    // school's branding. It must resolve via getSchoolById so layout.tsx and
+    // every consumer can render it like any other School, but it must NOT be
+    // selectable from the dropdown, since it isn't a real school.
+    const fallback = getSchoolById(DEFAULT_SCHOOL_ID);
+    expect(fallback?.name).toBe("Vocation");
+    expect(fallback?.logo).toBeTruthy();
+    expect(FLORIDA_SCHOOLS.find((s) => s.id === DEFAULT_SCHOOL_ID)).toBeUndefined();
   });
 
   it("lists the complete public systems", () => {

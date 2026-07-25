@@ -172,12 +172,20 @@ export default function SchoolSelector() {
       )}
 
       {/* Only warn for schools we have no program catalog for. MDC and FIU
-          both generate real pathways from their own catalogs. */}
-      {!hasCatalog(selectedId) && (
-        <p className="mt-1 text-xs text-amber-600">
-          We don&apos;t have {selected.shortName}&apos;s program catalog yet, so
-          pathways can&apos;t be generated for it.
+          both generate real pathways from their own catalogs. The default
+          identity isn't a school at all, so it gets a prompt to choose one
+          instead of a catalog complaint about "VOC". */}
+      {selectedId === DEFAULT_SCHOOL_ID ? (
+        <p className="mt-1 text-xs text-gray-500">
+          Choose your school to get started.
         </p>
+      ) : (
+        !hasCatalog(selectedId) && (
+          <p className="mt-1 text-xs text-amber-600">
+            We don&apos;t have {selected.shortName}&apos;s program catalog yet, so
+            pathways can&apos;t be generated for it.
+          </p>
+        )
       )}
     </div>
   );

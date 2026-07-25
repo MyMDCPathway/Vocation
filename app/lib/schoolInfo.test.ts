@@ -38,6 +38,26 @@ describe("getSchoolInfo", () => {
   });
 });
 
+describe("the default (no school selected) identity", () => {
+  it("points at Vocation's own contact and the state DOE, not MDC's", () => {
+    // The pre-selection identity must not silently inherit MDC's info the way
+    // an uncatalogued school does - that would misleadingly look like MDC had
+    // already been chosen.
+    const info = getSchoolInfo("default");
+    expect(info.contacts).toEqual([
+      { label: "Vocation", email: "chrisorozco305@gmail.com" },
+    ]);
+    expect(info.resources).toEqual([
+      { label: "Florida Department of Education", url: "https://www.fldoe.org/" },
+    ]);
+    expect(info.accessibilityUrl).toBeNull();
+  });
+
+  it("is a curated entry, not a fallback", () => {
+    expect(hasSchoolInfo("default")).toBe(true);
+  });
+});
+
 describe("hasSchoolInfo", () => {
   it("distinguishes a curated school from a fallback one", () => {
     expect(hasSchoolInfo("broward")).toBe(true);

@@ -57,7 +57,9 @@ describe("POST /api/generate-pathway", () => {
     );
 
     const { POST } = await loadRoute();
-    const res = await POST(makeRequest({ career: "Electrical Engineer" }));
+    const res = await POST(
+      makeRequest({ career: "Electrical Engineer", school: "mdc" })
+    );
 
     expect(res.status).toBe(200);
     const body = await res.json();
@@ -80,7 +82,7 @@ describe("POST /api/generate-pathway", () => {
     );
 
     const { POST } = await loadRoute();
-    const res = await POST(makeRequest({ career: "Nurse" }));
+    const res = await POST(makeRequest({ career: "Nurse", school: "mdc" }));
 
     expect(res.status).toBe(429);
     const body = await res.json();
@@ -99,7 +101,7 @@ describe("POST /api/generate-pathway", () => {
     );
 
     const { POST } = await loadRoute();
-    const res = await POST(makeRequest({ career: "Nurse" }));
+    const res = await POST(makeRequest({ career: "Nurse", school: "mdc" }));
 
     expect(res.status).toBe(502);
   });
@@ -110,6 +112,20 @@ describe("POST /api/generate-pathway", () => {
 
     const { POST } = await loadRoute();
     const res = await POST(makeRequest({}));
+
+    expect(res.status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects a missing school rather than silently generating an MDC pathway", async () => {
+    // The pre-selection identity is a neutral, non-school default (see
+    // floridaSchools.ts), so a request that omits `school` must be rejected
+    // the same way an uncatalogued school is - never fall back to MDC.
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { POST } = await loadRoute();
+    const res = await POST(makeRequest({ career: "Nurse" }));
 
     expect(res.status).toBe(400);
     expect(fetchMock).not.toHaveBeenCalled();

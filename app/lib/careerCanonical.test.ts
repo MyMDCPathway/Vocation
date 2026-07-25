@@ -100,9 +100,9 @@ describe("generate-pathway shares one generation across spellings", () => {
     const { POST } = await import("@/app/api/generate-pathway/route");
     const req = (body: unknown) => ({ json: async () => body }) as any;
 
-    const first = await POST(req({ career: "RN" }));
-    const second = await POST(req({ career: "nurse" }));
-    const third = await POST(req({ career: "Registered Nurse" }));
+    const first = await POST(req({ career: "RN", school: "mdc" }));
+    const second = await POST(req({ career: "nurse", school: "mdc" }));
+    const third = await POST(req({ career: "Registered Nurse", school: "mdc" }));
 
     expect(first.status).toBe(200);
     expect(await third.json()).toEqual(pathwayData);

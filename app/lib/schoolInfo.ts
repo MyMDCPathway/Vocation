@@ -24,12 +24,25 @@ export interface SchoolResource {
 export interface SchoolInfo {
   shortName: string;
   transferAgreementsUrl: string;
-  accessibilityUrl: string;
+  /** null when there's no school to point an accessibility link at (the default identity). */
+  accessibilityUrl: string | null;
   resources: SchoolResource[];
   contacts: SchoolContact[];
 }
 
 const SCHOOL_INFO: Record<string, SchoolInfo> = {
+  // The pre-selection identity (see floridaSchools.ts DEFAULT_SCHOOL) isn't a
+  // school, so it gets Vocation's own contact and the state's higher-ed site
+  // instead of MDC's — that fallback would misleadingly imply the visitor had
+  // already picked MDC. No accessibilityUrl for the same reason: there's no
+  // school-specific accessibility page to point at yet.
+  default: {
+    shortName: "Vocation",
+    transferAgreementsUrl: "https://www.fldoe.org/",
+    accessibilityUrl: null,
+    resources: [{ label: "Florida Department of Education", url: "https://www.fldoe.org/" }],
+    contacts: [{ label: "Vocation", email: "chrisorozco305@gmail.com" }],
+  },
   mdc: {
     shortName: "MDC",
     transferAgreementsUrl:

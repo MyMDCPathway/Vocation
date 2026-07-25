@@ -92,8 +92,8 @@ describe("generate-pathway route uses the cache", () => {
     const { POST } = await import("@/app/api/generate-pathway/route");
     const req = (body: unknown) => ({ json: async () => body }) as any;
 
-    const first = await POST(req({ career: "Nurse" }));
-    const second = await POST(req({ career: "  nurse  " })); // different spacing/case
+    const first = await POST(req({ career: "Nurse", school: "mdc" }));
+    const second = await POST(req({ career: "  nurse  ", school: "mdc" })); // different spacing/case
 
     expect(first.status).toBe(200);
     expect(second.status).toBe(200);

@@ -986,16 +986,18 @@ export default function Home() {
                     Terms of Service
                   </a>
                 </li>
-                <li>
-                  <a 
-                    href={schoolInfo.accessibilityUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="hover:text-school-600 transition-colors"
-                  >
-                    Accessibility
-                  </a>
-                </li>
+                {schoolInfo.accessibilityUrl && (
+                  <li>
+                    <a
+                      href={schoolInfo.accessibilityUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="hover:text-school-600 transition-colors"
+                    >
+                      Accessibility
+                    </a>
+                  </li>
+                )}
               </ul>
             </div>
 
