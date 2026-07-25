@@ -105,7 +105,7 @@ export default function TermsOfService() {
             <h2 className="text-2xl font-semibold text-gray-900 mt-8 mb-4">10. Contact Information</h2>
             <p>
               For questions about these Terms of Service, please contact us at{' '}
-              <a href="mailto:advisement@mdc.edu" className="text-blue-600 hover:underline">advisement@mdc.edu</a>.
+              <a href="mailto:advisement@mdc.edu" className="text-school-600 hover:underline">advisement@mdc.edu</a>.
             </p>
           </section>
         </div>
@@ -113,7 +113,7 @@ export default function TermsOfService() {
         <div className="mt-12">
           <a 
             href="/" 
-            className="text-blue-600 hover:text-blue-700 font-medium"
+            className="text-school-600 hover:text-school-700 font-medium"
           >
             ← Back to Vocation
           </a>

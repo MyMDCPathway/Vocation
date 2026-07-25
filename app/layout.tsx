@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Script from 'next/script'
+import SchoolThemeScript from '@/app/components/SchoolThemeScript'
 
 export const metadata: Metadata = {
   title: 'Vocation | Career Planning for Miami Dade College',
@@ -20,6 +21,7 @@ export default function RootLayout({
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
           rel="stylesheet"
         />
+        <SchoolThemeScript />
       </head>
       <body className="min-h-screen">{children}</body>
     </html>

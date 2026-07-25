@@ -410,7 +410,7 @@ function PathwayPageContent() {
       <div class="space-y-4 text-gray-700">
         <p><strong>Generate a Pathway:</strong></p>
         <p>1. Type your desired career (e.g., "Software Engineer" or "Nurse") into the text box.</p>
-        <p>2. Press <kbd class="px-2 py-1 bg-gray-200 rounded-md text-sm">Enter</kbd> or click the blue arrow button to generate a personalized educational pathway.</p>
+        <p>2. Press <kbd class="px-2 py-1 bg-gray-200 rounded-md text-sm">Enter</kbd> or click the arrow button to generate a personalized educational pathway.</p>
         <p>3. The pathway will show you recommended degrees from MDC, potential transfer steps to universities, and other milestones like internships and exams.</p>
         <p class="mt-4"><strong>Compare Careers:</strong></p>
         <p>1. After generating a pathway, click the "+ Compare Another Career" button below the flowchart.</p>
@@ -602,7 +602,7 @@ function PathwayPageContent() {
             {/* Loading indicator while fetching career suggestions */}
             {loadingSuggestions && (
               <div className="flex items-center justify-center space-x-3 mb-12">
-                <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <div className="w-5 h-5 border-2 border-school-600 border-t-transparent rounded-full animate-spin"></div>
                 <span className="text-gray-600">Finding specific career options...</span>
               </div>
             )}
@@ -616,9 +616,9 @@ function PathwayPageContent() {
                   <button
                     key={index}
                     onClick={() => handleGeneratePathway(suggestion)}
-                    className="bg-white border border-gray-200 rounded-lg p-6 hover:border-blue-500 hover:shadow-lg transition-all text-left group"
+                    className="bg-white border border-gray-200 rounded-lg p-6 hover:border-school-500 hover:shadow-lg transition-all text-left group"
                   >
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-school-600 transition-colors">
                       {suggestion.title || "Unknown Career"}
                     </h3>
                     {suggestion.description && (
@@ -636,7 +636,7 @@ function PathwayPageContent() {
                         )}
                         {suggestion.jobOutlook && (
                           <div className="flex items-center gap-2">
-                            <i className="fas fa-chart-line text-blue-600 text-xs"></i>
+                            <i className="fas fa-chart-line text-school-600 text-xs"></i>
                             <span className="text-sm text-gray-600">{suggestion.jobOutlook}</span>
                           </div>
                         )}
@@ -876,8 +876,8 @@ function PathwayPageContent() {
                 disabled={!careerInput.trim() || loadingSuggestions}
                 className={`px-16 py-4 rounded-lg shadow-md transition duration-200 text-base fade-in-delay-2 ${isFadingOut ? 'fade-out' : ''} ${
                   careerInput.trim()
-                    ? 'bg-blue-600 hover:bg-blue-700 text-white font-semibold cursor-pointer'
-                    : 'bg-blue-200 text-white font-semibold cursor-not-allowed'
+                    ? 'bg-school-600 hover:bg-school-700 text-white font-semibold cursor-pointer'
+                    : 'bg-school-200 text-white font-semibold cursor-not-allowed'
                 }`}
               >
                 Next
@@ -930,12 +930,12 @@ function PathwayPageContent() {
                       onClick={() => setSelectedPathwayIndex(index)}
                       className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                         selectedPathwayIndex === index
-                          ? "border-blue-500 text-blue-600"
+                          ? "border-school-500 text-school-600"
                           : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                       }`}
                     >
                       {pathway.isPrimary && (
-                        <span className="mr-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
+                        <span className="mr-2 text-xs bg-school-100 text-school-700 px-2 py-0.5 rounded">
                           Recommended
                         </span>
                       )}
@@ -1092,7 +1092,7 @@ function PathwayPageContent() {
                                 href={getMDCProgramUrl(step.name)}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
+                                className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-school-600 hover:bg-school-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-school-500 transition duration-150"
                               >
                                 <i className="fas fa-external-link-alt mr-2" />{" "}
                                 View Program Page
@@ -1118,7 +1118,7 @@ function PathwayPageContent() {
               <div className="mt-8 flex justify-center">
                 <button
                   onClick={handleAddCareerClick}
-                  className="flex items-center justify-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full shadow-md transition-colors"
+                  className="flex items-center justify-center px-6 py-3 bg-school-600 hover:bg-school-700 text-white font-medium rounded-full shadow-md transition-colors"
                 >
                   <i className="fas fa-plus mr-2" />
                   Compare Another Career
@@ -1137,13 +1137,13 @@ function PathwayPageContent() {
                       onChange={(e) => setAddCareerInput(e.target.value)}
                       onKeyDown={handleAddCareerKeyDown}
                       placeholder="Enter another career (e.g., Electrical Engineer)"
-                      className="flex-1 py-2 pl-4 pr-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      className="flex-1 py-2 pl-4 pr-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-school-500 text-sm"
                       autoFocus
                     />
                     <button
                       onClick={handleAddCareerGenerate}
                       disabled={!addCareerInput.trim()}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-full transition-colors"
+                      className="px-4 py-2 bg-school-600 hover:bg-school-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-full transition-colors"
                     >
                       <i className="fas fa-arrow-right" />
                     </button>
@@ -1191,12 +1191,12 @@ function PathwayPageContent() {
                           onClick={() => handlePathwaySelectInComparison(careerIndex, pathwayIndex)}
                           className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                             careerPathway.selectedPathwayIndex === pathwayIndex
-                              ? "border-blue-500 text-blue-600"
+                              ? "border-school-500 text-school-600"
                               : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                           }`}
                         >
                           {pathway.isPrimary && (
-                            <span className="mr-2 text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
+                            <span className="mr-2 text-xs bg-school-100 text-school-700 px-2 py-0.5 rounded">
                               Recommended
                             </span>
                           )}
@@ -1297,7 +1297,7 @@ function PathwayPageContent() {
                                     href={getMDCProgramUrl(step.name)}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-150"
+                                    className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-school-600 hover:bg-school-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-school-500 transition duration-150"
                                   >
                                     <i className="fas fa-external-link-alt mr-2" />{" "}
                                     View Program Page
@@ -1324,7 +1324,7 @@ function PathwayPageContent() {
                   <div className="mt-8 flex justify-center">
                     <button
                       onClick={handleAddCareerClick}
-                      className="flex items-center justify-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-full shadow-md transition-colors"
+                      className="flex items-center justify-center px-6 py-3 bg-school-600 hover:bg-school-700 text-white font-medium rounded-full shadow-md transition-colors"
                     >
                       <i className="fas fa-plus mr-2" />
                       Compare Another Career
@@ -1343,13 +1343,13 @@ function PathwayPageContent() {
                           onChange={(e) => setAddCareerInput(e.target.value)}
                           onKeyDown={handleAddCareerKeyDown}
                           placeholder="Enter another career (e.g., Electrical Engineer)"
-                          className="flex-1 py-2 pl-4 pr-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                          className="flex-1 py-2 pl-4 pr-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-school-500 text-sm"
                           autoFocus
                         />
                         <button
                           onClick={handleAddCareerGenerate}
                           disabled={!addCareerInput.trim()}
-                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-full transition-colors"
+                          className="px-4 py-2 bg-school-600 hover:bg-school-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-full transition-colors"
                         >
                           <i className="fas fa-arrow-right" />
                         </button>
@@ -1552,7 +1552,7 @@ function PathwayPageContent() {
                     href="https://www.mdc.edu/" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="hover:text-blue-600 transition-colors"
+                    className="hover:text-school-600 transition-colors"
                   >
                     Miami Dade College
                   </a>
@@ -1562,7 +1562,7 @@ function PathwayPageContent() {
                     href="https://www.mdc.edu/advisement/" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="hover:text-blue-600 transition-colors"
+                    className="hover:text-school-600 transition-colors"
                   >
                     Academic Advising
                   </a>
@@ -1572,7 +1572,7 @@ function PathwayPageContent() {
                     href="https://www.mdc.edu/academics/programs/" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="hover:text-blue-600 transition-colors"
+                    className="hover:text-school-600 transition-colors"
                   >
                     Degree Programs
                   </a>
@@ -1587,7 +1587,7 @@ function PathwayPageContent() {
                 <li>
                   <a 
                     href="/privacy" 
-                    className="hover:text-blue-600 transition-colors"
+                    className="hover:text-school-600 transition-colors"
                   >
                     Privacy Policy
                   </a>
@@ -1595,7 +1595,7 @@ function PathwayPageContent() {
                 <li>
                   <a 
                     href="/terms" 
-                    className="hover:text-blue-600 transition-colors"
+                    className="hover:text-school-600 transition-colors"
                   >
                     Terms of Service
                   </a>
@@ -1605,7 +1605,7 @@ function PathwayPageContent() {
                     href="https://www.mdc.edu/accessibility/" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="hover:text-blue-600 transition-colors"
+                    className="hover:text-school-600 transition-colors"
                   >
                     Accessibility
                   </a>
@@ -1619,7 +1619,7 @@ function PathwayPageContent() {
               <p className="mb-4">
                 <a 
                   href="mailto:advisement@mdc.edu" 
-                  className="hover:text-blue-600 transition-colors"
+                  className="hover:text-school-600 transition-colors"
                 >
                   advisement@mdc.edu
                 </a>

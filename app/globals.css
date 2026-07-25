@@ -4,10 +4,28 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+/* Selected school's palette, generated from its brand color.
+   These defaults are Miami Dade College blue and are what renders on the
+   server and before JavaScript runs. applySchoolTheme (app/lib/schoolTheme.ts)
+   overwrites them on <html> when a different school is chosen, and Tailwind
+   exposes them as the `school-*` color scale. */
+:root {
+  --school-50: #eff6fc;
+  --school-100: #d8e9f7;
+  --school-200: #a9cded;
+  --school-300: #6fabdf;
+  --school-400: #3585d0;
+  --school-500: #0c62b4;
+  --school-600: #0053a0;
+  --school-700: #00437f;
+  --school-800: #00325f;
+  --school-900: #002548;
+}
+
 /* Color variables for flowchart steps */
 :root {
-  /* MDC blue for degree steps */
-  --school-primary: #0054a6;
+  /* Degree steps follow the selected school. */
+  --school-primary: var(--school-600);
   --school-primary-rgb: 0, 84, 166;
 
   /* Orange for transfer steps */

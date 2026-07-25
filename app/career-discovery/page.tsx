@@ -273,7 +273,7 @@ export default function CareerDiscoveryPage() {
               </p>
               <button
                 onClick={handleRestart}
-                className="text-blue-600 hover:text-blue-700 font-medium"
+                className="text-school-600 hover:text-school-700 font-medium"
               >
                 Take the quiz again
               </button>
@@ -284,7 +284,7 @@ export default function CareerDiscoveryPage() {
                 {careers.map((career, index) => (
                   <div
                     key={index}
-                    className="bg-white border border-gray-200 rounded-lg p-6 hover:border-blue-500 hover:shadow-lg transition-all"
+                    className="bg-white border border-gray-200 rounded-lg p-6 hover:border-school-500 hover:shadow-lg transition-all"
                   >
                     <h3 className="text-xl font-semibold text-gray-900 mb-3">
                       {career.title}
@@ -295,11 +295,11 @@ export default function CareerDiscoveryPage() {
                       </p>
                     )}
                     {career.matchReason && (
-                      <div className="mb-4 p-3 bg-blue-50 rounded-md">
-                        <p className="text-xs font-medium text-blue-900 mb-1">
+                      <div className="mb-4 p-3 bg-school-50 rounded-md">
+                        <p className="text-xs font-medium text-school-900 mb-1">
                           Why this matches you:
                         </p>
-                        <p className="text-xs text-blue-800">
+                        <p className="text-xs text-school-800">
                           {career.matchReason}
                         </p>
                       </div>
@@ -315,7 +315,7 @@ export default function CareerDiscoveryPage() {
                       )}
                       {career.jobOutlook && (
                         <div className="flex items-center gap-2">
-                          <i className="fas fa-chart-line text-blue-600 text-xs"></i>
+                          <i className="fas fa-chart-line text-school-600 text-xs"></i>
                           <span className="text-sm text-gray-600">
                             {career.jobOutlook}
                           </span>
@@ -333,7 +333,7 @@ export default function CareerDiscoveryPage() {
                     <div className="mt-4">
                       <Link
                         href={`/pathway?career=${encodeURIComponent(career.title)}`}
-                        className="inline-block w-full text-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+                        className="inline-block w-full text-center px-4 py-2 bg-school-600 text-white rounded-md hover:bg-school-700 transition-colors text-sm font-medium"
                       >
                         View Career Pathway
                       </Link>
@@ -348,7 +348,7 @@ export default function CareerDiscoveryPage() {
                 </p>
                 <button
                   onClick={handleRestart}
-                  className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  className="px-6 py-2 bg-school-600 text-white rounded-md hover:bg-school-700 transition-colors"
                 >
                   Restart Quiz
                 </button>
@@ -448,7 +448,7 @@ export default function CareerDiscoveryPage() {
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
               <div
-                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                className="bg-school-600 h-2 rounded-full transition-all duration-300"
                 style={{ width: `${progress}%` }}
               ></div>
             </div>
@@ -473,14 +473,14 @@ export default function CareerDiscoveryPage() {
                     onClick={() => handleAnswerSelect(option)}
                     className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
                       isSelected
-                        ? "border-blue-500 bg-blue-50 text-blue-900"
+                        ? "border-school-500 bg-school-50 text-school-900"
                         : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50"
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-medium">{option}</span>
                       {isSelected && (
-                        <i className="fas fa-check-circle text-blue-600"></i>
+                        <i className="fas fa-check-circle text-school-600"></i>
                       )}
                     </div>
                   </button>
@@ -515,8 +515,8 @@ export default function CareerDiscoveryPage() {
               disabled={selectedAnswers.length === 0}
               className={`px-8 py-3 rounded-md font-medium transition-colors ${
                 selectedAnswers.length === 0
-                  ? "bg-blue-200 text-white cursor-not-allowed"
-                  : "bg-blue-600 text-white hover:bg-blue-700"
+                  ? "bg-school-200 text-white cursor-not-allowed"
+                  : "bg-school-600 text-white hover:bg-school-700"
               }`}
             >
               {currentStep === QUESTIONS.length - 1 ? "See Results" : "Next"}
