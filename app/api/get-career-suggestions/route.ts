@@ -3,6 +3,7 @@ import { getCached, setCached, cacheKey } from "@/app/lib/apiCache";
 import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
 import { geminiUrl } from "@/app/lib/geminiModel";
 import { logCacheMiss } from "@/app/lib/missLog";
+import { resolveCareer } from "@/app/lib/careerCanonical";
 
 // Server-side only - never exposed to the browser
 const apiKey = process.env.GEMINI_API_KEY;
@@ -27,8 +28,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Collapse spellings the same way pathway generation does, so "RN",
+    // "nurse", and "I want to be a nurse" share one cached suggestion list
+    // instead of spending three Gemini calls on near-identical answers. The
+    // canonical form is also what gets prompted, so the suggestions a student
+    // sees line up with the pathway they get after picking one.
+    const canonicalInput = resolveCareer(input).canonical;
+
     // Serve identical searches from cache to avoid the Gemini rate limit.
-    const key = cacheKey("suggestions", input);
+    const key = cacheKey("suggestions", canonicalInput);
     const cachedSuggestions = getCached(key);
     if (cachedSuggestions) {
       return NextResponse.json({ suggestions: cachedSuggestions });
@@ -38,15 +46,15 @@ export async function POST(request: NextRequest) {
     const limited = enforceGenerationLimits(request);
     if (limited) return limited;
     recordGeneration();
-    logCacheMiss("suggestions", input);
+    logCacheMiss("suggestions", input, canonicalInput);
 
-    const prompt = `You are a career advisor. A user has entered "${input}" as a career interest. 
+    const prompt = `You are a career advisor. A user has entered "${canonicalInput}" as a career interest. 
 
 IMPORTANT: Always return career suggestions. Only return an empty array [] if the input is completely nonsensical (like "banana123" or "xyzabc"). 
 
 Your task is to:
-1. If "${input}" is a broad career category (like "software", "nurse", "mechanic", "engineer", "teacher", "doctor", "lawyer"), identify 3-6 specific career titles within that category.
-2. If "${input}" is itself a specific, recognized job title/career, include it as the FIRST item, then add 2-5 related careers.
+1. If "${canonicalInput}" is a broad career category (like "software", "nurse", "mechanic", "engineer", "teacher", "doctor", "lawyer"), identify 3-6 specific career titles within that category.
+2. If "${canonicalInput}" is itself a specific, recognized job title/career, include it as the FIRST item, then add 2-5 related careers.
 3. For ANY career-related term (broad, specific, or partial), ALWAYS return 3-6 careers. Never return empty unless the input is completely unrelated to any real career.
 
 Return ONLY a valid JSON array. Each object must have these exact fields: "title", "description", "salary", "jobOutlook", "competitiveness". Return 3-6 items.
@@ -68,7 +76,7 @@ Examples:
 - If input is "mechanic" (broad term):
 [{"title": "Automotive Service Technician and Mechanic", "description": "Diagnoses, repairs, and maintains cars and light trucks.", "salary": "$47,000 - $55,000", "jobOutlook": "Moderate demand", "competitiveness": "Less competitive"}, {"title": "Diesel Service Technician and Mechanic", "description": "Repairs and maintains diesel engines in trucks, buses, and other heavy vehicles.", "salary": "$58,000 - $65,000", "jobOutlook": "Moderate demand", "competitiveness": "Less competitive"}, {"title": "Aircraft Mechanic", "description": "Maintains and repairs aircraft to ensure safe flight operations.", "salary": "$65,000 - $75,000", "jobOutlook": "Growing field", "competitiveness": "Moderately competitive"}, {"title": "Heavy Equipment Mechanic", "description": "Repairs and maintains construction and mining equipment.", "salary": "$55,000 - $63,000", "jobOutlook": "Moderate demand", "competitiveness": "Less competitive"}]
 
-Input: "${input}"
+Input: "${canonicalInput}"
 Return the JSON array (never empty unless input is completely nonsensical):`;
 
     const response = await fetch(

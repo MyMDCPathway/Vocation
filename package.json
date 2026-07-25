@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "node scripts/seed-pathways.mjs",
+    "scrape:fiu": "node scripts/scrape-fiu-programs.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },

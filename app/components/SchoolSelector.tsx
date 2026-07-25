@@ -10,52 +10,16 @@ import {
   type SchoolKind,
 } from "@/app/lib/floridaSchools";
 import { SCHOOL_STORAGE_KEY } from "@/app/lib/schoolStorage";
-import { applySchoolTheme, ensureContrastWithWhite } from "@/app/lib/schoolTheme";
+import { applySchoolTheme } from "@/app/lib/schoolTheme";
+import { hasCatalog } from "@/app/lib/schoolCatalogs";
+import { SchoolMark } from "@/app/components/SchoolMark";
 
-// Client-side only for now: nothing server-side reads the choice yet, because
-// pathway generation is still built entirely on MDC's catalog. When per-school
-// catalogs exist, read this same key when submitting a search.
+// The chosen school is sent with every generate-pathway request and decides
+// which catalog the pathway is built from. Pages other than this one read it
+// through useSelectedSchool.
 export { SCHOOL_STORAGE_KEY };
 
 const GROUP_ORDER: SchoolKind[] = ["state-college", "public-university", "private"];
-
-/**
- * The school's logo when one exists, otherwise a monogram in brand color.
- *
- * Every logo file is pre-rendered onto the same 240x80 transparent canvas, so
- * a fixed 3:1 box here makes a one-word wordmark and a tall shield occupy
- * identical space. The monogram fallback centers inside the same box, keeping
- * the rows aligned whether or not a school has a logo yet.
- */
-function SchoolMark({ school, size }: { school: School; size: "sm" | "lg" }) {
-  const [logoFailed, setLogoFailed] = useState(false);
-  const box = size === "lg" ? "h-12 w-36" : "h-8 w-24";
-
-  return (
-    <span className={`${box} inline-flex items-center justify-center shrink-0`}>
-      {school.logo && !logoFailed ? (
-        <img
-          src={school.logo}
-          alt={`${school.name} logo`}
-          className="max-h-full max-w-full object-contain"
-          onError={() => setLogoFailed(true)}
-        />
-      ) : (
-        <span
-          aria-hidden="true"
-          className={`${
-            size === "lg" ? "h-10 w-10 text-sm" : "h-8 w-8 text-xs"
-          } inline-flex items-center justify-center rounded-full font-bold text-white`}
-          // Darkened where needed so the white monogram stays legible — several
-          // brand colors (UCF gold, for one) are too light to carry white text.
-          style={{ backgroundColor: ensureContrastWithWhite(school.color) }}
-        >
-          {school.shortName}
-        </span>
-      )}
-    </span>
-  );
-}
 
 export default function SchoolSelector() {
   const [selectedId, setSelectedId] = useState(DEFAULT_SCHOOL_ID);
@@ -205,10 +169,12 @@ export default function SchoolSelector() {
         </div>
       )}
 
-      {selectedId !== DEFAULT_SCHOOL_ID && (
+      {/* Only warn for schools we have no program catalog for. MDC and FIU
+          both generate real pathways from their own catalogs. */}
+      {!hasCatalog(selectedId) && (
         <p className="mt-1 text-xs text-amber-600">
-          Pathways are currently built with Miami Dade College programs — {selected.shortName}{" "}
-          support is coming soon.
+          We don&apos;t have {selected.shortName}&apos;s program catalog yet, so
+          pathways can&apos;t be generated for it.
         </p>
       )}
     </div>

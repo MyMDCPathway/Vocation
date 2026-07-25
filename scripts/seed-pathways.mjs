@@ -10,9 +10,19 @@
 //   1. Start the dev server with seeding enabled:
 //        SEED_MODE=1 npm run dev          (PowerShell: $env:SEED_MODE=1; npm run dev)
 //   2. In a second terminal:
-//        npm run seed                     (all careers)
-//        npm run seed -- --limit 20       (just the first 20)
-//        npm run seed -- --no-exams       (skip exam lookups)
+//        npm run seed                       (all careers, for MDC)
+//        npm run seed -- --school fiu       (same careers, FIU pathways)
+//        npm run seed -- --limit 20         (just the first 20)
+//        npm run seed -- --no-exams         (skip exam lookups)
+//        npm run seed -- --no-suggestions   (skip the career suggestion lists)
+//
+// Three kinds of entry get written:
+//   suggestions:<career>        the list shown as soon as someone searches
+//   pathway:<school>:<career>   the generated plan
+//   exam:<name>                 details for each licensure exam it references
+//
+// Pathways are per school, so MDC and FIU both need their own run. Suggestions
+// and exams are school-independent and are shared.
 //
 // The script merges into any existing seed file, so if you hit Gemini's
 // per-minute limit partway through you can re-run it and keep what you had.
@@ -33,10 +43,17 @@ const BASE_URL = process.env.SEED_BASE_URL ?? "http://localhost:3000";
 const DELAY_MS = Number(process.env.SEED_DELAY_MS ?? 5000);
 
 function parseArgs(argv) {
-  const args = { limit: Infinity, exams: true };
+  const args = {
+    limit: Infinity,
+    exams: true,
+    suggestions: true,
+    school: "mdc",
+  };
   for (let i = 0; i < argv.length; i++) {
     if (argv[i] === "--limit") args.limit = Number(argv[++i]);
     else if (argv[i] === "--no-exams") args.exams = false;
+    else if (argv[i] === "--no-suggestions") args.suggestions = false;
+    else if (argv[i] === "--school") args.school = String(argv[++i]).toLowerCase();
   }
   return args;
 }
@@ -101,7 +118,7 @@ async function main() {
     ? JSON.parse(await readFile(SEED_FILE, "utf8"))
     : {};
 
-  console.log(`Seeding ${careers.length} careers against ${BASE_URL}`);
+  console.log(`Seeding ${careers.length} careers for ${args.school.toUpperCase()} against ${BASE_URL}`);
   console.log(`${Object.keys(seed).length} entries already present\n`);
 
   let generated = 0;
@@ -109,8 +126,29 @@ async function main() {
   const failures = [];
 
   for (const [index, career] of careers.entries()) {
-    const key = cacheKey("pathway", career);
+    const key = cacheKey(`pathway:${args.school}`, career);
     const position = `[${index + 1}/${careers.length}]`;
+
+    // The suggestion list is what a student sees FIRST, before picking a career
+    // and generating anything. Seeding it is what makes that initial search
+    // feel instant instead of waiting on Gemini. It's school-independent, so
+    // it's keyed on the career alone.
+    if (args.suggestions) {
+      const suggestKey = cacheKey("suggestions", career);
+      if (!seed[suggestKey]) {
+        const suggestions = await postJson("/api/get-career-suggestions", {
+          input: career,
+        });
+        if (suggestions.ok && suggestions.data?.suggestions) {
+          seed[suggestKey] = suggestions.data.suggestions;
+          console.log(`${position} ${career} — suggestions cached`);
+        } else if (!suggestions.ok) {
+          failures.push({ career: `${career} (suggestions)`, error: suggestions.error });
+          console.error(`${position} ${career} — suggestions FAILED: ${suggestions.error}`);
+        }
+        await sleep(DELAY_MS);
+      }
+    }
 
     if (seed[key]) {
       skipped++;
@@ -118,7 +156,7 @@ async function main() {
       continue;
     }
 
-    const result = await postJson("/api/generate-pathway", { career });
+    const result = await postJson("/api/generate-pathway", { career, school: args.school });
 
     if (!result.ok) {
       failures.push({ career, error: result.error });

@@ -1,0 +1,415 @@
+// FIU degree catalog: program name -> official program page.
+//
+// GENERATED FILE — do not edit by hand. Regenerate with:
+//   npm run scrape:fiu
+//
+// Source:     https://www.fiu.edu/academics/degrees-and-programs/index.html
+// Scraped:    2026-07-25
+// Programs:   287 (115 undergraduate, 172 graduate)
+//
+// This mirrors what app/lib/mdc-programs.ts does for Miami Dade College, so a
+// generated pathway can link the transfer and bachelor's steps to the real FIU
+// page instead of guessing a URL. FIU restructures its site periodically; if
+// links start 404ing, re-run the scraper.
+
+export type FIUProgramLevel = "undergraduate" | "graduate";
+
+export interface FIUProgram {
+  /** Program title exactly as FIU lists it, including its degree code. */
+  name: string;
+  url: string;
+  level: FIUProgramLevel;
+  college: string;
+  areaOfInterest: string;
+}
+
+export const FIU_PROGRAMS: FIUProgram[] = [
+  { name: "Accounting (BACC)", url: "https://business.fiu.edu/academics/undergraduate/bachelor-of-accounting/", level: "undergraduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Accounting (MACC)", url: "https://business.fiu.edu/academics/graduate/accounting/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Adult Education and Human Resource Development (Ed.D.)", url: "https://case.fiu.edu/eps/edd-in-adult-education-and-human-resource-development/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Adult Education and Human Resource Development (MS)", url: "https://case.fiu.edu/eps/ms-in-adult-education-and-human-resource-development/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "African and African Diaspora Studies (MA)", url: "http://africana.fiu.edu/academics/graduate-programs/ma-program/", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and Culture" },
+  { name: "Applied AI & Internet of Things (BS)", url: "https://cec.fiu.edu/degrees-programs/undergraduate/bs-in-applied-ai-internet-of-things/index.html", level: "undergraduate", college: "Engineering & Computing", areaOfInterest: "Technology" },
+  { name: "Applied AI & Internet of Things (MS)", url: "https://cec.fiu.edu/degrees-programs/graduate/ms-in-applied-ai-internet-of-things/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Technology" },
+  { name: "Architecture (MA)", url: "http://carta.fiu.edu/architecture/academics/degrees/", level: "graduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Architecture (MArch)", url: "http://carta.fiu.edu/architecture/academics/degrees/", level: "graduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Art - Studio (BFA)", url: "http://carta.fiu.edu/arts/degree-programs-and-deadlines/undergraduate/bfa-in-art/", level: "undergraduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Art (BA)", url: "http://carta.fiu.edu/arts/degree-programs-and-deadlines/undergraduate/bachelor-of-arts-in-art/", level: "undergraduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Art Education (BS)", url: "http://carta.fiu.edu/arts/degree-programs-and-deadlines/undergraduate/bachelor-of-science-in-art-education/", level: "undergraduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Art Education (MAT)", url: "http://carta.fiu.edu/arts/degree-programs-and-deadlines/graduate/mat-art-ed/", level: "graduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Art Education (MS)", url: "https://carta.fiu.edu/arts/degree-programs-and-deadlines/graduate/ms-art-education/", level: "graduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Art History (BA)", url: "http://carta.fiu.edu/arts/degree-programs-and-deadlines/undergraduate/bachelor-of-arts-in-art-history/", level: "undergraduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Asian Studies (BA)", url: "https://asian.fiu.edu/undergraduate/b.a.-in-asian-studies/index.html", level: "undergraduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and Culture" },
+  { name: "Asian Studies (MA)", url: "https://asian.fiu.edu/graduate/m.a-asian-studies/index.html", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and Culture" },
+  { name: "Athletic Training (MS)", url: "https://cnhs.fiu.edu/academics/athletic-training/programs/ms-in-athletic-training/index.html", level: "graduate", college: "Nicole Wertheim College of Nursing & Health Sciences", areaOfInterest: "Medicine and Health" },
+  { name: "Behavioral Neuroscience (BS)", url: "https://case.fiu.edu/psychology/students/undergraduate/bs-in-behavioral-science/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "Biochemistry (BS)", url: "https://case.fiu.edu/chemistry/bs-in-biochemistry/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Biochemistry (Ph.D.)", url: "https://case.fiu.edu/academics/biochemistry-phd-program/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Biological Sciences (BA)", url: "https://case.fiu.edu/biology/ba-in-biological-sciences/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Biological Sciences (BS)", url: "https://case.fiu.edu/biology/bs-in-biological-sciences/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Biological Sciences (BS) - Biology Education", url: "https://case.fiu.edu/biology/bs-in-biological-sciences-biological-education/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Biological Sciences (BS) - Quantifying Biology in the Classroom", url: "https://case.fiu.edu/biology/quantifying-biology-in-the-classroom/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Biology (MS)", url: "https://case.fiu.edu/biology/students/graduate-programs/ms-in-biology/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Biology (Ph.D.)", url: "https://case.fiu.edu/biology/students/graduate-programs/phd-in-biology/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Biomedical Engineering (BS)", url: "https://cec.fiu.edu/degrees-programs/undergraduate/bs-in-biomedical-engineering/index.html", level: "undergraduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Biomedical Engineering (MS)", url: "https://cec.fiu.edu/degrees-programs/graduate/ms-in-biomedical-engineering/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Biomedical Engineering (Ph.D.)", url: "https://cec.fiu.edu/degrees-programs/graduate/phd-in-biomedical-engineering/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Biomedical Sciences (Ph.D.)", url: "https://medicine.fiu.edu/academics/phd-in-biomedical-science/", level: "graduate", college: "Herbert Wertheim College of Medicine", areaOfInterest: "Sciences and Engineering" },
+  { name: "Business Administration - Hospitality (DBA)", url: "https://hospitality.fiu.edu/programs/dba/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Business Administration (DBA)", url: "https://business.fiu.edu/academics/graduate/doctor-of-business-administration/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Business Administration (Ph.D.)", url: "https://business.fiu.edu/academics/graduate/phd/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Business Analytics (MBA)", url: "https://business.fiu.edu/academics/graduate/business-analytics-mba/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Business Analytics and Artificial Intelligence (BBA)", url: "https://business.fiu.edu/academics/undergraduate/bba-business-analytics/", level: "undergraduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Business and Government Leadership (BS)", url: "https://freedom.fiu.edu/bachelor-of-science-in-business-government-leadership/", level: "undergraduate", college: "Adam Smith Center for Economic Freedom", areaOfInterest: "Business and EconomicsPublic Policy" },
+  { name: "Business and Government Leadership (MS)", url: "https://freedom.fiu.edu/master-of-science-in-business-government-leadership/", level: "graduate", college: "Adam Smith Center for Economic Freedom", areaOfInterest: "Business and EconomicsPublic Policy" },
+  { name: "Chemical Education (BA)", url: "https://case.fiu.edu/chemistry/students/undergraduate/ba-in-chemical-education/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Chemistry - Biochemistry (BA)", url: "https://case.fiu.edu/chemistry/students/undergraduate/ba-in-chemistry/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Chemistry - Chemical Education (BA)", url: "https://case.fiu.edu/chemistry/students/undergraduate/ba-in-chemical-education/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Chemistry - Environmental Chemistry (BA)", url: "https://case.fiu.edu/chemistry/students/undergraduate/ba-in-chemistry/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Chemistry - Forensic Chemistry (BA)", url: "https://case.fiu.edu/chemistry/students/undergraduate/ba-in-chemistry/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Chemistry (BA)", url: "https://case.fiu.edu/chemistry/ba-in-chemistry/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Chemistry (BS)", url: "https://case.fiu.edu/chemistry/students/undergraduate/bs-in-chemistry/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Chemistry (MS)", url: "https://case.fiu.edu/chemistry/students/graduate/ms-in-chemistry/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Chemistry (Ph.D.)", url: "https://case.fiu.edu/chemistry/students/graduate/phd-in-chemistry/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Civil Engineering (BS)", url: "https://cec.fiu.edu/degrees-programs/undergraduate/bs-in-civil-engineering/index.html", level: "undergraduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Civil Engineering (MS)", url: "https://cec.fiu.edu/degrees-programs/graduate/ms-in-civil-engineering/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Civil Engineering (Ph.D.)", url: "https://cec.fiu.edu/degrees-programs/graduate/phd-in-civil-engineering/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Communication Arts - Art and Performance (BA)", url: "https://carta.fiu.edu/communication/bachelors-of-arts-in-communication-arts/", level: "undergraduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Communication Arts - Organizational Communication Studies (BA)", url: "https://carta.fiu.edu/communication/bachelors-of-arts-in-communication-arts/", level: "undergraduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Communications Arts - Media and Design Arts Studies (BA)", url: "https://carta.fiu.edu/communication/bachelors-of-arts-in-communication-arts/", level: "undergraduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Computer Engineering (BS)", url: "https://cec.fiu.edu/degrees-programs/undergraduate/bs-in-computer-engineering/index.html", level: "undergraduate", college: "Engineering & Computing", areaOfInterest: "Technology" },
+  { name: "Computer Engineering (MS)", url: "https://cec.fiu.edu/degrees-programs/graduate/ms-in-computer-engineering/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Technology" },
+  { name: "Computer Science (BA)", url: "https://cec.fiu.edu/degrees-programs/undergraduate/ba-in-computer-science/index.html", level: "undergraduate", college: "Engineering & Computing", areaOfInterest: "Technology" },
+  { name: "Computer Science (BS)", url: "https://cec.fiu.edu/degrees-programs/undergraduate/bs-in-computer-science/index.html", level: "undergraduate", college: "Engineering & Computing", areaOfInterest: "Technology" },
+  { name: "Computer Science (MS)", url: "https://cec.fiu.edu/degrees-programs/graduate/ms-in-computer-science/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Technology" },
+  { name: "Computer Science (Ph.D.)", url: "https://cec.fiu.edu/degrees-programs/graduate/phd-in-computer-science/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Technology" },
+  { name: "Construction Management (BS)", url: "https://cec.fiu.edu/degrees-programs/undergraduate/bs-in-construction-management/index.html", level: "undergraduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Construction Management (MS)", url: "https://cec.fiu.edu/degrees-programs/graduate/ms-in-construction-management/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Counselor Education (MS)", url: "https://case.fiu.edu/crsp/counselor-education/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Creative Writing (MFA)", url: "https://case.fiu.edu/english/mfa-creative-writing/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "Crime Science (BS)", url: "https://ccj.fiu.edu/programs/bs-in-crime-science/", level: "undergraduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Public Policy" },
+  { name: "Criminal Justice (BS)", url: "https://ccj.fiu.edu/programs/bs-in-criminal-justice/", level: "undergraduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Public Policy" },
+  { name: "Criminal Justice (MS)", url: "https://ccj.fiu.edu/programs/ms-in-criminal-justice/index.html", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Public Policy" },
+  { name: "Curriculum and Instruction (MS)", url: "https://case.fiu.edu/tl/ms-in-curriculum-and-instruction/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Cybersecurity (BS)", url: "https://cec.fiu.edu/degrees-programs/undergraduate/bs-in-cybersecurity/index.html", level: "undergraduate", college: "Engineering & Computing", areaOfInterest: "Technology" },
+  { name: "Cybersecurity (MS)", url: "https://cec.fiu.edu/degrees-programs/graduate/ms-in-cybersecurity/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Technology" },
+  { name: "Cybersecurity Risk Management (MBA)", url: "https://business.fiu.edu/academics/graduate/cybersecurity-risk-management-mba/", level: "graduate", college: "Business", areaOfInterest: "Business and EconomicsTechnology" },
+  { name: "Data Science and Artificial Intelligence (BS)", url: "https://cec.fiu.edu/degrees-programs/undergraduate/bs-in-data-science-and-artificial-intelligence/index.html", level: "undergraduate", college: "Engineering & Computing", areaOfInterest: "Technology" },
+  { name: "Data Science and Artificial Intelligence (MS)", url: "https://cec.fiu.edu/degrees-programs/graduate/ms-in-data-science-artificial-intelligence/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Technology" },
+  { name: "Design (DDES)", url: "https://carta.fiu.edu/architecture/academics/degrees/doctor-of-design/", level: "graduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Dietetics and Nutrition (BS)", url: "https://stempel.fiu.edu/academics/dietetics-and-nutrition/bachelor-degree-in-dietetics-nutrition-didactic-program-in-dietetics/index.html", level: "undergraduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Medicine and Health" },
+  { name: "Dietetics and Nutrition (MS)", url: "https://stempel.fiu.edu/academics/dietetics-and-nutrition/master-of-science-in-dietetics/", level: "graduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Medicine and Health" },
+  { name: "Dietetics and Nutrition (Ph.D.)", url: "https://stempel.fiu.edu/academics/dietetics-and-nutrition/phd-in-dietetics-nutrition/", level: "graduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Medicine and Health" },
+  { name: "Digital Art - Animation (BFA)", url: "https://carta.fiu.edu/arts/degree-programs-and-deadlines/undergraduate/bachelor-of-fine-arts-in-digital-art/bfa-animation-major/", level: "undergraduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Digital Art - Graphic Design (BFA)", url: "https://carta.fiu.edu/arts/degree-programs-and-deadlines/undergraduate/bachelor-of-fine-arts-in-digital-art/bfa-graphic-design-major/", level: "undergraduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Digital Communication and Media (BS)", url: "https://carta.fiu.edu/journalism/programs-and-degrees/degrees-programs/", level: "undergraduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Disaster Management (BA)", url: "https://aidp.fiu.edu/degree-programs/undergraduate-program/index.html", level: "undergraduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Public Policy" },
+  { name: "Disaster Management (MA)", url: "https://aidp.fiu.edu/degree-programs/graduate-program/index.html", level: "graduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Public Policy" },
+  { name: "Doctor of Business Administration (DBA)", url: "https://business.fiu.edu/graduate/doctor-of-business-administration/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Doctor of Medicine (M.D.)", url: "https://medicine.fiu.edu/academics/degrees-and-programs/doctor-of-medicine/index.html", level: "graduate", college: "Herbert Wertheim College of Medicine", areaOfInterest: "Medicine and Health" },
+  { name: "Early Childhood Education (BS)", url: "https://case.fiu.edu/tl/bs-in-early-childhood-education/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Early Childhood Education (MS)", url: "https://case.fiu.edu/tl/students/graduate/ms-in-early-childhood-education/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Earth Sciences (BA)", url: "https://case.fiu.edu/earth-environment/ba-in-earth-science/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Earth Systems Science (Ph.D.)", url: "https://case.fiu.edu/earth-environment/phd-in-earth-systems-science/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Economics (BA)", url: "https://economics.fiu.edu/undergraduate/major-in-economics/index.html", level: "undergraduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Business and Economics" },
+  { name: "Economics (BS)", url: "https://economics.fiu.edu/undergraduate/bs-in-economics.html", level: "undergraduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Business and Economics" },
+  { name: "Economics (MA)", url: "http://economics.fiu.edu/graduate/ma-in-economics/", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Business and Economics" },
+  { name: "Economics (Ph.D.)", url: "http://economics.fiu.edu/graduate/phd-in-economics/", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Business and Economics" },
+  { name: "Educational Leadership (EdS)", url: "https://case.fiu.edu/eps/eds-in-educational-leadership/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Educational Leadership (MS)", url: "https://case.fiu.edu/eps/students/graduate/ms-in-educational-leadership/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Educational Leadership and Policy Studies (Ed.D.)", url: "https://case.fiu.edu/eps/edd-in-educational-leadership-and-policy-studies/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Electrical and Computer Engineering (Ph.D.)", url: "https://cec.fiu.edu/degrees-programs/graduate/phd-in-electrical-and-computer-engineering/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Electrical Engineering (BS)", url: "https://cec.fiu.edu/degrees-programs/undergraduate/bs-in-electrical-engineering/index.html", level: "undergraduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Electrical Engineering (MS)", url: "https://cec.fiu.edu/degrees-programs/graduate/ms-in-electrical-engineering/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Elementary Education (BS)", url: "https://case.fiu.edu/tl/bs-in-elementary-education/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Engineering and Computing Education (Ph.D.)", url: "https://cec.fiu.edu/degrees-programs/graduate/phd-in-engineering-and-computing-education/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Engineering Management (MS)", url: "https://cec.fiu.edu/degrees-programs/graduate/ms-in-engineering-management/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "English (BA)", url: "https://case.fiu.edu/english/students/undergraduate/ba-english/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "English (MA)", url: "https://case.fiu.edu/english/ma-english/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "English Education (BA)", url: "https://case.fiu.edu/english/ba-english-with-english-education/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Environmental Engineering (BS)", url: "https://cec.fiu.edu/degrees-programs/undergraduate/bs-in-environmental-engineering/index.html", level: "undergraduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Environmental Engineering (MS)", url: "https://cec.fiu.edu/degrees-programs/graduate/ms-in-environmental-engineering/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Environmental Policy and Management (PSM)", url: "https://case.fiu.edu/earth-environment/psm-environmental-policy-and-management/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Environmental Studies (BS)", url: "https://case.fiu.edu/earth-environment/bs-in-environmental-studies/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Environmental Studies (MS)", url: "https://case.fiu.edu/earth-environment/ms-in-environmental-studies/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Executive (MBA)", url: "https://business.fiu.edu/academics/graduate/executive-mba/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Finance (BBA)", url: "https://business.fiu.edu/academics/undergraduate/bba-finance/", level: "undergraduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Finance (MS)", url: "https://business.fiu.edu/academics/graduate/finance/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Foreign Language Education (MS)", url: "https://case.fiu.edu/tl/ms-in-foreign-language-education/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Forensic Science (MS)", url: "https://gfjc.fiu.edu/academics/ms-in-forensic-science/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Forensic Science (PSM)", url: "https://gfjc.fiu.edu/academics/professional-science-masters-forensic-programs/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Geosciences (BS)", url: "https://case.fiu.edu/earth-environment/bs-in-geosciences/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Geosciences (MS)", url: "https://case.fiu.edu/earth-environment/ms-in-geosciences/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Global Affairs (MA)", url: "http://maga.fiu.edu/", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and CulturePublic Policy" },
+  { name: "Global and Sociocultural Studies (MA)", url: "https://gss.fiu.edu/graduate/ma-in-global-sociocultural-studies/index.html", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and Culture" },
+  { name: "Global and Sociocultural Studies (Ph.D.)", url: "https://gss.fiu.edu/graduate/doctor-philosophy-global-sociocultural-studies/index.html", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and Culture" },
+  { name: "Global Languages, Cultures, and Literatures (BA)", url: "https://dll.fiu.edu/undergraduate/bachelor-of-arts-in-global-languages,-cultures-and-literatures/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "Global Studies - Anthropology (BA)", url: "https://gss.fiu.edu/undergraduate/ba-global-studies-anthro-major/", level: "undergraduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and Culture" },
+  { name: "Global Studies - Geography (BA)", url: "https://gss.fiu.edu/undergraduate/ba-geography/", level: "undergraduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and Culture" },
+  { name: "Global Studies - Interdisciplinary and Area Studies (BA)", url: "https://gss.fiu.edu/undergraduate/ba-global-studies/", level: "undergraduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and Culture" },
+  { name: "Global Studies - Sociology (BA)", url: "https://gss.fiu.edu/undergraduate/ba-anthropology-sociology-socio-track/", level: "undergraduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and Culture" },
+  { name: "Health Informatics and Analytics (MS)", url: "https://business.fiu.edu/academics/graduate/health-informatics-and-analytics/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Health Services Administration (BHSA)", url: "https://cnhs.fiu.edu/academics/health-services-administration/programs/bhsa/index.html", level: "undergraduate", college: "Nicole Wertheim College of Nursing & Health Sciences", areaOfInterest: "Medicine and Health" },
+  { name: "Health Services Administration (MHSA)", url: "https://cnhs.fiu.edu/academics/health-services-administration/programs/mhsa/index.html", level: "graduate", college: "Nicole Wertheim College of Nursing & Health Sciences", areaOfInterest: "Medicine and Health" },
+  { name: "Healthcare (MBA)", url: "https://business.fiu.edu/academics/graduate/healthcare-mba/", level: "graduate", college: "Business", areaOfInterest: "Business and EconomicsMedicine and Health" },
+  { name: "Higher Education (Ph.D.)", url: "https://case.fiu.edu/eps/phd-in-higher-education/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Higher Education Administration (MS)", url: "https://case.fiu.edu/eps/ms-in-higher-education-administration/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "History (BA)", url: "https://history.fiu.edu/undergraduate/ba-in-history/index.html", level: "undergraduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and Culture" },
+  { name: "History (MA)", url: "http://history.fiu.edu/graduate/ma-history/", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and Culture" },
+  { name: "History (Ph.D.)", url: "http://history.fiu.edu/graduate/doctorate-atlantic-history/", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and Culture" },
+  { name: "Hospitality Management - Cruise Line Management (BS)", url: "https://hospitality.fiu.edu/programs/undergraduate/bs-in-hospitality-management/cruise-line-management/index.html", level: "undergraduate", college: "Chaplin School of Hospitality & Tourism Management", areaOfInterest: "Hospitality Management" },
+  { name: "Hospitality Management - Events & Entertainment Management (BS)", url: "https://hospitality.fiu.edu/programs/undergraduate/bs-in-hospitality-management/events-entertainment-management/index.html", level: "undergraduate", college: "Chaplin School of Hospitality & Tourism Management", areaOfInterest: "Hospitality Management" },
+  { name: "Hospitality Management - Executive (MS)", url: "https://fiuonline.fiu.edu/programs/online-graduate-degrees/executive-master-of-science-in-hospitality-management.php", level: "graduate", college: "Chaplin School of Hospitality & Tourism Management", areaOfInterest: "Hospitality Management" },
+  { name: "Hospitality Management - Food Innovation and Entrepreneurship (BS)", url: "https://hospitality.fiu.edu/_assets/docs/track-sheet-food-innovation-entrepreneurship.pdf", level: "undergraduate", college: "Chaplin School of Hospitality & Tourism Management", areaOfInterest: "Hospitality Management" },
+  { name: "Hospitality Management - Hospitality Leadership (BS)", url: "https://hospitality.fiu.edu/programs/undergraduate/bs-in-hospitality-management/hospitality-leadership/index.html", level: "undergraduate", college: "Chaplin School of Hospitality & Tourism Management", areaOfInterest: "Hospitality Management" },
+  { name: "Hospitality Management - Hotel/Lodging Management (BS)", url: "https://hospitality.fiu.edu/programs/undergraduate/bs-in-hospitality-management/hotellodging-management/index.html", level: "undergraduate", college: "Chaplin School of Hospitality & Tourism Management", areaOfInterest: "Hospitality Management" },
+  { name: "Hospitality Management - Mega Events (MS)", url: "https://hospitality.fiu.edu/programs/graduate/ms-in-hospitality-management-with-specialization-in-mega-events/index.html", level: "graduate", college: "Chaplin School of Hospitality & Tourism Management", areaOfInterest: "Hospitality Management" },
+  { name: "Hospitality Management - Real Estate Development (MS)", url: "https://hospitality.fiu.edu/programs/graduate/ms-in-hospitality-management--specialization-in-hospitality-real-estate-development/index.html", level: "graduate", college: "Chaplin School of Hospitality & Tourism Management", areaOfInterest: "Hospitality Management" },
+  { name: "Hospitality Management - Restaurant & Culinary (BS)", url: "https://hospitality.fiu.edu/programs/undergraduate/bs-in-hospitality-management/restaurantculinary-management/index.html", level: "undergraduate", college: "Chaplin School of Hospitality & Tourism Management", areaOfInterest: "Hospitality Management" },
+  { name: "Hospitality Management - Revenue Management (MS)", url: "https://fiuonline.fiu.edu/programs/online-graduate-degrees/master-of-science-in-hospitality-management-revenue-management-track.php", level: "graduate", college: "Chaplin School of Hospitality & Tourism Management", areaOfInterest: "Hospitality Management" },
+  { name: "Hospitality Management - Travel and Tourism Management (BS)", url: "https://hospitality.fiu.edu/programs/undergraduate/bs-in-hospitality-management/travel-tourism-management/index.html", level: "undergraduate", college: "Chaplin School of Hospitality & Tourism Management", areaOfInterest: "Hospitality Management" },
+  { name: "Hospitality Management – Cruise Line Operations (MS)", url: "https://hospitality.fiu.edu/programs/graduate/ms-in-hospitality-management-specialization-in-cruise-line-operations/index.html", level: "graduate", college: "Chaplin School of Hospitality & Tourism Management", areaOfInterest: "Hospitality Management" },
+  { name: "Hospitality Management (BS)", url: "https://hospitality.fiu.edu/programs/undergraduate/bs-in-hospitality-management/index.html", level: "undergraduate", college: "Chaplin School of Hospitality & Tourism Management", areaOfInterest: "Hospitality Management" },
+  { name: "Hospitality Management (MS)", url: "https://hospitality.fiu.edu/programs/graduate/ms-in-hospitality-management-non-thesis/index.html", level: "graduate", college: "Chaplin School of Hospitality & Tourism Management", areaOfInterest: "Hospitality Management" },
+  { name: "Human Resource Management (BBA)", url: "https://business.fiu.edu/academics/undergraduate/bba-hr-management/", level: "undergraduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Human Resource Management (MS)", url: "https://business.fiu.edu/academics/graduate/human-resource-management/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Information Systems (MS)", url: "https://business.fiu.edu/academics/graduate/information-systems/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Information Technology (BA)", url: "https://cec.fiu.edu/degrees-programs/undergraduate/ba-in-information-technology/index.html", level: "undergraduate", college: "Engineering & Computing", areaOfInterest: "Technology" },
+  { name: "Information Technology (BS)", url: "https://cec.fiu.edu/degrees-programs/undergraduate/bs-in-information-technology/index.html", level: "undergraduate", college: "Engineering & Computing", areaOfInterest: "Technology" },
+  { name: "Information Technology (MS)", url: "https://cec.fiu.edu/degrees-programs/graduate/ms-in-information-technology/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Technology" },
+  { name: "Interdisciplinary Engineering (BS)", url: "https://cec.fiu.edu/degrees-programs/undergraduate/bs-in-interdisciplinary-engineering/index.html", level: "undergraduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Interdisciplinary Studies (BA)", url: "https://case.fiu.edu/liberal-studies/students/ba-in-interdisciplinary-studies/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "Interior Architecture (MA)", url: "http://carta.fiu.edu/interiors/academics/degrees-and-programs/interior-architecture-ma/", level: "graduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Interior Architecture (MIA)", url: "http://carta.fiu.edu/interiors/academics/degrees-and-programs/master-of-arts-in-interior-architecture-mia/", level: "graduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "International (MBA)", url: "https://business.fiu.edu/academics/graduate/international-mba/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "International Business (BBA)", url: "https://business.fiu.edu/undergraduate/bba-international-business/index.cfm", level: "undergraduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "International Business (MIB)", url: "https://business.fiu.edu/academics/graduate/international-business/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "International Crime and Justice (Ph.D.)", url: "https://ccj.fiu.edu/programs/ph.d.-in-international-crime-and-justice/", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Public Policy" },
+  { name: "International Real Estate (MS)", url: "https://business.fiu.edu/academics/graduate/international-real-estate/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "International Relations (BA)", url: "http://pir.fiu.edu/undergraduate-programs/major-in-international-relations/", level: "undergraduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Public Policy" },
+  { name: "International Relations (MA)", url: "http://pir.fiu.edu/graduate-programs/masters-in-international-studies/", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Public Policy" },
+  { name: "International Relations (Ph.D.)", url: "http://pir.fiu.edu/graduate-programs/phd-in-international-relations/", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Public Policy" },
+  { name: "Juris Doctor (JD)", url: "https://law.fiu.edu/academics/jd/", level: "graduate", college: "Law", areaOfInterest: "Public Policy" },
+  { name: "Juris Master (JM)", url: "https://law.fiu.edu/jm/", level: "graduate", college: "Law", areaOfInterest: "Public Policy" },
+  { name: "Kinesiology and Exercise Science (MS)", url: "https://case.fiu.edu/tl/ms-in-kinesiology-and-exercise-science/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Landscape Architecture (MLA)", url: "https://catalog.fiu.edu/programs/LAND:MLA", level: "graduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Latin American and Caribbean Studies (BA)", url: "https://lacc.fiu.edu/academics/bachelor-of-arts-program/", level: "undergraduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and Culture" },
+  { name: "Latin American and Caribbean Studies (MA)", url: "https://lacc.fiu.edu/academics/ma-program/", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and Culture" },
+  { name: "Liberal Studies - Health and Human Concerns (BA)", url: "https://case.fiu.edu/liberal-studies/ba-in-liberal-studies/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "Liberal Studies - Humanities and Cultural Traditions (BA)", url: "https://case.fiu.edu/liberal-studies/ba-in-liberal-studies/index.html#humanities-and-cultural-traditions", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "Liberal Studies - Law, Business and Society (BA)", url: "https://case.fiu.edu/liberal-studies/ba-in-liberal-studies/index.html#law-business-and-society", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "Liberal Studies - Local and Global Environment Education, Policy, and Community (BA)", url: "https://case.fiu.edu/liberal-studies/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "Linguistics (MA)", url: "https://case.fiu.edu/english/ma-linguistics/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "Logistics and Supply Chain Management (BBA)", url: "https://business.fiu.edu/academics/undergraduate/bba-logistics-and-supply-chain/", level: "undergraduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Logistics and Supply Chain Management (MS)", url: "https://business.fiu.edu/academics/graduate/logistics-and-supply-chain-management/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Logistics Engineering (MS)", url: "https://cec.fiu.edu/degrees-programs/graduate/ms-in-logistics-engineering/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Management (BBA)", url: "https://business.fiu.edu/academics/undergraduate/bba-management/", level: "undergraduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Management Information Systems (BBA)", url: "https://business.fiu.edu/academics/undergraduate/bba-information-systems/", level: "undergraduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Marine Biology (BS)", url: "https://marine.fiu.edu/major/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Marketing (BBA)", url: "https://business.fiu.edu/academics/undergraduate/bba-marketing/", level: "undergraduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Marketing (MS)", url: "https://business.fiu.edu/academics/graduate/marketing/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Mass Communication - Global Strategic Communications (MS)", url: "https://carta.fiu.edu/gsc/", level: "graduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Humanities and Culture" },
+  { name: "Mass Communication - Spanish Language Journalism (MS)", url: "https://carta.fiu.edu/slj/", level: "graduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Humanities and Culture" },
+  { name: "Master of Laws (LLM)", url: "https://law.fiu.edu/llm-master-laws/", level: "graduate", college: "Law", areaOfInterest: "Public Policy" },
+  { name: "Materials Science and Engineering (MS)", url: "https://cec.fiu.edu/degrees-programs/graduate/ms-in-materials-science-and-engineering/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Materials Science and Engineering (Ph.D.)", url: "https://cec.fiu.edu/degrees-programs/graduate/phd-in-materials-science-and-engineering/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Mathematical Sciences - Computer Science (BS)", url: "https://case.fiu.edu/mathstat/students/undergraduate-programs/bs-in-mathematical-sciences-mathematics/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Mathematical Sciences - Mathematical Data Science (BS)", url: "https://case.fiu.edu/mathstat/bs-in-mathematical-sciences-mathematics/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Mathematical Sciences - Mathematics (BS)", url: "https://case.fiu.edu/mathstat/bs-in-mathematical-sciences-mathematics/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Mathematical Sciences (BS) - Chemistry", url: "https://case.fiu.edu/mathstat/bs-in-mathematical-sciences-mathematics/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Mathematical Sciences (MS)", url: "https://case.fiu.edu/mathstat/students/graduate-programs/ms-in-mathematical-sciences/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Mathematical Sciences (Ph.D.)", url: "https://case.fiu.edu/mathstat/phd-in-mathematical-sciences/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Mathematics - Mathematics Education (BA)", url: "https://case.fiu.edu/mathstat/students/undergraduate-programs/ba-in-mathematics-mathematics-education/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Mechanical Engineering (BS)", url: "https://cec.fiu.edu/degrees-programs/undergraduate/bs-in-mechanical-engineering/index.html", level: "undergraduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Mechanical Engineering (MS)", url: "https://cec.fiu.edu/degrees-programs/graduate/ms-in-mechanical-engineering/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Mechanical Engineering (Ph.D.)", url: "https://cec.fiu.edu/degrees-programs/graduate/phd-in-mechanical-engineering/index.html", level: "graduate", college: "Engineering & Computing", areaOfInterest: "Sciences and Engineering" },
+  { name: "Music (BA)", url: "https://catalog.fiu.edu/programs/MUSIC:BA", level: "undergraduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Music (BM)", url: "https://carta.fiu.edu/music/students/degreeprograms/", level: "undergraduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Music (MM)", url: "https://carta.fiu.edu/music/students/degreeprograms/", level: "graduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Music Education (MS)", url: "https://carta.fiu.edu/music/musiceducation/", level: "graduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Natural and Applied Sciences (BA)", url: "https://case.fiu.edu/liberal-studies/ba-in-natural-and-applied-sciences/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Nursing - Accelerated Option (BSN)", url: "https://cnhs.fiu.edu/academics/nursing/undergrad-nursing/programs/ao-bsn/index.html", level: "undergraduate", college: "Nicole Wertheim College of Nursing & Health Sciences", areaOfInterest: "Medicine and Health" },
+  { name: "Nursing - Advanced Adult Gerontology Nurse Practitioner (MSN)", url: "https://cnhs.fiu.edu/academics/nursing/graduate-nursing/programs/msn-nurse-practitioner/", level: "graduate", college: "Nicole Wertheim College of Nursing & Health Sciences", areaOfInterest: "Medicine and Health" },
+  { name: "Nursing - Advanced Child Nurse Practitioner (MSN)", url: "https://cnhs.fiu.edu/academics/nursing/graduate-nursing/programs/msn-nurse-practitioner/", level: "graduate", college: "Nicole Wertheim College of Nursing & Health Sciences", areaOfInterest: "Medicine and Health" },
+  { name: "Nursing - Advanced Family Nurse Practitioner (MSN)", url: "https://cnhs.fiu.edu/academics/nursing/graduate-nursing/programs/msn-nurse-practitioner/", level: "graduate", college: "Nicole Wertheim College of Nursing & Health Sciences", areaOfInterest: "Medicine and Health" },
+  { name: "Nursing - Advanced Psychiatric Nurse Practitioner (MSN)", url: "https://cnhs.fiu.edu/academics/nursing/graduate-nursing/programs/msn-nurse-practitioner/", level: "graduate", college: "Nicole Wertheim College of Nursing & Health Sciences", areaOfInterest: "Medicine and Health" },
+  { name: "Nursing - Nurse Executive Educator (MSN)", url: "https://cnhs.fiu.edu/academics/nursing/graduate-nursing/", level: "graduate", college: "Nicole Wertheim College of Nursing & Health Sciences", areaOfInterest: "Medicine and Health" },
+  { name: "Nursing - RN to BSN Program (BSN)", url: "https://fiuonline.fiu.edu//programs/online-undergraduate-degrees/bachelor-of-science-in-nursing.php", level: "undergraduate", college: "Nicole Wertheim College of Nursing & Health Sciences", areaOfInterest: "Medicine and Health" },
+  { name: "Nursing - Traditional (BSN)", url: "https://cnhs.fiu.edu/academics/nursing/undergrad-nursing/programs/generic-bsn/index.html", level: "undergraduate", college: "Nicole Wertheim College of Nursing & Health Sciences", areaOfInterest: "Medicine and Health" },
+  { name: "Nursing (PhD)", url: "https://cnhs.fiu.edu/academics/phd-in-nursing/", level: "graduate", college: "Nicole Wertheim College of Nursing & Health Sciences", areaOfInterest: "Medicine and Health" },
+  { name: "Nursing Practice (DNP)", url: "https://cnhs.fiu.edu/academics/nursing/graduate-nursing/", level: "graduate", college: "Nicole Wertheim College of Nursing & Health Sciences", areaOfInterest: "Medicine and Health" },
+  { name: "Occupational Therapy (MS)", url: "https://cnhs.fiu.edu/academics/occupational-therapy/programs/ms-occupational-therapy/index.html", level: "graduate", college: "Nicole Wertheim College of Nursing & Health Sciences", areaOfInterest: "Medicine and Health" },
+  { name: "Philosophy (BA)", url: "https://case.fiu.edu/philosophy/students/ba-in-philosophy/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "Physical Therapy (DPT)", url: "https://cnhs.fiu.edu/academics/physical-therapy/programs/d-physical-therapy/index.html", level: "graduate", college: "Nicole Wertheim College of Nursing & Health Sciences", areaOfInterest: "Medicine and Health" },
+  { name: "Physician Assistant Studies (MPAS)", url: "https://medicine.fiu.edu/academics/degrees-and-programs/master-in-physician-studies/index.html", level: "graduate", college: "Herbert Wertheim College of Medicine", areaOfInterest: "Medicine and Health" },
+  { name: "Physics - Biophysics (BA)", url: "https://case.fiu.edu/physics/ba-in-physics/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Physics - Physics Education (BA)", url: "https://case.fiu.edu/physics/students/undergraduate/ba-in-physics/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Physics (BS)", url: "https://case.fiu.edu/physics/bs-in-physics/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Physics (MS)", url: "https://case.fiu.edu/physics/ms-in-physics/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Physics (PhD)", url: "https://case.fiu.edu/physics/phd-in-physics/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Political Science (BA)", url: "http://pir.fiu.edu/undergraduate-programs/major-political-science/", level: "undergraduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Public Policy" },
+  { name: "Political Science (MA)", url: "http://pir.fiu.edu/graduate-programs/masters-in-political-science/", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Public Policy" },
+  { name: "Political Science (Ph.D.)", url: "http://pir.fiu.edu/graduate-programs/phd-in-political-science/", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Public Policy" },
+  { name: "Professional MBA (Downtown)", url: "https://business.fiu.edu/academics/graduate/professional-mba-downtown/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Professional MBA (Flex)", url: "https://business.fiu.edu/academics/graduate/professional-mba-flex/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Professional MBA (Online)", url: "https://business.fiu.edu/academics/graduate/online-professional-mba/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Professional MBA (Weekend)", url: "https://business.fiu.edu/academics/graduate/professional-mba-weekend/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Psychology - Applied Behavioral Analysis (MS)", url: "https://case.fiu.edu/psychology/ms-in-behavior-analysis/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Medicine and Health" },
+  { name: "Psychology - Applied Social and Cultural Psychology (Ph.D.)", url: "https://case.fiu.edu/psychology/phd-in-applied-social-and-cultural-psychology/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Medicine and Health" },
+  { name: "Psychology - Clinical Science in Child and Adolescent Psychology (Ph.D.)", url: "http://cscap.fiu.edu/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "Psychology - Cognitive Neuroscience (Ph.D.)", url: "http://cn.fiu.edu/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "Psychology - Developmental Science (Ph.D.)", url: "http://dsp.fiu.edu/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "Psychology - Industrial/Organizational Psychology (Ph.D.)", url: "http://iop.fiu.edu/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "Psychology - Legal Psychology (Ph.D.)", url: "http://legalpsych.fiu.edu/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "Psychology - Organizational Sciences (MS)", url: "https://case.fiu.edu/psychology/ms-in-organizational-sciences/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "Psychology - Professional Counseling Psychology (MS)", url: "http://pcp.fiu.edu/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "Psychology (BA)", url: "https://case.fiu.edu/psychology/ba-in-psychology/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+  { name: "Public Administration (MPA)", url: "http://mpa.fiu.edu/", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Public Policy" },
+  { name: "Public Affairs (Ph.D.)", url: "https://pa.fiu.edu/programs/graduate-programs/phd-in-public-affairs/index.html", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Public Policy" },
+  { name: "Public Health - Biostatistics (MPH)", url: "https://stempel.fiu.edu/academics/public-health/disciplines/biostatistics/", level: "graduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Medicine and HealthPublic Policy" },
+  { name: "Public Health - Brain, Behavior, and the Environment (MPH)", url: "https://stempel.fiu.edu/academics/public-health/disciplines/environmental-health-sciences/masters-of-public-health-mph-with-a-concentration-in-brain-behavior-and-the-environment/index.html", level: "graduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Medicine and Health" },
+  { name: "Public Health - Brain, Behavior, and the Environment (Ph.D.)", url: "https://stempel.fiu.edu/academics/public-health/disciplines/environmental-health-sciences/phd-in-public-health-with-a-concentration-in-brain-behavior-and-the-environment/index.html", level: "graduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Medicine and Health" },
+  { name: "Public Health - Environmental Health Sciences (MPH)", url: "https://stempel.fiu.edu/academics/public-health/disciplines/environmental-health-sciences/mph-environmental-health-sciences/index.html", level: "graduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Medicine and HealthPublic Policy" },
+  { name: "Public Health - Environmental Toxicology (Ph.D.)", url: "http://stempel.fiu.edu//academics/public-health/disciplines/environmental-health-sciences/phd-in-public-health-with-a-concentration-in-environmental-toxicology/index.html", level: "graduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Medicine and HealthPublic Policy" },
+  { name: "Public Health - Epidemiology (MPH)", url: "https://stempel.fiu.edu/academics/public-health/disciplines/epidemiology/", level: "graduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Medicine and HealthPublic Policy" },
+  { name: "Public Health - Epidemiology (Ph.D.)", url: "https://stempel.fiu.edu/academics/public-health/disciplines/epidemiology/", level: "graduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Medicine and HealthPublic Policy" },
+  { name: "Public Health - Global Health (MPH)", url: "https://stempel.fiu.edu/academics/degrees-programs/global-health/index.html", level: "graduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Medicine and Health" },
+  { name: "Public Health - Health Promotion and Disease Prevention (MPH)", url: "https://stempel.fiu.edu/academics/public-health/disciplines/health-promotion-and-disease-prevention/", level: "graduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Medicine and HealthPublic Policy" },
+  { name: "Public Health - Health Promotion and Disease Prevention (Ph.D.)", url: "http://stempel.fiu.edu//academics/public-health/disciplines/health-promotion-and-disease-prevention/phd-in-public-health-with-a-concentration-in-health-promotion-and-disease-prevention/index.html", level: "graduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Medicine and HealthPublic Policy" },
+  { name: "Public Health - Maternal and Child Health (MPH)", url: "https://stempel.fiu.edu/academics/public-health/disciplines/health-promotion-and-disease-prevention/master-of-public-health-with-a-concentration-in-maternal-and-child-health/index.html", level: "graduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Medicine and Health" },
+  { name: "Public Health - Online Generalist (MPH)", url: "https://fiuonline.fiu.edu/programs/online-graduate-degrees/master-of-public-health.php", level: "graduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Medicine and HealthPublic Policy" },
+  { name: "Public Health (MPH)", url: "https://stempel.fiu.edu/academics/public-health/mph-apply/index.html", level: "graduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Medicine and HealthPublic Policy" },
+  { name: "Public Health (Ph.D.)", url: "https://stempel.fiu.edu/academics/public-health/phd-in-public-health/index.html", level: "graduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Medicine and HealthPublic Policy" },
+  { name: "Public Policy and Service (BPPS)", url: "https://pa.fiu.edu/programs/undergraduate-programs/bachelor-of-public-policy-and-service/index.html", level: "undergraduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Public Policy" },
+  { name: "Public Relations Advertising and Applied Communications (BS)", url: "https://carta.fiu.edu/communication/bachelors-of-science-degree-in-communication/", level: "undergraduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Reading Education (MS)", url: "https://case.fiu.edu/tl/students/graduate/ms-in-reading-literacy-education/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Real Estate (BBA)", url: "https://business.fiu.edu/academics/undergraduate/bba-real-estate/", level: "undergraduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Recreation and Sport Management - Recreational Therapy (MS)", url: "https://case.fiu.edu/crsp/students/graduate/ms-recreation-and-sport-management/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Recreation and Sport Management (BS)", url: "https://case.fiu.edu/crsp/students/undergraduate/bs-in-sport-and-recreation-management/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Recreation and Sport Management (MS)", url: "https://case.fiu.edu/crsp/students/graduate/ms-recreation-and-sport-management/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Rehabilitation and Recreational Therapy (BS)", url: "https://case.fiu.edu/crsp/bs-in-rehabilitation-and-recreational-therapy/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Medicine and Health" },
+  { name: "Religious Studies (BA)", url: "https://religion.fiu.edu/academics/undergraduate/", level: "undergraduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and Culture" },
+  { name: "Religious Studies (MA)", url: "https://religion.fiu.edu/academics/graduate-programs/", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and Culture" },
+  { name: "Research Design and Analysis - (MS)", url: "https://fiuonline.fiu.edu/programs/online-graduate-degrees/master-of-science-in-research-design-and-analysis.php", level: "graduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "School Psychology (EdS)", url: "https://case.fiu.edu/crsp/students/graduate/eds-in-school-psychology/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Social Welfare (Ph.D.)", url: "https://stempel.fiu.edu/academics/social-work/ph.d-in-social-welfare/index.html", level: "graduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Public Policy" },
+  { name: "Social Work (BS)", url: "https://stempel.fiu.edu/academics/social-work/undergraduate/bachelor-of-science-in-social-work/index.html", level: "undergraduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Public Policy" },
+  { name: "Social Work (MSW)", url: "https://stempel.fiu.edu/academics/social-work/master-of-social-work/", level: "graduate", college: "Robert Stempel College of Public Health & Social Work", areaOfInterest: "Public Policy" },
+  { name: "Spanish (BA)", url: "https://dll.fiu.edu/undergraduate/ba-spanish/index.html", level: "undergraduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and Culture" },
+  { name: "Spanish (MA)", url: "https://dll.fiu.edu/graduate/master-of-arts-in-spanish/", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and Culture" },
+  { name: "Spanish (Ph.D.)", url: "http://dll.fiu.edu/languages/spanish/phd-spanish/", level: "graduate", college: "Steven J. Green School of International and Public Affairs", areaOfInterest: "Humanities and Culture" },
+  { name: "Special Education (MS)", url: "https://case.fiu.edu/tl/students/graduate/ms-in-special-education/", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Speech Language Pathology (MS)", url: "https://cnhs.fiu.edu/academics/communication-sciences-disorders/programs/ms-speech-language-pathology/index.html", level: "graduate", college: "Nicole Wertheim College of Nursing & Health Sciences", areaOfInterest: "Medicine and Health" },
+  { name: "Sport and Exercise Science (BS)", url: "https://case.fiu.edu/tl/students/undergraduate/bs-in-sport-exercise-science/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "EducationMedicine and Health" },
+  { name: "Sports Management (MBA)", url: "https://business.fiu.edu/academics/graduate/online-professional-mba-sports-management/", level: "graduate", college: "Business", areaOfInterest: "Business and Economics" },
+  { name: "Statistics (MS)", url: "https://case.fiu.edu/mathstat/ms-in-statistics/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Sustainability and the Environment (BA)", url: "https://case.fiu.edu/earth-environment/ba-in-sustainability-and-the-environment/index.html", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Sciences and Engineering" },
+  { name: "Teaching and Learning (EdS)", url: "https://case.fiu.edu/tl/students/graduate/eds-in-teaching-and-learning/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Teaching and Learning (Ph.D.)", url: "https://case.fiu.edu/tl/students/graduate/phd-in-teaching-and-learning/index.html", level: "graduate", college: "Arts, Sciences & Education", areaOfInterest: "Education" },
+  { name: "Theatre (BA)", url: "http://carta.fiu.edu/theatre/degrees/", level: "undergraduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Theatre (BFA)", url: "http://carta.fiu.edu/theatre/degrees/", level: "undergraduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Urban Design (MA)", url: "http://carta.fiu.edu/landscape/academics/degrees/", level: "graduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Visual Arts - Studio (MFA)", url: "http://carta.fiu.edu/arts/degree-programs-and-deadlines/graduate/mfa/", level: "graduate", college: "Communication, Architecture + The Arts", areaOfInterest: "Arts and Design" },
+  { name: "Women's and Gender Studies (BA)", url: "https://cwgs.fiu.edu/academics/ba-in-womens-and-gender-studies/", level: "undergraduate", college: "Arts, Sciences & Education", areaOfInterest: "Humanities and Culture" },
+];
+
+// Matching has to survive the gap between how FIU names a program
+// ("Accounting (BACC)") and how a generated pathway names it ("Bachelor of
+// Science in Accounting"). Normalizing strips case, punctuation, the
+// parenthetical degree code, and the common degree prefixes.
+
+const DEGREE_PREFIX =
+  /^(bachelor|master|doctor)(s)?( of| in)?( science| arts| applied science| business administration| fine arts| public administration)?( in| of)?\s+/;
+
+function normalize(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+function matchKey(value: string): string {
+  return normalize(value).replace(DEGREE_PREFIX, "").trim();
+}
+
+const BY_KEY = new Map<string, FIUProgram[]>();
+for (const program of FIU_PROGRAMS) {
+  for (const key of new Set([normalize(program.name), matchKey(program.name)])) {
+    if (!key) continue;
+    const bucket = BY_KEY.get(key);
+    if (bucket) bucket.push(program);
+    else BY_KEY.set(key, [program]);
+  }
+}
+
+const GRADUATE_HINT =
+  /\b(master|masters|m\.?s\.?|m\.?a\.?|mba|macc|m\.?b\.?a|ph\.?d|doctor|doctoral|graduate)\b/i;
+
+const UNDERGRADUATE_HINT =
+  /\b(bachelor|bachelors|b\.?s\.?|b\.?a\.?|b\.?b\.?a|b\.?f\.?a|b\.?a\.?s|undergraduate)\b/i;
+
+/**
+ * Resolves a free-text program name to an FIU program.
+ *
+ * Many titles exist at both levels — "Accounting" is both a BACC and a MACC.
+ * Undergraduate wins unless a graduate credential is named, because the app's
+ * pathways reach FIU as a transfer destination for a bachelor's degree.
+ *
+ * `levelHint` carries a pathway step's level field ("B.S.", "M.B.A. / M.S.
+ * (Optional)"), which often states the credential when the program name alone
+ * doesn't. It is only consulted for choosing between levels, never for
+ * matching, so it can't cause a false match.
+ */
+export function findFIUProgram(
+  programName: string,
+  levelHint?: string
+): FIUProgram | undefined {
+  if (!programName) return undefined;
+
+  const candidates =
+    BY_KEY.get(normalize(programName)) ?? BY_KEY.get(matchKey(programName));
+  if (!candidates?.length) return undefined;
+
+  const hints = `${programName} ${levelHint ?? ""}`;
+
+  // When the caller states a credential, the match is STRICT: return nothing
+  // rather than the other level. Sending a student reading a master's step to
+  // a bachelor's page (or the reverse) is worse than showing no link at all.
+  if (GRADUATE_HINT.test(hints)) {
+    return candidates.find((p) => p.level === "graduate");
+  }
+  if (UNDERGRADUATE_HINT.test(hints)) {
+    return candidates.find((p) => p.level === "undergraduate");
+  }
+
+  // No credential stated ("Accounting"): prefer the bachelor's, since pathways
+  // reach FIU as a transfer destination, but take whatever exists.
+  return (
+    candidates.find((p) => p.level === "undergraduate") ?? candidates[0]
+  );
+}
+
+export function getFIUProgramUrl(
+  programName: string,
+  levelHint?: string
+): string | null {
+  return findFIUProgram(programName, levelHint)?.url ?? null;
+}
+
+export function isFIUProgram(programName: string, levelHint?: string): boolean {
+  return findFIUProgram(programName, levelHint) !== undefined;
+}
+
+/** Every distinct college, for grouping or filtering in the UI. */
+export function fiuColleges(): string[] {
+  return [...new Set(FIU_PROGRAMS.map((p) => p.college))].filter(Boolean).sort();
+}
+
+/** Every distinct area of interest, for grouping or filtering in the UI. */
+export function fiuAreasOfInterest(): string[] {
+  return [...new Set(FIU_PROGRAMS.map((p) => p.areaOfInterest))]
+    .filter(Boolean)
+    .sort();
+}

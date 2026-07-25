@@ -31,4 +31,27 @@ describe("floridaSchools", () => {
       expect(school.color, school.id).toMatch(/^#[0-9A-Fa-f]{6}$/);
     }
   });
+
+  it("points every logo at a local file, not a hotlinked URL", () => {
+    // mdc.png used to hotlink mdcwap.mdc.edu; every logo now ships from our
+    // own public/logos so it can't break when a school reorganizes its site.
+    for (const school of FLORIDA_SCHOOLS.filter((s) => s.logo)) {
+      expect(school.logo, school.id).toMatch(/^\/logos\/[a-z]+\.png$/);
+    }
+  });
+
+  it("has a real logo for every school", () => {
+    // All 61 are covered, so the monogram chip is now a safety net for logos
+    // that fail to load rather than the normal state for most rows.
+    for (const school of FLORIDA_SCHOOLS) {
+      expect(school.logo, school.id).toBeTruthy();
+    }
+  });
+
+  it("keeps a usable monogram for every school anyway", () => {
+    // SchoolMark falls back to this if an image 404s or fails to decode.
+    for (const school of FLORIDA_SCHOOLS) {
+      expect(school.shortName.trim().length, school.id).toBeGreaterThan(0);
+    }
+  });
 });

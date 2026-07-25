@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { SchoolHeader } from "@/app/components/SchoolHeader";
 
 interface Career {
   title: string;
@@ -249,17 +250,7 @@ export default function CareerDiscoveryPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         {/* Header Bar - Centered Logo */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="max-w-7xl mx-auto flex items-center justify-center">
-            <Link href="/">
-              <img
-                src="https://mdcwap.mdc.edu/apply/assets/mdc-logo.png"
-                alt="Miami Dade College Logo"
-                className="h-10 w-auto cursor-pointer"
-              />
-            </Link>
-          </div>
-        </header>
+        <SchoolHeader />
 
         {/* Results */}
         <section className="px-6 md:px-8 pt-12 md:pt-16 pb-24 md:pb-32">
@@ -364,17 +355,7 @@ export default function CareerDiscoveryPage() {
     return (
       <div className="min-h-screen bg-gray-50">
         {/* Header Bar - Centered Logo */}
-        <header className="bg-white border-b border-gray-200 px-6 py-4">
-          <div className="max-w-7xl mx-auto flex items-center justify-center">
-            <Link href="/">
-              <img
-                src="https://mdcwap.mdc.edu/apply/assets/mdc-logo.png"
-                alt="Miami Dade College Logo"
-                className="h-10 w-auto cursor-pointer"
-              />
-            </Link>
-          </div>
-        </header>
+        <SchoolHeader />
 
         {/* Loading State */}
         <section className="px-6 md:px-8 pt-24 md:pt-32 pb-24 md:pb-32">
@@ -421,17 +402,7 @@ export default function CareerDiscoveryPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Bar - Centered Logo */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-center">
-          <Link href="/">
-            <img
-              src="https://mdcwap.mdc.edu/apply/assets/mdc-logo.png"
-              alt="Miami Dade College Logo"
-              className="h-10 w-auto cursor-pointer"
-            />
-          </Link>
-        </div>
-      </header>
+      <SchoolHeader />
 
       {/* Main Content */}
       <section className="px-6 md:px-8 pt-12 md:pt-16 pb-24 md:pb-32">

@@ -11,10 +11,14 @@ import {
   isMDCAssociateInArtsProgram,
   isMDCAssociateInScienceProgram,
   getMDCProgramUrl,
+  hasMDCProgramPage,
 } from "@/app/lib/mdc-programs";
+import { ProgramLink } from "@/app/components/ProgramLink";
+import { useSelectedSchoolId } from "@/app/lib/useSelectedSchool";
 import { FLORIDA_UNIVERSITIES } from "@/app/lib/universities";
 import { ExamStepComponent } from "@/app/components/ExamStep";
 import { calculateStepCostRange, calculatePathwayCostRange, formatCostRange } from "@/app/lib/cost";
+import { SchoolHeader } from "@/app/components/SchoolHeader";
 
 const SUGGESTIONS = [
   "mechanical engineer",
@@ -28,6 +32,9 @@ const SUGGESTIONS = [
 function PathwayPageContent() {
   const searchParams = useSearchParams();
   const [careerInput, setCareerInput] = useState("");
+  // Which school's catalog to plan against. Read after mount because
+  // localStorage isn't available during the server render.
+  const [schoolId] = useSelectedSchoolId();
   const [showClearBtn, setShowClearBtn] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
@@ -183,7 +190,7 @@ function PathwayPageContent() {
         const response = await fetch("/api/generate-pathway", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ career }),
+          body: JSON.stringify({ career, school: schoolId }),
           signal: abortController.signal,
         });
 
@@ -537,17 +544,7 @@ function PathwayPageContent() {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header Bar - Centered Logo */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-center">
-          <Link href="/">
-            <img
-              src="https://mdcwap.mdc.edu/apply/assets/mdc-logo.png"
-              alt="Miami Dade College Logo"
-              className="h-10 w-auto cursor-pointer"
-            />
-          </Link>
-        </div>
-      </header>
+      <SchoolHeader />
 
       {/* Search Section / Loading / Flowchart Display Area */}
       <section className="px-6 md:px-8 pt-24 md:pt-32 pb-24 md:pb-32">
@@ -1080,24 +1077,7 @@ function PathwayPageContent() {
                               </a>
                             </div>
                           )}
-                          {step.type === "degree" &&
-                            ((step.level.includes("MDC") &&
-                              !step.name.toLowerCase().includes("bachelor") &&
-                              (isMDCAssociateInScienceProgram(step.name) ||
-                                isMDCAssociateInArtsProgram(step.name))) ||
-                              step.name.toLowerCase().includes("certificate") ||
-                              (step.name.toLowerCase().includes("bachelor") &&
-                                isMDCBachelorsProgram(step.name))) && (
-                              <a
-                                href={getMDCProgramUrl(step.name)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-school-600 hover:bg-school-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-school-500 transition duration-150"
-                              >
-                                <i className="fas fa-external-link-alt mr-2" />{" "}
-                                View Program Page
-                              </a>
-                            )}
+                          <ProgramLink step={step} schoolId={schoolId} />
                           {step.type === "exam" && (
                             <ExamStepComponent 
                               examName={step.name} 
@@ -1285,24 +1265,7 @@ function PathwayPageContent() {
                                   </a>
                                 </div>
                               )}
-                              {step.type === "degree" &&
-                                ((step.level.includes("MDC") &&
-                                  !step.name.toLowerCase().includes("bachelor") &&
-                                  (isMDCAssociateInScienceProgram(step.name) ||
-                                    isMDCAssociateInArtsProgram(step.name))) ||
-                                  step.name.toLowerCase().includes("certificate") ||
-                                  (step.name.toLowerCase().includes("bachelor") &&
-                                    isMDCBachelorsProgram(step.name))) && (
-                                  <a
-                                    href={getMDCProgramUrl(step.name)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-school-600 hover:bg-school-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-school-500 transition duration-150"
-                                  >
-                                    <i className="fas fa-external-link-alt mr-2" />{" "}
-                                    View Program Page
-                                  </a>
-                                )}
+                              <ProgramLink step={step} schoolId={schoolId} />
                               {step.type === "exam" && (
                                 <ExamStepComponent 
                                   examName={step.name} 

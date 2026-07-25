@@ -1,5 +1,5 @@
 {
-  "pathway:accountant": {
+  "pathway:mdc:accountant": {
     "title": "Accountant",
     "pathways": [
       {
@@ -108,7 +108,7 @@
       "Comply with the IMA Statement of Ethical Professional Practice"
     ]
   },
-  "pathway:aerospace engineer": {
+  "pathway:mdc:aerospace engineer": {
     "title": "Aerospace Engineer",
     "pathways": [
       {
@@ -229,7 +229,7 @@
       "Create an NCEES account to register for and schedule the CBT exam"
     ]
   },
-  "pathway:air traffic controller": {
+  "pathway:mdc:air traffic controller": {
     "title": "Air Traffic Controller",
     "pathways": [
       {
@@ -357,7 +357,7 @@
       "Must pass a practical test (facility rating) administered by an authorized FAA examiner or designated facility evaluator under 14 CFR Part 65 Subpart B"
     ]
   },
-  "pathway:aircraft mechanic": {
+  "pathway:mdc:aircraft mechanic": {
     "title": "Aircraft Mechanic",
     "pathways": [
       {
@@ -439,7 +439,7 @@
       "Pass an Oral and Practical (O&P) test administered by a Designated Mechanic Examiner (DME)"
     ]
   },
-  "pathway:animator": {
+  "pathway:mdc:animator": {
     "title": "Animator",
     "pathways": [
       {
@@ -600,7 +600,7 @@
       "Pass the Unity Certified Associate exam (a proctored exam featuring multiple-choice and practical scenario questions)"
     ]
   },
-  "pathway:architect": {
+  "pathway:mdc:architect": {
     "title": "Architect",
     "pathways": [
       {
@@ -731,7 +731,7 @@
       }
     ]
   },
-  "pathway:biomedical engineer": {
+  "pathway:mdc:biomedical engineer": {
     "title": "Biomedical Engineer",
     "pathways": [
       {
@@ -835,7 +835,7 @@
       "Candidate-in-Training status option: Candidates who meet the educational requirements but lack the necessary work experience may take the exam and earn candidate-in-training status, with 5 years to fulfill the work experience requirement."
     ]
   },
-  "pathway:certified nurse-midwife": {
+  "pathway:mdc:certified nurse-midwife": {
     "title": "Certified Nurse Midwife",
     "pathways": [
       {
@@ -930,7 +930,7 @@
       }
     ]
   },
-  "pathway:certified public accountant": {
+  "pathway:mdc:certified public accountant": {
     "title": "Certified Public Accountant",
     "pathways": [
       {
@@ -1019,7 +1019,7 @@
       }
     ]
   },
-  "pathway:certified registered nurse anesthetist": {
+  "pathway:mdc:certified registered nurse anesthetist": {
     "title": "Certified Registered Nurse Anesthetist",
     "pathways": [
       {
@@ -1134,7 +1134,7 @@
       "Meet state-specific or jurisdiction-specific requirements"
     ]
   },
-  "pathway:chef": {
+  "pathway:mdc:chef": {
     "title": "Chef",
     "pathways": [
       {
@@ -1242,7 +1242,7 @@
       "Pass the ACF Practical Examination demonstrating hands-on knife skills, cooking techniques, and kitchen organization"
     ]
   },
-  "pathway:chemical engineer": {
+  "pathway:mdc:chemical engineer": {
     "title": "Chemical Engineer",
     "pathways": [
       {
@@ -1343,7 +1343,7 @@
       }
     ]
   },
-  "pathway:civil engineer": {
+  "pathway:mdc:civil engineer": {
     "title": "Civil Engineer",
     "pathways": [
       {
@@ -1444,7 +1444,7 @@
       }
     ]
   },
-  "pathway:commercial pilot": {
+  "pathway:mdc:commercial pilot": {
     "title": "Commercial Pilot",
     "pathways": [
       {
@@ -1579,7 +1579,7 @@
       "Pass the FAA Practical Test (checkride) administered by an FAA Designated Pilot Examiner"
     ]
   },
-  "pathway:computer engineer": {
+  "pathway:mdc:computer engineer": {
     "title": "Computer Engineer",
     "pathways": [
       {
@@ -1678,7 +1678,7 @@
       "Meet state-specific or jurisdiction-specific requirements"
     ]
   },
-  "pathway:crime scene investigator": {
+  "pathway:mdc:crime scene investigator": {
     "title": "Crime Scene Investigator",
     "pathways": [
       {
@@ -1839,7 +1839,7 @@
       "Pass a written examination consisting of 150 multiple-choice questions with a score of 75% or higher"
     ]
   },
-  "pathway:cybersecurity analyst": {
+  "pathway:mdc:cybersecurity analyst": {
     "title": "Cybersecurity Analyst",
     "pathways": [
       {
@@ -1988,7 +1988,7 @@
       "Maintain the certification every 4 years by earning 36 GIAC Continuous Professional Education (CPE) credits"
     ]
   },
-  "pathway:data analyst": {
+  "pathway:mdc:data analyst": {
     "title": "Data Analyst",
     "pathways": [
       {
@@ -2149,7 +2149,7 @@
       "Pass the CAP examination, consisting of 100 multiple-choice questions administered within a 3-hour timeframe"
     ]
   },
-  "pathway:data scientist": {
+  "pathway:mdc:data scientist": {
     "title": "Data Scientist",
     "pathways": [
       {
@@ -2258,7 +2258,7 @@
       "Demonstrated ability to solve problems involving Computer Vision (CNNs), Natural Language Processing (NLP), and Time Series/Sequences"
     ]
   },
-  "pathway:dental hygienist": {
+  "pathway:mdc:dental hygienist": {
     "title": "Dental Hygienist",
     "pathways": [
       {
@@ -2366,7 +2366,7 @@
       "Pass the ADEX Dental Hygiene Clinical Examination (administered by testing agencies such as CDCA-WREB-CITA), consisting of patient-based or simulated clinical assessments"
     ]
   },
-  "pathway:dentist": {
+  "pathway:mdc:dentist": {
     "title": "Dentist",
     "pathways": [
       {
@@ -2500,7 +2500,7 @@
       "Meet state-specific or jurisdiction-specific requirements"
     ]
   },
-  "pathway:detective": {
+  "pathway:mdc:detective": {
     "title": "Detective",
     "pathways": [
       {
@@ -2654,7 +2654,7 @@
       "Meet state-specific or jurisdiction-specific requirements"
     ]
   },
-  "pathway:diagnostic medical sonographer": {
+  "pathway:mdc:diagnostic medical sonographer": {
     "title": "Diagnostic Medical Sonographer",
     "pathways": [
       {
@@ -2751,7 +2751,7 @@
       "Meet state-specific or jurisdiction-specific requirements"
     ]
   },
-  "pathway:electrical engineer": {
+  "pathway:mdc:electrical engineer": {
     "title": "Electrical Engineer",
     "pathways": [
       {
@@ -2864,7 +2864,7 @@
       }
     ]
   },
-  "pathway:electrician": {
+  "pathway:mdc:electrician": {
     "title": "Electrician",
     "pathways": [
       {
@@ -2949,7 +2949,7 @@
       "Meet state-specific or jurisdiction-specific requirements"
     ]
   },
-  "pathway:elementary school teacher": {
+  "pathway:mdc:elementary school teacher": {
     "title": "Elementary School Teacher",
     "pathways": [
       {
@@ -3048,7 +3048,7 @@
       "Present one valid, unexpired government-issued photo ID with a signature at the testing center on the day of the exam"
     ]
   },
-  "pathway:emergency medical technician": {
+  "pathway:mdc:emergency medical technician": {
     "title": "Emergency Medical Technician",
     "pathways": [
       {
@@ -3147,7 +3147,7 @@
       "Fulfill state EMS agency requirements for licensure, which usually include background checks, fingerprinting, and state-level registration fees"
     ]
   },
-  "pathway:entrepreneur": {
+  "pathway:mdc:entrepreneur": {
     "title": "Entrepreneur",
     "pathways": [
       {
@@ -3250,7 +3250,7 @@
       "Meet state-specific or jurisdiction-specific requirements"
     ]
   },
-  "pathway:film producer": {
+  "pathway:mdc:film producer": {
     "title": "Film Producer",
     "pathways": [
       {
@@ -3327,7 +3327,7 @@
       }
     ]
   },
-  "pathway:financial analyst": {
+  "pathway:mdc:financial analyst": {
     "title": "Financial Analyst",
     "pathways": [
       {
@@ -3482,7 +3482,7 @@
       "Meet state-specific or jurisdiction-specific requirements"
     ]
   },
-  "pathway:firefighter": {
+  "pathway:mdc:firefighter": {
     "title": "Firefighter",
     "pathways": [
       {
@@ -3612,7 +3612,7 @@
       "Pass the NREMT Paramedic Psychomotor Exam"
     ]
   },
-  "pathway:forensic scientist": {
+  "pathway:mdc:forensic scientist": {
     "title": "Forensic Scientist",
     "pathways": [
       {
@@ -3774,7 +3774,7 @@
       "Meet state-specific or jurisdiction-specific requirements"
     ]
   },
-  "pathway:game developer": {
+  "pathway:mdc:game developer": {
     "title": "Game Developer",
     "pathways": [
       {
@@ -3889,7 +3889,7 @@
       "Present a valid, unexpired government-issued photo ID at the time of the exam"
     ]
   },
-  "pathway:graphic designer": {
+  "pathway:mdc:graphic designer": {
     "title": "Graphic Designer",
     "pathways": [
       {
@@ -3982,7 +3982,7 @@
       "Optionally earn an Adobe Certified Professional Specialist credential by passing two required application exams (e.g., Visual Design requires Photoshop plus Illustrator or InDesign)"
     ]
   },
-  "pathway:hvac technician": {
+  "pathway:mdc:hvac technician": {
     "title": "HVAC Technician",
     "pathways": [
       {
@@ -4079,7 +4079,7 @@
       "Meet state-specific or jurisdiction-specific requirements"
     ]
   },
-  "pathway:high school teacher": {
+  "pathway:mdc:high school teacher": {
     "title": "High School Teacher",
     "pathways": [
       {
@@ -4168,7 +4168,7 @@
       }
     ]
   },
-  "pathway:hospitality manager": {
+  "pathway:mdc:hospitality manager": {
     "title": "Hospitality Manager",
     "pathways": [
       {
@@ -4276,7 +4276,7 @@
       "Achieve a passing score of 70% or higher on the exam within the allotted 2-hour time limit"
     ]
   },
-  "pathway:human resources specialist": {
+  "pathway:mdc:human resources specialist": {
     "title": "Human Resources Specialist",
     "pathways": [
       {
@@ -4385,7 +4385,7 @@
       "Meet state-specific or jurisdiction-specific requirements"
     ]
   },
-  "pathway:industrial engineer": {
+  "pathway:mdc:industrial engineer": {
     "title": "Industrial Engineer",
     "pathways": [
       {
@@ -4506,7 +4506,7 @@
       "Create a MyNCEES account and register for the Computer-Based Test (CBT) exam, paying the $400 exam fee"
     ]
   },
-  "pathway:information technology specialist": {
+  "pathway:mdc:information technology specialist": {
     "title": "Information Technology Specialist",
     "pathways": [
       {
@@ -4663,7 +4663,7 @@
       "Meet state-specific or jurisdiction-specific requirements"
     ]
   },
-  "pathway:interior designer": {
+  "pathway:mdc:interior designer": {
     "title": "Interior Designer",
     "pathways": [
       {
@@ -4762,7 +4762,7 @@
       "Pass the Interior Design Professional Exam (IDPX) and the Practicum Exam (PRAC) after fulfilling both the education and work experience requirements"
     ]
   },
-  "pathway:journalist": {
+  "pathway:mdc:journalist": {
     "title": "Journalist",
     "pathways": [
       {
@@ -4875,7 +4875,7 @@
       }
     ]
   },
-  "pathway:landscape architect": {
+  "pathway:mdc:landscape architect": {
     "title": "Landscape Architect",
     "pathways": [
       {
@@ -4974,7 +4974,7 @@
       "Complete required professional work experience under the direct supervision of a licensed landscape architect (duration varies by jurisdiction, typically 1–4 years)"
     ]
   },
-  "pathway:lawyer": {
+  "pathway:mdc:lawyer": {
     "title": "Lawyer",
     "pathways": [
       {
@@ -5137,7 +5137,7 @@
       "Pass both Part A (Florida specific examination) and Part B (Multistate Bar Examination - MBE) of the Florida Bar Examination"
     ]
   },
-  "pathway:marketing manager": {
+  "pathway:mdc:marketing manager": {
     "title": "Marketing Manager",
     "pathways": [
       {
@@ -5245,7 +5245,7 @@
       "Pay the required course tuition and exam registration fees"
     ]
   },
-  "pathway:mechanical engineer": {
+  "pathway:mdc:mechanical engineer": {
     "title": "Mechanical Engineer",
     "pathways": [
       {
@@ -5346,7 +5346,7 @@
       }
     ]
   },
-  "pathway:mental health counselor": {
+  "pathway:mdc:mental health counselor": {
     "title": "Mental Health Counselor",
     "pathways": [
       {
@@ -5505,7 +5505,7 @@
       "Submission of a formal application through ProCounselor along with payment of the examination fee"
     ]
   },
-  "pathway:mobile application developer": {
+  "pathway:mdc:mobile application developer": {
     "title": "Mobile Application Developer",
     "pathways": [
       {
@@ -5608,7 +5608,7 @@
       "Optionally complete the Meta Certified Digital Associate/Developer certification exam preparation modules included in the program"
     ]
   },
-  "pathway:network administrator": {
+  "pathway:mdc:network administrator": {
     "title": "Network Administrator",
     "pathways": [
       {
@@ -5757,7 +5757,7 @@
       "Meet state-specific or jurisdiction-specific requirements"
     ]
   },
-  "pathway:nurse practitioner": {
+  "pathway:mdc:nurse practitioner": {
     "title": "Nurse Practitioner",
     "pathways": [
       {
@@ -5873,7 +5873,7 @@
       "Submit a completed application and appropriate application fees through the Florida Health Care Clinic Licensing / Medical Quality Assurance portal."
     ]
   },
-  "pathway:occupational therapist": {
+  "pathway:mdc:occupational therapist": {
     "title": "Occupational Therapist",
     "pathways": [
       {
@@ -5995,7 +5995,7 @@
       "Submission of a completed licensure application and applicable fees to the Florida Department of Health"
     ]
   },
-  "pathway:paralegal": {
+  "pathway:mdc:paralegal": {
     "title": "Paralegal",
     "pathways": [
       {
@@ -6092,7 +6092,7 @@
       "Pass the Skills Exam, a written essay test assessing critical thinking, writing, and analytical skills (must be taken after passing or during the eligibility window of the Knowledge Exam)"
     ]
   },
-  "pathway:paramedic": {
+  "pathway:mdc:paramedic": {
     "title": "Paramedic",
     "pathways": [
       {
@@ -6183,7 +6183,7 @@
       "Meet state-specific or jurisdiction-specific requirements"
     ]
   },
-  "pathway:pharmacist": {
+  "pathway:mdc:pharmacist": {
     "title": "Pharmacist",
     "pathways": [
       {
@@ -6298,7 +6298,7 @@
       "Receive an Authorization to Test (ATT) from Pearson VUE and schedule an exam appointment within the designated eligibility period"
     ]
   },
-  "pathway:photographer": {
+  "pathway:mdc:photographer": {
     "title": "Photographer",
     "pathways": [
       {
@@ -6397,7 +6397,7 @@
       "Maintain certification every 3 years by earning 15 Continuing Education System (CEU) points or re-submitting for evaluation"
     ]
   },
-  "pathway:physical therapist": {
+  "pathway:mdc:physical therapist": {
     "title": "Physical Therapist",
     "pathways": [
       {
@@ -6509,7 +6509,7 @@
       "Comply with attempt limit policies (maximum of 6 lifetime attempts and a maximum of 3 attempts within any 12-month period)"
     ]
   },
-  "pathway:physical therapist assistant": {
+  "pathway:mdc:physical therapist assistant": {
     "title": "Physical Therapist Assistant",
     "pathways": [
       {
@@ -6602,7 +6602,7 @@
       "Schedule an exam appointment at a Prometric testing center after receiving an Authorization to Test (ATT) letter"
     ]
   },
-  "pathway:physician": {
+  "pathway:mdc:physician": {
     "title": "Physician",
     "pathways": [
       {
@@ -6809,7 +6809,7 @@
       "Meet state-specific or jurisdiction-specific requirements"
     ]
   },
-  "pathway:physician assistant": {
+  "pathway:mdc:physician assistant": {
     "title": "Physician Assistant",
     "pathways": [
       {
@@ -6950,7 +6950,7 @@
       "Complete the exam within 6 years of PA program graduation, limited to a maximum of 6 attempts"
     ]
   },
-  "pathway:police officer": {
+  "pathway:mdc:police officer": {
     "title": "Police Officer",
     "pathways": [
       {
@@ -7045,7 +7045,7 @@
       "Pass the examination within four years of beginning the basic recruit training program or receiving an approved exemption"
     ]
   },
-  "pathway:professor": {
+  "pathway:mdc:professor": {
     "title": "Professor",
     "pathways": [
       {
@@ -7122,7 +7122,7 @@
       }
     ]
   },
-  "pathway:project manager": {
+  "pathway:mdc:project manager": {
     "title": "Project Manager",
     "pathways": [
       {
@@ -7264,7 +7264,7 @@
       "Pass the 180-question multiple-choice Certified Construction Manager (CCM) examination"
     ]
   },
-  "pathway:psychologist": {
+  "pathway:mdc:psychologist": {
     "title": "Psychologist",
     "pathways": [
       {
@@ -7363,7 +7363,7 @@
       "Attainment of a passing score as determined by your specific licensing jurisdiction (typically a scaled score of 500 for independent licensure)"
     ]
   },
-  "pathway:radiologic technologist": {
+  "pathway:mdc:radiologic technologist": {
     "title": "Radiologic Technologist",
     "pathways": [
       {
@@ -7456,7 +7456,7 @@
       "Pass the computer-based ARRT Examination in Radiography (consisting of 200 scored questions)"
     ]
   },
-  "pathway:real estate agent": {
+  "pathway:mdc:real estate agent": {
     "title": "Real Estate Agent",
     "pathways": [
       {
@@ -7555,7 +7555,7 @@
       "Pass the Florida Real Estate Broker Licensure Examination with a score of 75 or higher"
     ]
   },
-  "pathway:registered nurse": {
+  "pathway:mdc:registered nurse": {
     "title": "Registered Nurse",
     "pathways": [
       {
@@ -7648,7 +7648,7 @@
       "Receive an Authorization to Test (ATT) email from Pearson VUE after being declared eligible by your NRB"
     ]
   },
-  "pathway:respiratory therapist": {
+  "pathway:mdc:respiratory therapist": {
     "title": "Respiratory Therapist",
     "pathways": [
       {
@@ -7745,7 +7745,7 @@
       "Pass the Clinical Simulation Examination (CSE) after attaining TMC eligibility to earn the Registered Respiratory Therapist (RRT) credential"
     ]
   },
-  "pathway:school counselor": {
+  "pathway:mdc:school counselor": {
     "title": "School Counselor",
     "pathways": [
       {
@@ -7856,7 +7856,7 @@
       "Meet state-specific or jurisdiction-specific requirements"
     ]
   },
-  "pathway:social worker": {
+  "pathway:mdc:social worker": {
     "title": "Social Worker",
     "pathways": [
       {
@@ -7959,7 +7959,7 @@
       "Pass the 170-question multiple-choice computer-based examination within the 4-hour time limit"
     ]
   },
-  "pathway:software engineer": {
+  "pathway:mdc:software engineer": {
     "title": "Software Engineer",
     "pathways": [
       {
@@ -8121,7 +8121,7 @@
       "Present a valid, unexpired government-issued photo ID at an authorized Pearson VUE testing center on exam day"
     ]
   },
-  "pathway:surgical technologist": {
+  "pathway:mdc:surgical technologist": {
     "title": "Surgical Technologist",
     "pathways": [
       {
@@ -8202,7 +8202,7 @@
       "Achieve a passing score on the computer-based CST Examination (175 multiple-choice questions)"
     ]
   },
-  "pathway:systems administrator": {
+  "pathway:mdc:systems administrator": {
     "title": "Systems Administrator",
     "pathways": [
       {
@@ -8351,7 +8351,7 @@
       "Meet state-specific or jurisdiction-specific requirements"
     ]
   },
-  "pathway:teacher": {
+  "pathway:mdc:teacher": {
     "title": "Teacher",
     "pathways": [
       {
@@ -8464,7 +8464,7 @@
       }
     ]
   },
-  "pathway:veterinarian": {
+  "pathway:mdc:veterinarian": {
     "title": "Veterinarian",
     "pathways": [
       {
@@ -8611,7 +8611,7 @@
       "Scheduling and completion of the 360 multiple-choice question exam at a Prometric testing center during the approved testing window"
     ]
   },
-  "pathway:veterinary technician": {
+  "pathway:mdc:veterinary technician": {
     "title": "Veterinary Technician",
     "pathways": [
       {
@@ -8692,7 +8692,7 @@
       "Compliance with any specific additional eligibility criteria set by the candidate's chosen state or provincial licensing board"
     ]
   },
-  "pathway:web developer": {
+  "pathway:mdc:web developer": {
     "title": "Web Developer",
     "pathways": [
       {
@@ -8841,7 +8841,7 @@
       "Meet state-specific or jurisdiction-specific requirements"
     ]
   },
-  "pathway:welder": {
+  "pathway:mdc:welder": {
     "title": "Welder",
     "pathways": [
       {
@@ -8924,5 +8924,2868 @@
       "Submit a completed CWI application with qualifying work experience verified and signed by a current or past employer",
       "Pass all three parts of the CWI exam (Part A: Fundamentals, Part B: Practical, and Part C: Code Book) with a minimum score of 72% on each part"
     ]
-  }
+  },
+  "suggestions:accountant": [
+    {
+      "title": "Accountant",
+      "description": "Prepares, maintains, and analyzes financial records to ensure accuracy, compliance, and proper tax filing for individuals or organizations.",
+      "salary": "$65,000 - $85,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Certified Public Accountant (CPA)",
+      "description": "Licensed accounting professional who provides auditing, taxation, financial planning, and consulting services to corporations and individuals.",
+      "salary": "$80,000 - $115,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Auditor",
+      "description": "Examines financial statements and organizational records to verify accuracy, prevent fraud, and ensure compliance with laws and regulations.",
+      "salary": "$70,000 - $95,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Forensic Accountant",
+      "description": "Investigates financial crimes, fraud, and discrepancies using accounting skills to prepare evidence for legal proceedings.",
+      "salary": "$85,000 - $120,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Management Accountant",
+      "description": "Analyzes internal financial data to help business executives make strategic operational, planning, and budgeting decisions.",
+      "salary": "$75,000 - $100,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:aerospace engineer": [
+    {
+      "title": "Aerospace Engineer",
+      "description": "Designs, tests, and manufactures aircraft, spacecraft, satellites, and missile systems.",
+      "salary": "$115,000 - $140,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Astronautical Engineer",
+      "description": "Focuses specifically on the science and technology of spacecraft and vehicles operating outside Earth's atmosphere.",
+      "salary": "$118,000 - $145,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Avionics Engineer",
+      "description": "Specializes in the design and integration of electronic systems used on aircraft, satellites, and spacecraft.",
+      "salary": "$105,000 - $130,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Propulsion Engineer",
+      "description": "Designs and evaluates propulsion systems, including rocket motors, jet engines, and advanced fuel delivery systems.",
+      "salary": "$110,000 - $135,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Flight Test Engineer",
+      "description": "Plans, conducts, and evaluates flight test operations to ensure aircraft safety and performance compliance.",
+      "salary": "$100,000 - $125,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:air traffic controller": [
+    {
+      "title": "Air Traffic Controller",
+      "description": "Monitors and directs the movement of aircraft on the ground and in the air to ensure safety and prevent collisions.",
+      "salary": "$125,000 - $145,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Flight Dispatcher",
+      "description": "Plans flight routes, assesses weather conditions, calculates fuel requirements, and coordinates with pilots throughout flights.",
+      "salary": "$65,000 - $95,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Airfield Operations Specialist",
+      "description": "Ensures the safe takeoff, landing, and taxiing of aircraft, while maintaining airport runway conditions and security.",
+      "salary": "$55,000 - $75,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Aviation Safety Inspector",
+      "description": "Inspects flight operations, maintenance programs, and personnel to ensure compliance with aviation regulations.",
+      "salary": "$95,000 - $130,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Airport Operations Manager",
+      "description": "Oversees day-to-day airport activities, including emergency response, security, facilities maintenance, and regulatory compliance.",
+      "salary": "$85,000 - $120,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:aircraft mechanic": [
+    {
+      "title": "Aircraft Mechanic",
+      "description": "Inspects, maintains, and repairs aircraft structures, engines, and mechanical systems to ensure flight safety.",
+      "salary": "$65,000 - $85,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Avionics Technician",
+      "description": "Installs, tests, and repairs electronic equipment on aircraft, including navigation, radar, and radio communication systems.",
+      "salary": "$68,000 - $88,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Aircraft Inspector",
+      "description": "Examines aircraft components, maintenance work, and record logs to ensure strict compliance with federal aviation safety standards.",
+      "salary": "$80,000 - $105,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Aerospace Engineering Technician",
+      "description": "Operates and maintains specialized equipment used in building, testing, and developing aircraft and spacecraft.",
+      "salary": "$70,000 - $92,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Helicopter Mechanic",
+      "description": "Specializes in diagnosing, servicing, and repairing rotary-wing aircraft for civil, commercial, or military applications.",
+      "salary": "$65,000 - $85,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:animator": [
+    {
+      "title": "Animator",
+      "description": "Creates a series of images that simulate movement for films, video games, television, and digital media.",
+      "salary": "$70,000 - $95,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "3D Animator",
+      "description": "Specializes in building three-dimensional digital models and animating them for computer graphics and interactive media.",
+      "salary": "$75,000 - $105,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Motion Graphics Designer",
+      "description": "Creates animated artwork, typography, and graphic design elements for commercial advertising, television, and web media.",
+      "salary": "$65,000 - $90,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Visual Effects (VFX) Artist",
+      "description": "Integrates computer-generated visual effects into live-action film, television, and video game footage.",
+      "salary": "$80,000 - $115,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Character Rigger",
+      "description": "Develops digital skeletons and control structures for 3D models so that animators can manipulate their movements.",
+      "salary": "$75,000 - $100,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:architect": [
+    {
+      "title": "Architect",
+      "description": "Plans and designs buildings and other structures, blending creativity, engineering, and functionality.",
+      "salary": "$85,000 - $115,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Landscape Architect",
+      "description": "Designs attractive and functional outdoor spaces such as parks, gardens, playgrounds, and urban green spaces.",
+      "salary": "$70,000 - $95,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Interior Architect",
+      "description": "Blends interior design with structural engineering to optimize indoor spaces for aesthetics and functionality.",
+      "salary": "$65,000 - $90,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Naval Architect",
+      "description": "Designs, builds, and maintains ships, boats, submarines, and offshore structures.",
+      "salary": "$90,000 - $125,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Enterprise Architect",
+      "description": "Aligns an organization's technology strategy, IT infrastructure, and software applications with its business goals.",
+      "salary": "$130,000 - $175,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:biomedical engineer": [
+    {
+      "title": "Biomedical Engineer",
+      "description": "Combines engineering principles with medical sciences to design and create equipment, devices, computer systems, and software used in healthcare.",
+      "salary": "$80,000 - $110,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Medical Device Engineer",
+      "description": "Focuses on the research, development, and manufacturing of diagnostic tools, surgical instruments, and therapeutic equipment.",
+      "salary": "$85,000 - $115,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Clinical Engineer",
+      "description": "Applies engineering technology to optimize healthcare delivery and manage medical equipment systems within hospital environments.",
+      "salary": "$75,000 - $100,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Tissue Engineer",
+      "description": "Uses biological cells, engineering techniques, and biomaterials to restore, maintain, or improve biological tissue functions.",
+      "salary": "$82,000 - $115,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Biomechatronics Engineer",
+      "description": "Integrates mechanics, electronics, and biology to design advanced artificial limbs, exoskeletons, and robotic prosthetics.",
+      "salary": "$85,000 - $120,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:certified nurse-midwife": [
+    {
+      "title": "Certified Nurse Midwife",
+      "description": "Provides comprehensive reproductive health care, prenatal and postpartum care, and assists with child delivery.",
+      "salary": "$115,000 - $130,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Women's Health Nurse Practitioner",
+      "description": "Specializes in primary care, gynecological services, and reproductive health services tailored specifically for women.",
+      "salary": "$110,000 - $125,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Labor and Delivery Nurse",
+      "description": "Provides specialized nursing care to women during labor, childbirth, and immediate postpartum recovery.",
+      "salary": "$78,000 - $92,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Neonatal Nurse Practitioner",
+      "description": "Cares for premature and critically ill newborns in neonatal intensive care units (NICU).",
+      "salary": "$120,000 - $135,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Obstetrician-Gynecologist (OB/GYN)",
+      "description": "Physician specializing in female reproductive health, high-risk pregnancy care, and surgical interventions.",
+      "salary": "$230,000 - $310,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:certified public accountant": [
+    {
+      "title": "Certified Public Accountant",
+      "description": "Prepares and analyzes financial records, conducts audits, and manages tax strategies for businesses, organizations, and individuals.",
+      "salary": "$75,000 - $115,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Forensic Accountant",
+      "description": "Investigates financial discrepancies, fraud, and legal disputes by analyzing complex accounting records and serving as expert witnesses.",
+      "salary": "$80,000 - $120,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Financial Auditor",
+      "description": "Examines organizational financial statements, accounting systems, and internal controls to ensure compliance and accuracy.",
+      "salary": "$70,000 - $100,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Corporate Controller",
+      "description": "Directs high-level accounting operations, manages financial reporting, and oversees budgeting and internal compliance within a corporation.",
+      "salary": "$125,000 - $175,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Tax Manager",
+      "description": "Oversees tax strategy, planning, and legal compliance for companies or high-net-worth clients.",
+      "salary": "$105,000 - $150,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:certified registered nurse anesthetist": [
+    {
+      "title": "Certified Registered Nurse Anesthetist (CRNA)",
+      "description": "Administers anesthesia and manages pain for patients undergoing surgical, obstetrical, or diagnostic procedures.",
+      "salary": "$190,000 - $220,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Anesthesiologist Assistant",
+      "description": "Works under the supervision of anesthesiologists to develop and implement anesthesia care plans for patients.",
+      "salary": "$160,000 - $190,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Nurse Practitioner",
+      "description": "Provides primary and specialty healthcare services, including diagnosing medical conditions and prescribing medications.",
+      "salary": "$115,000 - $130,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Critical Care Nurse",
+      "description": "Provides specialized care to patients with life-threatening conditions in hospital intensive care units.",
+      "salary": "$80,000 - $100,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Clinical Nurse Specialist",
+      "description": "Provides expert clinical leadership, consultation, and direct care in specialized areas of healthcare practice.",
+      "salary": "$100,000 - $120,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:chef": [
+    {
+      "title": "Chef",
+      "description": "Directs food preparation, creates menus, manages kitchen staff, and maintains food quality and safety standards in dining establishments.",
+      "salary": "$55,000 - $85,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Sous Chef",
+      "description": "Serves as second-in-command in the kitchen, supervising line cooks, overseeing prep work, and assisting the head chef with daily operations.",
+      "salary": "$45,000 - $60,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Pastry Chef",
+      "description": "Specializes in baking and preparing desserts, pastries, breads, and confectionery items for restaurants, bakeries, and hotels.",
+      "salary": "$50,000 - $70,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Private Chef",
+      "description": "Prepares customized, high-quality meals directly for private clients, families, or estates based on specific dietary preferences.",
+      "salary": "$65,000 - $110,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Culinary Director",
+      "description": "Oversees the overarching culinary vision, menu development, quality control, and kitchen operations across multiple restaurant locations or hospitality brands.",
+      "salary": "$90,000 - $140,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:chemical engineer": [
+    {
+      "title": "Chemical Engineer",
+      "description": "Develops and designs chemical manufacturing processes and applies principles of chemistry, physics, and math to solve production challenges.",
+      "salary": "$105,000 - $125,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Process Engineer",
+      "description": "Designs, implements, and optimizes industrial processes to transform raw materials into finished chemical or biological products efficiently.",
+      "salary": "$90,000 - $115,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Materials Engineer",
+      "description": "Develops, processes, and tests materials used to create a wide range of products, focusing on chemical composition and structural performance.",
+      "salary": "$95,000 - $115,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Biochemical Engineer",
+      "description": "Combines biology and chemical engineering to convert biological materials into usable pharmaceuticals, biofuels, and agricultural products.",
+      "salary": "$98,000 - $120,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Environmental Engineer",
+      "description": "Uses chemical engineering principles to develop solutions for environmental problems, such as waste treatment and pollution control.",
+      "salary": "$85,000 - $105,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:civil engineer": [
+    {
+      "title": "Civil Engineer",
+      "description": "Designs, plans, and oversees the construction and maintenance of infrastructure projects such as roads, bridges, and water systems.",
+      "salary": "$85,000 - $105,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Structural Engineer",
+      "description": "Specializes in designing and analyzing structural frameworks to ensure buildings and bridges can safely withstand loads and environmental forces.",
+      "salary": "$88,000 - $110,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Transportation Engineer",
+      "description": "Plans, designs, and operates public transportation systems, highways, airports, and transit networks to improve mobility.",
+      "salary": "$82,000 - $102,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Geotechnical Engineer",
+      "description": "Analyzes soil, rock, and groundwater conditions to determine safe foundation parameters for major construction projects.",
+      "salary": "$80,000 - $100,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Construction Manager",
+      "description": "Oversees civil engineering and building projects from planning to completion, managing budgets, schedules, and site personnel.",
+      "salary": "$95,000 - $125,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:commercial pilot": [
+    {
+      "title": "Commercial Pilot",
+      "description": "Flies aircraft for nonscheduled flights, charter companies, aerial photography, emergency medical services, or crop dusting.",
+      "salary": "$90,000 - $130,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Airline Transport Pilot",
+      "description": "Commands scheduled flights for major or regional airlines transporting passengers and luggage safely to destinations worldwide.",
+      "salary": "$130,000 - $220,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Cargo Pilot",
+      "description": "Operates heavy aircraft dedicated to transporting air freight, mail, and international supply chain logistics.",
+      "salary": "$95,000 - $160,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Corporate Pilot",
+      "description": "Flies private jets and business aircraft for corporations, high-net-worth individuals, or charter operations.",
+      "salary": "$85,000 - $150,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Certified Flight Instructor",
+      "description": "Teaches aspiring pilots flight maneuvers, navigation, aviation safety, and ground school subjects.",
+      "salary": "$45,000 - $75,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    }
+  ],
+  "suggestions:computer engineer": [
+    {
+      "title": "Computer Engineer",
+      "description": "Researches, designs, develops, and tests computer systems and physical components such as processors, memory devices, circuit boards, and routers.",
+      "salary": "$115,000 - $140,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Embedded Systems Engineer",
+      "description": "Designs and develops specialized microcontrollers and low-level software for hardware systems in automotive, medical, and consumer technology industries.",
+      "salary": "$105,000 - $135,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Firmware Engineer",
+      "description": "Writes low-level code that directly interacts with hardware components to ensure smooth communication between software and physical devices.",
+      "salary": "$110,000 - $138,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Robotics Engineer",
+      "description": "Integrates computer engineering, mechanical systems, and software to design autonomous machines and automated robotic devices.",
+      "salary": "$100,000 - $130,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Computer Systems Architect",
+      "description": "Designs and oversees the implementation of complex IT infrastructure and high-performance computing system architectures.",
+      "salary": "$130,000 - $165,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:crime scene investigator": [
+    {
+      "title": "Crime Scene Investigator",
+      "description": "Collects, preserves, and documents physical evidence from crime scenes to aid law enforcement in criminal investigations.",
+      "salary": "$55,000 - $80,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Forensic Science Technician",
+      "description": "Analyzes chemical and biological evidence in laboratory settings to support law enforcement and legal proceedings.",
+      "salary": "$60,000 - $85,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Digital Forensics Examiner",
+      "description": "Recovers, analyzes, and preserves evidence from electronic devices and digital media during criminal investigations.",
+      "salary": "$70,000 - $105,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Forensic Latent Print Examiner",
+      "description": "Specializes in analyzing, identifying, and evaluating friction ridge details such as fingerprints found at crime scenes.",
+      "salary": "$50,000 - $75,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Bloodstain Pattern Analyst",
+      "description": "Examines the shape, size, and distribution of bloodstains to reconstruct the sequence of violent events at a crime scene.",
+      "salary": "$55,000 - $82,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:cybersecurity analyst": [
+    {
+      "title": "Cybersecurity Analyst",
+      "description": "Monitors networks for security breaches, investigates incidents, and implements protective measures to safeguard organizational data.",
+      "salary": "$85,000 - $115,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Penetration Tester",
+      "description": "Simulates cyberattacks on an organization's systems to identify security vulnerabilities before malicious hackers can exploit them.",
+      "salary": "$95,000 - $130,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Security Architect",
+      "description": "Designs, builds, and implements robust enterprise security structures to protect complex computer networks and systems.",
+      "salary": "$125,000 - $165,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Incident Response Handler",
+      "description": "Responds swiftly to security breaches and cyber incidents to contain threats, minimize impact, and restore normal operations.",
+      "salary": "$90,000 - $120,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Information Security Manager",
+      "description": "Oversees an organization's overall cybersecurity strategy, managing security teams, policies, and regulatory compliance.",
+      "salary": "$130,000 - $170,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Very competitive"
+    }
+  ],
+  "suggestions:data analyst": [
+    {
+      "title": "Data Analyst",
+      "description": "Collects, processes, and performs statistical analyses on data to help organizations make informed business decisions.",
+      "salary": "$65,000 - $85,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Data Scientist",
+      "description": "Utilizes advanced statistics, machine learning, and predictive modeling to extract actionable insights from complex datasets.",
+      "salary": "$100,000 - $130,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Business Intelligence Analyst",
+      "description": "Transforms raw data into meaningful metrics, reports, and dashboards to guide strategic corporate decisions.",
+      "salary": "$75,000 - $95,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Data Engineer",
+      "description": "Designs, builds, and maintains the data pipelines and infrastructure required for data collection and analysis.",
+      "salary": "$105,000 - $135,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Quantitative Analyst",
+      "description": "Applies mathematical and statistical methods to financial and risk management problems.",
+      "salary": "$115,000 - $150,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Very competitive"
+    }
+  ],
+  "suggestions:data scientist": [
+    {
+      "title": "Data Scientist",
+      "description": "Extracts actionable insights from complex datasets using machine learning, statistics, and advanced analytics.",
+      "salary": "$120,000 - $155,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Machine Learning Engineer",
+      "description": "Designs, builds, and deploys scalable machine learning models and artificial intelligence systems.",
+      "salary": "$130,000 - $165,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Data Engineer",
+      "description": "Develops and maintains the infrastructure, data pipelines, and architectures needed to process massive volumes of data.",
+      "salary": "$110,000 - $145,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Data Analyst",
+      "description": "Gathers, cleans, and analyzes numerical data to help organizations solve problems and improve business operations.",
+      "salary": "$70,000 - $95,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Business Intelligence Analyst",
+      "description": "Transforms data into interactive dashboards and visual reports to guide executive decision-making and business strategy.",
+      "salary": "$85,000 - $110,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:dental hygienist": [
+    {
+      "title": "Dental Hygienist",
+      "description": "Examines patients for signs of oral diseases, cleans teeth, and provides preventive dental care and oral health education.",
+      "salary": "$75,000 - $90,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Dental Assistant",
+      "description": "Assists dentists during procedures, prepares instruments, takes X-rays, and handles administrative office tasks.",
+      "salary": "$40,000 - $50,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Dentist",
+      "description": "Diagnoses and treats diseases, injuries, and malformations of the teeth, gums, and mouth tissues.",
+      "salary": "$150,000 - $190,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Dental Laboratory Technician",
+      "description": "Designs and constructs custom dental prosthetics such as crowns, bridges, dentures, and corrective aligners.",
+      "salary": "$45,000 - $60,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Orthodontic Assistant",
+      "description": "Specializes in assisting orthodontists with fitting braces, taking dental impressions, and managing oral alignment equipment.",
+      "salary": "$42,000 - $52,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Less competitive"
+    }
+  ],
+  "suggestions:dentist": [
+    {
+      "title": "Dentist",
+      "description": "Diagnoses, treats, and helps prevent diseases, injuries, and malformations of the teeth, gums, and mouth.",
+      "salary": "$155,000 - $180,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Orthodontist",
+      "description": "Specializes in diagnosing, preventing, and correcting misaligned teeth, jaws, and bite patterns.",
+      "salary": "$208,000 - $250,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Very competitive"
+    },
+    {
+      "title": "Oral and Maxillofacial Surgeon",
+      "description": "Performs complex surgical procedures on the mouth, jaws, teeth, gums, neck, and head.",
+      "salary": "$230,000 - $300,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Pediatric Dentist",
+      "description": "Provides comprehensive oral health care tailored specifically to infants, children, and adolescents.",
+      "salary": "$175,000 - $215,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Periodontist",
+      "description": "Focuses on the prevention, diagnosis, and treatment of inflammatory diseases affecting the gums and supporting structures of teeth.",
+      "salary": "$185,000 - $230,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:detective": [
+    {
+      "title": "Police Detective",
+      "description": "Gathers facts and collects evidence for criminal cases to solve crimes and assist in prosecuting suspects.",
+      "salary": "$70,000 - $95,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Private Investigator",
+      "description": "Conducts personal, financial, or legal investigations for private clients, businesses, and law firms.",
+      "salary": "$50,000 - $75,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Digital Forensics Investigator",
+      "description": "Analyzes digital evidence from computer systems and mobile devices to investigate cybercrimes and security breaches.",
+      "salary": "$80,000 - $115,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Financial Fraud Investigator",
+      "description": "Examines financial records, transactions, and statements to detect white-collar crime and embezzlement.",
+      "salary": "$65,000 - $90,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Forensic Crime Scene Investigator",
+      "description": "Collects, preserves, and analyzes physical evidence found at crime scenes to aid criminal investigations.",
+      "salary": "$60,000 - $85,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:diagnostic medical sonographer": [
+    {
+      "title": "Diagnostic Medical Sonographer",
+      "description": "Uses high-frequency sound waves to produce images of internal organs and tissues to assist physicians in diagnosing medical conditions.",
+      "salary": "$78,000 - $95,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Cardiac Sonographer",
+      "description": "Specializes in imaging the heart, including its chambers, valves, and blood vessels, to help diagnose cardiovascular diseases.",
+      "salary": "$80,000 - $100,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Vascular Technologist",
+      "description": "Uses ultrasound equipment to evaluate blood flow and identify vascular issues like blockages or blood clots.",
+      "salary": "$75,000 - $92,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Radiologic Technologist",
+      "description": "Performs diagnostic imaging examinations, such as X-rays and computed tomography (CT) scans, to assist physicians.",
+      "salary": "$65,000 - $80,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "MRI Technologist",
+      "description": "Operates Magnetic Resonance Imaging scanners to capture detailed anatomical images for diagnostic purposes.",
+      "salary": "$80,000 - $98,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:electrical engineer": [
+    {
+      "title": "Electrical Engineer",
+      "description": "Designs, develops, tests, and supervises the manufacturing of electrical equipment, components, and systems.",
+      "salary": "$85,000 - $115,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Electronics Engineer",
+      "description": "Researches, designs, and tests electronic components, circuit boards, and systems for various technological applications.",
+      "salary": "$90,000 - $120,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Power Systems Engineer",
+      "description": "Focuses on the generation, transmission, and distribution of electric power, including renewable energy integration.",
+      "salary": "$88,000 - $118,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Control Systems Engineer",
+      "description": "Designs and manages equipment used to monitor and control dynamic processes, machinery, and automated systems.",
+      "salary": "$85,000 - $110,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Embedded Systems Engineer",
+      "description": "Combines electrical engineering and software development to create integrated microcontrollers and electronic systems.",
+      "salary": "$95,000 - $125,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:electrician": [
+    {
+      "title": "Electrician",
+      "description": "Installs, maintains, and repairs electrical power, communications, lighting, and control systems in residential, commercial, and industrial settings.",
+      "salary": "$55,000 - $75,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Industrial Electrician",
+      "description": "Specializes in testing, troubleshooting, and repairing complex electrical equipment and machinery in manufacturing plants and industrial facilities.",
+      "salary": "$65,000 - $85,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Electrical Line Worker",
+      "description": "Installs, repairs, and maintains high-voltage electrical power lines and transmission infrastructure.",
+      "salary": "$70,000 - $95,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Master Electrician",
+      "description": "Oversees large-scale wiring projects, interprets blueprints, secures permits, and supervises journeymen and apprentice electricians.",
+      "salary": "$80,000 - $110,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Electrical Inspector",
+      "description": "Examines installed electrical systems to ensure compliance with national safety standards and local building codes.",
+      "salary": "$60,000 - $80,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:elementary school teacher": [
+    {
+      "title": "Elementary School Teacher",
+      "description": "Teaches children foundational academic subjects, social skills, and personal development in public or private schools.",
+      "salary": "$50,000 - $65,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Special Education Teacher",
+      "description": "Works with students who have a wide range of learning, mental, emotional, and physical disabilities to help them succeed academically.",
+      "salary": "$52,000 - $68,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Middle School Teacher",
+      "description": "Educates students in sixth through eighth grades, typically specializing in specific academic subjects like math, science, or English.",
+      "salary": "$52,000 - $67,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Reading Specialist",
+      "description": "Helps young students improve their reading, writing, and comprehension skills through targeted, small-group or individual instruction.",
+      "salary": "$55,000 - $72,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Instructional Coordinator",
+      "description": "Develops educational content, evaluates school curricula, and trains teachers on effective classroom strategies and materials.",
+      "salary": "$65,000 - $82,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:emergency medical technician": [
+    {
+      "title": "Emergency Medical Technician",
+      "description": "Responds to emergency calls, provides basic emergency medical care, and transports patients safely to healthcare facilities.",
+      "salary": "$36,000 - $48,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Paramedic",
+      "description": "Provides advanced emergency care to critical patients, including administering medications and performing invasive procedures in pre-hospital settings.",
+      "salary": "$48,000 - $68,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Emergency Room Technician",
+      "description": "Assists doctors and nurses in hospital emergency rooms by taking vital signs, drawing blood, and aiding in emergency procedures.",
+      "salary": "$38,000 - $52,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Flight Paramedic",
+      "description": "Provides critical emergency medical treatment to patients during transportation aboard air ambulances and medical helicopters.",
+      "salary": "$62,000 - $85,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Firefighter / EMT",
+      "description": "Responds to fires, hazardous material incidents, and medical emergencies to extinguish fires and deliver pre-hospital care.",
+      "salary": "$52,000 - $78,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Very competitive"
+    }
+  ],
+  "suggestions:entrepreneur": [
+    {
+      "title": "Entrepreneur",
+      "description": "Launches and builds new business ventures, taking on financial risks to innovate and achieve commercial growth.",
+      "salary": "$60,000 - $150,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Small Business Owner",
+      "description": "Owns and manages the daily operations of an independent commercial business, handling strategy, staffing, and revenue.",
+      "salary": "$55,000 - $120,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Venture Capitalist",
+      "description": "Evaluates early-stage startups and provides capital and strategic guidance in exchange for equity stakes.",
+      "salary": "$120,000 - $250,000",
+      "jobOutlook": "Competitive",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Corporate Innovation Manager",
+      "description": "Leads entrepreneurial ventures, new product development, and innovation strategies within established enterprises.",
+      "salary": "$95,000 - $140,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Business Consultant",
+      "description": "Advises companies on operational efficiency, growth strategies, and market expansion opportunities.",
+      "salary": "$85,000 - $130,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:film producer": [
+    {
+      "title": "Film Producer",
+      "description": "Oversees all aspects of film production from initial script selection through financing, hiring crew, and managing distribution.",
+      "salary": "$70,000 - $120,000",
+      "jobOutlook": "Competitive",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Executive Producer",
+      "description": "Secures financing for film projects, manages top-level business decisions, and supervises overall production execution.",
+      "salary": "$90,000 - $160,000",
+      "jobOutlook": "Competitive",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Line Producer",
+      "description": "Manages daily physical operations, detailed budgeting, logistics, and scheduling on the film set.",
+      "salary": "$65,000 - $110,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Film Director",
+      "description": "Controls a film's artistic and dramatic vision, guiding the actors and technical crew to realize the script.",
+      "salary": "$75,000 - $130,000",
+      "jobOutlook": "Competitive",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Production Manager",
+      "description": "Coordinates operational details of video and film production, overseeing equipment, crew scheduling, and logistics.",
+      "salary": "$60,000 - $95,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:financial analyst": [
+    {
+      "title": "Financial Analyst",
+      "description": "Guides businesses and individuals in making investment decisions by analyzing financial data, market trends, and company performance.",
+      "salary": "$75,000 - $100,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Financial Planning & Analysis (FP&A) Analyst",
+      "description": "Focuses on corporate budgeting, forecasting, and financial modeling to support executive strategic decision-making.",
+      "salary": "$80,000 - $105,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Investment Banking Analyst",
+      "description": "Evaluates companies, conducts complex financial valuation modeling, and assists with capital raising and mergers and acquisitions.",
+      "salary": "$110,000 - $160,000",
+      "jobOutlook": "Competitive",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Equity Research Analyst",
+      "description": "Analyzes financial statements and market trends to produce research reports and recommendations on specific stocks and securities.",
+      "salary": "$95,000 - $135,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Financial Risk Analyst",
+      "description": "Identifies, measures, and manages potential financial risks regarding credit, market fluctuations, and business operations.",
+      "salary": "$70,000 - $95,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:firefighter": [
+    {
+      "title": "Firefighter",
+      "description": "Responds to fires, medical emergencies, and rescue operations to protect life, property, and the environment.",
+      "salary": "$50,000 - $75,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Wildland Firefighter",
+      "description": "Specializes in suppressing, containing, and managing forest fires and outdoor wildfires using specialized hand tools and fire engines.",
+      "salary": "$42,000 - $65,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Paramedic",
+      "description": "Provides advanced emergency pre-hospital medical care and transport to patients suffering from severe illness or injury.",
+      "salary": "$45,000 - $60,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Fire Inspector and Investigator",
+      "description": "Examines buildings to enforce fire codes, identifies fire hazards, and determines the origin and cause of fires.",
+      "salary": "$60,000 - $80,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Hazardous Materials Specialist",
+      "description": "Responds to chemical, biological, and radiological spills or emergencies to contain and clean up dangerous substances safely.",
+      "salary": "$55,000 - $85,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:forensic scientist": [
+    {
+      "title": "Forensic Scientist",
+      "description": "Collects, analyzes, and interprets physical evidence from crime scenes to assist law enforcement and legal investigations.",
+      "salary": "$60,000 - $85,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Crime Scene Investigator",
+      "description": "Secures and processes crime scenes to collect physical evidence such as fingerprints, blood, and weapons for laboratory analysis.",
+      "salary": "$52,000 - $75,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Forensic Toxicologist",
+      "description": "Analyzes bodily fluids and tissue samples to identify the presence of drugs, alcohol, poisons, and toxic substances.",
+      "salary": "$65,000 - $95,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Digital Forensics Examiner",
+      "description": "Extracts, recovers, and analyzes data from digital devices such as computers and smartphones to investigate cybercrime and legal matters.",
+      "salary": "$75,000 - $110,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Forensic DNA Analyst",
+      "description": "Examines biological samples to isolate and analyze DNA sequences to identify individuals associated with criminal cases.",
+      "salary": "$58,000 - $82,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Forensic Pathologist",
+      "description": "Performs autopsies and medical examinations to determine the exact cause and manner of sudden, unexplained, or violent deaths.",
+      "salary": "$200,000 - $300,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:game developer": [
+    {
+      "title": "Game Developer",
+      "description": "Designs, builds, and codes video games for consoles, PCs, mobile devices, and virtual reality platforms.",
+      "salary": "$75,000 - $115,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Game Designer",
+      "description": "Creates the rules, mechanics, storylines, character arcs, and overall world design of video games.",
+      "salary": "$65,000 - $105,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Gameplay Programmer",
+      "description": "Writes the code that governs character movement, player actions, game logic, and user interactions.",
+      "salary": "$80,000 - $120,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Game Engine Programmer",
+      "description": "Develops and optimizes the core software frameworks and rendering systems used to power interactive video games.",
+      "salary": "$95,000 - $140,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Level Designer",
+      "description": "Crafts maps, environments, and level progression to create engaging player experiences and challenges.",
+      "salary": "$60,000 - $95,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:graphic designer": [
+    {
+      "title": "Graphic Designer",
+      "description": "Creates visual concepts using computer software or by hand to communicate ideas that inspire, inform, and captivate consumers.",
+      "salary": "$50,000 - $65,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "UI/UX Designer",
+      "description": "Designs user interfaces and user experiences for websites, mobile applications, and software systems to ensure seamless usability.",
+      "salary": "$80,000 - $105,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Art Director",
+      "description": "Oversees the visual style and artistic direction for advertising campaigns, publications, product packaging, and media productions.",
+      "salary": "$95,000 - $120,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Motion Graphics Designer",
+      "description": "Creates animated graphics, visual effects, and dynamic visual content for television, film, video games, and web media.",
+      "salary": "$65,000 - $85,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Brand Identity Designer",
+      "description": "Develops complete visual systems, including logos, typography, color schemes, and brand guidelines for businesses.",
+      "salary": "$60,000 - $80,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:hvac technician": [
+    {
+      "title": "HVAC Technician",
+      "description": "Installs, maintains, and repairs heating, ventilation, air conditioning, and refrigeration systems in residential and commercial buildings.",
+      "salary": "$50,000 - $65,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Building Automation Technician",
+      "description": "Installs and maintains computerized control systems that manage heating, cooling, ventilation, and energy usage in large facilities.",
+      "salary": "$60,000 - $78,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Commercial Refrigeration Technician",
+      "description": "Specializes in installing, servicing, and repairing industrial freezing and refrigeration systems used in supermarkets, restaurants, and cold storage.",
+      "salary": "$55,000 - $72,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Pipefitter and Steamfitter",
+      "description": "Installs, maintains, and repairs high-pressure piping systems for heating, cooling, steam generation, and industrial manufacturing.",
+      "salary": "$58,000 - $75,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Solar Energy System Installer",
+      "description": "Assembles, installs, and services solar thermal and photovoltaic heating and electrical systems on residential and commercial structures.",
+      "salary": "$48,000 - $62,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    }
+  ],
+  "suggestions:high school teacher": [
+    {
+      "title": "High School Teacher",
+      "description": "Teaches academic and vocational subjects to students in grades 9 through 12 to prepare them for college and future careers.",
+      "salary": "$55,000 - $70,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "High School Guidance Counselor",
+      "description": "Helps students develop academic, social, and personal skills while guiding them through college admissions and career planning.",
+      "salary": "$58,000 - $72,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Curriculum Developer",
+      "description": "Designs educational content, instructional materials, and teaching standards for educational institutions and school districts.",
+      "salary": "$65,000 - $85,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Middle School Teacher",
+      "description": "Instructs students in sixth through eighth grade in core subjects to help build a foundation for secondary education.",
+      "salary": "$53,000 - $68,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Special Education Teacher",
+      "description": "Adapts general education lessons to teach students with a wide range of learning, physical, or emotional disabilities.",
+      "salary": "$56,000 - $72,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    }
+  ],
+  "suggestions:hospitality manager": [
+    {
+      "title": "Hospitality Manager",
+      "description": "Oversees daily operations in hospitality establishments such as hotels, resorts, and restaurants to ensure customer satisfaction and efficient business operations.",
+      "salary": "$55,000 - $80,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Hotel General Manager",
+      "description": "Directs all aspects of hotel operations, including guest services, front desk operations, housekeeping, and financial management.",
+      "salary": "$65,000 - $110,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Restaurant Manager",
+      "description": "Manages daily dining operations, staff scheduling, customer service quality, and food inventory control.",
+      "salary": "$50,000 - $75,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Event and Conference Manager",
+      "description": "Plans, coordinates, and executes events, conventions, weddings, and corporate gatherings from concept to completion.",
+      "salary": "$52,000 - $78,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Resort Operations Manager",
+      "description": "Coordinates recreational activities, lodging services, dining facilities, and guest experiences at vacation resorts.",
+      "salary": "$60,000 - $95,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:human resources specialist": [
+    {
+      "title": "Human Resources Specialist",
+      "description": "Recruits, screens, and interviews job applicants while supporting employee relations, compensation, and organizational policies.",
+      "salary": "$60,000 - $75,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Human Resources Manager",
+      "description": "Plans, directs, and coordinates the administrative functions of an organization's human resources department.",
+      "salary": "$90,000 - $120,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Talent Acquisition Specialist",
+      "description": "Focuses on identifying, sourcing, and hiring top talent to fulfill specific organizational staffing requirements.",
+      "salary": "$65,000 - $85,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Compensation and Benefits Manager",
+      "description": "Designs and administers competitive employee pay structures, insurance benefits, and retirement plans.",
+      "salary": "$95,000 - $125,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Training and Development Specialist",
+      "description": "Creates and delivers educational and skill-building programs to help employees succeed and grow professionally.",
+      "salary": "$62,000 - $80,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Less competitive"
+    }
+  ],
+  "suggestions:industrial engineer": [
+    {
+      "title": "Industrial Engineer",
+      "description": "Optimizes complex processes, systems, and organizations to eliminate waste of time, money, materials, and energy.",
+      "salary": "$85,000 - $110,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Manufacturing Engineer",
+      "description": "Designs, develops, and improves integrated systems and machinery used in the production of goods.",
+      "salary": "$80,000 - $105,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Process Engineer",
+      "description": "Designs and optimizes continuous production processes to ensure efficiency, safety, and product quality.",
+      "salary": "$85,000 - $115,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Supply Chain Engineer",
+      "description": "Analyzes and designs logistics and inventory systems to streamline operations and distribution networks.",
+      "salary": "$82,000 - $108,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Quality Engineer",
+      "description": "Develops quality control systems, conducts audits, and monitors manufacturing processes to prevent defects.",
+      "salary": "$75,000 - $98,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Operations Research Analyst",
+      "description": "Uses advanced mathematical and analytical methods to help organizations solve complex operational problems.",
+      "salary": "$88,000 - $120,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:information technology specialist": [
+    {
+      "title": "Information Technology Specialist",
+      "description": "Assists organizations with setting up, maintaining, and troubleshooting hardware, software, and network systems.",
+      "salary": "$55,000 - $75,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Network Administrator",
+      "description": "Installs, configures, and maintains an organization's local area networks (LAN) and wide area networks (WAN).",
+      "salary": "$70,000 - $90,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Cybersecurity Analyst",
+      "description": "Protects company networks and systems from security threats, breaches, and cyberattacks.",
+      "salary": "$85,000 - $115,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Systems Administrator",
+      "description": "Manages the setup, upkeep, and daily operation of server computers and operating systems.",
+      "salary": "$65,000 - $85,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "IT Help Desk Technician",
+      "description": "Provides technical assistance and support to users experiencing computer hardware or software issues.",
+      "salary": "$45,000 - $60,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    }
+  ],
+  "suggestions:interior designer": [
+    {
+      "title": "Interior Designer",
+      "description": "Plans, designs, and furnishes interior spaces to create functional, safe, and aesthetically pleasing environments.",
+      "salary": "$55,000 - $75,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Commercial Interior Designer",
+      "description": "Specializes in planning and designing corporate offices, retail stores, hotels, and public facilities.",
+      "salary": "$60,000 - $85,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Set and Exhibit Designer",
+      "description": "Designs sets for movie, television, and theater productions, as well as displays for trade shows and museums.",
+      "salary": "$58,000 - $80,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Kitchen and Bath Designer",
+      "description": "Focuses on the specialized spatial planning, cabinetry, fixtures, and materials for kitchen and bathroom spaces.",
+      "salary": "$50,000 - $72,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Architectural Drafter",
+      "description": "Prepares detailed technical drawings and blueprints for buildings and interior construction projects using CADD software.",
+      "salary": "$52,000 - $68,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Less competitive"
+    }
+  ],
+  "suggestions:journalist": [
+    {
+      "title": "Journalist",
+      "description": "Researches, writes, and reports on current events, breaking news, and human interest stories for various media outlets.",
+      "salary": "$45,000 - $75,000",
+      "jobOutlook": "Competitive",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Investigative Reporter",
+      "description": "Conducts in-depth research to uncover facts about complex topics such as political corruption, corporate wrongdoing, and social issues.",
+      "salary": "$55,000 - $90,000",
+      "jobOutlook": "Competitive",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Broadcast Journalist",
+      "description": "Gathers, writes, and presents news stories live or pre-recorded for radio, television, and online video platforms.",
+      "salary": "$50,000 - $85,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Digital Content Editor",
+      "description": "Oversees the creation, editing, and publishing of news articles and digital feature stories for online platforms.",
+      "salary": "$55,000 - $80,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Photojournalist",
+      "description": "Uses photography and visual media to capture and convey compelling news and feature stories.",
+      "salary": "$40,000 - $65,000",
+      "jobOutlook": "Competitive",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:landscape architect": [
+    {
+      "title": "Landscape Architect",
+      "description": "Designs outdoor spaces, public parks, residential yards, and commercial properties to create functional and aesthetically pleasing environments.",
+      "salary": "$70,000 - $95,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Urban Planner",
+      "description": "Develops plans and programs for land use in urban and regional areas to create communities and accommodate population growth.",
+      "salary": "$75,000 - $98,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Environmental Designer",
+      "description": "Focuses on designing eco-friendly outdoor and built environments that minimize impact on nature and integrate sustainable practices.",
+      "salary": "$65,000 - $88,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Golf Course Architect",
+      "description": "Specializes in designing, renovating, and preserving golf courses while balancing playability, aesthetics, and environmental stewardship.",
+      "salary": "$80,000 - $120,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Horticulturalist",
+      "description": "Applies plant science to oversee the cultivation, management, and health of plants in gardens, parks, and agricultural settings.",
+      "salary": "$50,000 - $72,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Less competitive"
+    }
+  ],
+  "suggestions:lawyer": [
+    {
+      "title": "Lawyer",
+      "description": "Represents clients in civil or criminal legal proceedings, advises on legal rights, and drafts legal documents.",
+      "salary": "$120,000 - $150,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Corporate Lawyer",
+      "description": "Advises corporations on legal rights, obligations, and strategies for business transactions, contracts, and compliance.",
+      "salary": "$135,000 - $185,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Intellectual Property Attorney",
+      "description": "Specializes in protecting patents, trademarks, copyrights, and trade secrets for inventors, creators, and businesses.",
+      "salary": "$140,000 - $195,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Criminal Defense Attorney",
+      "description": "Defends individuals and organizations charged with criminal conduct in court proceedings and negotiations.",
+      "salary": "$85,000 - $130,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Paralegal",
+      "description": "Supports lawyers by investigating facts, conducting legal research, and organizing legal documentation.",
+      "salary": "$55,000 - $72,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    }
+  ],
+  "suggestions:marketing manager": [
+    {
+      "title": "Marketing Manager",
+      "description": "Plans, directs, and coordinates marketing policies and strategies to drive customer acquisition and increase brand awareness.",
+      "salary": "$110,000 - $140,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Digital Marketing Manager",
+      "description": "Oversees online marketing strategies, including search engine marketing, social media campaigns, email outreach, and digital ads.",
+      "salary": "$95,000 - $125,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Brand Manager",
+      "description": "Develops and executes marketing campaigns to enhance brand image, drive customer loyalty, and expand market share.",
+      "salary": "$100,000 - $130,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Product Marketing Manager",
+      "description": "Leads the positioning, messaging, and go-to-market strategies for specific products or product lines.",
+      "salary": "$115,000 - $145,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Content Marketing Manager",
+      "description": "Directs the creation and distribution of valuable content to attract, engage, and convert a target audience.",
+      "salary": "$85,000 - $110,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:mechanical engineer": [
+    {
+      "title": "Mechanical Engineer",
+      "description": "Designs, develops, builds, and tests mechanical devices, tools, engines, and thermal systems.",
+      "salary": "$85,000 - $105,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Aerospace Engineer",
+      "description": "Designs and tests aircraft, spacecraft, satellites, and propulsion systems using advanced mechanics.",
+      "salary": "$95,000 - $125,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Robotics Engineer",
+      "description": "Creates robotic systems and automated machinery for manufacturing, medical, and consumer applications.",
+      "salary": "$90,000 - $120,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Automotive Engineer",
+      "description": "Develops and improves vehicle systems, mechanical components, powertrain designs, and safety features.",
+      "salary": "$85,000 - $110,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "HVAC Engineer",
+      "description": "Specializes in designing heating, ventilation, air conditioning, and refrigeration systems for buildings.",
+      "salary": "$75,000 - $98,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:mental health counselor": [
+    {
+      "title": "Mental Health Counselor",
+      "description": "Helps clients manage and overcome mental, emotional, and behavioral challenges through evidence-based therapeutic techniques.",
+      "salary": "$50,000 - $68,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Licensed Clinical Social Worker (LCSW)",
+      "description": "Provides diagnosis, treatment, and counseling services while connecting individuals and families with supportive community resources.",
+      "salary": "$55,000 - $75,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Marriage and Family Therapist (MFT)",
+      "description": "Specializes in assessing and treating psychological distress within the context of interpersonal relationships and family systems.",
+      "salary": "$52,000 - $72,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Substance Abuse Counselor",
+      "description": "Supports individuals recovering from drug, alcohol, or behavioral addictions by developing personalized treatment plans.",
+      "salary": "$48,000 - $62,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Clinical Psychologist",
+      "description": "Diagnoses and treats complex mental health disorders using clinical interviews, psychological testing, and psychotherapy.",
+      "salary": "$85,000 - $115,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:mobile application developer": [
+    {
+      "title": "Mobile Application Developer",
+      "description": "Designs, builds, and maintains software applications tailored for mobile devices across various operating systems.",
+      "salary": "$95,000 - $125,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "iOS Developer",
+      "description": "Specializes in creating, testing, and updating applications specifically for Apple's iOS platform using Swift or Objective-C.",
+      "salary": "$100,000 - $135,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Android Developer",
+      "description": "Focuses on building and optimizing applications for the Android operating system primarily using Kotlin and Java.",
+      "salary": "$95,000 - $130,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Cross-Platform Mobile Developer",
+      "description": "Creates mobile applications that operate seamlessly on multiple platforms using frameworks like React Native or Flutter.",
+      "salary": "$90,000 - $120,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Mobile UI/UX Designer",
+      "description": "Focuses on designing intuitive interface layouts and user experiences specifically tailored for touchscreen mobile screens.",
+      "salary": "$85,000 - $115,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:network administrator": [
+    {
+      "title": "Network Administrator",
+      "description": "Manages, maintains, and supports an organization's computer networks, including LANs, WANs, and network hardware.",
+      "salary": "$70,000 - $90,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Network Engineer",
+      "description": "Designs, implements, and manages complex computer networks to ensure optimal performance and connectivity.",
+      "salary": "$85,000 - $115,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Systems Administrator",
+      "description": "Oversees the day-to-day operation, configuration, and security of organizational computer systems and servers.",
+      "salary": "$72,000 - $95,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Network Security Engineer",
+      "description": "Protects network infrastructure from cyber threats, unauthorized access, and security vulnerabilities.",
+      "salary": "$95,000 - $130,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Cloud Network Architect",
+      "description": "Designs and manages enterprise network infrastructures within cloud environments such as AWS, Azure, and Google Cloud.",
+      "salary": "$120,000 - $160,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:nurse practitioner": [
+    {
+      "title": "Nurse Practitioner",
+      "description": "An advanced practice registered nurse who provides primary, acute, and specialty healthcare services to patients.",
+      "salary": "$115,000 - $130,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Certified Registered Nurse Anesthetist (CRNA)",
+      "description": "Administers anesthesia and manages pain management care for surgical, obstetrical, and trauma patients.",
+      "salary": "$195,000 - $215,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Physician Assistant",
+      "description": "Examines, diagnoses, and treats patients in collaboration with healthcare teams across various medical specialties.",
+      "salary": "$110,000 - $125,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Clinical Nurse Specialist",
+      "description": "An advanced practice nurse who provides direct patient care, clinical leadership, and consulting to optimize healthcare outcomes.",
+      "salary": "$105,000 - $120,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Psychiatric-Mental Health Nurse Practitioner",
+      "description": "Specializes in assessing, diagnosing, and prescribing treatment for individuals with mental health and substance abuse disorders.",
+      "salary": "$120,000 - $140,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:occupational therapist": [
+    {
+      "title": "Occupational Therapist",
+      "description": "Helps patients develop, recover, improve, and maintain the skills needed for daily living and working through therapeutic activities.",
+      "salary": "$85,000 - $98,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Physical Therapist",
+      "description": "Helps injured or ill patients improve movement and manage pain through physical rehabilitation, exercises, and hands-on therapies.",
+      "salary": "$90,000 - $105,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Occupational Therapy Assistant",
+      "description": "Works under the supervision of occupational therapists to help patients perform rehabilitative activities and exercises.",
+      "salary": "$60,000 - $70,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Speech-Language Pathologist",
+      "description": "Assesses, diagnoses, and treats speech, language, and swallowing disorders in children and adults.",
+      "salary": "$80,000 - $95,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Recreational Therapist",
+      "description": "Plans and coordinates recreation-based treatment programs to improve patients' physical, social, and emotional well-being.",
+      "salary": "$50,000 - $62,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Less competitive"
+    }
+  ],
+  "suggestions:paralegal": [
+    {
+      "title": "Paralegal",
+      "description": "Supports attorneys by conducting legal research, drafting legal documents, and organizing case files for trial or transaction proceedings.",
+      "salary": "$55,000 - $75,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Legal Assistant",
+      "description": "Handles administrative duties, prepares legal correspondence, and maintains client records to assist law offices and legal departments.",
+      "salary": "$45,000 - $60,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Compliance Specialist",
+      "description": "Monitors organizational operations to ensure adherence to legal standards, government regulations, and internal company policies.",
+      "salary": "$65,000 - $85,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Legal Nurse Consultant",
+      "description": "Applies nursing expertise to analyze medical records and healthcare issues in personal injury, malpractice, and legal cases.",
+      "salary": "$80,000 - $105,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "E-Discovery Specialist",
+      "description": "Identifies, collects, and processes electronically stored information for litigation, investigations, and legal compliance.",
+      "salary": "$70,000 - $95,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:paramedic": [
+    {
+      "title": "Paramedic",
+      "description": "Provides advanced emergency medical care and transportation for critical and urgent patients who access emergency medical services.",
+      "salary": "$45,000 - $60,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Emergency Medical Technician (EMT)",
+      "description": "Provides basic emergency medical care and transportation for sick or injured patients in emergency situations.",
+      "salary": "$35,000 - $45,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Flight Paramedic",
+      "description": "Delivers advanced critical care to patients during air ambulance transports in helicopters or airplanes.",
+      "salary": "$65,000 - $85,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Critical Care Paramedic",
+      "description": "Specializes in managing high-risk, critically ill, or injured patients during inter-facility medical transfers.",
+      "salary": "$60,000 - $78,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Firefighter / Paramedic",
+      "description": "Combines firefighting duties with advanced emergency medical treatment during fire, medical, and rescue incidents.",
+      "salary": "$55,000 - $80,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Very competitive"
+    }
+  ],
+  "suggestions:pharmacist": [
+    {
+      "title": "Pharmacist",
+      "description": "Dispenses prescription medications to patients and offers expertise in the safe use of prescriptions.",
+      "salary": "$120,000 - $135,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Clinical Pharmacist",
+      "description": "Works directly with physicians and healthcare teams in clinical settings to optimize medication therapy for patients.",
+      "salary": "$125,000 - $140,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Pharmacy Director",
+      "description": "Oversees all operational, administrative, and clinical activities of a pharmacy department in a hospital or healthcare network.",
+      "salary": "$145,000 - $170,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Pharmaceutical Research Scientist",
+      "description": "Conducts laboratory research to discover, test, and manufacture new drugs and therapeutic treatments.",
+      "salary": "$95,000 - $130,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Pharmacy Technician",
+      "description": "Helps licensed pharmacists prepare and dispense prescription medications to customers and health professionals.",
+      "salary": "$35,000 - $45,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Less competitive"
+    }
+  ],
+  "suggestions:photographer": [
+    {
+      "title": "Photographer",
+      "description": "Captures visual images for commercial, artistic, editorial, or personal purposes using professional camera equipment and lighting.",
+      "salary": "$40,000 - $70,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Photojournalist",
+      "description": "Tells compelling news stories through photographs for newspapers, magazines, digital publications, and broadcast networks.",
+      "salary": "$45,000 - $75,000",
+      "jobOutlook": "Competitive",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Commercial Photographer",
+      "description": "Creates professional imagery of products, corporate brand assets, and merchandise for marketing and advertising campaigns.",
+      "salary": "$50,000 - $90,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Very competitive"
+    },
+    {
+      "title": "Videographer",
+      "description": "Records and edits video content for events, corporate clients, commercials, documentaries, and digital platforms.",
+      "salary": "$50,000 - $80,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Drone Photographer",
+      "description": "Operates unmanned aerial vehicles to capture high-resolution aerial photography and video for real estate, inspection, and film industries.",
+      "salary": "$55,000 - $85,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:physical therapist": [
+    {
+      "title": "Physical Therapist",
+      "description": "Helps injured or ill people improve movement and manage pain through hands-on care, targeted exercise, and patient education.",
+      "salary": "$88,000 - $100,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Occupational Therapist",
+      "description": "Treats injured, ill, or disabled patients through the therapeutic use of everyday activities to improve daily living and work skills.",
+      "salary": "$85,000 - $98,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Physical Therapist Assistant",
+      "description": "Works under the direct supervision of a physical therapist to help patients carry out treatment plans and recovery exercises.",
+      "salary": "$55,000 - $65,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Athletic Trainer",
+      "description": "Specializes in preventing, diagnosing, treating, and rehabilitating muscle and bone injuries for athletes and active individuals.",
+      "salary": "$50,000 - $62,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Exercise Physiologist",
+      "description": "Develops fitness and exercise programs to help patients recover from chronic diseases and improve overall cardiovascular function.",
+      "salary": "$50,000 - $60,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Less competitive"
+    }
+  ],
+  "suggestions:physical therapist assistant": [
+    {
+      "title": "Physical Therapist Assistant",
+      "description": "Helps patients regain movement and manage pain under the direction and supervision of physical therapists.",
+      "salary": "$55,000 - $65,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Occupational Therapy Assistant",
+      "description": "Helps patients develop, recover, and improve the skills needed for daily living and working.",
+      "salary": "$55,000 - $64,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Physical Therapist",
+      "description": "Diagnoses and treats individuals with physical conditions to help them improve mobility and relieve pain.",
+      "salary": "$85,000 - $98,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Athletic Trainer",
+      "description": "Specializes in preventing, diagnosing, and treating muscle and bone injuries, often in sports environments.",
+      "salary": "$48,000 - $58,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Exercise Physiologist",
+      "description": "Develops fitness and exercise programs to help patients recover from chronic diseases and improve cardiovascular function.",
+      "salary": "$50,000 - $62,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:physician": [
+    {
+      "title": "Primary Care Physician",
+      "description": "Examines patients, diagnoses common medical conditions, and manages ongoing health care for individuals and families.",
+      "salary": "$210,000 - $260,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Very competitive"
+    },
+    {
+      "title": "Surgeon",
+      "description": "Treats diseases, injuries, and deformities through invasive procedures and surgical operations.",
+      "salary": "$350,000 - $450,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Pediatrician",
+      "description": "Specializes in providing medical care, preventive checkups, and treatments to infants, children, and adolescents.",
+      "salary": "$190,000 - $240,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Anesthesiologist",
+      "description": "Administers pain management medications and monitors vital signs before, during, and after surgical operations.",
+      "salary": "$330,000 - $420,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Physician Assistant",
+      "description": "Examines, diagnoses, and treats patients under the supervision of a licensed physician.",
+      "salary": "$115,000 - $130,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:physician assistant": [
+    {
+      "title": "Physician Assistant",
+      "description": "Examines, diagnoses, and treats patients in collaboration with physicians across various medical specialties.",
+      "salary": "$115,000 - $130,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Nurse Practitioner",
+      "description": "Provides primary and specialty healthcare services, including diagnosing conditions and prescribing medication.",
+      "salary": "$115,000 - $128,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Surgical Assistant",
+      "description": "Assists surgeons during surgical procedures by providing exposure, controlling bleeding, and suturing tissue.",
+      "salary": "$85,000 - $105,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Emergency Medicine Physician Assistant",
+      "description": "Specializes in diagnosing and treating acute illnesses and injuries in emergency department settings.",
+      "salary": "$120,000 - $140,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Medical Assistant",
+      "description": "Handles clinical and administrative tasks to support physicians and physician assistants in outpatient settings.",
+      "salary": "$38,000 - $48,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    }
+  ],
+  "suggestions:police officer": [
+    {
+      "title": "Police Officer",
+      "description": "Protects public safety, maintains order, responds to emergency calls, and enforces local, state, and federal laws.",
+      "salary": "$65,000 - $80,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Police Detective",
+      "description": "Gathers evidence, conducts interviews, and investigates serious crimes to solve criminal cases.",
+      "salary": "$80,000 - $105,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "State Trooper",
+      "description": "Enforces traffic laws, monitors highways, and provides general law enforcement across an entire state.",
+      "salary": "$70,000 - $90,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Federal Special Agent",
+      "description": "Investigates federal law violations, organized crime, and national security threats for agencies such as the FBI, DEA, or ATF.",
+      "salary": "$90,000 - $130,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Probation Officer",
+      "description": "Monitors offenders placed on probation or released on parole to assist with rehabilitation and prevent reoffending.",
+      "salary": "$55,000 - $70,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Less competitive"
+    }
+  ],
+  "suggestions:professor": [
+    {
+      "title": "University Professor",
+      "description": "Teaches postsecondary courses in academic or professional fields and conducts original research to publish in scholarly journals.",
+      "salary": "$80,000 - $130,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Adjunct Professor",
+      "description": "Teaches higher education courses on a contract or part-time basis, focusing primarily on instruction and course management.",
+      "salary": "$35,000 - $55,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Academic Researcher",
+      "description": "Conducts advanced scientific or scholarly research at universities, securing grants and publishing findings.",
+      "salary": "$70,000 - $110,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Community College Instructor",
+      "description": "Teaches lower-level undergraduate courses and vocational programs with an emphasis on teaching over research.",
+      "salary": "$55,000 - $75,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Higher Education Administrator",
+      "description": "Manages academic departments, faculty, admissions, or student services at colleges and universities.",
+      "salary": "$85,000 - $125,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:project manager": [
+    {
+      "title": "Project Manager",
+      "description": "Oversees projects from inception to completion, managing teams, timelines, budgets, and resources to meet specific goals.",
+      "salary": "$85,000 - $115,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Technical Program Manager",
+      "description": "Handles complex, cross-functional technical initiatives and leads engineering teams to deliver software or hardware products.",
+      "salary": "$120,000 - $160,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Product Manager",
+      "description": "Defines product vision, strategy, and roadmap while collaborating with engineering, design, and marketing teams.",
+      "salary": "$110,000 - $145,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Scrum Master",
+      "description": "Facilitates Agile processes and ceremonies for software development teams, helping remove obstacles to maximize delivery.",
+      "salary": "$90,000 - $120,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Construction Project Manager",
+      "description": "Plans, coordinates, and budgets building projects from start to finish, managing contractors and ensuring site safety.",
+      "salary": "$95,000 - $130,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:psychologist": [
+    {
+      "title": "Clinical Psychologist",
+      "description": "Diagnoses and treats mental, emotional, and behavioral disorders through assessment and therapy.",
+      "salary": "$85,000 - $115,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Counseling Psychologist",
+      "description": "Helps individuals cope with personal, social, educational, and career-related challenges.",
+      "salary": "$80,000 - $105,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Industrial-Organizational Psychologist",
+      "description": "Applies psychological principles to workplace issues to improve productivity and employee satisfaction.",
+      "salary": "$95,000 - $130,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "School Psychologist",
+      "description": "Works within educational settings to support students' academic, emotional, and behavioral needs.",
+      "salary": "$75,000 - $95,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Neuropsychologist",
+      "description": "Studies the relationship between brain structure, function, and human behavior to treat cognitive conditions.",
+      "salary": "$100,000 - $140,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:radiologic technologist": [
+    {
+      "title": "Radiologic Technologist",
+      "description": "Performs diagnostic imaging examinations, such as X-rays, on patients to assist physicians in diagnosing medical conditions.",
+      "salary": "$65,000 - $80,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "MRI Technologist",
+      "description": "Operates magnetic resonance imaging scanners to create detailed diagnostic images of patients' internal organs and tissues.",
+      "salary": "$75,000 - $95,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Diagnostic Medical Sonographer",
+      "description": "Uses sound wave technology to produce images of body organs and tissues for medical diagnosis.",
+      "salary": "$75,000 - $90,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "CT Scan Technologist",
+      "description": "Specializes in operating computed tomography equipment to create cross-sectional X-ray images of internal body structures.",
+      "salary": "$70,000 - $88,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Nuclear Medicine Technologist",
+      "description": "Prepares and administers trace amounts of radioactive drugs to create images for diagnostic or therapeutic medical purposes.",
+      "salary": "$85,000 - $105,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:real estate agent": [
+    {
+      "title": "Real Estate Agent",
+      "description": "Represents buyers and sellers in real estate transactions, guiding clients through property searches, market pricing, and contract negotiations.",
+      "salary": "$50,000 - $85,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Real Estate Broker",
+      "description": "Licensed advanced real estate professional who can work independently, manage a firm, and oversee other real estate agents.",
+      "salary": "$70,000 - $115,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Commercial Real Estate Agent",
+      "description": "Specializes in buying, selling, and leasing properties used for business purposes, such as retail spaces, offices, and industrial buildings.",
+      "salary": "$85,000 - $150,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Property Manager",
+      "description": "Oversees the daily operations, maintenance, leasing, and financial reporting for residential or commercial rental properties.",
+      "salary": "$55,000 - $80,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Real Estate Appraiser",
+      "description": "Inspects real estate properties to determine accurate market values for mortgages, tax assessments, investments, and sales.",
+      "salary": "$60,000 - $90,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:registered nurse": [
+    {
+      "title": "Registered Nurse",
+      "description": "Provides and coordinates patient care, educates patients about health conditions, and offers support and advice to patients and their family members.",
+      "salary": "$75,000 - $90,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Nurse Practitioner",
+      "description": "An advanced practice registered nurse who provides primary, acute, and specialty healthcare, often diagnosing conditions and prescribing medication.",
+      "salary": "$115,000 - $130,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Critical Care Nurse",
+      "description": "Specializes in providing care to patients with life-threatening illnesses and severe injuries in intensive care units.",
+      "salary": "$80,000 - $98,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Nurse Educator",
+      "description": "Teaches nursing students in academic settings or provides continuing education to nursing staff in clinical environments.",
+      "salary": "$80,000 - $95,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Certified Registered Nurse Anesthetist (CRNA)",
+      "description": "An advanced practice nurse who administers anesthesia and provides anesthesia-related care to surgical and diagnostic patients.",
+      "salary": "$195,000 - $220,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:respiratory therapist": [
+    {
+      "title": "Respiratory Therapist",
+      "description": "Evaluates, treats, and cares for patients with breathing or cardiopulmonary disorders in hospitals, clinics, and critical care settings.",
+      "salary": "$70,000 - $85,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Polysomnographic Technologist",
+      "description": "Performs sleep studies and diagnostic tests to help evaluate and treat patients with sleep and airway disorders.",
+      "salary": "$55,000 - $70,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Pulmonary Function Technologist",
+      "description": "Conducts specialized diagnostic tests to measure lung capacity, gas exchange, and overall respiratory system performance.",
+      "salary": "$65,000 - $78,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Cardiovascular Technologist",
+      "description": "Assists physicians in diagnosing and treating cardiac and vascular ailments using specialized diagnostic procedures and imaging.",
+      "salary": "$65,000 - $80,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Anesthesia Technologist",
+      "description": "Supports surgical anesthesia teams by preparing specialized monitoring equipment, managing supplies, and assisting with patient airway management.",
+      "salary": "$50,000 - $65,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Less competitive"
+    }
+  ],
+  "suggestions:school counselor": [
+    {
+      "title": "School Counselor",
+      "description": "Helps students develop academic, social, and emotional skills while planning for higher education or post-secondary careers.",
+      "salary": "$60,000 - $75,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "School Psychologist",
+      "description": "Supports students' mental health and learning needs by conducting assessments, providing therapy, and collaborating with educators.",
+      "salary": "$78,000 - $95,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "School Social Worker",
+      "description": "Assists students and families with personal, social, and behavioral issues that affect academic success and emotional well-being.",
+      "salary": "$55,000 - $70,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Academic Advisor",
+      "description": "Guides college and university students through degree requirements, course selection, and career preparation.",
+      "salary": "$48,000 - $62,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Career Counselor",
+      "description": "Helps individuals explore career options, develop resume and interview skills, and navigate job transitions.",
+      "salary": "$52,000 - $68,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:social worker": [
+    {
+      "title": "Social Worker",
+      "description": "Helps individuals, families, and communities cope with challenges, access essential resources, and improve their overall well-being.",
+      "salary": "$50,000 - $65,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Healthcare Social Worker",
+      "description": "Assists patients and families in navigating complex medical diagnoses, treatment plans, and post-hospitalization care.",
+      "salary": "$55,000 - $72,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Child and Family Social Worker",
+      "description": "Provides intervention and support services to protect vulnerable children and assist families in crisis.",
+      "salary": "$48,000 - $62,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Mental Health and Substance Abuse Social Worker",
+      "description": "Offers clinical therapy and support services to individuals coping with mental illness, trauma, and addiction.",
+      "salary": "$52,000 - $68,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "School Social Worker",
+      "description": "Works within schools to support students' emotional, social, and academic development alongside educators and parents.",
+      "salary": "$50,000 - $67,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:software engineer": [
+    {
+      "title": "Software Engineer",
+      "description": "Designs, develops, and maintains software systems and applications using computer science principles.",
+      "salary": "$105,000 - $140,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Backend Engineer",
+      "description": "Builds and maintains the server-side logic, databases, and application programming interfaces (APIs) that power applications.",
+      "salary": "$110,000 - $145,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Frontend Engineer",
+      "description": "Specializes in building the visual and interactive elements of web and mobile applications that users interact with directly.",
+      "salary": "$100,000 - $130,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "DevOps Engineer",
+      "description": "Bridges software development and IT operations to streamline and automate code deployment, testing, and infrastructure management.",
+      "salary": "$115,000 - $150,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Systems Software Engineer",
+      "description": "Develops operating systems, low-level software, networks, and compilers that support core hardware and computing infrastructure.",
+      "salary": "$110,000 - $145,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:surgical technologist": [
+    {
+      "title": "Surgical Technologist",
+      "description": "Prepares operating rooms, arranges surgical equipment, and assists surgeons during medical procedures.",
+      "salary": "$55,000 - $75,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Surgical First Assistant",
+      "description": "Provides direct hands-on assistance to surgeons during operations by aiding with exposure, hemostasis, and suturing.",
+      "salary": "$70,000 - $95,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Sterile Processing Technician",
+      "description": "Decontaminates, sterilizes, packages, and prepares medical instruments and surgical trays for procedures.",
+      "salary": "$40,000 - $52,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Perioperative Registered Nurse",
+      "description": "Provides patient care and manages operating room safety before, during, and after surgical procedures.",
+      "salary": "$80,000 - $105,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Anesthesia Technician",
+      "description": "Assists anesthesia providers by setting up, maintaining, and troubleshooting specialized equipment during procedures.",
+      "salary": "$48,000 - $65,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Less competitive"
+    }
+  ],
+  "suggestions:systems administrator": [
+    {
+      "title": "Systems Administrator",
+      "description": "Maintains, configures, and ensures the reliable operation of computer systems, servers, and enterprise IT infrastructure.",
+      "salary": "$70,000 - $95,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Network Administrator",
+      "description": "Installs, configures, and maintains local and wide area network infrastructure to ensure reliable data communication.",
+      "salary": "$68,000 - $90,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Cloud Administrator",
+      "description": "Manages, provisions, and monitors cloud services and virtualized architecture across platforms like AWS, Azure, or GCP.",
+      "salary": "$85,000 - $115,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "DevOps Engineer",
+      "description": "Bridges software development and IT operations by automating processes and managing continuous integration pipeline infrastructure.",
+      "salary": "$105,000 - $135,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "IT Infrastructure Manager",
+      "description": "Oversees the strategy, deployment, and operational reliability of an organization's IT systems, servers, and hardware networks.",
+      "salary": "$110,000 - $145,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:teacher": [
+    {
+      "title": "Elementary School Teacher",
+      "description": "Educates young children in foundational subjects such as reading, mathematics, and science while supporting their social and emotional development.",
+      "salary": "$55,000 - $68,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "High School Teacher",
+      "description": "Instructs teenagers in specific academic subjects like algebra, history, or chemistry to prepare them for college or future careers.",
+      "salary": "$60,000 - $75,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Special Education Teacher",
+      "description": "Adapts general education lessons and teaches various subjects to students with physical, emotional, or learning disabilities.",
+      "salary": "$62,000 - $78,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "English as a Second Language (ESL) Teacher",
+      "description": "Instructs non-native English speakers in language acquisition, listening, speaking, reading, and writing skills.",
+      "salary": "$52,000 - $67,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Instructional Designer",
+      "description": "Develops educational curricula, learning courses, and instructional materials for schools, higher education, or corporate environments.",
+      "salary": "$72,000 - $92,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:veterinarian": [
+    {
+      "title": "Veterinarian",
+      "description": "Diagnoses, treats, and researches medical conditions and injuries in pets, livestock, and other animals.",
+      "salary": "$95,000 - $130,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Veterinary Technician",
+      "description": "Performs medical tests, administers medications, and assists veterinarians in diagnosing and treating animals.",
+      "salary": "$35,000 - $48,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Veterinary Pathologist",
+      "description": "Specializes in examining animal tissues and fluids to diagnose diseases and conduct medical research.",
+      "salary": "$110,000 - $150,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Equine Veterinarian",
+      "description": "Provides specialized medical care, surgical treatment, and preventative medicine specifically for horses.",
+      "salary": "$90,000 - $125,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Zoologist and Wildlife Biologist",
+      "description": "Studies animals and their behavior, ecosystems, and conservation in controlled or natural habitats.",
+      "salary": "$65,000 - $85,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ],
+  "suggestions:veterinary technician": [
+    {
+      "title": "Veterinary Technician",
+      "description": "Assists veterinarians in diagnosing, treating, and caring for animals in clinics, animal hospitals, and research facilities.",
+      "salary": "$38,000 - $48,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Veterinary Assistant",
+      "description": "Provides basic care for animals, assists during exams, and cleans and sterilizes equipment in veterinary settings.",
+      "salary": "$30,000 - $37,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Veterinary Technologist",
+      "description": "Performs advanced diagnostic testing, clinical procedures, and research support using specialized four-year veterinary technology training.",
+      "salary": "$42,000 - $55,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Veterinarian",
+      "description": "Diagnoses health conditions, performs surgeries, prescribes medications, and manages medical care for animals.",
+      "salary": "$95,000 - $125,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Laboratory Animal Caretaker",
+      "description": "Feeds, waters, and cares for animals used in scientific research experiments and laboratory testing.",
+      "salary": "$32,000 - $42,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Less competitive"
+    }
+  ],
+  "suggestions:web developer": [
+    {
+      "title": "Web Developer",
+      "description": "Builds and maintains websites and web applications to ensure functionality, site speed, and seamless user experiences.",
+      "salary": "$75,000 - $95,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Front-End Developer",
+      "description": "Focuses on the visual aspects and client-side functionality of websites that users directly interact with.",
+      "salary": "$80,000 - $105,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Back-End Developer",
+      "description": "Manages server-side logic, databases, integration of network components, and API development.",
+      "salary": "$85,000 - $115,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Full Stack Developer",
+      "description": "Works on both the front-end user interface and the back-end database and server management of web applications.",
+      "salary": "$95,000 - $125,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "UI/UX Developer",
+      "description": "Blends user interface engineering with user experience design to create intuitive, accessible, and visually appealing web interfaces.",
+      "salary": "$85,000 - $110,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    }
+  ],
+  "suggestions:welder": [
+    {
+      "title": "Welder",
+      "description": "Joins metal components using specialized thermal tools and techniques to assemble, build, and repair industrial structures, equipment, and goods.",
+      "salary": "$45,000 - $65,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Pipewelder",
+      "description": "Specializes in fitting and joining metal pipes to construct, install, and maintain industrial pipelines, refineries, and power plants.",
+      "salary": "$55,000 - $85,000",
+      "jobOutlook": "High demand",
+      "competitiveness": "Moderately competitive"
+    },
+    {
+      "title": "Underwater Welder",
+      "description": "Combines commercial diving skills with welding techniques to build and repair subsea structures, offshore oil rigs, dams, and ship hulls.",
+      "salary": "$80,000 - $130,000",
+      "jobOutlook": "Growing field",
+      "competitiveness": "Highly competitive"
+    },
+    {
+      "title": "Metal Fabricator",
+      "description": "Cuts, bends, aligns, and welds raw sheet metal and structural components to create customized machinery and metal products.",
+      "salary": "$48,000 - $68,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Less competitive"
+    },
+    {
+      "title": "Boilermaker",
+      "description": "Fabricates, installs, inspects, and repairs large metal boilers, closed vats, and high-pressure storage vessels.",
+      "salary": "$60,000 - $85,000",
+      "jobOutlook": "Moderate demand",
+      "competitiveness": "Moderately competitive"
+    }
+  ]
 }

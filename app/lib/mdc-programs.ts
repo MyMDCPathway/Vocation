@@ -589,3 +589,23 @@ export function getMDCProgramUrl(programName: string): string {
   // Return the MDC program URL
   return `https://www.mdc.edu/${slug}/`;
 }
+
+/**
+ * Whether a pathway step should link to an MDC program page.
+ *
+ * Extracted from the render sites because the same condition is evaluated in
+ * three places — the two pathway views and TransferProgramLink, which must
+ * stay out of the way when MDC already owns the step. Three copies of a
+ * five-clause boolean drift; one does not.
+ */
+export function hasMDCProgramPage(stepName: string, stepLevel: string): boolean {
+  const name = stepName.toLowerCase();
+  return (
+    (stepLevel.includes("MDC") &&
+      !name.includes("bachelor") &&
+      (isMDCAssociateInScienceProgram(stepName) ||
+        isMDCAssociateInArtsProgram(stepName))) ||
+    name.includes("certificate") ||
+    (name.includes("bachelor") && isMDCBachelorsProgram(stepName))
+  );
+}
