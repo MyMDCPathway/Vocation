@@ -552,6 +552,508 @@ const SCHOOL_INFO: Record<string, SchoolInfo> = {
     ],
     contacts: [{ label: "Enrollment", email: "enrollment@valenciacollege.edu" }],
   },
+
+  // --- State University System (FIU is curated above) ---------------------
+  // Researched 2026-07-25 from each university's own site. Universities push
+  // advising down to the individual college, so most publish no central
+  // advising address and `contacts` is empty for them — the footer drops the
+  // heading rather than showing a guess.
+  //
+  // Watch the accessibility links here: several of these schools serve a
+  // /accessibility/ page that is a WEB-accessibility policy, not the student
+  // disability office (FAMU and UNF both do). These point at the office that
+  // actually arranges student accommodations.
+
+  famu: {
+    shortName: "FAMU",
+    transferAgreementsUrl: null,
+    // CeDAR, not famu.edu/accessibility (that one is a web-accessibility policy).
+    accessibilityUrl:
+      "https://www.famu.edu/students/student-resources/center-for-disability-access-and-resources/index.php",
+    resources: [
+      { label: "Florida A&M University", url: "https://www.famu.edu/" },
+      {
+        label: "Academic Advising",
+        url: "https://www.famu.edu/students/student-resources/academic-support/academic-advising/index.php",
+      },
+      { label: "Degree Programs", url: "https://www.famu.edu/academics/index.php" },
+    ],
+    // FAMU assigns advisors per program via iRattler and publishes no
+    // central advising address, so this is the admissions office.
+    contacts: [
+      { label: "Undergraduate Admissions", email: "ugrdadmissions@famu.edu" },
+    ],
+  },
+  fau: {
+    shortName: "FAU",
+    transferAgreementsUrl: null,
+    accessibilityUrl: "https://www.fau.edu/sas/",
+    resources: [
+      { label: "Florida Atlantic University", url: "https://www.fau.edu/" },
+      { label: "Academic Advising", url: "https://www.fau.edu/advising/" },
+      { label: "Degree Programs", url: "https://www.fau.edu/programs/" },
+    ],
+    contacts: [{ label: "Advising", email: "advisingservices@fau.edu" }],
+  },
+  fgcu: {
+    shortName: "FGCU",
+    transferAgreementsUrl: null,
+    accessibilityUrl: "https://www.fgcu.edu/adaptive/",
+    resources: [
+      { label: "Florida Gulf Coast University", url: "https://www.fgcu.edu/" },
+      { label: "Academic Advising", url: "https://www.fgcu.edu/academics/advising/" },
+      { label: "Degree Programs", url: "https://www.fgcu.edu/degree/" },
+    ],
+    // FGCU advises by college; Exploratory is the office for students who
+    // haven't declared, which is the closest thing to a general contact.
+    contacts: [{ label: "Exploratory Advising", email: "explore@fgcu.edu" }],
+  },
+  flpoly: {
+    shortName: "Florida Poly",
+    transferAgreementsUrl: null,
+    accessibilityUrl: "https://floridapoly.edu/studentlife/disability-services/",
+    resources: [
+      { label: "Florida Polytechnic University", url: "https://floridapoly.edu/" },
+      {
+        label: "Academic Advising",
+        url: "https://floridapoly.edu/academics/resources/student-success/",
+      },
+      { label: "Degree Programs", url: "https://floridapoly.edu/academics/programs/" },
+    ],
+    contacts: [{ label: "Student Success", email: "success@floridapoly.edu" }],
+  },
+  fsu: {
+    shortName: "FSU",
+    transferAgreementsUrl: null,
+    accessibilityUrl: "https://dsst.fsu.edu/oas",
+    resources: [
+      { label: "Florida State University", url: "https://www.fsu.edu/" },
+      { label: "Academic Advising", url: "https://advising.fsu.edu/" },
+      { label: "Degree Programs", url: "https://admissions.fsu.edu/majors" },
+    ],
+    // Advising is per college; this is the general admissions contact.
+    contacts: [{ label: "Admissions", email: "admissions@fsu.edu" }],
+  },
+  ncf: {
+    shortName: "New College",
+    transferAgreementsUrl: null,
+    accessibilityUrl: "https://www.ncf.edu/departments/advocacy-accessibility/",
+    resources: [
+      { label: "New College of Florida", url: "https://www.ncf.edu/" },
+      { label: "Academic Advising", url: "https://www.ncf.edu/advising/" },
+      { label: "Degree Programs", url: "https://www.ncf.edu/academics/" },
+    ],
+    contacts: [{ label: "Admissions", email: "admissions@ncf.edu" }],
+  },
+  ucf: {
+    shortName: "UCF",
+    transferAgreementsUrl: null,
+    accessibilityUrl: "https://access.ucf.edu/student-accessibility-services/",
+    resources: [
+      { label: "University of Central Florida", url: "https://www.ucf.edu/" },
+      {
+        label: "Academic Advising",
+        url: "https://www.sswb.ucf.edu/faq/academic-advising/",
+      },
+      { label: "Degree Programs", url: "https://www.ucf.edu/degree-search/" },
+    ],
+    // UCF calls advising "Academic Success Coaching" and runs it per college;
+    // students find their assigned coach through myUCF, so this is admissions.
+    contacts: [{ label: "Admissions", email: "admission@ucf.edu" }],
+  },
+  uf: {
+    shortName: "UF",
+    transferAgreementsUrl: null,
+    // The Disability Resource Center, not accessibility.ufl.edu (web policy).
+    accessibilityUrl: "https://disability.ufl.edu/",
+    resources: [
+      { label: "University of Florida", url: "https://www.ufl.edu/" },
+      { label: "Academic Advising", url: "https://www.advising.ufl.edu/" },
+      {
+        label: "Degree Programs",
+        url: "https://www.ufl.edu/academics/programs-courses/",
+      },
+    ],
+    // UF's public contacts page lists only phones and a Request Info form;
+    // this address was supplied by the project owner.
+    contacts: [{ label: "Admissions", email: "freshman@ufl.edu" }],
+  },
+  unf: {
+    shortName: "UNF",
+    transferAgreementsUrl: null,
+    // The Student Accessibility Center, not unf.edu/accessibility (ADA/504
+    // coordination policy).
+    accessibilityUrl: "https://www.unf.edu/sac/index.html",
+    resources: [
+      { label: "University of North Florida", url: "https://www.unf.edu/" },
+      { label: "Academic Advising", url: "https://www.unf.edu/advising/" },
+      { label: "Degree Programs", url: "https://www.unf.edu/academics/" },
+    ],
+    contacts: [{ label: "Admissions", email: "admissions@unf.edu" }],
+  },
+  usf: {
+    shortName: "USF",
+    transferAgreementsUrl: null,
+    accessibilityUrl: "https://www.usf.edu/student-affairs/student-accessibility/",
+    resources: [
+      { label: "University of South Florida", url: "https://www.usf.edu/" },
+      {
+        label: "Academic Advising",
+        url: "https://www.usf.edu/undergrad/students/advising.aspx",
+      },
+      {
+        label: "Degree Programs",
+        url: "https://www.usf.edu/undergrad-catalog-programs-a-z",
+      },
+    ],
+    // Advising is per college; Exploratory covers undeclared students.
+    contacts: [{ label: "Exploratory Advising", email: "ecmadvise@usf.edu" }],
+  },
+  uwf: {
+    shortName: "UWF",
+    transferAgreementsUrl: null,
+    accessibilityUrl:
+      "https://uwf.edu/student-affairs/departments/student-accessibility-resources/",
+    resources: [
+      { label: "University of West Florida", url: "https://uwf.edu/" },
+      {
+        label: "Academic Advising",
+        url: "https://uwf.edu/academic-affairs/departments/persistence-and-academic-success-services/academic-advising/",
+      },
+      { label: "Degree Programs", url: "https://uwf.edu/programs/" },
+    ],
+    contacts: [{ label: "Admissions", email: "admissions@uwf.edu" }],
+  },
+
+  // --- Private institutions (SACSCOC-accredited, curated list) ------------
+  // Researched 2026-07-25 from each school's own site. Four of these serve
+  // pages only to real browsers (Cloudflare); those were verified in a browser
+  // rather than by script.
+  //
+  // Some entries have no "Academic Advising" resource: Bethune-Cookman,
+  // Edward Waters, Keiser and Palm Beach Atlantic publish no advising page we
+  // could find. Others have accessibilityUrl null because the office page is
+  // gone — Bethune-Cookman's Student Accessibility Services page 404s and only
+  // a web-accessibility POLICY survives, which is not the same thing and must
+  // not be linked in its place.
+
+  avemaria: {
+    shortName: "Ave Maria",
+    transferAgreementsUrl: null,
+    accessibilityUrl: "https://www.avemaria.edu/resources/adaptive-services",
+    resources: [
+      { label: "Ave Maria University", url: "https://www.avemaria.edu/" },
+      {
+        label: "Academic Advising",
+        url: "https://www.avemaria.edu/resources/advising-services",
+      },
+      { label: "Degree Programs", url: "https://www.avemaria.edu/academics" },
+    ],
+    contacts: [{ label: "Admissions", email: "admissions@avemaria.edu" }],
+  },
+  barry: {
+    shortName: "Barry",
+    transferAgreementsUrl: null,
+    accessibilityUrl: "https://www.barry.edu/en/accessibility-services/",
+    resources: [
+      { label: "Barry University", url: "https://www.barry.edu/en" },
+      {
+        label: "Academic Advising",
+        url: "https://www.barry.edu/en/academic-affairs/casa",
+      },
+      { label: "Degree Programs", url: "https://www.barry.edu/en/academics/" },
+    ],
+    contacts: [{ label: "Admissions", email: "admissions@barry.edu" }],
+  },
+  cookman: {
+    shortName: "B-CU",
+    transferAgreementsUrl: null,
+    accessibilityUrl:
+      "https://www.cookman.edu/currentstudents/bhrs/accessibility-services.html",
+    resources: [
+      { label: "Bethune-Cookman University", url: "https://www.cookman.edu/" },
+      // B-CU publishes no general advising page. This one is the veteran and
+      // military services team, so it's labelled for what it actually is
+      // rather than passed off as academic advising.
+      {
+        label: "Military & Veteran Services",
+        url: "https://www.cookman.edu/currentstudents/military-services/meet-the-team.html",
+      },
+      { label: "Degree Programs", url: "https://www.cookman.edu/academics/" },
+    ],
+    contacts: [{ label: "Admissions", email: "admissions@cookman.edu" }],
+  },
+  eckerd: {
+    shortName: "Eckerd",
+    transferAgreementsUrl: null,
+    accessibilityUrl: "https://www.eckerd.edu/aes/",
+    resources: [
+      { label: "Eckerd College", url: "https://www.eckerd.edu/" },
+      { label: "Academic Advising", url: "https://www.eckerd.edu/excellence/" },
+      { label: "Degree Programs", url: "https://www.eckerd.edu/academics/majors/" },
+    ],
+    contacts: [
+      { label: "Center for Academic Excellence", email: "excellence@eckerd.edu" },
+    ],
+  },
+  ewu: {
+    shortName: "EWU",
+    transferAgreementsUrl: null,
+    accessibilityUrl: "https://www.ew.edu/accessibility-support/",
+    resources: [
+      // Edward Waters moved from ewc.edu to ew.edu.
+      { label: "Edward Waters University", url: "https://www.ew.edu/" },
+      { label: "Academic Advising", url: "https://www.ew.edu/sse/" },
+      { label: "Degree Programs", url: "https://www.ew.edu/academics/" },
+    ],
+    contacts: [{ label: "Admissions", email: "admissions@ew.edu" }],
+  },
+  erau: {
+    shortName: "Embry-Riddle",
+    transferAgreementsUrl: null,
+    accessibilityUrl:
+      "https://erau.edu/student-experience/student-services/student-accessibility-services",
+    resources: [
+      { label: "Embry-Riddle Aeronautical University", url: "https://erau.edu/" },
+      {
+        label: "Academic Advising",
+        url: "https://erau.edu/student-experience/student-services/academic-advising",
+      },
+      { label: "Degree Programs", url: "https://erau.edu/degrees" },
+    ],
+    // Embry-Riddle advises per campus; Daytona Beach is the Florida one.
+    contacts: [{ label: "Daytona Beach Advising", email: "dbadvise@erau.edu" }],
+  },
+  flagler: {
+    shortName: "Flagler",
+    transferAgreementsUrl: null,
+    accessibilityUrl:
+      "https://www.flagler.edu/academics/academic-support/disability-resource-center",
+    resources: [
+      { label: "Flagler College", url: "https://www.flagler.edu/" },
+      {
+        label: "Academic Advising",
+        url: "https://www.flagler.edu/academics/academic-support/academic-access-and-success/center-advising-and-core-experience",
+      },
+      {
+        label: "Degree Programs",
+        url: "https://www.flagler.edu/academics/degrees-programs",
+      },
+    ],
+    contacts: [{ label: "Advising", email: "cace@flagler.edu" }],
+  },
+  fit: {
+    shortName: "Florida Tech",
+    transferAgreementsUrl: null,
+    accessibilityUrl:
+      "https://www.fit.edu/student-success-support-center/accessibility-resources/",
+    resources: [
+      { label: "Florida Institute of Technology", url: "https://www.fit.edu/" },
+      { label: "Academic Advising", url: "https://www.fit.edu/advising/" },
+      { label: "Degree Programs", url: "https://www.fit.edu/programs/" },
+    ],
+    contacts: [{ label: "Advising", email: "advising@fit.edu" }],
+  },
+  fmu: {
+    shortName: "FMU",
+    transferAgreementsUrl: null,
+    accessibilityUrl:
+      "https://www.fmu.edu/about-fmu/administration/academic-affairs/office-of-the-provost/center-for-academic-resources-and-support/ada-accommodations/",
+    resources: [
+      { label: "Florida Memorial University", url: "https://www.fmu.edu/" },
+      {
+        label: "Academic Advising",
+        url: "https://www.fmu.edu/about-fmu/administration/academic-affairs/office-of-the-provost/center-for-academic-resources-and-support/academic-advising/",
+      },
+      { label: "Degree Programs", url: "https://www.fmu.edu/academics/" },
+    ],
+    // FMU's site is fmu.edu but its mail domain is fmuniv.edu.
+    contacts: [{ label: "Advising", email: "Advising@fmuniv.edu" }],
+  },
+  fsc: {
+    shortName: "Florida Southern",
+    transferAgreementsUrl: null,
+    accessibilityUrl:
+      "https://www.flsouthern.edu/campus-offices/offices-directory/office-of-student-disability-services",
+    resources: [
+      { label: "Florida Southern College", url: "https://www.flsouthern.edu/" },
+      {
+        label: "Academic Advising",
+        url: "https://www.flsouthern.edu/academic-life/engaged-learning-the-fsc-way/academic-support-services/academic-advising",
+      },
+      {
+        label: "Degree Programs",
+        url: "https://www.flsouthern.edu/academic-life/all-academic-programs",
+      },
+    ],
+    contacts: [{ label: "Admissions", email: "fscadm@flsouthern.edu" }],
+  },
+  ju: {
+    shortName: "JU",
+    transferAgreementsUrl: null,
+    accessibilityUrl: "https://www.ju.edu/disabilityservices/",
+    resources: [
+      { label: "Jacksonville University", url: "https://www.ju.edu/" },
+      {
+        label: "Academic Advising",
+        url: "https://www.ju.edu/studentenrichmentcenter/index.php",
+      },
+      { label: "Degree Programs", url: "https://www.ju.edu/academics/" },
+    ],
+    contacts: [{ label: "Student Enrichment Center", email: "enrichment@ju.edu" }],
+  },
+  keiser: {
+    shortName: "Keiser",
+    transferAgreementsUrl: null,
+    accessibilityUrl:
+      "https://www.keiseruniversity.edu/americans-with-disabilities-act/",
+    resources: [
+      { label: "Keiser University", url: "https://www.keiseruniversity.edu/" },
+      {
+        label: "Academic Advising",
+        url: "https://residential.keiseruniversity.edu/students/academic-advising/",
+      },
+      {
+        label: "Degree Programs",
+        url: "https://www.keiseruniversity.edu/programs/all-programs/",
+      },
+    ],
+    contacts: [{ label: "ADA Office", email: "ADA@keiseruniversity.edu" }],
+  },
+  lynn: {
+    shortName: "Lynn",
+    transferAgreementsUrl: null,
+    accessibilityUrl:
+      "https://www.lynn.edu/campus-directory/departments/accessibility-services",
+    resources: [
+      { label: "Lynn University", url: "https://www.lynn.edu/" },
+      {
+        label: "Academic Advising",
+        url: "https://www.lynn.edu/campus-directory/departments/academic-advising",
+      },
+      { label: "Degree Programs", url: "https://www.lynn.edu/academics" },
+    ],
+    contacts: [{ label: "Advising", email: "myadvisor@lynn.edu" }],
+  },
+  nova: {
+    shortName: "NSU",
+    transferAgreementsUrl: null,
+    accessibilityUrl: "https://www.nova.edu/disability-services/index.html",
+    resources: [
+      { label: "Nova Southeastern University", url: "https://www.nova.edu/" },
+      {
+        label: "Academic Advising",
+        url: "https://undergrad.nova.edu/academics/academic-advising.html",
+      },
+      { label: "Degree Programs", url: "https://www.nova.edu/degrees.html" },
+    ],
+    contacts: [{ label: "Admissions", email: "admissions@nova.edu" }],
+  },
+  pba: {
+    shortName: "PBA",
+    transferAgreementsUrl: null,
+    accessibilityUrl:
+      "https://www.pba.edu/academics/disability-services-accommodations/",
+    resources: [
+      { label: "Palm Beach Atlantic University", url: "https://www.pba.edu/" },
+      {
+        label: "Academic Advising",
+        url: "https://www.pba.edu/academics/student-success/",
+      },
+      {
+        label: "Degree Programs",
+        url: "https://www.pba.edu/academics/undergraduate-programs/",
+      },
+    ],
+    contacts: [{ label: "Admissions", email: "admit@pba.edu" }],
+  },
+  rollins: {
+    shortName: "Rollins",
+    transferAgreementsUrl: null,
+    accessibilityUrl: "https://www.rollins.edu/student-life/accessibility-services/",
+    resources: [
+      { label: "Rollins College", url: "https://www.rollins.edu/" },
+      {
+        label: "Academic Advising",
+        url: "https://www.rollins.edu/academic-advising/",
+      },
+      { label: "Degree Programs", url: "https://www.rollins.edu/academics/majors-minors/" },
+    ],
+    contacts: [{ label: "Advising", email: "advising@rollins.edu" }],
+  },
+  saintleo: {
+    shortName: "Saint Leo",
+    transferAgreementsUrl: null,
+    accessibilityUrl:
+      "https://www.saintleo.edu/student-experience/support/accessibility",
+    resources: [
+      { label: "Saint Leo University", url: "https://www.saintleo.edu/" },
+      {
+        label: "Academic Advising",
+        url: "https://www.saintleo.edu/academics/success-resources/student-advising",
+      },
+      { label: "Degree Programs", url: "https://www.saintleo.edu/academics" },
+    ],
+    contacts: [{ label: "Admissions", email: "admissions@saintleo.edu" }],
+  },
+  stetson: {
+    shortName: "Stetson",
+    transferAgreementsUrl: null,
+    accessibilityUrl: "https://www.stetson.edu/administration/accessibility-services/",
+    resources: [
+      { label: "Stetson University", url: "https://www.stetson.edu/" },
+      {
+        label: "Academic Advising",
+        url: "https://www.stetson.edu/administration/academic-advising/",
+      },
+      { label: "Degree Programs", url: "https://www.stetson.edu/academics/" },
+    ],
+    // Stetson advises through assigned faculty; the accessibility centre is
+    // the one published departmental address.
+    contacts: [{ label: "Accessibility Services", email: "asc@stetson.edu" }],
+  },
+  stu: {
+    shortName: "STU",
+    transferAgreementsUrl: null,
+    accessibilityUrl: "https://www.stu.edu/student-accessibility-service/",
+    resources: [
+      { label: "St. Thomas University", url: "https://www.stu.edu/" },
+      { label: "Academic Advising", url: "https://www.stu.edu/student-success/" },
+      { label: "Degree Programs", url: "https://www.stu.edu/programs/" },
+    ],
+    contacts: [{ label: "Admissions", email: "admissions@stu.edu" }],
+  },
+  miami: {
+    shortName: "UM",
+    transferAgreementsUrl: null,
+    accessibilityUrl: "https://camnercenter.miami.edu/disability-services/",
+    resources: [
+      { label: "University of Miami", url: "https://welcome.miami.edu/" },
+      { label: "Academic Advising", url: "https://success.miami.edu/" },
+      { label: "Degree Programs", url: "https://welcome.miami.edu/academics/" },
+    ],
+    contacts: [{ label: "Admission", email: "admission@miami.edu" }],
+  },
+  tampa: {
+    shortName: "UTampa",
+    transferAgreementsUrl: null,
+    accessibilityUrl:
+      "https://www.ut.edu/academics/academic-support/academic-success-center/student-accessibility-and-academic-support-/student-accessibility-services",
+    resources: [
+      { label: "University of Tampa", url: "https://www.ut.edu/" },
+      {
+        label: "Academic Advising",
+        url: "https://www.ut.edu/academics/academic-support/academic-success-center",
+      },
+      {
+        label: "Degree Programs",
+        url: "https://www.ut.edu/academics/degree-programs",
+      },
+    ],
+    contacts: [
+      { label: "Academic Success Center", email: "academicsuccess@ut.edu" },
+    ],
+  },
 };
 
 export function getSchoolInfo(schoolId: string): SchoolInfo {

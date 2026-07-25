@@ -21,12 +21,12 @@ describe("getSchoolInfo", () => {
     expect(info.contacts).toEqual([{ label: "Advising", email: "fiuadvising@fiu.edu" }]);
   });
 
-  it("falls back to MDC's info for a school with no curated entry", () => {
-    // Schools in floridaSchools.ts with no dedicated footer data yet — the
-    // state universities and privates, now that all 28 FCS schools are curated.
-    const ucf = getSchoolInfo("ucf");
+  it("falls back to MDC's info for an unknown school id", () => {
+    // Every school in floridaSchools.ts is curated now, so the fallback only
+    // fires for an id that isn't a school at all (a stale cookie, say).
+    const unknown = getSchoolInfo("not-a-real-school");
     const mdc = getSchoolInfo("mdc");
-    expect(ucf).toEqual(mdc);
+    expect(unknown).toEqual(mdc);
   });
 
   it("gives every school at least one resource link", () => {
@@ -40,35 +40,37 @@ describe("getSchoolInfo", () => {
   });
 });
 
-describe("Florida College System coverage", () => {
-  // Every FCS school got its links read off its own site (2026-07-25). These
-  // guard the shape of that data, not its accuracy — a link rotting is
-  // something only a human revisiting the site can catch.
-  const FCS_IDS = FLORIDA_SCHOOLS.filter((s) => s.kind === "state-college").map(
-    (s) => s.id
-  );
+describe("school info coverage", () => {
+  // Every school got its links read off its own site (2026-07-25). These guard
+  // the shape of that data, not its accuracy — a link rotting is something
+  // only a human revisiting the site can catch.
+  const ALL_IDS = FLORIDA_SCHOOLS.map((s) => s.id);
 
-  it("curates all 28 FCS schools, none falling back to MDC", () => {
-    expect(FCS_IDS).toHaveLength(28);
-    for (const id of FCS_IDS) {
+  it("curates every school in floridaSchools.ts", () => {
+    expect(ALL_IDS).toHaveLength(61);
+    for (const id of ALL_IDS) {
       expect(hasSchoolInfo(id), `${id} should have its own entry`).toBe(true);
     }
   });
 
-  it("gives each FCS school a site, an advising page and a programs page", () => {
-    for (const id of FCS_IDS) {
+  it("gives each school a site link and a programs page", () => {
+    for (const id of ALL_IDS) {
       const info = getSchoolInfo(id);
-      expect(info.resources.map((r) => r.label), id).toEqual([
-        expect.any(String),
-        "Academic Advising",
-        "Degree Programs",
-      ]);
+      const labels = info.resources.map((r) => r.label);
+      // The first entry is always the school's own site; a programs page is
+      // always present. An advising page is not — a handful of schools
+      // publish none, and a made-up link is worse than a missing one. Labels
+      // beyond those two are allowed so a link can describe what it actually
+      // is (Bethune-Cookman's is military & veteran services, not advising).
+      expect(labels.length, id).toBeGreaterThanOrEqual(2);
+      expect(labels).toContain("Degree Programs");
+      for (const l of labels) expect(l.length, id).toBeGreaterThan(0);
       for (const r of info.resources) expect(r.url, `${id} ${r.label}`).toMatch(/^https:\/\//);
     }
   });
 
   it("uses https and a plausible address for every link and contact", () => {
-    for (const id of FCS_IDS) {
+    for (const id of ALL_IDS) {
       const info = getSchoolInfo(id);
       if (info.accessibilityUrl) {
         expect(info.accessibilityUrl, id).toMatch(/^https:\/\//);
@@ -76,13 +78,24 @@ describe("Florida College System coverage", () => {
       if (info.transferAgreementsUrl) {
         expect(info.transferAgreementsUrl, id).toMatch(/^https:\/\//);
       }
-      // contacts may legitimately be empty - several schools publish no
-      // central advising address, and inventing one would be worse.
+      // contacts may legitimately be empty - inventing an address would be
+      // worse than leaving it out.
       for (const c of info.contacts) {
         expect(c.email, `${id} ${c.label}`).toMatch(/^\S+@\S+\.\S+$/);
         expect(c.label.length, `${id}`).toBeGreaterThan(0);
       }
     }
+  });
+
+  it("never points an accessibility link at a web-accessibility policy page", () => {
+    // FAMU and UNF both serve a /accessibility/ page that is a web content
+    // policy, not the office that arranges student accommodations. Linking
+    // those would send a student needing accommodations to the wrong place.
+    expect(getSchoolInfo("famu").accessibilityUrl).toContain(
+      "center-for-disability-access-and-resources"
+    );
+    expect(getSchoolInfo("unf").accessibilityUrl).toContain("/sac/");
+    expect(getSchoolInfo("uf").accessibilityUrl).toBe("https://disability.ufl.edu/");
   });
 });
 
@@ -110,7 +123,9 @@ describe("hasSchoolInfo", () => {
   it("distinguishes a curated school from a fallback one", () => {
     expect(hasSchoolInfo("broward")).toBe(true);
     expect(hasSchoolInfo("fiu")).toBe(true);
-    expect(hasSchoolInfo("ucf")).toBe(false);
+    expect(hasSchoolInfo("ucf")).toBe(true);
+    expect(hasSchoolInfo("miami")).toBe(true);
+    expect(hasSchoolInfo("not-a-real-school")).toBe(false);
   });
 });
 
