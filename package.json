@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "scrape:broward": "node scripts/scrape-broward-programs.mjs",
+    "scrape:ucf": "node scripts/scrape-ucf-programs.mjs",
     "export-cache": "node scripts/export-cache.mjs"
   },
   "dependencies": {

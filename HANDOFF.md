@@ -1,11 +1,20 @@
 # Vocation — Project Handoff
 
 Everything a new developer needs to work on this codebase safely. Written
-2026-07-25, against commit `3e8051c` on `main`.
+2026-07-25, last updated **2026-07-26** against commit `3290c18` on `main`.
 
 Read the **Rules** section before writing code. Several of them exist because
 the obvious approach has already failed here in a way that wasn't visible until
 production.
+
+> **Next session: public and private universities, continued.**
+> The generic university prompt template now exists (`universitySystemPrompt`
+> in `pathwayPrompts.ts`, refactored out of what used to be FIU's hard-coded
+> prompt) and UCF is wired up as the pilot — scraped, tested, verified live in
+> a browser. 10 SUS universities and 21 private schools remain uncatalogued.
+> **Read §13 first — universities are not state colleges**, and read the UCF
+> entry in §13's per-school table before assuming the next university's
+> catalog site works the same way UCF's did.
 
 ---
 
@@ -19,14 +28,18 @@ school, which exams), for one of several Florida schools. Next.js 14 App
 Router, TypeScript, no database.
 
 **The one rule everything else follows from:** Gemini prompts are grounded in
-scraped real program catalogs (`app/lib/fiu-programs.ts`,
-`app/lib/programs/broward.ts`, `app/lib/mdc-programs.ts`). Never let the model
-free-generate a program name — it invents plausible-sounding degrees that don't
-exist. If you add a school, you scrape its catalog first (§2, §7).
+scraped real program catalogs (`app/lib/programs/*.ts`, `app/lib/fiu-programs.ts`,
+`app/lib/mdc-programs.ts` — 3,313 real programs across 28 files). Never let the
+model free-generate a program name — it invents plausible-sounding degrees that
+don't exist. If you add a school, you scrape its catalog first (§2, §7).
 
-**There is no database.** Persistence is `data/seed-cache.json` (a committed
-JSON file, §5) plus a `vocation_school` cookie for the selected school. Don't
-go looking for Prisma/Supabase/a schema — there isn't one.
+**29 of 61 schools can generate pathways** (27 state colleges + FIU + UCF). The
+other 32 — 10 SUS universities and 21 private schools — are gated off and show
+a "we don't have this catalog yet" notice. That's the next body of work (§13).
+
+**There is no traditional database.** Persistence is `data/seed-cache.json` (a
+committed JSON file, §5), an optional Redis/KV durable layer (§5.1), and a
+`vocation_school` cookie. Don't go looking for Prisma/Supabase/a schema.
 
 **Selected school lives in a cookie, not localStorage, and this is load-bearing
 (§6).** The server renders the school-specific logo/colors/catalog from that
@@ -39,12 +52,19 @@ cookie before React runs. If you "simplify" this back to
 lookup → rate limit → build prompt → call Gemini. Rate limiting must stay
 *after* the cache check, or browsing pre-generated content gets throttled.
 
-**Generated files, never hand-edit:** `app/lib/fiu-programs.ts` and
-`app/lib/programs/broward.ts` say GENERATED at the top. Edit the scraper in
-`scripts/` and re-run it (`npm run scrape:fiu` / `scrape:broward`).
+**Generated files, never hand-edit:** everything in `app/lib/programs/` and
+`app/lib/fiu-programs.ts` says GENERATED at the top. Only two have committed
+scrapers (`npm run scrape:fiu` / `scrape:broward`); the other 25 were scraped
+with throwaway browser-driven scripts (§9) — treat those files as the source of
+record and re-scrape by hand if a catalog goes stale.
+
+**Two school ids don't match their catalog filenames.** `dsc.ts` is school id
+`daytona`; `ssc.ts` is school id `seminole`. Registries key on the
+`floridaSchools.ts` id, never the filename. Getting this wrong produces a
+silently unreachable catalog.
 
 **Before you "fix" an inconsistency, check §7.** MDC's catalog/prompt/URL
-scheme is deliberately different from FIU's and Broward's. That's a documented
+scheme is deliberately different from every other school's. That's a documented
 decision, not debt — don't unify it without reading why.
 
 **Known-dead code:** `app/page.tsx` still contains a full pathway-generation
@@ -58,7 +78,7 @@ the logo-flash bug both passed every automated check while still being broken.
 
 **Golden commands:**
 ```bash
-npm test          # 169 tests must pass
+npm test          # 364 tests; 363 pass, 1 known pre-existing failure (§8)
 npm run build     # must compile; NEVER run this while `npm run dev` is up (§8)
 ```
 
@@ -158,16 +178,19 @@ app/
 
     ── program catalogs ──
     programCatalog.ts         SHARED matcher factory. One implementation.
-    programCatalogs.ts        Registry: school id → catalog.
+    programCatalogs.ts        Registry: school id → catalog. 28 entries.
+    programs/*.ts             GENERATED. 27 files, 2,979 programs total.
+                              ⚠ dsc.ts = id "daytona", ssc.ts = id "seminole".
     fiu-programs.ts           GENERATED. 287 FIU programs.
-    programs/broward.ts       GENERATED. 211 Broward programs.
     mdc-programs.ts           MDC catalog. Hand-written, slug-based (§7).
+    transferAgreements.ts     25 flagship articulation agreements (§7).
 
     ── generation ──
     pathwayPrompts.ts         Per-school prompt construction.
     careerCanonical.ts        Free text → canonical career title.
-    careerAliases.ts          Hand-maintained synonym table.
-    apiCache.ts               Two-layer cache (seed file + memory).
+    careerAliases.ts          Hand-maintained synonym table. 77 careers.
+    apiCache.ts               Layers 1+2 (committed seed file + memory).
+    durableCache.ts           Layer 3 (Redis/KV). No-ops when unconfigured (§5.1).
     rateLimit.ts              Per-IP + daily ceiling.
     geminiModel.ts            Single source of truth for the model name.
     missLog.ts                Logs what reached Gemini, for growing the seed.
@@ -176,7 +199,9 @@ app/
     cost.ts, certifications.ts, universities.ts, types.ts, icons.tsx
 
 scripts/
-  seed-pathways.mjs           Pre-generates pathways/suggestions/exams.
+  seed-pathways.mjs           Pre-generates pathways/suggestions/exams (costs $).
+  export-cache.mjs            Pulls user-generated pathways from Redis into the
+                              seed file. Costs nothing — preferred over seeding.
   scrape-fiu-programs.mjs     Regenerates fiu-programs.ts.
   scrape-broward-programs.mjs Regenerates programs/broward.ts.
 
@@ -199,11 +224,11 @@ School Logos/                 7.7MB of ORIGINAL source images. Committed (§9).
 
 ---
 
-## 5. "Database schema" — there is no database
+## 5. "Database schema" — there is no relational database
 
 This is worth stating plainly because it's the most likely thing for a new
-developer to assume wrongly. **There is no database, no ORM, no migrations, no
-Prisma, no Supabase.** Persistence is:
+developer to assume wrongly. **There is no ORM, no migrations, no Prisma, no
+Supabase, no SQL.** Persistence is three cache layers plus a cookie.
 
 ### `data/seed-cache.json` — 411 keys, 891 KB, committed to git
 
@@ -215,7 +240,9 @@ A flat key/value JSON file. Keys use the format produced by `cacheKey()`:
 | `suggestions:<career>` | 77 | Array of career suggestion objects |
 | `exam:<exam name>` | 181 | `{ url, requirements[] }` |
 
-Currently seeded: **77 MDC pathways, 76 Broward pathways, 0 FIU pathways.**
+Currently seeded: **77 MDC pathways, 76 Broward pathways.** The other 26
+catalogued schools have **zero** seeded pathways — every request for them is a
+live Gemini call. See §5.1 for why that's now acceptable rather than urgent.
 
 Values match the TypeScript types in `app/lib/types.ts`:
 
@@ -238,11 +265,53 @@ Three reasons, and they still hold:
    can't be reviewed as easily.
 3. **The data is finite and read-mostly.** There are only so many careers.
 
-### When you WOULD want a real database
+### 5.1 Layer 3 — the durable cache (`durableCache.ts`)
 
-If you want pathways generated at runtime to persist across deploys (the long
-tail — someone searching "Ocean Engineer" once). The write path is already
-isolated in `setCached()`, so swapping the backing store is contained.
+Added 2026-07-26. Solves the "long tail" problem §5 used to defer.
+
+Layer 2 (in-memory) dies on every serverless cold start, so a pathway a student
+already paid a Gemini call for got re-billed minutes later. Layer 3 is a
+Redis/KV store that sits **behind** layers 1–2 and survives cold starts.
+
+```
+seed file (free, permanent)  →  memory (free, dies on cold start)
+                             →  Redis (survives)  →  Gemini (costs money)
+```
+
+Two payoffs:
+
+1. **A pathway is generated at most once, ever.** Verified: after a cold start,
+   a previously generated pathway served in 633 ms with no Gemini call.
+2. **`npm run export-cache` grows the seed file for free** — it pulls what real
+   users generated into `data/seed-cache.json` with **zero** Gemini spend,
+   because the generation already happened when a student asked for it.
+
+**The intended workflow, and why it beats bulk seeding.** Seeding all 77 careers
+× 27 unseeded schools is ~2,079 Gemini calls and ~8.7 hours serial. Instead:
+
+```bash
+# students use the site; misses generate once and persist
+npm run export-cache            # pull them into the seed file, $0
+git diff data/seed-cache.json   # REVIEW — see below
+```
+
+**Review is doing real work, not ceremony.** Exported entries went straight from
+Gemini to a student with no human check. Merging one makes it the permanent
+answer. The script refuses to overwrite an already-seeded key for exactly this
+reason.
+
+**Design constraints, all deliberate:**
+- **Zero npm dependencies.** Vercel provisions `KV_REST_API_URL` /
+  `KV_REST_API_TOKEN` for an Upstash-compatible REST endpoint, which is plain
+  `fetch`. No client library to pin or chase through a rename.
+- **Every function no-ops when unconfigured.** Local dev and CI have no store
+  and must behave exactly as before. A cache that can break a request is a
+  liability — all failures are logged and swallowed, and degrade to a miss.
+- **2 s timeout, 30-day TTL.** The read sits in front of Gemini; if the store
+  can't answer fast, generating beats stalling.
+
+Setup: add a Redis store in Vercel (Storage → Marketplace → Upstash; free tier
+is ample), then `vercel env pull .env.local` so `export-cache` can reach it.
 
 ### The other persisted state
 
@@ -314,14 +383,38 @@ state is genuinely page-local. Don't lift it without a reason.
 bachelor's with no transfer step; a state college starts at an associate and
 transfers out. `pathwayPrompts.ts` has an FIU prompt, a *generic state-college
 template* parameterized by catalog, and MDC's original hand-tuned 13,000-char
-prompt. Adding a college means a scraper + a registry line, not a new prompt.
+prompt. Adding a college means a scraper + two registry lines, not a new prompt.
 
 **MDC is deliberately inconsistent with the others.** `mdc-programs.ts` builds
-URLs from name slugs; FIU and Broward use scraped name→URL tables. MDC also
+URLs from name slugs; every other school uses scraped name→URL tables. MDC also
 keeps its bespoke prompt and is absent from `programCatalogs.ts`. This is not an
 oversight — MDC's version works, is well tested, and its 77 pathways are
 already seeded. Migrating it would risk the most-used school for consistency's
 sake alone. Leave it unless you have a concrete reason.
+
+**Transfer agreements are named, not generic.** `transferAgreements.ts` records
+each state college's *flagship* articulation agreement (DirectConnect to UCF,
+Link2FAU, FUSE, Aspire, …) and the prompt names it in the transfer step, because
+"transfer to a four-year university" is useless advice for the one step a
+student actually has to plan.
+
+Three rules the file enforces, each because reality violated the simple version:
+
+- **`summary` is written per school, never templated.** Schools promise
+  materially different things. CF/EFSC guarantee UCF admission; FGC's Going
+  Gator only routes into one UF college's majors; NFC's is a coaching pathway
+  with *no* guarantee at all. One sentence for all of them would misstate the
+  weaker ones.
+- **A school with no real flagship gets `null`, not a guess.** Chipola holds
+  parallel AA sheets to five universities with no branded guarantee, so it has
+  no entry and falls back to the generic instruction. A test asserts this.
+- **The prompt always states the statewide 2+2 floor** and explicitly says never
+  to imply the named partner is the only option — because it isn't.
+
+**Two catalog files are named differently from their school id.** `dsc.ts` →
+`daytona`, `ssc.ts` → `seminole`. All three registries key on the
+`floridaSchools.ts` id. Keying on the filename yields a catalog nothing can
+reach, and nothing fails loudly when you do.
 
 **Strict level matching.** If a query names a credential ("Master of Science
 in X"), the catalog returns a program at that level or *nothing*. Linking a
@@ -355,9 +448,12 @@ dead* (see §9). If you revive the home-page generator, fix this first.
 returns careers, not programs, so it's defensible — but if you make quiz
 results school-specific, this needs the school too.
 
-**58 of 61 schools fall back to MDC's footer info.** `schoolInfo.ts` has real
-data for MDC, FIU, and Broward only. Selecting UCF shows MDC's advising email.
-`hasSchoolInfo()` tells you which are real. This is a placeholder, not a claim.
+**One known failing test: `fiuCoverage.test.ts`.** Asserts >30% of post-MDC
+degree steps resolve to an FIU program; actual is 166/651 = 25.5%. It is
+**pre-existing and unrelated to the multi-school work** — the ratio has not
+moved across any of the last several batches. Either the threshold was set
+optimistically or FIU's catalog drifted. Don't "fix" it by lowering the number
+without checking which; it's a coverage floor doing its job.
 
 **Rate limiting is per-instance, not global.** Counters live in process memory,
 so on serverless the effective limit scales with warm instance count. It stops
@@ -393,13 +489,16 @@ never bound to a rendered input. Deleting it is safe and would remove the
 school-param bug above along with it. Left in place because deleting live-looking
 code deserves an explicit decision.
 
-**FIU pathways are not seeded.** Every FIU generation is a live Gemini call.
-Run `npm run seed -- --school fiu`.
+**26 of 28 catalogued schools have no seeded pathways.** Only MDC and Broward.
+Every request for the other 26 is a live Gemini call. **Prefer
+`npm run export-cache` over `npm run seed`** — see §5.1. Bulk-seeding all of
+them is ~2,079 calls and ~8.7 hours; harvesting real demand is free.
 
-**26 of 28 Florida College System schools have no catalog.** Only MDC and
-Broward. Each needs its own scraper because each site differs — but several FL
-colleges also run CourseLeaf, so `scrape-broward-programs.mjs` may be mostly a
-URL change for them. Check what a school serves before writing a parser.
+**25 of 27 scrapers were throwaway.** Only FIU and Broward have committed
+scrapers in `scripts/`. The other 25 catalogs were produced by browser-driven
+one-off scripts that no longer exist. The generated files are the source of
+record. If a catalog goes stale you re-scrape by hand — budget for that rather
+than assuming `npm run scrape:*` covers it.
 
 **No school selector on `/pathway`.** It reads the stored school but you must
 go back to the home page to change it. Users landing on a shared `/pathway`
@@ -465,17 +564,25 @@ responses to the console on every call. Harmless, noisy.
 npm install
 cp .env.example .env.local     # add GEMINI_API_KEY from aistudio.google.com
 npm run dev                    # http://localhost:3000
-npm test                       # 169 tests
+npm test                       # 364 tests (363 pass, 1 known failure — §8)
 npm run build                  # production build
 ```
 
-Seeding (needs the dev server running in another terminal):
+**Growing the seed file — prefer this** (free, no dev server needed):
+
+```bash
+vercel env pull .env.local     # once, to get KV_REST_API_URL / _TOKEN
+npm run export-cache -- --dry-run
+npm run export-cache
+git diff data/seed-cache.json  # REVIEW before committing (§5.1)
+```
+
+**Bulk seeding** (costs money; needs the dev server in another terminal):
 
 ```bash
 SEED_MODE=1 npm run dev                    # PowerShell: $env:SEED_MODE=1; npm run dev
-npm run seed                               # MDC
-npm run seed -- --school fiu               # FIU (not yet done)
-npm run seed -- --school broward --limit 5 # partial run
+npm run seed -- --school valencia          # one school, all 77 careers
+npm run seed -- --school spc --limit 5     # partial run
 ```
 
 `SEED_MODE=1` bypasses rate limiting for the seeder. **Never set it on a
@@ -484,22 +591,167 @@ deployed server.**
 ### Cost
 
 Roughly **$0.007 per uncached generation** (~4,800 input + ~970 output tokens,
-plus exam lookups). Seeding all 77 careers for one school ≈ $0.35. Cache hits
-are free. Confirm current Gemini pricing before relying on these figures.
+plus exam lookups). Seeding one school's 77 careers ≈ $0.35; all 27 unseeded
+schools ≈ $15 and ~8.7 hours serial at the built-in 5 s pacing.
+
+Measured 2026-07-26: per-school system prompts run 3.7 KB–13.4 KB, and **99.8%
+of each is career-invariant** (it's the school's catalog). Context caching looks
+like the obvious fix but most schools fall *below* Gemini's minimum cacheable
+size, and it would optimize a bill that's already ~$1 — the real constraint is
+wall-clock time, not tokens. Confirm current Gemini pricing before relying on
+these figures.
 
 ---
 
-## 12. Test suite — 169 tests, 17 files
+## 12. Test suite — 364 tests, 20 files
 
 | Area | Files | Notable coverage |
 |---|---|---|
-| Catalogs | `fiu-programs`, `programs/broward`, `mdc-programs`, `fiuCoverage` | No tracking params, no HTML entities, level routing, coverage floor |
-| Generation | `pathwayPrompts`, route tests | Prompts contain no un-interpolated `${`, catalogs actually embedded |
-| Caching | `apiCache` | Seed layer authoritative, never expires, not shadowed |
+| Catalogs | `programCatalogs`, `fiu-programs`, `programs/broward`, `mdc-programs`, `fiuCoverage` | Every program round-trips to itself at the right level; no tracking params; coverage floor |
+| Generation | `pathwayPrompts` (177 tests), route tests | Per-school: own catalog embedded, own transfer partner named, no other school's catalog leaked, no un-interpolated `${` |
+| Transfers | `transferAgreements` | Every agreement has a real school, a live `.edu` link, and a non-stub summary; Chipola stays `null` |
+| Caching | `apiCache`, `durableCache` | Seed layer authoritative; layer 3 no-ops unconfigured and degrades to a miss on every failure |
 | Limits | `rateLimit` | Per-IP window, daily ceiling, header parsing |
 | Theming | `schoolTheme` | **WCAG AA for all 61 schools** |
-| Schools | `floridaSchools`, `schoolInfo` | 28 FCS + 12 SUS counts, all logos local |
+| Schools | `floridaSchools`, `schoolInfo` | 29 FCS + 12 SUS + 21 private counts, all logos local |
 
-The most valuable tests are the invariants — the WCAG check, the "no `${` in
-prompts" check, and the catalog-coverage floor. Each caught a real bug that
-typechecked cleanly.
+The most valuable tests are the invariants, and each caught a real bug that
+typechecked cleanly:
+
+- **`programCatalogs` round-trip** found that certificate abbreviations
+  (`C.C.C.`, `T.C.`, `A.T.C.`, PSAV…) weren't recognized, so ~470 certificate
+  steps silently resolved to a same-named *associate degree*. Also found FIU
+  master's codes (`MAT`, `MPH`, `MSN`, `JD`…) resolving to the *bachelor's*.
+- **The WCAG check** caught unreadable button text across the school palette.
+- **"no `${` in prompts"** caught template literals shipped un-interpolated.
+
+Write invariants, not examples. "Every program resolves to itself" caught three
+real bugs; a test asserting one specific program would have caught none.
+
+---
+
+## 13. Next up — public and private universities
+
+**Status as of 2026-07-26:** all 27 Florida College System schools are wired up
+and generating pathways. UCF is the first SUS university, done as the pilot
+that validated the university template. What remains:
+
+| Group | Count | Catalogued | Notes |
+|---|---|---|---|
+| State colleges | 29* | 27 | Done. (*29 includes MDC + Broward) |
+| SUS public universities | 12 | 2 (FIU, UCF) | **Next.** FAMU, FAU, FGCU, FlPoly, FSU, NCF, UF, UNF, USF, UWF |
+| Private (SACSCOC) | 21 | 0 | After that |
+
+Until a school is catalogued it's gated off in `schoolCatalogs.ts` and the UI
+shows "we don't have this catalog yet" — so partial progress is safe to ship.
+
+### The university template now exists — UCF is the reference implementation
+
+What used to be FIU's own hard-coded prompt is now a generic
+`universitySystemPrompt` / `universityUserQuery` pair in `pathwayPrompts.ts`,
+parameterized the same way `collegeSystemPrompt` is for state colleges. FIU was
+refactored onto it first (177 pathwayPrompts tests passing unchanged is the
+proof the refactor didn't alter FIU's behavior), then UCF was added as the
+first genuinely new university.
+
+The dispatcher no longer branches on `schoolId === "fiu"`. It's a registry
+lookup instead: `UNIVERSITY_SHORT_NAMES` / `UNIVERSITY_PROGRAMS` (both
+`Record<string, ...>` keyed by school id) in `pathwayPrompts.ts`. Adding the
+next university is: scrape → `app/lib/programs/<id>.ts` → one line in each of
+`schoolCatalogs.ts`, `programCatalogs.ts`, `UNIVERSITY_SHORT_NAMES`, and
+`UNIVERSITY_PROGRAMS`. No new prompt-writing needed unless a university turns
+out not to fit the "starts at the bachelor's, no transfer" shape.
+
+Per point 2 above, **UCF has no `transferAgreements.ts` entry, and that's
+correct, not an oversight** — it's the destination FGC/TSC/Valencia/etc. name
+in their own transfer sections, not a school that needs one of its own.
+
+### UCF-specific findings, useful before starting the next university
+
+**Catalog platform: Kuali Catalog, a JSON REST API — not what the FCS schools used.**
+Point 4 above said to expect bespoke platforms; UCF's `catalog.ucf.edu` (really
+`www.ucf.edu/catalog/*`) is a Kuali Catalog SPA that renders nothing without
+JavaScript, but backs onto a plain, unauthenticated REST endpoint:
+`https://ucf.kuali.co/api/v1/catalog/programs/<catalogId>?q=`. Two separate
+catalog ids exist (undergraduate and graduate editions); `scripts/scrape-ucf-programs.mjs`
+fetches both directly and reconstructs the browsable URL from each program's
+`pid` (`https://www.ucf.edu/catalog/undergraduate/#/programs/<pid>`, hash-routed
+by the SPA, confirmed to resolve correctly in a real browser). **Don't assume
+the next university's catalog works this way** — check for a Kuali, Acalog, or
+CourseLeaf backend before writing a scraper; if you find `<school>.kuali.co` in
+the network tab, the API-first approach here is directly reusable.
+
+**The round-trip test caught two real matcher bugs, exactly as predicted.**
+Both are now fixed in `programCatalog.ts`'s `requestedLevel`, not worked around
+in UCF's data:
+- `DEGREE_TRANSITION` — an accelerated dual-degree title like "Environmental
+  Engineering MSEnvE, Accelerated BS to MSEnvE" is entirely a graduate program,
+  but the "BS" naming the accelerated track's entry point read as a bachelor's
+  hint. Stripped the same way `GRADUATE_OF_A_DEGREE` already strips "AA
+  Graduates" — the credential named right before "to" is the entry point, not
+  this program's own level.
+- `EMBEDDED_DEGREE_FRAGMENT` — compound engineering credentials like
+  "(B.S.M.S.E.)" (Bachelor of Science in **M**aterials **S**cience and
+  Engineering) coincidentally spell "M.S." with no space before it, which read
+  as a graduate hint on a bachelor's program. Fixed by only stripping the
+  no-space-before variant — a genuine "M.S." credential is always its own
+  token (preceded by a space, a paren, or the string start).
+
+Expect more of these as the remaining 10 universities' engineering and health
+programs get scraped — **run `programCatalogs.test.ts` immediately after each
+scrape**, before wiring the school into `pathwayPrompts.ts`.
+
+### Read this before starting: universities are not state colleges
+
+The state-college work was repetitive enough that the fifth batch looked like
+the first. **Universities are not.** Reusing the state-college path will produce
+confidently wrong pathways. Four real differences:
+
+**1. The pathway shape is different, and there is already a prompt for it.**
+A state college starts at an associate and transfers out. A university starts
+at the bachelor's — no associate step, no transfer step. `fiuSystemPrompt()`
+in `pathwayPrompts.ts` is that shape and is the template to follow, *not*
+`collegeSystemPrompt()`. Note the FIU prompt explicitly forbids a transfer
+step; the dispatcher branches on `schoolId === "fiu"` today and will need to
+become a set or a `kind` lookup.
+
+**2. Transfer agreements mostly don't apply — and that's the point.**
+`transferAgreements.ts` exists because state-college students transfer *out*.
+Universities are the destination. Most SUS schools should have **no entry**
+(like Chipola), and the prompt should omit the transfer section entirely rather
+than invent a partner. Do not reflexively fill in all 12.
+
+**3. Graduate programs matter here.** State-college catalogs top out at a
+bachelor's. Universities have master's/doctoral programs, and the `graduate`
+level in `ProgramLevel` is currently only exercised by FIU. Two consequences:
+- `createProgramCatalog(programs, { preferred: "associate" })` is **wrong** for
+  a university. FIU uses the default (`bachelor`). Match that.
+- Level detection has already bitten us twice (§12). University catalogs will
+  introduce more credential codes (`Ed.D.`, `Psy.D.`, `M.Arch`, `LL.M.`…).
+  **The `programCatalogs` round-trip test will catch these — run it early and
+  read its failures as real findings, not as test noise.**
+
+**4. Catalog platforms differ.** The FCS schools clustered on CourseLeaf,
+Acalog, and SmartCatalogIQ. Universities are larger and more bespoke; expect
+per-school work and paginated JS-driven catalogs. Survey before writing a
+parser.
+
+### The mechanical part (unchanged from the FCS batches)
+
+Per school: scrape → `app/lib/programs/<id>.ts` → register in **three** places:
+`schoolCatalogs.ts`, `programCatalogs.ts`, `pathwayPrompts.ts`
+(`COLLEGE_SHORT_NAMES` + `COLLEGE_PROGRAMS`, or the university equivalent) →
+extend the test tables → verify in a browser.
+
+**Key on the `floridaSchools.ts` id, not the filename.** This already bit us:
+`dsc.ts` is `daytona`, `ssc.ts` is `seminole`. A mismatch produces a catalog
+nothing can reach and nothing fails loudly.
+
+### Verification bar
+
+Every batch so far ended with: `npx tsc --noEmit` clean, `npm test` at the known
+356/357, **all scraped URLs confirmed HTTP 200**, and one live end-to-end
+pathway generated in a real browser with its program links checked. That last
+step caught bugs the first three missed every single time — including a 29-URL
+break in Daytona State's catalog where the school's own index linked to a dead
+path. Keep it.

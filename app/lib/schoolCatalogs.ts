@@ -34,6 +34,7 @@ export const SCHOOLS_WITH_CATALOG = [
   "phsc",
   "spc",
   "seminole",
+  "ucf",
 ] as const;
 
 export type CatalogSchoolId = (typeof SCHOOLS_WITH_CATALOG)[number];

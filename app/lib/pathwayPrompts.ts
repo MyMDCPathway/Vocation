@@ -44,6 +44,7 @@ import { SJR_PROGRAMS } from "./programs/sjr";
 import { SPC_PROGRAMS } from "./programs/spc";
 import { SSC_PROGRAMS } from "./programs/ssc";
 import { TSC_PROGRAMS } from "./programs/tsc";
+import { UCF_PROGRAMS } from "./programs/ucf";
 import { VALENCIA_PROGRAMS } from "./programs/valencia";
 import type { SchoolProgram } from "./programCatalog";
 import { SCHOOLS_WITH_CATALOG, hasCatalog, type CatalogSchoolId } from "./schoolCatalogs";
@@ -242,61 +243,99 @@ CRITICAL REQUIREMENTS:
 Remember: Only use actual MDC programs that exist. Provide alternative routes when multiple programs are viable options for "${canonicalCareer}".`;
 }
 
-const FIU_UNDERGRADUATE = FIU_PROGRAMS.filter((p) => p.level === "bachelor")
-  .map((p) => p.name)
-  .join(", ");
+// --- Generic university prompt ---------------------------------------------
+//
+// A public university's pathway starts at the bachelor's — no associate step,
+// no transfer step, because the student is already at a four-year school. This
+// was originally FIU's own hard-coded prompt; it's the template every SUS
+// university (§13 of HANDOFF.md) shares, parameterized the same way
+// collegeSystemPrompt is for the state colleges. Adding a university is a
+// scraper plus a registry entry here, not a new hand-written prompt.
+//
+// Unlike a college catalog, a university's programs already carry their
+// credential code inside the name itself (FIU lists "Accounting (BACC)", not
+// name="Accounting" + credential="BACC"), so programList's credential-suffix
+// behavior is a no-op here — it just prints the name.
 
-const FIU_GRADUATE = FIU_PROGRAMS.filter((p) => p.level === "graduate")
-  .map((p) => p.name)
-  .join(", ");
+interface UniversityCatalog {
+  schoolName: string;
+  shortName: string;
+  programs: SchoolProgram[];
+}
 
-function fiuSystemPrompt(canonicalCareer: string): string {
-  return `You are an academic advisor at Florida International University (FIU) in Miami. Generate a comprehensive educational pathway for a student who is starting at FIU and wants to become a "${canonicalCareer}".
+const UNIVERSITY_SHORT_NAMES: Record<string, string> = {
+  fiu: "FIU",
+  ucf: "UCF",
+};
+
+const UNIVERSITY_PROGRAMS: Record<string, SchoolProgram[]> = {
+  fiu: FIU_PROGRAMS,
+  ucf: UCF_PROGRAMS,
+};
+
+function universityCatalog(schoolId: string): UniversityCatalog | null {
+  const programs = UNIVERSITY_PROGRAMS[schoolId];
+  const shortName = UNIVERSITY_SHORT_NAMES[schoolId];
+  if (!programs || !shortName) return null;
+
+  const schoolName = FLORIDA_SCHOOLS.find((s) => s.id === schoolId)?.name;
+  if (!schoolName) return null;
+
+  return { schoolName, shortName, programs };
+}
+
+function universitySystemPrompt(
+  school: UniversityCatalog,
+  canonicalCareer: string
+): string {
+  const undergrad = programList(school.programs, "bachelor");
+  const graduate = programList(school.programs, "graduate");
+
+  return `You are an academic advisor at ${school.schoolName} (${school.shortName}). Generate a comprehensive educational pathway for a student who is starting at ${school.shortName} and wants to become a "${canonicalCareer}".
 
 PATHWAY STRUCTURE REQUIREMENTS:
-FIU is a four-year university, so the pathway STARTS with a bachelor's degree. There is NO associate degree step and NO transfer step — the student is already enrolled at a university that grants bachelor's degrees.
+${school.shortName} is a four-year university, so the pathway STARTS with a bachelor's degree. There is NO associate degree step and NO transfer step — the student is already enrolled at a university that grants bachelor's degrees.
 
 The pathway must follow this structure:
-1. START with the FIU bachelor's program most directly relevant to the career. This is ALWAYS the first step and its type MUST be 'degree'.
+1. START with the ${school.shortName} bachelor's program most directly relevant to the career. This is ALWAYS the first step and its type MUST be 'degree'.
 2. Include PROFESSIONAL EXPERIENCE / INTERNSHIP steps required for the career or for licensure.
 3. Include REQUIRED LICENSURE EXAMS or CERTIFICATIONS (FE and PE for engineers, NCLEX for nurses, the CPA exam for accountants, the A.R.E. for architects, and so on).
-4. Include GRADUATE DEGREES (master's or doctoral) when the career requires or strongly benefits from one. Prefer an FIU graduate program when FIU offers a relevant one.
+4. Include GRADUATE DEGREES (master's or doctoral) when the career requires or strongly benefits from one. Prefer a ${school.shortName} graduate program when ${school.shortName} offers a relevant one.
 
-CRITICAL — USE ONLY REAL FIU PROGRAMS:
+CRITICAL — USE ONLY REAL ${school.shortName.toUpperCase()} PROGRAMS:
 Do NOT invent programs. Every step with type 'degree' MUST use a program name taken EXACTLY from the lists below, including its degree code in parentheses.
 
-FIU BACHELOR'S PROGRAMS (use one of these as the first step):
-${FIU_UNDERGRADUATE}
+${school.shortName.toUpperCase()} BACHELOR'S PROGRAMS (use one of these as the first step):
+${undergrad}
 
-FIU GRADUATE PROGRAMS (use only when a graduate degree is warranted):
-${FIU_GRADUATE}
+${school.shortName.toUpperCase()} GRADUATE PROGRAMS (use only when a graduate degree is warranted):
+${graduate}
 
-SELECT THE CLOSEST RELATED PROGRAM. For example:
-* For "Accountant" use "Accounting (BACC)"
-* For "Civil Engineer" use "Civil Engineering (BS)"
-* For "Registered Nurse" use FIU's nursing bachelor's program
-* For "Architect" use FIU's architecture bachelor's program
+SELECT THE CLOSEST RELATED PROGRAM.
 
 STEP FIELD REQUIREMENTS:
-- 'type' must be one of: degree, internship, exam. Do NOT emit a 'transfer' step for an FIU pathway.
-- 'level' must state the credential and the school, e.g. "B.S. (FIU)", "B.A. (FIU)", "M.S. (FIU)", "Ph.D. (FIU)". For non-degree steps use a short label such as "Internship" or "Licensure Exam".
+- 'type' must be one of: degree, internship, exam. Do NOT emit a 'transfer' step for a ${school.shortName} pathway.
+- 'level' must state the credential and the school, e.g. "B.S. (${school.shortName})", "B.A. (${school.shortName})", "M.S. (${school.shortName})", "Ph.D. (${school.shortName})". For non-degree steps use a short label such as "Internship" or "Licensure Exam".
 - 'name' for a degree step must be the exact program title from the lists above.
 - 'description' should be 1-3 sentences explaining what the student does at this step and why it matters for the career.
 
 MULTIPLE PATHWAY OPTIONS:
-When more than one FIU bachelor's program can lead to the career, provide a separate complete pathway for each viable option, and mark the most direct one with isPrimary: true. If only one program clearly leads to the career, return a single pathway in the pathways array.
+When more than one ${school.shortName} bachelor's program can lead to the career, provide a separate complete pathway for each viable option, and mark the most direct one with isPrimary: true. If only one program clearly leads to the career, return a single pathway in the pathways array.
 
-Remember: only real FIU programs, always start with a bachelor's, and never include a transfer step.`;
+Remember: only real ${school.shortName} programs, always start with a bachelor's, and never include a transfer step.`;
 }
 
-function fiuUserQuery(canonicalCareer: string): string {
-  return `Generate comprehensive educational pathway(s) for becoming a "${canonicalCareer}", starting from Florida International University.
+function universityUserQuery(
+  school: UniversityCatalog,
+  canonicalCareer: string
+): string {
+  return `Generate comprehensive educational pathway(s) for becoming a "${canonicalCareer}", starting from ${school.schoolName}.
 
 REQUIREMENTS:
-- The FIRST step must be an FIU bachelor's program taken exactly from the approved list.
+- The FIRST step must be ${article(school.shortName)} ${school.shortName} bachelor's program taken exactly from the approved list.
 - Do NOT include an associate degree step and do NOT include a transfer step.
 - Include internships, required licensure exams, and graduate degrees where the career calls for them.
-- Provide multiple pathways when several FIU bachelor's programs lead to this career, marking the most direct one as primary.`;
+- Provide multiple pathways when several ${school.shortName} bachelor's programs lead to this career, marking the most direct one as primary.`;
 }
 
 // --- Generic state-college prompt -----------------------------------------
@@ -510,10 +549,11 @@ export function buildPathwayRequest(
 
   const responseSchema = buildResponseSchema(canonicalCareer);
 
-  if (schoolId === "fiu") {
+  const university = universityCatalog(schoolId);
+  if (university) {
     return {
-      systemPrompt: fiuSystemPrompt(canonicalCareer),
-      userQuery: fiuUserQuery(canonicalCareer),
+      systemPrompt: universitySystemPrompt(university, canonicalCareer),
+      userQuery: universityUserQuery(university, canonicalCareer),
       responseSchema,
     };
   }

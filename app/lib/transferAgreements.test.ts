@@ -87,6 +87,7 @@ describe("transfer agreements", () => {
   it("returns null for schools with no recorded agreement", () => {
     expect(transferAgreementFor("mdc")).toBeNull();
     expect(transferAgreementFor("fiu")).toBeNull();
+    expect(transferAgreementFor("ucf")).toBeNull();
     expect(transferAgreementFor("nope")).toBeNull();
     expect(transferAgreementFor("")).toBeNull();
   });

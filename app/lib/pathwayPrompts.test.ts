@@ -6,6 +6,7 @@ import {
 } from "@/app/lib/pathwayPrompts";
 import { FIU_PROGRAMS } from "@/app/lib/fiu-programs";
 import { FLORIDA_SCHOOLS } from "@/app/lib/floridaSchools";
+import { UCF_PROGRAMS } from "@/app/lib/programs/ucf";
 import { BROWARD_PROGRAMS } from "@/app/lib/programs/broward";
 import { CF_PROGRAMS } from "@/app/lib/programs/cf";
 import { CFK_PROGRAMS } from "@/app/lib/programs/cfk";
@@ -40,7 +41,8 @@ describe("catalog gating", () => {
   it("recognizes only the schools with real program data", () => {
     expect(hasCatalog("mdc")).toBe(true);
     expect(hasCatalog("fiu")).toBe(true);
-    expect(hasCatalog("ucf")).toBe(false);
+    expect(hasCatalog("ucf")).toBe(true);
+    expect(hasCatalog("uf")).toBe(false);
     expect(hasCatalog("")).toBe(false);
   });
 
@@ -128,6 +130,54 @@ describe("FIU prompt", () => {
 
   it("does not mention Miami Dade College's catalog", () => {
     expect(built.systemPrompt).not.toContain("Associate in Arts in Engineering");
+  });
+});
+
+describe("UCF prompt (generic university template)", () => {
+  const built = buildPathwayRequest("ucf", "Accountant")!;
+
+  it("builds a request", () => {
+    expect(built).not.toBeNull();
+  });
+
+  it("instructs the pathway to start at a bachelor's", () => {
+    expect(built.systemPrompt).toMatch(/STARTS with a bachelor/i);
+    // "a UCF" not "an UCF" — U is said "you", a consonant sound.
+    expect(built.userQuery).toMatch(/FIRST step must be a UCF bachelor/i);
+  });
+
+  it("forbids associate and transfer steps", () => {
+    expect(built.systemPrompt).toMatch(/NO associate degree step/i);
+    expect(built.systemPrompt).toMatch(/never include a transfer step/i);
+    expect(built.userQuery).toMatch(/do NOT include a transfer step/i);
+  });
+
+  it("embeds UCF's real program catalog, not a placeholder", () => {
+    expect(built.systemPrompt).not.toContain("${");
+
+    const undergrad = UCF_PROGRAMS.filter((p) => p.level === "bachelor");
+    expect(undergrad.length).toBeGreaterThan(100);
+    for (const program of undergrad.slice(0, 20)) {
+      expect(built.systemPrompt, program.name).toContain(program.name);
+    }
+  });
+
+  it("interpolates the career into both prompts", () => {
+    expect(built.systemPrompt).toContain("Accountant");
+    expect(built.userQuery).toContain("Accountant");
+  });
+
+  it("does not mention Miami Dade College's catalog or FIU's", () => {
+    expect(built.systemPrompt).not.toContain("Associate in Arts in Engineering");
+    expect(built.systemPrompt).not.toContain("Florida International University");
+  });
+
+  it("has no transfer partner recorded, since UCF is a transfer destination", () => {
+    // Universities are where state-college students transfer INTO — see §13
+    // of HANDOFF.md. UCF is FGC/TSC/Valencia/etc.'s named partner elsewhere,
+    // but it should never invent one of its own.
+    expect(transferAgreementFor("ucf")).toBeNull();
+    expect(built.systemPrompt).not.toContain("TRANSFER PARTNER");
   });
 });
 

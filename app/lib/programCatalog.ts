@@ -90,9 +90,30 @@ const CERTIFICATE_HINT =
 // Left in, it reads as a master's and the program resolves to nothing.
 const GRADUATE_OF_A_DEGREE = /\b(a\.?a\.?|a\.?s\.?|b\.?a\.?|b\.?s\.?)\s+graduates?\b/gi;
 
+// A university's accelerated dual-degree tracks name the credential a student
+// enters WITH, not the level of the program itself — UCF's "Environmental
+// Engineering MSEnvE, Accelerated BS to MSEnvE" is entirely a graduate
+// program, but "BS" in "BS to MSEnvE" would otherwise read as a bachelor's
+// hint. Same shape as GRADUATE_OF_A_DEGREE above, one degree code further.
+const DEGREE_TRANSITION = /\b(a\.?a\.?|a\.?s\.?|b\.?a\.?|b\.?s\.?|m\.?s\.?|m\.?a\.?)\s+to\s+/gi;
+
+// Compound engineering credentials like UCF's "(B.S.M.S.E.)" — Bachelor of
+// Science in Materials Science and Engineering — spell out a discipline
+// name whose initials happen to embed "M.S." with no space before it. A
+// genuine standalone "M.S." or "M.A." mention always has a space, an opening
+// paren, or the string start immediately before it, so only the run-together
+// variant (which can only occur buried inside a longer bachelor's code, never
+// as a credential in its own right) gets stripped.
+const EMBEDDED_DEGREE_FRAGMENT = /(?<=[A-Za-z]\.)(m\.?s\.?|m\.?a\.?)\b/gi;
+
 /** Which level a free-text query is explicitly asking for, if any. */
 export function requestedLevel(...hints: (string | undefined)[]): ProgramLevel | null {
-  const text = hints.filter(Boolean).join(" ").replace(GRADUATE_OF_A_DEGREE, " ");
+  const text = hints
+    .filter(Boolean)
+    .join(" ")
+    .replace(GRADUATE_OF_A_DEGREE, " ")
+    .replace(DEGREE_TRANSITION, " ")
+    .replace(EMBEDDED_DEGREE_FRAGMENT, " ");
   if (!text.trim()) return null;
   // Order matters: "Bachelor of Applied Science" contains "applied science",
   // and a master's step often names the bachelor's it builds on.

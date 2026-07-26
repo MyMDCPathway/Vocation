@@ -37,6 +37,7 @@ import { SJR_PROGRAMS } from "./programs/sjr";
 import { SPC_PROGRAMS } from "./programs/spc";
 import { SSC_PROGRAMS } from "./programs/ssc";
 import { TSC_PROGRAMS } from "./programs/tsc";
+import { ucfCatalog } from "./programs/ucf";
 import { VALENCIA_PROGRAMS } from "./programs/valencia";
 import { createProgramCatalog, type ProgramCatalog } from "./programCatalog";
 
@@ -50,6 +51,7 @@ const asCollege = (programs: Parameters<typeof createProgramCatalog>[0]) =>
 // up here instead, so regenerating a scraped file can never drop the catalog.
 const CATALOGS: Record<string, ProgramCatalog> = {
   fiu: fiuCatalog,
+  ucf: ucfCatalog,
   broward: browardCatalog,
   cf: asCollege(CF_PROGRAMS),
   efsc: asCollege(EFSC_PROGRAMS),
