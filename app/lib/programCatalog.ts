@@ -16,6 +16,19 @@ export type ProgramLevel =
   | "bachelor"
   | "graduate";
 
+export type CostUnit =
+  | "per-credit-hour"
+  | "per-year"
+  | "total-program"
+  | "school-wide-flat-rate";
+
+export interface ProgramCost {
+  amount: number;
+  unit: CostUnit;
+  /** Set only when the page quotes a separate out-of-state/non-resident rate. */
+  outOfStateAmount?: number;
+}
+
 export interface SchoolProgram {
   /** Program title as the school lists it. */
   name: string;
@@ -25,6 +38,11 @@ export interface SchoolProgram {
   credential?: string;
   /** College, school, or career area the program belongs to. */
   area?: string;
+  /** Omit rather than guess: most schools quote one flat rate for the whole
+   *  school, not a true per-program cost — see costNote for that case. */
+  cost?: ProgramCost;
+  /** Free-text explanation when cost is absent, a flat rate, or a range. */
+  costNote?: string;
 }
 
 const DEGREE_PREFIX =
@@ -43,20 +61,39 @@ export function programMatchKey(value: string): string {
   return normalizeProgramName(value).replace(DEGREE_PREFIX, "").trim();
 }
 
+// Schools label degrees by code far more often than by name, so these lists
+// carry every code that actually appears in a catalog we hold. A code missing
+// here does not fail loudly — it silently falls through to `preferred`, which
+// is how FIU's "Art Education (MAT)" used to resolve to the bachelor's of the
+// same name. programCatalogs.test.ts round-trips every program to keep that
+// from happening again as new catalogs land.
 const GRADUATE_HINT =
-  /\b(master|masters|m\.?s\.?|m\.?a\.?|mba|macc|m\.?b\.?a|ph\.?d|doctor|doctoral|graduate)\b/i;
+  /\b(master|masters|doctor|doctoral|graduate|ph\.?d|ed\.?d|m\.?s\.?|m\.?a\.?|m\.?b\.?a|macc|mat|mfa|mha|mhsa|mia|mib|mla|mm|mpa|mpas|mph|msn|msw|psm|dba|ddes|dnp|dpt|jd|jm|llm)\b/i;
 
 const BACHELOR_HINT =
-  /\b(bachelor|bachelors|b\.?s\.?|b\.?a\.?|b\.?b\.?a|b\.?f\.?a|b\.?a\.?s|bsn|bacc|undergraduate)\b/i;
+  /\b(bachelor|bachelors|undergraduate|b\.?s\.?|b\.?a\.?|b\.?b\.?a|b\.?f\.?a|b\.?a\.?s|bacc|bhsa|bm|bppa|bpps|bsn)\b/i;
 
-const ASSOCIATE_HINT = /\b(associate|associates|a\.?a\.?|a\.?s\.?|a\.?a\.?s)\b/i;
+const ASSOCIATE_HINT =
+  /\b(associate|associates|a\.?a\.?|a\.?s\.?|a\.?a\.?s|saat)\b/i;
 
-const CERTIFICATE_HINT = /\b(certificate|certification|diploma)\b/i;
+// Florida colleges name certificates by abbreviation far more often than they
+// spell them out — C.C.C., T.C., A.T.C., C.T.C., C.C.P., A.T.D., PSAV, V.C.,
+// O.C., and FSCJ's N.C. for non-credit adult education. Without these, a
+// certificate step resolves to a same-named associate degree, which is the
+// exact wrong-level mis-link this module exists to prevent. Certificates are
+// tested before associates in requestedLevel, so these win the tie.
+const CERTIFICATE_HINT =
+  /\b(certificate|certification|certificates|cert|diploma|c\.?c\.?c\.?|c\.?t\.?c\.?|c\.?c\.?p\.?|a\.?t\.?c\.?|a\.?t\.?d\.?|p\.?s\.?a\.?v\.?|t\.?c\.?|c\.?c\.?|n\.?c\.?|v\.?c\.?|o\.?c\.?)\b/i;
+
+// "Data Analytics & AI AA Graduate" is Broward's bachelor's for students who
+// arrive holding an A.A. — "graduate" is the student, not the degree level.
+// Left in, it reads as a master's and the program resolves to nothing.
+const GRADUATE_OF_A_DEGREE = /\b(a\.?a\.?|a\.?s\.?|b\.?a\.?|b\.?s\.?)\s+graduates?\b/gi;
 
 /** Which level a free-text query is explicitly asking for, if any. */
 export function requestedLevel(...hints: (string | undefined)[]): ProgramLevel | null {
-  const text = hints.filter(Boolean).join(" ");
-  if (!text) return null;
+  const text = hints.filter(Boolean).join(" ").replace(GRADUATE_OF_A_DEGREE, " ");
+  if (!text.trim()) return null;
   // Order matters: "Bachelor of Applied Science" contains "applied science",
   // and a master's step often names the bachelor's it builds on.
   if (GRADUATE_HINT.test(text)) return "graduate";
@@ -109,7 +146,13 @@ export function createProgramCatalog(
       index.get(normalizeProgramName(name)) ?? index.get(programMatchKey(name));
     if (!candidates?.length) return undefined;
 
-    const wanted = requestedLevel(name, levelHint);
+    // An explicit level hint outranks the program title, because titles
+    // routinely name a level the program is not: EFSC's "Business
+    // Administration, AS to BS/BAS University Transfer Specialization" is an
+    // A.S., and CF's "Registered Nurse to Bachelor of Science in Nursing" is a
+    // bachelor's. Reading the title first mis-levels both. Only when the caller
+    // gives no usable hint do we fall back to reading the name.
+    const wanted = requestedLevel(levelHint) ?? requestedLevel(name);
     if (wanted) return candidates.find((p) => p.level === wanted);
 
     return candidates.find((p) => p.level === preferred) ?? candidates[0];

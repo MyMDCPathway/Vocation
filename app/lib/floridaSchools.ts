@@ -97,7 +97,10 @@ export const FLORIDA_SCHOOLS: School[] = [
   // darkens step 600 for white-text contrast (same path as UCF's gold).
   { id: "phsc", name: "Pasco-Hernando State College", shortName: "PHSC", city: "New Port Richey", kind: "state-college", color: "#D0B457", logo: "/logos/phsc.png" },
   { id: "psc", name: "Pensacola State College", shortName: "PSC", city: "Pensacola", kind: "state-college", color: "#00539B", logo: "/logos/psc.png" },
-  { id: "polk", name: "Polk State College", shortName: "PSC", city: "Winter Haven", kind: "state-college", color: "#A6192E", logo: "/logos/polk.png" },
+  // shortName is "Polk", not "PSC" — Pensacola State College already claims
+  // that badge above, and reusing it here would make both schools show the
+  // same abbreviation in the selector.
+  { id: "polk", name: "Polk State College", shortName: "Polk", city: "Winter Haven", kind: "state-college", color: "#A6192E", logo: "/logos/polk.png" },
   { id: "sjr", name: "St. Johns River State College", shortName: "SJR", city: "Palatka", kind: "state-college", color: "#003DA5", logo: "/logos/sjr.png" },
   { id: "spc", name: "St. Petersburg College", shortName: "SPC", city: "St. Petersburg", kind: "state-college", color: "#0066A1", logo: "/logos/spc.png" },
   { id: "sf", name: "Santa Fe College", shortName: "SF", city: "Gainesville", kind: "state-college", color: "#003865", logo: "/logos/sf.png" },

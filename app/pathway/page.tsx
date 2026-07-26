@@ -21,6 +21,10 @@ import { ExamStepComponent } from "@/app/components/ExamStep";
 import { calculateStepCostRange, calculatePathwayCostRange, formatCostRange } from "@/app/lib/cost";
 import { SchoolHeader } from "@/app/components/SchoolHeader";
 
+// Comparing a second career doubles the Gemini calls for that session. Off
+// for now to hold down token spend — flip back on when that's not a concern.
+const COMPARE_CAREER_ENABLED = false;
+
 const SUGGESTIONS = [
   "mechanical engineer",
   "nurse",
@@ -1098,7 +1102,7 @@ function PathwayPageContent() {
             </div>
 
             {/* Add Career Button - Only show if no additional careers have been added yet */}
-            {comparisonPathways.length === 0 && !showAddCareerInput && (
+            {COMPARE_CAREER_ENABLED && comparisonPathways.length === 0 && !showAddCareerInput && (
               <div className="mt-8 flex justify-center">
                 <button
                   onClick={handleAddCareerClick}
@@ -1289,7 +1293,7 @@ function PathwayPageContent() {
                 </div>
 
                 {/* Add Career Button after last additional pathway - Only show if under limit */}
-                {careerIndex === comparisonPathways.length - 1 && comparisonPathways.length < 3 && !showAddCareerInput && (
+                {COMPARE_CAREER_ENABLED && careerIndex === comparisonPathways.length - 1 && comparisonPathways.length < 3 && !showAddCareerInput && (
                   <div className="mt-8 flex justify-center">
                     <button
                       onClick={handleAddCareerClick}

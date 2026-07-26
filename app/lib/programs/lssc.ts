@@ -1,0 +1,95 @@
+// LSSC program catalog.
+//
+// GENERATED FILE — do not edit by hand.
+//
+// Source:   https://www.lssc.edu/academics/academic-programs/
+// Scraped:  2026-07-26
+// Programs: 77 (49 associate, 19 certificate, 9 bachelor)
+//
+// Cost: not set per-program. This school (like most FCS schools) publishes
+// tuition as a single flat per-credit-hour rate for the whole college rather
+// than a distinct price per program, so repeating an identical costNote on
+// every entry would only be noise.
+// Excludes non-degree listings on the same page (Dual Enrollment, Educational Opportunities, Youth Programming, Workforce Career Training/Non-Credit, State & Partnership Programs). SAAT = Specialized Associate in Arts Transfer, a UCF direct-admission associate track; kept as its own credential label per the school's usage.
+
+import { createProgramCatalog, type SchoolProgram } from "@/app/lib/programCatalog";
+
+export const LSSC_PROGRAMS: SchoolProgram[] = [
+  { name: "Advertising Pathway", url: "https://www.lssc.edu/advertising-pathway/", level: "associate", credential: "A.A." },
+  { name: "Art Pathway", url: "https://www.lssc.edu/art-pathway/", level: "associate", credential: "A.A." },
+  { name: "Biology", url: "https://www.lssc.edu/biology-pathway/", level: "associate", credential: "A.A." },
+  { name: "Business", url: "https://www.lssc.edu/business-pathway/", level: "associate", credential: "A.A." },
+  { name: "Chemistry", url: "https://www.lssc.edu/chemistry-pathway/", level: "associate", credential: "A.A." },
+  { name: "Computer Science", url: "https://www.lssc.edu/computer-science-pathway/", level: "associate", credential: "A.A." },
+  { name: "Criminal Justice", url: "https://www.lssc.edu/criminal-justice-pathway/", level: "associate", credential: "A.A." },
+  { name: "Digital and Performing Arts", url: "https://www.lssc.edu/digital-and-performing-arts-pathway/", level: "associate", credential: "A.A." },
+  { name: "DirectConnect to UCF", url: "https://www.lssc.edu/direct-connect-to-ucf/", level: "associate", credential: "A.A." },
+  { name: "Early Childhood Education", url: "https://www.lssc.edu/early-childhood-education-pathway/", level: "associate", credential: "A.A." },
+  { name: "Elementary Education", url: "https://www.lssc.edu/elementary-education-pathway/", level: "associate", credential: "A.A." },
+  { name: "Engineering", url: "https://www.lssc.edu/engineering-pathway/", level: "associate", credential: "A.A." },
+  { name: "English and Literature", url: "https://www.lssc.edu/english-literature-pathway/", level: "associate", credential: "A.A." },
+  { name: "Environmental Science Pathway", url: "https://www.lssc.edu/environmental-science-pathway/", level: "associate", credential: "A.A." },
+  { name: "General Studies (Pathway to Bachelor's)", url: "https://www.lssc.edu/general-studies-pathway-to-bachelors/", level: "associate", credential: "A.A." },
+  { name: "History Pathway", url: "https://www.lssc.edu/history-pathway/", level: "associate", credential: "A.A." },
+  { name: "Hospitality Management Pathway", url: "https://www.lssc.edu/hospitality-management-pathway/", level: "associate", credential: "A.A." },
+  { name: "Information Technology Pathway", url: "https://www.lssc.edu/information-technology-pathway/", level: "associate", credential: "A.A." },
+  { name: "Journalism Pathway", url: "https://www.lssc.edu/journalism-pathway/", level: "associate", credential: "A.A." },
+  { name: "Mathematics Pathway", url: "https://www.lssc.edu/math-pathway/", level: "associate", credential: "A.A." },
+  { name: "Medical Laboratory Technology (A.A. Pathway)", url: "https://www.lssc.edu/medical-laboratory-technology-pathway/", level: "associate", credential: "A.A." },
+  { name: "Nursing (A.A. Pathway)", url: "https://www.lssc.edu/nursing-pathway/", level: "associate", credential: "A.A." },
+  { name: "Pharmacy Pathway", url: "https://www.lssc.edu/pharmacy-pathway/", level: "associate", credential: "A.A." },
+  { name: "Physics", url: "https://www.lssc.edu/physics-pathway/", level: "associate", credential: "A.A." },
+  { name: "Political Science", url: "https://www.lssc.edu/political-science-pathway/", level: "associate", credential: "A.A." },
+  { name: "Professional Health", url: "https://www.lssc.edu/professional-health-pathway/", level: "associate", credential: "A.A." },
+  { name: "Psychology", url: "https://www.lssc.edu/psychology-pathway/", level: "associate", credential: "A.A." },
+  { name: "Respiratory Care (A.A. Pathway)", url: "https://www.lssc.edu/aa-respiratory-care/", level: "associate", credential: "A.A." },
+  { name: "Secondary Education", url: "https://www.lssc.edu/secondary-education-pathway/", level: "associate", credential: "A.A." },
+  { name: "Social Work", url: "https://www.lssc.edu/social-work-pathway/", level: "associate", credential: "A.A." },
+  { name: "Sports and Exercise Science", url: "https://www.lssc.edu/sports-and-excercise-science-pathway/", level: "associate", credential: "A.A." },
+  { name: "Applied Artificial Intelligence", url: "https://www.lssc.edu/applied-artificial-intelligence/", level: "associate", credential: "A.S." },
+  { name: "Business Administration", url: "https://www.lssc.edu/business-administration/", level: "associate", credential: "A.S." },
+  { name: "Computer Information Technology", url: "https://www.lssc.edu/computer-information-technology/", level: "associate", credential: "A.S." },
+  { name: "Construction Management", url: "https://www.lssc.edu/construction-management/", level: "associate", credential: "A.S." },
+  { name: "Criminal Justice", url: "https://www.lssc.edu/criminal-justice/", level: "associate", credential: "A.S." },
+  { name: "Cybersecurity", url: "https://www.lssc.edu/as-cybersecurity/", level: "associate", credential: "A.S." },
+  { name: "Digital Media: Creative Video Production", url: "https://www.lssc.edu/digital-media-creative-video-production/", level: "associate", credential: "A.S." },
+  { name: "Engineering Technology", url: "https://www.lssc.edu/engineering-technology/", level: "associate", credential: "A.S." },
+  { name: "Health Services Management", url: "https://www.lssc.edu/as-health-services-management/", level: "associate", credential: "A.S." },
+  { name: "Management Technology", url: "https://www.lssc.edu/management-technology/", level: "associate", credential: "A.S." },
+  { name: "Medical Laboratory Technology", url: "https://www.lssc.edu/medical-laboratory-technology/", level: "associate", credential: "A.S." },
+  { name: "Nursing", url: "https://www.lssc.edu/as-nursing/", level: "associate", credential: "A.S." },
+  { name: "Respiratory Care", url: "https://www.lssc.edu/as-respiratory-care/", level: "associate", credential: "A.S." },
+  { name: "Criminal Justice Leadership", url: "https://www.lssc.edu/atc-criminal-justice-leadership/", level: "certificate", credential: "A.T.C." },
+  { name: "Health Services Administration", url: "https://www.lssc.edu/health-services-administration/", level: "certificate", credential: "A.T.C." },
+  { name: "Human Resources Management", url: "https://www.lssc.edu/atc-human-resources-management/", level: "certificate", credential: "A.T.C." },
+  { name: "Organizational Management", url: "https://www.lssc.edu/atc-organizational-management/", level: "certificate", credential: "A.T.C." },
+  { name: "Project Management", url: "https://www.lssc.edu/atc-project-management/", level: "certificate", credential: "A.T.C." },
+  { name: "Leadership - Criminal Justice Leadership", url: "https://www.lssc.edu/bas-criminal-justice-leadership/", level: "bachelor", credential: "B.A.S." },
+  { name: "Leadership - Health Services Administration", url: "https://www.lssc.edu/basl-health-services-administration/", level: "bachelor", credential: "B.A.S." },
+  { name: "Leadership - Human Resources Management", url: "https://www.lssc.edu/human-resources-management/", level: "bachelor", credential: "B.A.S." },
+  { name: "Leadership - Organizational Management", url: "https://www.lssc.edu/basl-organizational-management/", level: "bachelor", credential: "B.A.S." },
+  { name: "Leadership - Project Management", url: "https://www.lssc.edu/basl-project-management/", level: "bachelor", credential: "B.A.S." },
+  { name: "Leadership - Sports Leadership", url: "https://www.lssc.edu/sports-leadership-concentration/", level: "bachelor", credential: "B.A.S." },
+  { name: "Elementary Education", url: "https://www.lssc.edu/elementary-education/", level: "bachelor", credential: "B.S." },
+  { name: "Exceptional Student Education", url: "https://www.lssc.edu/exceptional-student-education/", level: "bachelor", credential: "B.S." },
+  { name: "Nursing (RN to", url: "https://www.lssc.edu/rn-to-bsn-nursing/", level: "bachelor", credential: "B.S." },
+  { name: "Biology (SAAT)", url: "https://www.lssc.edu/biology/", level: "associate", credential: "SAAT" },
+  { name: "Civil Engineering (SAAT)", url: "https://www.lssc.edu/civil-engineering/", level: "associate", credential: "SAAT" },
+  { name: "Electrical Engineering (SAAT)", url: "https://www.lssc.edu/electrical-engineering/", level: "associate", credential: "SAAT" },
+  { name: "Health Sciences (SAAT)", url: "https://www.lssc.edu/health-sciences/", level: "associate", credential: "SAAT" },
+  { name: "Mechanical Engineering (SAAT)", url: "https://www.lssc.edu/mechanical-engineering/", level: "associate", credential: "SAAT" },
+  { name: "Artificial Intelligence Practitioner", url: "https://www.lssc.edu/artificial-intelligence-practitioner/", level: "certificate", credential: "C.C.C." },
+  { name: "Business Management", url: "https://www.lssc.edu/ccc-business-management/", level: "certificate", credential: "C.C.C." },
+  { name: "Business Operations", url: "https://www.lssc.edu/ccc-business-operations/", level: "certificate", credential: "C.C.C." },
+  { name: "Business Specialist", url: "https://www.lssc.edu/ccc-business-specialist/", level: "certificate", credential: "C.C.C." },
+  { name: "Chemical Laboratory Specialist", url: "https://www.lssc.edu/chemical-lab-specialist/", level: "certificate", credential: "C.C.C." },
+  { name: "Criminal Justice Leadership", url: "https://www.lssc.edu/ccc-criminal-justice-leadership/", level: "certificate", credential: "C.C.C." },
+  { name: "Cybersecurity Analyst", url: "https://www.lssc.edu/cybersecurity-analyst-certificate/", level: "certificate", credential: "C.C.C." },
+  { name: "Digital Media Production", url: "https://www.lssc.edu/digital-media-production/", level: "certificate", credential: "C.C.C." },
+  { name: "Digital Media: Video Production", url: "https://www.lssc.edu/digital-media-video-production/", level: "certificate", credential: "C.C.C." },
+  { name: "Engineering Technology Support Specialist", url: "https://www.lssc.edu/ccc-engineering-technology-support-specialist/", level: "certificate", credential: "C.C.C." },
+  { name: "Information Technology Analysis", url: "https://www.lssc.edu/ccc-information-technology-analysis/", level: "certificate", credential: "C.C.C." },
+  { name: "Information Technology Support", url: "https://www.lssc.edu/information-technology-support/", level: "certificate", credential: "C.C.C." },
+  { name: "Medical Information Coding and Billing", url: "https://www.lssc.edu/medical-information-coding-and-billing/", level: "certificate", credential: "C.C.C." },
+  { name: "Scientific Workplace Preparation", url: "https://www.lssc.edu/ccc-scientific-workplace-preparation/", level: "certificate", credential: "C.C.C." },
+];

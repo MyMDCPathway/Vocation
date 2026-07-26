@@ -17,9 +17,37 @@
 // The MDC prompt below was moved verbatim out of app/api/generate-pathway.
 
 import { FIU_PROGRAMS } from "./fiu-programs";
+import { FLORIDA_SCHOOLS } from "./floridaSchools";
 import { BROWARD_PROGRAMS } from "./programs/broward";
+import { CF_PROGRAMS } from "./programs/cf";
+import { CFK_PROGRAMS } from "./programs/cfk";
+import { CHIPOLA_PROGRAMS } from "./programs/chipola";
+import { DSC_PROGRAMS } from "./programs/dsc";
+import { EFSC_PROGRAMS } from "./programs/efsc";
+import { FGC_PROGRAMS } from "./programs/fgc";
+import { FSCJ_PROGRAMS } from "./programs/fscj";
+import { FSW_PROGRAMS } from "./programs/fsw";
+import { GCSC_PROGRAMS } from "./programs/gcsc";
+import { HCC_PROGRAMS } from "./programs/hcc";
+import { IRSC_PROGRAMS } from "./programs/irsc";
+import { LSSC_PROGRAMS } from "./programs/lssc";
+import { NFC_PROGRAMS } from "./programs/nfc";
+import { NWFSC_PROGRAMS } from "./programs/nwfsc";
+import { PBSC_PROGRAMS } from "./programs/pbsc";
+import { PHSC_PROGRAMS } from "./programs/phsc";
+import { POLK_PROGRAMS } from "./programs/polk";
+import { PSC_PROGRAMS } from "./programs/psc";
+import { SCF_PROGRAMS } from "./programs/scf";
+import { SF_PROGRAMS } from "./programs/sf";
+import { SFSC_PROGRAMS } from "./programs/sfsc";
+import { SJR_PROGRAMS } from "./programs/sjr";
+import { SPC_PROGRAMS } from "./programs/spc";
+import { SSC_PROGRAMS } from "./programs/ssc";
+import { TSC_PROGRAMS } from "./programs/tsc";
+import { VALENCIA_PROGRAMS } from "./programs/valencia";
 import type { SchoolProgram } from "./programCatalog";
 import { SCHOOLS_WITH_CATALOG, hasCatalog, type CatalogSchoolId } from "./schoolCatalogs";
+import { transferAgreementFor } from "./transferAgreements";
 
 export { SCHOOLS_WITH_CATALOG, hasCatalog };
 export type { CatalogSchoolId };
@@ -285,13 +313,95 @@ interface CollegeCatalog {
   programs: SchoolProgram[];
 }
 
-const COLLEGE_CATALOGS: Record<string, CollegeCatalog> = {
-  broward: {
-    schoolName: "Broward College",
-    shortName: "Broward",
-    programs: BROWARD_PROGRAMS,
-  },
+// schoolName is looked up in FLORIDA_SCHOOLS rather than repeated here, so the
+// name a student sees in the school selector and the name the model is told it
+// advises for cannot drift apart. shortName stays explicit because it is prose
+// ("a Broward program"), not the abbreviation the selector shows ("BC").
+const COLLEGE_SHORT_NAMES: Record<string, string> = {
+  broward: "Broward",
+  cf: "CF",
+  efsc: "EFSC",
+  fgc: "FGC",
+  fscj: "FSCJ",
+  fsw: "FSW",
+  nwfsc: "NWFSC",
+  polk: "Polk State",
+  psc: "PSC",
+  scf: "SCF",
+  sf: "SF",
+  sfsc: "SFSC",
+  sjr: "SJR",
+  cfk: "CFK",
+  chipola: "Chipola",
+  gcsc: "GCSC",
+  irsc: "IRSC",
+  tsc: "TSC",
+  valencia: "Valencia",
+  daytona: "Daytona State",
+  hcc: "HCC",
+  lssc: "LSSC",
+  nfc: "NFC",
+  pbsc: "PBSC",
+  phsc: "PHSC",
+  spc: "SPC",
+  seminole: "Seminole State",
 };
+
+const COLLEGE_PROGRAMS: Record<string, SchoolProgram[]> = {
+  broward: BROWARD_PROGRAMS,
+  cf: CF_PROGRAMS,
+  efsc: EFSC_PROGRAMS,
+  fgc: FGC_PROGRAMS,
+  fscj: FSCJ_PROGRAMS,
+  fsw: FSW_PROGRAMS,
+  nwfsc: NWFSC_PROGRAMS,
+  polk: POLK_PROGRAMS,
+  psc: PSC_PROGRAMS,
+  scf: SCF_PROGRAMS,
+  sf: SF_PROGRAMS,
+  sfsc: SFSC_PROGRAMS,
+  sjr: SJR_PROGRAMS,
+  cfk: CFK_PROGRAMS,
+  chipola: CHIPOLA_PROGRAMS,
+  gcsc: GCSC_PROGRAMS,
+  irsc: IRSC_PROGRAMS,
+  tsc: TSC_PROGRAMS,
+  valencia: VALENCIA_PROGRAMS,
+  // dsc.ts / ssc.ts are the catalog files; "daytona" / "seminole" are the
+  // floridaSchools.ts ids these are keyed under (see programCatalogs.ts).
+  daytona: DSC_PROGRAMS,
+  hcc: HCC_PROGRAMS,
+  lssc: LSSC_PROGRAMS,
+  nfc: NFC_PROGRAMS,
+  pbsc: PBSC_PROGRAMS,
+  phsc: PHSC_PROGRAMS,
+  spc: SPC_PROGRAMS,
+  seminole: SSC_PROGRAMS,
+};
+
+function collegeCatalog(schoolId: string): CollegeCatalog | null {
+  const programs = COLLEGE_PROGRAMS[schoolId];
+  const shortName = COLLEGE_SHORT_NAMES[schoolId];
+  if (!programs || !shortName) return null;
+
+  const schoolName = FLORIDA_SCHOOLS.find((s) => s.id === schoolId)?.name;
+  if (!schoolName) return null;
+
+  return { schoolName, shortName, programs };
+}
+
+// "an FSW program", not "a FSW program". Initialisms take "an" whenever the
+// first letter is *said* with a leading vowel sound (F is "eff", so it does;
+// C is "see", so it does not).
+const LETTER_SOUNDS_LIKE_VOWEL = /^[AEFHILMNORSX]/;
+
+function article(name: string): "a" | "an" {
+  const isInitialism = name === name.toUpperCase();
+  const takesAn = isInitialism
+    ? LETTER_SOUNDS_LIKE_VOWEL.test(name)
+    : /^[aeiou]/i.test(name);
+  return takesAn ? "an" : "a";
+}
 
 function programList(programs: SchoolProgram[], level: SchoolProgram["level"]): string {
   return programs
@@ -300,10 +410,35 @@ function programList(programs: SchoolProgram[], level: SchoolProgram["level"]): 
     .join(", ");
 }
 
-function collegeSystemPrompt(school: CollegeCatalog, canonicalCareer: string): string {
+// The transfer step is the one a student actually has to plan, so name the
+// school's real partner instead of saying "a four-year university". The
+// statewide 2+2 floor is stated alongside it so the model does not present the
+// named partner as the student's only option.
+function transferPartnerSection(schoolId: string, shortName: string): string {
+  const agreement = transferAgreementFor(schoolId);
+  if (!agreement) return "";
+
+  const also = agreement.alsoPartnersWith?.length
+    ? ` ${shortName} also holds transfer agreements with ${agreement.alsoPartnersWith.join(", ")}.`
+    : "";
+
+  return `
+TRANSFER PARTNER:
+${shortName}'s flagship articulation agreement is "${agreement.programName}" with ${agreement.university} (${agreement.universityShortName}). ${agreement.summary}${also}
+
+When you emit a transfer step, default to ${agreement.universityShortName} and name "${agreement.programName}" in the description. Choose a different university only when the career needs a program ${agreement.universityShortName} does not offer — and say why. Florida's statewide 2+2 articulation separately guarantees Associate in Arts graduates admission to one of the twelve State University System universities, so other public universities remain legitimate destinations; never imply ${agreement.universityShortName} is the only option.
+`;
+}
+
+function collegeSystemPrompt(
+  schoolId: string,
+  school: CollegeCatalog,
+  canonicalCareer: string
+): string {
   const associates = programList(school.programs, "associate");
   const bachelors = programList(school.programs, "bachelor");
   const certificates = programList(school.programs, "certificate");
+  const transferPartner = transferPartnerSection(schoolId, school.shortName);
 
   return `You are an academic advisor at ${school.schoolName}, a Florida College System institution. Generate a comprehensive educational pathway for a student starting at ${school.shortName} who wants to become a "${canonicalCareer}".
 
@@ -313,7 +448,7 @@ ${school.shortName} is a two-year college that also grants some bachelor's degre
    * An Associate of Science (A.S.) for technical and career-focused paths
    * The Associate of Arts (A.A.) when the career requires transferring to a university for a bachelor's
    * A certificate when it is a genuine entry point or a stepping stone
-   * A ${school.shortName} bachelor's degree when one directly leads to the career
+   * ${article(school.shortName) === "an" ? "An" : "A"} ${school.shortName} bachelor's degree when one directly leads to the career
 2. Include a TRANSFER step to a four-year university when the career needs a bachelor's that ${school.shortName} does not itself offer.
 3. Include the BACHELOR'S degree step when the career requires one.
 4. Include PROFESSIONAL EXPERIENCE / INTERNSHIP steps required for the career or for licensure.
@@ -331,7 +466,7 @@ ${bachelors}
 
 ${school.shortName.toUpperCase()} CERTIFICATES:
 ${certificates}
-
+${transferPartner}
 STEP FIELD REQUIREMENTS:
 - 'type' must be one of: degree, transfer, internship, exam.
 - 'level' must state the credential and, for steps at ${school.shortName}, the school: "A.A. (${school.shortName})", "A.S. (${school.shortName})", "B.S. (${school.shortName})". For a bachelor's earned after transferring, use "B.S." or "B.A." without a school. For non-degree steps use a short label such as "Transfer", "Internship", or "Licensure Exam".
@@ -344,12 +479,21 @@ When more than one ${school.shortName} program leads to the career, provide a se
 Remember: only real ${school.shortName} programs, and always start at ${school.shortName}.`;
 }
 
-function collegeUserQuery(school: CollegeCatalog, canonicalCareer: string): string {
+function collegeUserQuery(
+  schoolId: string,
+  school: CollegeCatalog,
+  canonicalCareer: string
+): string {
+  const agreement = transferAgreementFor(schoolId);
+  const transferLine = agreement
+    ? `- Include a transfer step when the career requires a bachelor's that ${school.shortName} does not offer, defaulting to ${agreement.universityShortName} via ${agreement.programName}.`
+    : `- Include a transfer step when the career requires a bachelor's that ${school.shortName} does not offer.`;
+
   return `Generate comprehensive educational pathway(s) for becoming a "${canonicalCareer}", starting from ${school.schoolName}.
 
 REQUIREMENTS:
-- The FIRST step must be a ${school.shortName} program taken exactly from the approved lists.
-- Include a transfer step when the career requires a bachelor's that ${school.shortName} does not offer.
+- The FIRST step must be ${article(school.shortName)} ${school.shortName} program taken exactly from the approved lists.
+${transferLine}
 - Include internships, required licensure exams, and graduate degrees where the career calls for them.
 - Provide multiple pathways when several ${school.shortName} programs lead to this career, marking the most direct one as primary.`;
 }
@@ -374,11 +518,11 @@ export function buildPathwayRequest(
     };
   }
 
-  const college = COLLEGE_CATALOGS[schoolId];
+  const college = collegeCatalog(schoolId);
   if (college) {
     return {
-      systemPrompt: collegeSystemPrompt(college, canonicalCareer),
-      userQuery: collegeUserQuery(college, canonicalCareer),
+      systemPrompt: collegeSystemPrompt(schoolId, college, canonicalCareer),
+      userQuery: collegeUserQuery(schoolId, college, canonicalCareer),
       responseSchema,
     };
   }

@@ -4,7 +4,37 @@
 // pulling in the catalogs themselves — importing this from pathwayPrompts would
 // drag all 287 FIU programs into the browser bundle just to check two strings.
 
-export const SCHOOLS_WITH_CATALOG = ["mdc", "fiu", "broward"] as const;
+export const SCHOOLS_WITH_CATALOG = [
+  "mdc",
+  "fiu",
+  "broward",
+  "cf",
+  "efsc",
+  "fgc",
+  "fscj",
+  "fsw",
+  "nwfsc",
+  "polk",
+  "psc",
+  "scf",
+  "sf",
+  "sfsc",
+  "sjr",
+  "cfk",
+  "chipola",
+  "gcsc",
+  "irsc",
+  "tsc",
+  "valencia",
+  "daytona",
+  "hcc",
+  "lssc",
+  "nfc",
+  "pbsc",
+  "phsc",
+  "spc",
+  "seminole",
+] as const;
 
 export type CatalogSchoolId = (typeof SCHOOLS_WITH_CATALOG)[number];
 
