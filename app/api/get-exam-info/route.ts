@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCached, setCached, cacheKey } from "@/app/lib/apiCache";
+import { getDurable, setDurable } from "@/app/lib/durableCache";
 import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
 import { geminiUrl } from "@/app/lib/geminiModel";
 import { logCacheMiss } from "@/app/lib/missLog";
@@ -44,6 +45,14 @@ export async function POST(request: NextRequest) {
   const cachedExam = getCached(key);
   if (cachedExam) {
     return NextResponse.json(cachedExam);
+  }
+
+  // Layer 3 — survives the cold starts that wipe the in-memory layer. See
+  // durableCache.ts; no-ops when no store is configured.
+  const durableExam = await getDurable(key);
+  if (durableExam) {
+    setCached(key, durableExam);
+    return NextResponse.json(durableExam);
   }
 
   // Past the cache, this route spends a Gemini request like the others.
@@ -170,6 +179,7 @@ Respond ONLY with valid JSON, no additional text.`;
     // request can still try for the real official info.
     if (typeof examInfo.url === "string" && !examInfo.url.includes("google.com/search")) {
       setCached(key, examInfo);
+      await setDurable(key, examInfo);
     }
 
     return NextResponse.json(examInfo);

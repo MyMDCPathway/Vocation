@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { cookies } from 'next/headers'
+import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import { SchoolProvider } from '@/app/components/SchoolProvider'
 import { DEFAULT_SCHOOL_ID, getSchoolById } from '@/app/lib/floridaSchools'
@@ -43,6 +44,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen">
         <SchoolProvider schoolId={schoolId}>{children}</SchoolProvider>
+        <Analytics />
       </body>
     </html>
   )

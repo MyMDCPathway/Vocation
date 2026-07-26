@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCached, setCached, cacheKey } from "@/app/lib/apiCache";
+import { getDurable, setDurable } from "@/app/lib/durableCache";
 import { resolveCareer } from "@/app/lib/careerCanonical";
 import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
 import { geminiUrl } from "@/app/lib/geminiModel";
@@ -67,6 +68,17 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(cached);
     }
 
+    // Layer 3. The in-memory layer above is wiped on every cold start, so
+    // without this a pathway someone already paid Gemini for gets billed again
+    // the next time a fresh instance handles the request. Checked only after
+    // the free in-process layers miss, and a no-op when no store is
+    // configured. Warms layer 2 so the rest of this instance's life is local.
+    const durable = await getDurable(key);
+    if (durable) {
+      setCached(key, durable);
+      return NextResponse.json(durable);
+    }
+
     // Everything past here costs a Gemini request, so the limits apply from
     // this point only — browsing seeded or already-cached careers stays free
     // and unthrottled no matter how much someone clicks around.
@@ -124,6 +136,11 @@ export async function POST(request: NextRequest) {
       const text = result.candidates[0].content.parts[0].text;
       const generatedData = JSON.parse(text);
       setCached(key, generatedData);
+      // Awaited rather than fired-and-forgotten: serverless can freeze the
+      // instance the moment the response is sent, which would drop the write
+      // and waste the generation we just paid for. It's one fast REST call,
+      // capped by TIMEOUT_MS, and it can't throw.
+      await setDurable(key, generatedData);
       return NextResponse.json(generatedData);
     } else if (result.promptFeedback) {
       return NextResponse.json(

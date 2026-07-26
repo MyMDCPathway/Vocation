@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCached, setCached, cacheKey } from "@/app/lib/apiCache";
+import { getDurable, setDurable } from "@/app/lib/durableCache";
 import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
 import { geminiUrl } from "@/app/lib/geminiModel";
 import { logCacheMiss } from "@/app/lib/missLog";
@@ -40,6 +41,14 @@ export async function POST(request: NextRequest) {
     const cachedSuggestions = getCached(key);
     if (cachedSuggestions) {
       return NextResponse.json({ suggestions: cachedSuggestions });
+    }
+
+    // Layer 3 — survives the cold starts that wipe the in-memory layer. See
+    // durableCache.ts; no-ops when no store is configured.
+    const durableSuggestions = await getDurable(key);
+    if (durableSuggestions) {
+      setCached(key, durableSuggestions);
+      return NextResponse.json({ suggestions: durableSuggestions });
     }
 
     // Past the cache, this route spends a Gemini request like the others.
@@ -329,6 +338,7 @@ Return the JSON array (never empty unless input is completely nonsensical):`;
     // Only cache non-empty results so a transient parse failure isn't sticky.
     if (suggestions.length > 0) {
       setCached(key, suggestions);
+      await setDurable(key, suggestions);
     }
 
     return NextResponse.json({ suggestions });
