@@ -45,6 +45,12 @@ export const SCHOOLS_WITH_CATALOG = [
   "fau",
   "famu",
   "fsu",
+  "miami",
+  "stetson",
+  "erau",
+  "tampa",
+  "barry",
+  "lynn",
 ] as const;
 
 export type CatalogSchoolId = (typeof SCHOOLS_WITH_CATALOG)[number];

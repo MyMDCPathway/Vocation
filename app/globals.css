@@ -112,6 +112,12 @@ body {
 
 /* New Flowchart Styles */
 .flowchart-container {
+  /* Single source of truth for the horizontal geometry. The wrapper width
+     below is derived from these, so a card can't get out of sync with the
+     space reserved for it. */
+  --flowchart-card-width: 380px;
+  --flowchart-connector-width: 1.5rem;
+
   display: flex;
   flex-direction: row;
   align-items: stretch; /* Make cards same height */
@@ -149,12 +155,27 @@ body {
 .flowchart-container > div {
   display: flex;
   align-items: stretch;
-  flex-shrink: 0;
   /* align-items: stretch on parent will make all wrappers same height */
+
+  /* The width MUST be stated explicitly rather than left to `auto`. Left to
+     intrinsic sizing, Safari computes this nested flex container's width from
+     its content's max-content width (a card's description on one unwrapped
+     line — measured at 700-1150px) instead of honoring the inner
+     .flowchart-step's `flex-basis`. The card still painted at its correct
+     380px, so the leftover wrapper width showed up as a huge blank gap before
+     the next connector. Chrome/Edge honor the flex-basis and were unaffected,
+     which is why this only reproduced on Mac. */
+  flex: 0 0
+    calc(var(--flowchart-card-width) + var(--flowchart-connector-width));
+}
+
+/* The first wrapper has no leading connector, so it reserves only a card. */
+.flowchart-container > div:first-child {
+  flex-basis: var(--flowchart-card-width);
 }
 
 .flowchart-step {
-  flex: 0 0 380px; /* Fixed width */
+  flex: 0 0 var(--flowchart-card-width); /* Fixed width */
   align-self: stretch; /* Stretch to match wrapper height */
   display: flex;
   flex-direction: column;
@@ -249,7 +270,7 @@ body {
 }
 
 .flowchart-connector {
-  flex: 0 0 1.5rem; /* Fixed width to span the gap between boxes */
+  flex: 0 0 var(--flowchart-connector-width); /* Spans the gap between boxes */
   position: relative;
   align-self: stretch; /* Stretch to match box height */
   pointer-events: none; /* Don't interfere with interactions */

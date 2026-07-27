@@ -7,27 +7,211 @@ Read the **Rules** section before writing code. Several of them exist because
 the obvious approach has already failed here in a way that wasn't visible until
 production.
 
-> **Next session: private universities.**
-> All **12 SUS public universities are wired up and done**: FIU (original),
-> UCF, UF, FGCU, UWF, NCF, UNF, FlPoly, USF, FAU, FAMU, and **FSU** — each
-> verified live in a browser. That's every public university in Florida.
-> **Read §13 first.** FlPoly and USF are both Acalog sites WAF-blocked for
-> `fetch()`/`curl`, but a real browser navigating directly to each page still
-> gets through — both were hand-collected that way (navigate, read the
-> rendered DOM, no committed scraper). FAU and FAMU both turned out to have
-> no WAF at all — their real catalogs live on the university's own site, not
-> the Acalog `catalog.*.edu` instance the earlier survey looked at, and each
-> got a real committed scraper once the actual page was found. **FSU took a
-> different resolution than the others**: its best data (550 majors, real
-> per-program AND per-college links) lives in a Power BI dashboard that
-> resists every automated interaction technique tried (see §13) — rather than
-> keep fighting that, FSU's catalog uses real major names pulled from FSU's
-> own plain HTML program-listing pages instead, with every entry pointing at
-> one shared link (`admissions.fsu.edu/majors`) rather than a per-program URL
-> this scraper has no way to verify. **Next up: the 21 private (SACSCOC)
-> schools** — expect each to need its own survey the way every university
-> did; read §13's "universities are not state colleges" section before
-> starting, since the private schools will differ from these public ones too.
+> **Next session: private universities, batch 7 of 21.**
+> All **12 SUS public universities are done**, and six private (SACSCOC)
+> schools are wired up: **University of Miami**, **Stetson University**,
+> **Embry-Riddle Aeronautical University** (Daytona Beach campus),
+> **University of Tampa**, **Barry University**, and **Lynn University**.
+> Stetson's, ERAU's, UT's, Barry's, and Lynn's generations were all verified
+> fully live end-to-end — a real Gemini call through a locally-running dev
+> server, with `GEMINI_API_KEY` set — and every returned step name matched
+> the scraped catalog exactly, with every program link resolving to its real
+> page. UM's verification stopped short of that (no API key was available in
+> that session); if you want that gap closed, re-run one live UM generation
+> now that a key exists.
+>
+> **UM** is the best-case catalog shape found in this whole project:
+> `bulletin.miami.edu` (CourseLeaf, no WAF) has a single Program Index page
+> listing all 689 rows in one plain `fetch()`, each with a real per-program
+> link, level, and Plan column. The round-trip test caught 5 real mismatches
+> (per §13's standing warning that this happens on every university, no
+> exceptions): three were missing `GRADUATE_HINT` codes (`md`, `mps`, `msf`),
+> one was a truncated title on UM's own site, and one was a certificate
+> mistagged `Plan="Major"`. A separate bug — two rows linking to an external
+> domain that the scraper blindly prepended its own origin to — was only
+> caught by bulk-checking all 483 scraped URLs return HTTP 200, not by the
+> round-trip test. **Bulk URL verification is worth doing for every school.**
+>
+> **Stetson** was a harder scrape than UM, closer to the SUS batch's
+> difficulty: no single listing page exists at any level. Undergrad (3 real
+> degree-granting colleges of the 6 nav sections — WORLD/Discovery/Honors are
+> programs, not degree-granting colleges) uses a tabbed "Majors" UI with
+> heading-grouped `<li>` lists; graduate (2 of those 3 colleges) is loose
+> prose with a heading per program area and a real link inside the following
+> paragraph — one heading turned out to be an umbrella covering 4 genuinely
+> distinct sub-programs, each with its own link and fully-descriptive anchor
+> text, so a heading-only extraction would have silently collapsed all 4 into
+> one wrong entry (see the scraper's own header comment in
+> `scripts/scrape-stetson-programs.mjs` for the exact "longer text wins /
+> 2+ links means trust the links" rule that handles both shapes). Law (11
+> real programs) has no listing page either — hand-identified from `/law/`'s
+> own nav, confirmed via each page's own `<title>`. Zero round-trip mismatches
+> on the first pass — the "spell the credential out in parens" naming choice
+> (`"American Studies (Bachelor of Arts)"`) already matches existing
+> `BACHELOR_HINT`/`GRADUATE_HINT` patterns with no new codes needed.
+>
+> **ERAU** (Daytona Beach campus — floridaSchools.ts's id, since ERAU runs
+> separate catalogs per campus) was the cleanest scrape of the four: one
+> page, one `fetch()`, heading-per-level (Associates/Bachelors/Masters/
+> Combined Program Pathways/Dual Masters/Certificates/Doctoral/Ph.D.
+> Programs), and every entry's own anchor text already states its complete
+> credential — no name synthesis needed at all, unlike Stetson. Associates
+> and Certificates were excluded (the same call UCF's scraper made for its
+> own associate track: this app's university template starts at the
+> bachelor's, so a level below that isn't a fit for the shape). "Combined
+> Program Pathways" (90 entries) and "Dual Masters" (14) looked at first like
+> they might be noise but are real, individually-linked accelerated/dual-
+> degree tracks — ERAU's Business and Aviation programs each pair with
+> several specific graduate programs. Zero round-trip mismatches on the first
+> pass, same as Stetson.
+>
+> **UT** was the first school on **SmartCatalogIQ**, a third catalog
+> platform after CourseLeaf and Acalog — no WAF, but (unlike UM/ERAU) no
+> single flat program-index page either. Undergrad came from the site's own
+> `/site-map` page (a complete, clean, nested link tree with real display
+> text on every link — worth checking for on any future school before
+> assuming page-by-page crawling is needed) filtered to links under one of
+> UT's 4 undergraduate colleges whose own text contains "Major" or starts
+> with "Bachelor of"; that college-path restriction is what excludes the
+> sitemap's real false positives ("Double Majors", "Declaring/Changing Your
+> Advisor or Major" — both policy pages that also happen to contain the word
+> "major"). Graduate came from a separate, hand-curated "Graduate Degree
+> Programs" page, heading-grouped by college like UM/ERAU with no name
+> synthesis needed. One round-trip mismatch on the first pass, the same
+> combo-degree shape UM hit: a "Bachelor of Science in Health Science/3+2
+> Master of Science in Athletic Training" accelerated track was stored as
+> `bachelor` but its own name contains "Master," so `GRADUATE_HINT` read it
+> as graduate first — fixed by classifying any undergrad entry whose name
+> also names a graduate credential as graduate, matching how the app's own
+> matcher reads it (see `scripts/scrape-tampa-programs.mjs`).
+>
+> **Barry** was the second school on SmartCatalogIQ, and confirmed a real
+> platform-discovery trick: `barry.smartcatalogiq.com` returns 200 directly
+> (unlike UT's redirect-based subdomain), and — unlike UT — Barry has a
+> dedicated, purpose-built "Programs of Study" page per catalog level
+> (`id="sc-program-links"`, a SmartCatalogIQ built-in widget) listing every
+> program on one page, so UT's sitemap-filtering trick wasn't even needed.
+> **Check for this exact page shape on every future SmartCatalogIQ school
+> before falling back to UT's sitemap approach.** Both pages mix real
+> programs with policy pages, bare specialization/concentration tracks with
+> no credential of their own ("Biochemistry Specialization"), and
+> certificates — filtering on "does the title contain a real credential
+> token" (B.A./B.S./B.F.A./... for undergrad, Master/Doctor.../Ph.D./M.S./...
+> for graduate) cleanly separates real standalone programs from all three.
+> One regex gap found and fixed: `\bdoctor\b` doesn't match inside
+> "Doctorate" (the word boundary fails at the "-ate" suffix), which silently
+> excluded "School of Law Juris Doctorate Program" until changed to
+> `doctor\w*`. A few undergrad entries were the same UM/UT combo-degree
+> shape (e.g. "Kinesiology and Sport Sciences (B.S. KHPUS to M.S. KHPS SEPPG
+> Seamless)") and got the same fix: reclassify as graduate when the name
+> also contains a graduate credential. Zero round-trip mismatches after that
+> fix.
+>
+> **Lynn** was the first school in this batch with no catalog platform
+> vendor at all — a bespoke site (`lynn.edu/academics/catalog`) behind
+> **Cloudflare bot protection**, a different blocking mechanism than the AWS
+> WAF Bot Control seen on the Acalog schools but the same practical effect:
+> every plain `fetch()`/`curl` request to the *entire domain* (even the bare
+> homepage) returns HTTP 403 "Attention Required! | Cloudflare", while a
+> real browser's top-level navigation gets through cleanly — so this is a
+> **hand-verified file with no committed scraper**, the same category as
+> `flpoly.ts`/`usf.ts`. The real find: Lynn's catalog has no flat
+> program-index page anywhere, but **every catalog page shares one
+> server-rendered left-nav menu that itself lists all 93 raw entries in the
+> entire catalog** (undergrad day / online / graduate divisions × 6
+> colleges) as real links, each with its own credential shown in a nested
+> `<span>` — so the full catalog came from reading that one shared menu on a
+> single page load, not from crawling per-college pages the way Stetson's
+> and Lynn's own division/college hierarchy would otherwise have required.
+> **Check any bespoke-site school for a shared nav/sitemap component before
+> assuming a per-page crawl is needed** — this is the third time in this
+> batch alone (after UT's `/site-map` and Barry's `programs-of-study`
+> widget) that the real shortcut was a site-wide list hiding in plain sight
+> rather than the obvious per-page path. A real extraction bug surfaced and
+> got fixed: naively removing the credential span's text from the anchor's
+> full `textContent` via `.replace()` corrupted names whose full text
+> *starts* with the credential and repeats it in the span (e.g. "Master of
+> Science in Psychology" + span "Master of Science" → replace matched the
+> leading occurrence, not the trailing duplicate, producing "in
+> PsychologyMaster of Science") — fixed by cloning the anchor, removing the
+> span node, then reading the clone's `textContent`. Associate-level (7) and
+> the one certificate entry were excluded (same call as UCF/ERAU/Barry).
+> Zero round-trip mismatches. **Verified with a real live Gemini
+> generation**: `/pathway?career=Marketing Manager` under the `lynn` cookie
+> returned two pathways whose every degree-step name matched the catalog
+> verbatim (`"Marketing (Bachelor of Science)"`, `"Master of Business
+> Administration in Marketing"`, `"Advertising and Public Relations
+> (Bachelor of Arts)"`), each resolving to its real `lynn.edu` page
+> (confirmed by browser navigation, since `curl`-based bulk URL checking
+> doesn't work on this domain either).
+>
+> **Next up: the other 15 private (SACSCOC) schools.** Don't assume any of
+> them repeat these six shapes — §13's "private universities are next"
+> section already warned to expect flat-rate tuition (not resident/
+> non-resident), wildly different catalog sizes, and a per-vendor platform
+> survey each time. Already surveyed and set aside:
+> - **Rollins College, Flagler College, Florida Tech, Palm Beach Atlantic,
+>   and Saint Leo are all WAF-blocked**, the same way FAMU/FlPoly/USF were
+>   — their catalog sites (`catalog.rollins.edu`, `catalog.flagler.edu`,
+>   `catalog.fit.edu`, `catalog.pba.edu`, `academiccatalog.saintleo.edu`, the
+>   last one Acalog too despite the different subdomain naming) return HTTP
+>   202 with `x-amzn-waf-action: challenge` on the actual `content.php`
+>   program pages, while the front page/index loads fine. Per §13's
+>   browser-navigation technique, a real browser can likely still get
+>   through by top-level navigation; that hasn't been tried yet for any of
+>   the five.
+> - **Ave Maria University's catalog has no real per-program or per-
+>   department URL at all** — it's a client-rendered single-page app
+>   (`catalog.avemaria.edu/programs`) where every one of its 81 real,
+>   cleanly-categorized programs (36 majors, 38 minors, 7 graduate) expands
+>   inline via local component state rather than navigating anywhere; the
+>   URL never changes no matter what's clicked, confirmed by watching
+>   `location.href` after clicking both a program card and its expand
+>   control. If this school gets picked up, the FSU precedent applies: real
+>   names, one shared link (`https://catalog.avemaria.edu/programs`) rather
+>   than a fabricated per-program URL.
+> - **Bethune-Cookman's Acalog gateway (`catalog.cookman.edu`) is not
+>   WAF-blocked** (`index.php?catoid=41` returns a plain 200) but its catalog
+>   navigation tree loads by some other, not-yet-found mechanism (no
+>   `content.php`/`navoid` links present in the static HTML) — worth another
+>   look before assuming it needs the same browser-navigation workaround as
+>   the blocked schools.
+> - **St. Thomas University's catalog is PDF-only** (`stu.edu/academics/
+>   course-catalogs/`, e.g. "Final-UG-Catalog-2025-2026-...pdf") — no HTML
+>   catalog exists at all, so this needs a different extraction approach
+>   (PDF text extraction) than every other school so far, or hand entry.
+>   **Florida Memorial University's catalog is PDF-only too**
+>   (`fmu.edu/academics/catalogs-courses/`) — same obstacle, same open
+>   question.
+> - **Eckerd College has real per-major pages but none of them state a
+>   credential.** `eckerd.edu/academics/majors/` lists ~41 real majors with
+>   real per-major links (e.g. `eckerd.edu/biology/`), but neither that page
+>   nor the individual major pages nor the general academics pages mention
+>   "Bachelor" anywhere — confirmed by a text search across several pages.
+>   Eckerd's own PDF catalog almost certainly states the credential per
+>   major, but per-major HTML pages don't, and guessing whether a given
+>   major is B.A. or B.S. would violate "never invent school data." Needs
+>   either PDF extraction or a source that states credentials that hasn't
+>   been found yet.
+> - `catalog.nova.edu` is a **CourseLeaf placeholder ("Coming Soon")** —
+>   not usable yet regardless of NSU's own separate warning about its likely
+>   NSU-scale catalog size.
+> - `<school>.smartcatalogiq.com` **exists but returns "Layout Not Found" or
+>   404 on every path tried** for Florida Southern, Keiser, and Edward
+>   Waters — these subdomains are reserved on SmartCatalogIQ's platform but
+>   have no content actually deployed (confirmed distinct from Barry's and
+>   UT's working instances, both of which serve real content immediately).
+>   Each needs its real current catalog URL found via that school's own
+>   registrar/academics page (the way Barry's, Saint Leo's, Eckerd's, and
+>   Lynn's were all found — none of them were at the subdomain first
+>   guessed) rather than another subdomain guess. **Jacksonville University
+>   has no `catalog.*`/`bulletin.*`/`*.smartcatalogiq.com` subdomain at
+>   all** (403 from CloudFront/S3 on the SmartCatalogIQ guess) — needs a
+>   full fresh platform survey. Note also that a bare
+>   `catalog.<abbreviation>.edu` guess can hit an entirely unrelated school
+>   by coincidence — `catalog.ewu.edu` resolved to Eastern Washington
+>   University, not Edward Waters University, despite both using "EWU" as a
+>   short name.
 
 ---
 
@@ -46,10 +230,11 @@ scraped real program catalogs (`app/lib/programs/*.ts`, `app/lib/fiu-programs.ts
 model free-generate a program name — it invents plausible-sounding degrees that
 don't exist. If you add a school, you scrape its catalog first (§2, §7).
 
-**39 of 61 schools can generate pathways** — all 27 state colleges and all 12
+**45 of 61 schools can generate pathways** — all 27 state colleges, all 12
 SUS public universities (FIU + UCF + UF + FGCU + UWF + NCF + UNF + FlPoly +
-USF + FAU + FAMU + FSU). The other 22 — all private (SACSCOC) — are gated off
-and show a "we don't have this catalog yet" notice. That's the next body of
+USF + FAU + FAMU + FSU), and six private universities (UM, Stetson, ERAU,
+UT, Barry, Lynn). The other 15 — all private (SACSCOC) — are gated off and
+show a "we don't have this catalog yet" notice. That's the next body of
 work (§13).
 
 **There is no traditional database.** Persistence is `data/seed-cache.json` (a
@@ -645,18 +830,22 @@ real bugs; a test asserting one specific program would have caught none.
 
 ---
 
-## 13. Next up — private universities (all public universities are done)
+## 13. Next up — private universities (6 of 21 done)
 
 **Status as of 2026-07-27:** all 27 Florida College System schools AND all 12
 SUS public universities are wired up and generating pathways: FIU (original),
 UCF (the pilot that validated the university template), UF, FGCU, UWF, NCF,
-UNF, FlPoly, USF, FAU, FAMU, and FSU. What remains:
+UNF, FlPoly, USF, FAU, FAMU, and FSU. The private-school batch has started:
+University of Miami, Stetson University, Embry-Riddle Aeronautical University
+(Daytona Beach), University of Tampa, Barry University, and Lynn University
+are all done, using the same `universitySystemPrompt` template unchanged.
+What remains:
 
 | Group | Count | Catalogued | Notes |
 |---|---|---|---|
 | State colleges | 29* | 27 | Done. (*29 includes MDC + Broward) |
 | SUS public universities | 12 | 12 (all of them) | Done. |
-| Private (SACSCOC) | 21 | 0 | **Next.** Expect another per-school survey — read "universities are not state colleges" below before assuming these behave like the SUS batch |
+| Private (SACSCOC) | 21 | 6 (UM, Stetson, ERAU, UT, Barry, Lynn) | **Next: the other 15.** Expect another per-school survey — read "universities are not state colleges" below before assuming these behave like the SUS batch |
 
 Until a school is catalogued it's gated off in `schoolCatalogs.ts` and the UI
 shows "we don't have this catalog yet" — so partial progress is safe to ship.
@@ -1016,34 +1205,288 @@ Acalog, and SmartCatalogIQ. Universities are larger and more bespoke; expect
 per-school work and paginated JS-driven catalogs. Survey before writing a
 parser.
 
-### Private universities are next — expect them to differ again, not to repeat the SUS batch
+### Private universities — 6 of 21 done, expect the other 15 to differ again
 
 All 21 are SACSCOC-accredited private (non-state) schools. Full list, from
-`floridaSchools.ts` (id — name — city):
+`floridaSchools.ts` (id — name — city). `miami`, `stetson`, `erau`, `tampa`,
+`barry`, and `lynn` are done; the rest are next:
 
 | id | Name | City |
 |---|---|---|
-| `avemaria` | Ave Maria University | Ave Maria |
-| `barry` | Barry University | Miami Shores |
-| `cookman` | Bethune-Cookman University | Daytona Beach |
-| `eckerd` | Eckerd College | St. Petersburg |
-| `ewu` | Edward Waters University | Jacksonville |
-| `erau` | Embry-Riddle Aeronautical University | Daytona Beach |
-| `flagler` | Flagler College | St. Augustine |
-| `fit` | Florida Institute of Technology | Melbourne |
-| `fmu` | Florida Memorial University | Miami Gardens |
-| `fsc` | Florida Southern College | Lakeland |
-| `ju` | Jacksonville University | Jacksonville |
-| `keiser` | Keiser University | Fort Lauderdale |
-| `lynn` | Lynn University | Boca Raton |
-| `nova` | Nova Southeastern University | Davie |
-| `pba` | Palm Beach Atlantic University | West Palm Beach |
-| `rollins` | Rollins College | Winter Park |
-| `saintleo` | Saint Leo University | St. Leo |
-| `stu` | St. Thomas University | Miami Gardens |
-| `stetson` | Stetson University | DeLand |
-| `miami` | University of Miami | Coral Gables |
-| `tampa` | University of Tampa | Tampa |
+| `avemaria` | Ave Maria University | Ave Maria | No per-program URL — see below |
+| `barry` | Barry University | Miami Shores | ✅ Done — see below |
+| `cookman` | Bethune-Cookman University | Daytona Beach | Not WAF-blocked but nav tree not found yet — see below |
+| `eckerd` | Eckerd College | St. Petersburg | Real per-major pages, no stated credential — see below |
+| `ewu` | Edward Waters University | Jacksonville | SmartCatalogIQ subdomain exists, no content deployed — see below |
+| `erau` | Embry-Riddle Aeronautical University | Daytona Beach | ✅ Done — see below |
+| `flagler` | Flagler College | St. Augustine | WAF-blocked — see below |
+| `fit` | Florida Institute of Technology | Melbourne | WAF-blocked — see below |
+| `fmu` | Florida Memorial University | Miami Gardens | PDF-only catalog — see below |
+| `fsc` | Florida Southern College | Lakeland | SmartCatalogIQ subdomain exists, no content deployed — see below |
+| `ju` | Jacksonville University | Jacksonville | No catalog subdomain found at all — see below |
+| `keiser` | Keiser University | Fort Lauderdale | SmartCatalogIQ subdomain exists, no content deployed — see below |
+| `lynn` | Lynn University | Boca Raton | ✅ Done — see below |
+| `nova` | Nova Southeastern University | Davie | Catalog site not live yet — see below |
+| `pba` | Palm Beach Atlantic University | West Palm Beach | WAF-blocked — see below |
+| `rollins` | Rollins College | Winter Park | WAF-blocked — see below |
+| `saintleo` | Saint Leo University | St. Leo | WAF-blocked — see below |
+| `stu` | St. Thomas University | Miami Gardens | PDF-only catalog — see below |
+| `stetson` | Stetson University | DeLand | ✅ Done — see below |
+| `miami` | University of Miami | Coral Gables | ✅ Done — see below |
+| `tampa` | University of Tampa | Tampa | ✅ Done — see below |
+
+**What UM confirmed and what it didn't.** UM is a large research university
+(closer to UF/UCF in catalog size — 492 programs), so it doesn't yet tell us
+whether the "size varies enormously" prediction below holds for the small
+liberal-arts colleges (Ave Maria, Eckerd, Flagler, etc.) — those are still
+unconfirmed. What UM did confirm: real per-program links are achievable even
+outside the SUS batch (CourseLeaf, no WAF, one-page fetch — see below), the
+university template needed zero prompt changes, and the round-trip test keeps
+finding exactly one thing every single time (§13's standing warning below) —
+this time three missing `GRADUATE_HINT` codes (`md`, `mps`, `msf`) plus two
+real site-data quirks (a truncated title, a mistagged certificate) that
+weren't matcher bugs at all. Bulk-checking all scraped URLs return HTTP 200
+(not just spot-checking) caught a real bug the round-trip test couldn't: two
+rows linked to an external domain and the scraper was blindly prepending its
+own origin, producing an unresolvable concatenated URL. Do this full check on
+every future school, not just a handful of examples.
+
+**What Stetson confirmed.** Also CourseLeaf, also no WAF (`catalog.stetson.edu`
+— confirmed by checking response headers for `x-amzn-waf-action`, same check
+that flagged Rollins/Flagler as blocked below), but a genuinely harder scrape
+than UM: no single listing page exists at any level, unlike UM's one-page
+Program Index. What ended up working: **the sitemap.xml** revealed the site's
+real structure at a glance (825 URLs, one glance at path depth and slug
+suffixes like `-ba`/`-bs`/`-plan` separated real program pages from course
+plans and policy pages) — checking for a sitemap before assuming a school
+needs page-by-page crawling is worth doing on every future school. From
+there: undergrad uses a tabbed `#majorstextcontainer` UI (3 of the school's 6
+top-level undergrad sections are real degree-granting colleges — Arts &
+Sciences, Business Administration, Music; WORLD/Discovery/Honors are programs
+or centers, confirmed by the tab's absence on those pages) with
+heading-grouped `<li>` lists; graduate is loose prose, one heading per program
+area with a real link inside the following paragraph. One heading ("Master of
+Science (MS)" under Arts & Sciences' counselor-education section) turned out
+to cover 4 genuinely distinct sub-programs, each with its own link and its own
+fully-descriptive anchor text — extracting by heading alone would have
+silently collapsed all 4 into one wrong, too-generic entry. The rule that
+handles both shapes (a heading naming exactly one program vs. an umbrella
+naming several) is in `scripts/scrape-stetson-programs.mjs`'s header comment;
+short version: when a heading's section contains 2+ links whose own text
+already states a real credential, trust the links over the heading; when it
+contains exactly 1, use whichever of (heading text, anchor text) is longer —
+the longer one was the more complete, correct name in every case checked by
+hand. Law has no listing page either (11 real programs, hand-identified from
+`/law/`'s own nav links, each name taken from its own page's `<title>` rather
+than hardcoded, so a future credential-title change on Stetson's own site is
+still picked up on a re-scrape). **Zero round-trip mismatches on the first
+pass** — spelling the credential out in parens for names that don't already
+state one (`"American Studies (Bachelor of Arts)"`, matching FSU's and NCF's
+prior "don't guess an abbreviation" precedent) already satisfied existing
+`BACHELOR_HINT`/`GRADUATE_HINT` patterns with no new codes needed. **Verified
+with a real live Gemini generation**, not just tests — with `GEMINI_API_KEY`
+configured, `/pathway?career=Accountant` under the `stetson` cookie returned
+two pathways whose every degree-step name matched the scraped catalog
+verbatim (`"Accounting (Bachelor of Business Administration)"`, `"Master of
+Accountancy"`, `"Finance (Bachelor of Business Administration)"`), and every
+step's rendered link resolved to its real `catalog.stetson.edu` page.
+
+**What ERAU confirmed.** Also CourseLeaf, also no WAF (`catalog.erau.edu`).
+The cleanest scrape of the three so far — one page
+(`daytona-beach/academic-programs/`), one `fetch()`, a plain `<h2>` heading
+per credential level (Associates/Bachelors/Masters/Combined Program
+Pathways/Dual Masters/Certificates/Doctoral/Ph.D. Programs) each followed by
+a `<ul>` of real links, and — unlike Stetson — every entry's own anchor text
+already states its complete credential ("B.S. in Aerospace Engineering"), so
+no heading-derived name synthesis was needed at all. Associates (2 programs)
+and Certificates (1) were excluded, the same call UCF's scraper made for its
+own associate-level track: the university template starts every pathway at
+the bachelor's, so a level below that isn't a fit. "Combined Program
+Pathways" (90 entries) and "Dual Masters" (14) looked like they might be
+noise at first glance but are real, individually-linked accelerated/dual-
+degree tracks (ERAU's Business and Aviation programs each pair with several
+specific graduate programs, e.g. "B.S. in Aeronautics/M.S. in Aviation
+Finance"). Zero round-trip mismatches on the first pass, same as Stetson.
+**Verified with a real live Gemini generation**: `/pathway?career=Aerospace
+Engineer` under the `erau` cookie returned two pathways whose every
+degree-step name matched the scraped catalog verbatim (`"B.S. in Aerospace
+Engineering"`, `"M.S. in Aerospace Engineering"`, `"B.S. in Mechanical
+Engineering"`), each resolving to its real `catalog.erau.edu` page. One
+platform-level note for future schools: ERAU runs a **separate catalog per
+campus** (Daytona Beach / Prescott / Worldwide / Asia, all under the same
+`catalog.erau.edu`) — floridaSchools.ts lists ERAU at Daytona Beach, so only
+that edition was scraped; a school with multiple US campuses should be
+checked for the same shape before assuming one catalog covers it all.
+
+**What UT confirmed.** The first school in this batch on **SmartCatalogIQ**
+(`ut.smartcatalogiq.com`) — a third catalog platform after CourseLeaf and
+Acalog, and (like ERAU) not WAF-blocked at all. Unlike UM/ERAU, no single
+flat program-index page exists for either level. What worked: the site's own
+`/site-map` page is a complete, clean, nested link tree of the *entire*
+catalog with real display text on every link (not just raw hrefs, the same
+"check for a sitemap first" lesson Stetson's batch taught) — filtered to
+links under one of UT's four undergraduate colleges (Arts and Letters,
+Natural and Health Sciences, Social Sciences/Mathematics/Education, Sykes
+College of Business) whose own text contains "Major" or starts with
+"Bachelor of". That college-path restriction is what excludes the sitemap's
+real false positives — "Double Majors", "Declaring/Changing Your Advisor or
+Major", "Spartan Studies Major Overlap" are all policy pages that happen to
+contain the word "major" too, and would have been wrongly captured by a
+text-only filter. Graduate came from a separate, hand-curated "Graduate
+Degree Programs" page (heading-grouped by college, no name synthesis
+needed — same shape as UM's and ERAU's cleanest cases). One round-trip
+mismatch on the first pass, and it was the exact same combo-degree shape UM
+hit: a "Bachelor of Science in Health Science/3+2 Master of Science in
+Athletic Training" accelerated track was stored as `bachelor`, but its own
+name contains "Master," so the app's `GRADUATE_HINT` (checked before
+`BACHELOR_HINT`) read it as graduate — fixed in the scraper itself (not
+`programCatalog.ts`, since this wasn't a missing hint code) by classifying
+any undergrad-college entry whose name also names a graduate credential as
+graduate, matching how the matcher actually reads it. **Verified with a real
+live Gemini generation**: `/pathway?career=Accountant` under the `tampa`
+cookie returned two pathways whose every degree-step name matched the
+scraped catalog verbatim (`"Accounting Major"`, `"Master of Science in
+Accounting"`), each resolving to its real `ut.smartcatalogiq.com` page.
+
+**What Barry confirmed.** The second school on SmartCatalogIQ, and
+`barry.smartcatalogiq.com` returns 200 directly (no redirect chain like
+UT's). Unlike UT, Barry has a dedicated, purpose-built "Programs of Study"
+page per catalog level (undergrad and grad each get one) — a SmartCatalogIQ
+built-in widget (`id="sc-program-links"`) listing every linked program on
+one page, so UT's sitemap-filtering trick wasn't needed at all. **Check for
+this exact page shape on any future SmartCatalogIQ school before falling
+back to UT's sitemap approach.** Both pages mix real programs with policy
+pages, bare specialization/concentration tracks that don't carry their own
+credential ("Biochemistry Specialization", "Forensic Psychology
+Specialization"), and certificates — none of which state a credential in
+their own title, which is what separates them from every real program.
+Filtering on "does the title contain a real credential token" (bachelor's
+family for undergrad, graduate family for grad) cleanly separates the three.
+One regex gap found and fixed: a bare `\bdoctor\b` doesn't match inside
+"Doctorate" — the word boundary fails at the "-ate" suffix — which silently
+excluded "School of Law Juris Doctorate Program" until the pattern became
+`doctor\w*`. A few undergrad entries were the same UM/UT combo-degree shape
+("Kinesiology and Sport Sciences (B.S. KHPUS to M.S. KHPS SEPPG Seamless)")
+and got the same fix as UT's: reclassify as graduate when the name also
+names a graduate credential. Zero round-trip mismatches after that fix.
+**Verified with a real live Gemini generation**: `/pathway?career=Social
+Worker` under the `barry` cookie returned two pathways whose every
+degree-step name matched the scraped catalog verbatim (`"Bachelor of Social
+Work (B.S.W.)"`, `"Master of Social Work Degree Program"`, `"Psychology
+(B.S.)"`), each resolving to its real `barry.smartcatalogiq.com` page.
+
+**What Lynn confirmed.** No catalog platform vendor at all — a bespoke site
+(`lynn.edu/academics/catalog`) behind **Cloudflare bot protection**, a
+different mechanism than the AWS WAF Bot Control on the Acalog schools but
+the same net effect: every plain `fetch()`/`curl` to the *entire domain*
+(even the bare homepage) returns HTTP 403 "Attention Required! |
+Cloudflare", confirmed by testing both `lynn.edu/` and a specific catalog
+page — while a real browser's top-level navigation gets through cleanly.
+This is a **hand-verified file, no committed scraper**, the same category as
+`flpoly.ts`/`usf.ts`. The real find: Lynn's catalog has no flat
+program-index page anywhere, but every catalog page shares one
+server-rendered left-nav menu that itself lists all 93 raw entries in the
+whole catalog (undergrad day / online / graduate divisions × 6 colleges) as
+real links, each with its own credential in a nested `<span>` — so the
+entire catalog came from reading that one shared menu on a single page load
+rather than crawling Lynn's own per-division/per-college hierarchy the
+"obvious" way. **Check any bespoke-site school for a shared nav/sitemap
+component before assuming a per-page crawl is needed** — the third time in
+this batch alone (after UT's `/site-map` and Barry's `programs-of-study`
+widget) that the real shortcut was a site-wide list hiding in plain sight. A
+real extraction bug surfaced and got fixed: naively stripping the
+credential span's text from the anchor's full `textContent` via `.replace()`
+corrupted names whose full text *starts with* the credential and repeats it
+in the span (e.g. name "Master of Science in Psychology" + span "Master of
+Science" → `.replace()` matched the leading occurrence instead of the
+trailing duplicate, producing "in PsychologyMaster of Science") — fixed by
+cloning the anchor, removing the span node, then reading the clone's
+`textContent`. Associate-level (7 entries) and the one certificate were
+excluded, the same call as UCF/ERAU/Barry. Zero round-trip mismatches.
+**Verified with a real live Gemini generation**: `/pathway?career=Marketing
+Manager` under the `lynn` cookie returned two pathways whose every
+degree-step name matched the catalog verbatim (`"Marketing (Bachelor of
+Science)"`, `"Master of Business Administration in Marketing"`,
+`"Advertising and Public Relations (Bachelor of Arts)"`), each resolving to
+its real `lynn.edu` page — confirmed by browser navigation, since bulk URL
+checking via `curl` doesn't work on this domain either.
+
+**Rollins College, Flagler College, Florida Tech, Palm Beach Atlantic, and
+Saint Leo are all WAF-blocked**, the same pattern as FAMU/FlPoly/USF in the
+SUS batch: all five run Acalog (`catalog.rollins.edu`, `catalog.flagler.edu`,
+`catalog.fit.edu`, `catalog.pba.edu`, `academiccatalog.saintleo.edu` — found
+via `saintleo.edu/academics/academic-affairs/catalogs`, a different
+subdomain naming than the other four but the same platform and the same
+block), and all five return HTTP 202 with an `x-amzn-waf-action: challenge`
+header on the actual `content.php` program pages (the bare `index.php`/
+homepage loads fine — it's the program content specifically that's gated).
+Per §13's browser-navigation technique (discovered during the SUS batch: a
+real browser doing a top-level navigation gets through an Acalog WAF that
+blocks both `curl` and in-page `fetch()`), these are very likely solvable
+the same hand-collection way FlPoly's and USF's catalogs were — that hasn't
+been tried yet for any of the five.
+
+**More dead ends surveyed, not yet resolved:**
+- **Ave Maria University's catalog (`catalog.avemaria.edu`) has no real
+  per-program or per-department URL at all.** It's a client-rendered Next.js
+  single-page app — `/programs` lists all 81 real programs cleanly (36
+  majors, 38 minors, 7 graduate, correctly categorized with department and
+  credential), but every program card is a `<button>`, not a link; clicking
+  one (or its expand control) never changes `location.href`, confirmed by
+  checking it directly after each click. If this school gets picked up
+  later, apply the FSU precedent: real names, one shared link
+  (`https://catalog.avemaria.edu/programs`) rather than a fabricated
+  per-program URL.
+- **Bethune-Cookman (`catalog.cookman.edu`) is Acalog but NOT WAF-blocked**
+  (`index.php?catoid=41` returns a plain 200, unlike the five above) — but
+  its catalog navigation tree isn't in the static HTML either (no
+  `content.php`/`navoid` links found), so whatever loads it is a mechanism
+  not yet identified. Worth a real browser session to find before assuming
+  it needs the same workaround as the WAF-blocked schools.
+- **St. Thomas University's and Florida Memorial University's catalogs are
+  both PDF-only.** `stu.edu/academics/course-catalogs/` and
+  `fmu.edu/academics/catalogs-courses/` both link straight to PDFs (no HTML
+  catalog page exists at either school). Needs either PDF text extraction
+  (not yet attempted for any school in this project) or hand entry; the
+  "no listing page" workarounds used for Stetson/UT/Barry/Lynn all depend on
+  some HTML page to read — neither school has one.
+- **Eckerd College has real per-major pages but none of them state a
+  credential.** `eckerd.edu/academics/majors/` lists ~41 real majors with
+  real per-major links (e.g. `eckerd.edu/biology/`), but neither that page,
+  the individual major pages, nor the general academics pages mention
+  "Bachelor" anywhere — confirmed by a text search across several pages.
+  Eckerd's own PDF catalog almost certainly states the credential per major,
+  but the per-major HTML pages don't, and guessing whether a given major is
+  B.A. or B.S. would violate "never invent school data." Needs either PDF
+  extraction or a source that states credentials, neither found yet.
+- **`catalog.nova.edu` is a live CourseLeaf placeholder** ("A New Courseleaf
+  Site Coming Soon!") — not yet usable regardless of NSU's own separate
+  "expect NSU-scale" sizing warning below.
+- **`<school>.smartcatalogiq.com` resolves but serves no real content** for
+  Florida Southern, Keiser, and Edward Waters — the bare subdomain returns
+  "Layout Not Found" (Sitecore's own 404-equivalent) and neither UT's
+  `/en/current/catalog` nor Barry's `/en/<year>/undergraduate-catalog` path
+  guesses resolve either. These are reserved-but-unused SmartCatalogIQ
+  subdomains, confirmed distinct from Barry's and UT's instances (both of
+  which serve real content immediately at their own subdomain — and, per
+  Eckerd's and Lynn's resolutions, distinct from what those two schools'
+  real catalogs turned out to be: not on SmartCatalogIQ at all, despite each
+  also having a reserved-but-empty `<school>.smartcatalogiq.com` subdomain).
+  Each remaining school's real, currently-published catalog URL needs to be
+  found via that school's own registrar/academics page — the way Barry's
+  (`barry.edu/en/registrar/catalogs/`), Saint Leo's
+  (`saintleo.edu/academics/academic-affairs/catalogs`), Eckerd's
+  (`eckerd.edu/academics/majors/`), and Lynn's (`lynn.edu/academics/catalog`)
+  were all found — rather than another subdomain guess.
+- **Jacksonville University has no `catalog.*`/`bulletin.*`/
+  `*.smartcatalogiq.com` subdomain at all** (403 from CloudFront/S3 on the
+  SmartCatalogIQ guess) — needs a full fresh platform survey from scratch.
+- **Edward Waters University is a trap, not just a miss**: guessing
+  `catalog.ewu.edu` returns a real, live, 200-OK CourseLeaf catalog — for
+  **Eastern Washington University**, an entirely different school on the
+  other side of the country that happens to share the "EWU" short name.
+  Always confirm the school name in the page's own `<title>` before trusting
+  a subdomain guess, not just the HTTP status code.
 
 **Don't assume the SUS playbook just repeats.** Some real differences to
 expect, not yet confirmed against any specific school (survey each before

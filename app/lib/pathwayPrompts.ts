@@ -18,12 +18,14 @@
 
 import { FIU_PROGRAMS } from "./fiu-programs";
 import { FLORIDA_SCHOOLS } from "./floridaSchools";
+import { BARRY_PROGRAMS } from "./programs/barry";
 import { BROWARD_PROGRAMS } from "./programs/broward";
 import { CF_PROGRAMS } from "./programs/cf";
 import { CFK_PROGRAMS } from "./programs/cfk";
 import { CHIPOLA_PROGRAMS } from "./programs/chipola";
 import { DSC_PROGRAMS } from "./programs/dsc";
 import { EFSC_PROGRAMS } from "./programs/efsc";
+import { ERAU_PROGRAMS } from "./programs/erau";
 import { FAMU_PROGRAMS } from "./programs/famu";
 import { FAU_PROGRAMS } from "./programs/fau";
 import { FGC_PROGRAMS } from "./programs/fgc";
@@ -36,6 +38,8 @@ import { GCSC_PROGRAMS } from "./programs/gcsc";
 import { HCC_PROGRAMS } from "./programs/hcc";
 import { IRSC_PROGRAMS } from "./programs/irsc";
 import { LSSC_PROGRAMS } from "./programs/lssc";
+import { LYNN_PROGRAMS } from "./programs/lynn";
+import { UM_PROGRAMS } from "./programs/miami";
 import { NCF_PROGRAMS } from "./programs/ncf";
 import { NFC_PROGRAMS } from "./programs/nfc";
 import { NWFSC_PROGRAMS } from "./programs/nwfsc";
@@ -49,6 +53,8 @@ import { SFSC_PROGRAMS } from "./programs/sfsc";
 import { SJR_PROGRAMS } from "./programs/sjr";
 import { SPC_PROGRAMS } from "./programs/spc";
 import { SSC_PROGRAMS } from "./programs/ssc";
+import { STETSON_PROGRAMS } from "./programs/stetson";
+import { TAMPA_PROGRAMS } from "./programs/tampa";
 import { TSC_PROGRAMS } from "./programs/tsc";
 import { UCF_PROGRAMS } from "./programs/ucf";
 import { UF_PROGRAMS } from "./programs/uf";
@@ -286,6 +292,12 @@ const UNIVERSITY_SHORT_NAMES: Record<string, string> = {
   fau: "FAU",
   famu: "FAMU",
   fsu: "FSU",
+  miami: "UM",
+  stetson: "Stetson",
+  erau: "ERAU",
+  tampa: "UT",
+  barry: "Barry",
+  lynn: "Lynn",
 };
 
 const UNIVERSITY_PROGRAMS: Record<string, SchoolProgram[]> = {
@@ -301,6 +313,12 @@ const UNIVERSITY_PROGRAMS: Record<string, SchoolProgram[]> = {
   fau: FAU_PROGRAMS,
   famu: FAMU_PROGRAMS,
   fsu: FSU_PROGRAMS,
+  miami: UM_PROGRAMS,
+  stetson: STETSON_PROGRAMS,
+  erau: ERAU_PROGRAMS,
+  tampa: TAMPA_PROGRAMS,
+  barry: BARRY_PROGRAMS,
+  lynn: LYNN_PROGRAMS,
 };
 
 function universityCatalog(schoolId: string): UniversityCatalog | null {

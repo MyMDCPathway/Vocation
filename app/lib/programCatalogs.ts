@@ -11,12 +11,14 @@
 // it stays on its own path until there's a reason to move it.
 
 import { fiuCatalog } from "./fiu-programs";
+import { barryCatalog } from "./programs/barry";
 import { browardCatalog } from "./programs/broward";
 import { CF_PROGRAMS } from "./programs/cf";
 import { CFK_PROGRAMS } from "./programs/cfk";
 import { CHIPOLA_PROGRAMS } from "./programs/chipola";
 import { DSC_PROGRAMS } from "./programs/dsc";
 import { EFSC_PROGRAMS } from "./programs/efsc";
+import { erauCatalog } from "./programs/erau";
 import { famuCatalog } from "./programs/famu";
 import { fauCatalog } from "./programs/fau";
 import { FGC_PROGRAMS } from "./programs/fgc";
@@ -29,6 +31,8 @@ import { GCSC_PROGRAMS } from "./programs/gcsc";
 import { HCC_PROGRAMS } from "./programs/hcc";
 import { IRSC_PROGRAMS } from "./programs/irsc";
 import { LSSC_PROGRAMS } from "./programs/lssc";
+import { lynnCatalog } from "./programs/lynn";
+import { umCatalog } from "./programs/miami";
 import { ncfCatalog } from "./programs/ncf";
 import { NFC_PROGRAMS } from "./programs/nfc";
 import { NWFSC_PROGRAMS } from "./programs/nwfsc";
@@ -42,6 +46,8 @@ import { SFSC_PROGRAMS } from "./programs/sfsc";
 import { SJR_PROGRAMS } from "./programs/sjr";
 import { SPC_PROGRAMS } from "./programs/spc";
 import { SSC_PROGRAMS } from "./programs/ssc";
+import { stetsonCatalog } from "./programs/stetson";
+import { tampaCatalog } from "./programs/tampa";
 import { TSC_PROGRAMS } from "./programs/tsc";
 import { ucfCatalog } from "./programs/ucf";
 import { ufCatalog } from "./programs/uf";
@@ -72,6 +78,12 @@ const CATALOGS: Record<string, ProgramCatalog> = {
   fau: fauCatalog,
   famu: famuCatalog,
   fsu: fsuCatalog,
+  miami: umCatalog,
+  stetson: stetsonCatalog,
+  erau: erauCatalog,
+  tampa: tampaCatalog,
+  barry: barryCatalog,
+  lynn: lynnCatalog,
   broward: browardCatalog,
   cf: asCollege(CF_PROGRAMS),
   efsc: asCollege(EFSC_PROGRAMS),

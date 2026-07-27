@@ -91,8 +91,16 @@ export function programMatchKey(value: string): string {
 // FAU's many same-named bachelor's/graduate pairs (the rest share a
 // level-agnostic code like B.S./M.S. or B.A./Ph.D. that was already
 // dot-tolerant).
+// Dot-tolerant md, mps, and bare msf are UM: "M.D./Security Management
+// Certificate" has no other graduate hint once EMBEDDED_DEGREE_FRAGMENT and
+// CERTIFICATE_HINT are in play, so an undotted-or-dotted "md" is needed the
+// same way FIU's/UCF's own "Doctor of Medicine" entries rely on the spelled-
+// out word "doctor" instead — UM's own listing never spells it out. "M.P.S."
+// (Master of Professional Science, "...B.A.M.A./M.P.S. Program") and "MSF"
+// (Master of Science in Finance, "BBA/BSBA - MSF Dual Degree Program") were
+// both entirely unrecognized codes.
 const GRADUATE_HINT =
-  /\b(master|masters|doctor|doctoral|specialist|graduate|ph\.?d|ed\.?d|m\.?ed\.?|m\.?s\.?|m\.?a\.?|m\.?b\.?a|m\.?arch\.?|macc|mat|m\.?f\.?a\.?|mha|mhsa|mia|mib|mla|m\.?m\.?|mpa|m\.?p\.?a\.?s\.?|m\.?p\.?h\.?|mscj|msee|msme|msn|msw|psm|d\.?b\.?a\.?|ddes|dnp|dpt|dr\.?p\.?h\.?|jd|jm|llm)\b/i;
+  /\b(master|masters|doctor|doctoral|specialist|graduate|ph\.?d|ed\.?d|m\.?ed\.?|m\.?s\.?|m\.?a\.?|m\.?b\.?a|m\.?arch\.?|macc|mat|m\.?f\.?a\.?|mha|mhsa|mia|mib|mla|m\.?m\.?|mpa|m\.?p\.?a\.?s\.?|m\.?p\.?h\.?|m\.?p\.?s\.?|mscj|msee|msme|msf|msn|msw|psm|d\.?b\.?a\.?|ddes|dnp|dpt|dr\.?p\.?h\.?|m\.?d\.?|jd|jm|llm)\b/i;
 
 const BACHELOR_HINT =
   /\b(bachelor|bachelors|undergraduate|b\.?s\.?|b\.?a\.?|b\.?b\.?a|b\.?f\.?a|b\.?a\.?s|bacc|bhsa|b\.?m\.?|bppa|bpps|bsn)\b/i;

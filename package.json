@@ -21,6 +21,11 @@
     "scrape:fau": "node scripts/scrape-fau-programs.mjs",
     "scrape:famu": "node scripts/scrape-famu-programs.mjs",
     "scrape:fsu": "node scripts/scrape-fsu-programs.mjs",
+    "scrape:um": "node scripts/scrape-um-programs.mjs",
+    "scrape:stetson": "node scripts/scrape-stetson-programs.mjs",
+    "scrape:erau": "node scripts/scrape-erau-programs.mjs",
+    "scrape:tampa": "node scripts/scrape-tampa-programs.mjs",
+    "scrape:barry": "node scripts/scrape-barry-programs.mjs",
     "export-cache": "node scripts/export-cache.mjs"
   },
   "dependencies": {

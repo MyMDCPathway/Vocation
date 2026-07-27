@@ -39,10 +39,11 @@ describe("catalog registry", () => {
     // A state-college pathway starts at an associate, so a bare "Nursing" in a
     // generated step should link to the A.S., not the RN-to-BSN. Every scraped
     // catalog except the bachelor's-first universities (FIU, UCF, UF, FGCU,
-    // UWF, NCF, UNF, FlPoly, USF, FAU, FAMU, FSU) is a state college, so
+    // UWF, NCF, UNF, FlPoly, USF, FAU, FAMU, FSU, UM, Stetson, ERAU, UT,
+    // Barry, Lynn) is a state college, so
     // derive the list instead of hand-maintaining it — a new state college
     // wired up here is covered automatically.
-    const UNIVERSITY_IDS = new Set(["fiu", "ucf", "uf", "fgcu", "uwf", "ncf", "unf", "flpoly", "usf", "fau", "famu", "fsu"]);
+    const UNIVERSITY_IDS = new Set(["fiu", "ucf", "uf", "fgcu", "uwf", "ncf", "unf", "flpoly", "usf", "fau", "famu", "fsu", "miami", "stetson", "erau", "tampa", "barry", "lynn"]);
     for (const id of scrapedCatalogIds().filter((sid) => !UNIVERSITY_IDS.has(sid))) {
       const catalog = catalogFor(id)!;
       const ambiguous = catalog.programs.filter(
