@@ -7,6 +7,16 @@ import {
 import { FIU_PROGRAMS } from "@/app/lib/fiu-programs";
 import { FLORIDA_SCHOOLS } from "@/app/lib/floridaSchools";
 import { UCF_PROGRAMS } from "@/app/lib/programs/ucf";
+import { UF_PROGRAMS } from "@/app/lib/programs/uf";
+import { FGCU_PROGRAMS } from "@/app/lib/programs/fgcu";
+import { UWF_PROGRAMS } from "@/app/lib/programs/uwf";
+import { NCF_PROGRAMS } from "@/app/lib/programs/ncf";
+import { UNF_PROGRAMS } from "@/app/lib/programs/unf";
+import { FLPOLY_PROGRAMS } from "@/app/lib/programs/flpoly";
+import { USF_PROGRAMS } from "@/app/lib/programs/usf";
+import { FAU_PROGRAMS } from "@/app/lib/programs/fau";
+import { FAMU_PROGRAMS } from "@/app/lib/programs/famu";
+import { FSU_PROGRAMS } from "@/app/lib/programs/fsu";
 import { BROWARD_PROGRAMS } from "@/app/lib/programs/broward";
 import { CF_PROGRAMS } from "@/app/lib/programs/cf";
 import { CFK_PROGRAMS } from "@/app/lib/programs/cfk";
@@ -42,7 +52,17 @@ describe("catalog gating", () => {
     expect(hasCatalog("mdc")).toBe(true);
     expect(hasCatalog("fiu")).toBe(true);
     expect(hasCatalog("ucf")).toBe(true);
-    expect(hasCatalog("uf")).toBe(false);
+    expect(hasCatalog("uf")).toBe(true);
+    expect(hasCatalog("fgcu")).toBe(true);
+    expect(hasCatalog("uwf")).toBe(true);
+    expect(hasCatalog("ncf")).toBe(true);
+    expect(hasCatalog("unf")).toBe(true);
+    expect(hasCatalog("flpoly")).toBe(true);
+    expect(hasCatalog("usf")).toBe(true);
+    expect(hasCatalog("fau")).toBe(true);
+    expect(hasCatalog("famu")).toBe(true);
+    expect(hasCatalog("fsu")).toBe(true);
+    expect(hasCatalog("avemaria")).toBe(false);
     expect(hasCatalog("")).toBe(false);
   });
 
@@ -178,6 +198,459 @@ describe("UCF prompt (generic university template)", () => {
     // but it should never invent one of its own.
     expect(transferAgreementFor("ucf")).toBeNull();
     expect(built.systemPrompt).not.toContain("TRANSFER PARTNER");
+  });
+});
+
+describe("UF prompt (generic university template)", () => {
+  const built = buildPathwayRequest("uf", "Accountant")!;
+
+  it("builds a request", () => {
+    expect(built).not.toBeNull();
+  });
+
+  it("instructs the pathway to start at a bachelor's", () => {
+    expect(built.systemPrompt).toMatch(/STARTS with a bachelor/i);
+    expect(built.userQuery).toMatch(/FIRST step must be a UF bachelor/i);
+  });
+
+  it("forbids associate and transfer steps", () => {
+    expect(built.systemPrompt).toMatch(/NO associate degree step/i);
+    expect(built.systemPrompt).toMatch(/never include a transfer step/i);
+    expect(built.userQuery).toMatch(/do NOT include a transfer step/i);
+  });
+
+  it("embeds UF's real program catalog, not a placeholder", () => {
+    expect(built.systemPrompt).not.toContain("${");
+
+    const undergrad = UF_PROGRAMS.filter((p) => p.level === "bachelor");
+    expect(undergrad.length).toBeGreaterThan(100);
+    for (const program of undergrad.slice(0, 20)) {
+      expect(built.systemPrompt, program.name).toContain(program.name);
+    }
+  });
+
+  it("interpolates the career into both prompts", () => {
+    expect(built.systemPrompt).toContain("Accountant");
+    expect(built.userQuery).toContain("Accountant");
+  });
+
+  it("does not mention Miami Dade College's catalog or FIU's/UCF's", () => {
+    expect(built.systemPrompt).not.toContain("Associate in Arts in Engineering");
+    expect(built.systemPrompt).not.toContain("Florida International University");
+    expect(built.systemPrompt).not.toContain("University of Central Florida");
+  });
+
+  it("has no transfer partner recorded, since UF is a transfer destination", () => {
+    expect(transferAgreementFor("uf")).toBeNull();
+    expect(built.systemPrompt).not.toContain("TRANSFER PARTNER");
+  });
+});
+
+describe("FGCU prompt (generic university template)", () => {
+  const built = buildPathwayRequest("fgcu", "Accountant")!;
+
+  it("builds a request", () => {
+    expect(built).not.toBeNull();
+  });
+
+  it("instructs the pathway to start at a bachelor's", () => {
+    expect(built.systemPrompt).toMatch(/STARTS with a bachelor/i);
+    expect(built.userQuery).toMatch(/FIRST step must be an FGCU bachelor/i);
+  });
+
+  it("forbids associate and transfer steps", () => {
+    expect(built.systemPrompt).toMatch(/NO associate degree step/i);
+    expect(built.systemPrompt).toMatch(/never include a transfer step/i);
+    expect(built.userQuery).toMatch(/do NOT include a transfer step/i);
+  });
+
+  it("embeds FGCU's real program catalog, not a placeholder", () => {
+    expect(built.systemPrompt).not.toContain("${");
+
+    const undergrad = FGCU_PROGRAMS.filter((p) => p.level === "bachelor");
+    expect(undergrad.length).toBeGreaterThan(40);
+    for (const program of undergrad.slice(0, 20)) {
+      expect(built.systemPrompt, program.name).toContain(program.name);
+    }
+  });
+
+  it("interpolates the career into both prompts", () => {
+    expect(built.systemPrompt).toContain("Accountant");
+    expect(built.userQuery).toContain("Accountant");
+  });
+
+  it("does not mention Miami Dade College's catalog or FIU's/UCF's/UF's", () => {
+    expect(built.systemPrompt).not.toContain("Associate in Arts in Engineering");
+    expect(built.systemPrompt).not.toContain("Florida International University");
+    expect(built.systemPrompt).not.toContain("University of Central Florida");
+  });
+
+  it("has no transfer partner recorded, since FGCU is a transfer destination", () => {
+    expect(transferAgreementFor("fgcu")).toBeNull();
+    expect(built.systemPrompt).not.toContain("TRANSFER PARTNER");
+  });
+});
+
+describe("UWF prompt (generic university template)", () => {
+  const built = buildPathwayRequest("uwf", "Accountant")!;
+
+  it("builds a request", () => {
+    expect(built).not.toBeNull();
+  });
+
+  it("instructs the pathway to start at a bachelor's", () => {
+    expect(built.systemPrompt).toMatch(/STARTS with a bachelor/i);
+    expect(built.userQuery).toMatch(/FIRST step must be a UWF bachelor/i);
+  });
+
+  it("forbids associate and transfer steps", () => {
+    expect(built.systemPrompt).toMatch(/NO associate degree step/i);
+    expect(built.systemPrompt).toMatch(/never include a transfer step/i);
+    expect(built.userQuery).toMatch(/do NOT include a transfer step/i);
+  });
+
+  it("embeds UWF's real program catalog, not a placeholder", () => {
+    expect(built.systemPrompt).not.toContain("${");
+
+    const undergrad = UWF_PROGRAMS.filter((p) => p.level === "bachelor");
+    expect(undergrad.length).toBeGreaterThan(30);
+    for (const program of undergrad.slice(0, 20)) {
+      expect(built.systemPrompt, program.name).toContain(program.name);
+    }
+  });
+
+  it("interpolates the career into both prompts", () => {
+    expect(built.systemPrompt).toContain("Accountant");
+    expect(built.userQuery).toContain("Accountant");
+  });
+
+  it("does not mention Miami Dade College's catalog or FIU's/UCF's", () => {
+    expect(built.systemPrompt).not.toContain("Associate in Arts in Engineering");
+    expect(built.systemPrompt).not.toContain("Florida International University");
+    expect(built.systemPrompt).not.toContain("University of Central Florida");
+  });
+
+  it("has no transfer partner recorded, since UWF is a transfer destination", () => {
+    expect(transferAgreementFor("uwf")).toBeNull();
+    expect(built.systemPrompt).not.toContain("TRANSFER PARTNER");
+  });
+});
+
+describe("NCF prompt (generic university template)", () => {
+  const built = buildPathwayRequest("ncf", "Data Scientist")!;
+
+  it("builds a request", () => {
+    expect(built).not.toBeNull();
+  });
+
+  it("instructs the pathway to start at a bachelor's", () => {
+    expect(built.systemPrompt).toMatch(/STARTS with a bachelor/i);
+    expect(built.userQuery).toMatch(/FIRST step must be an NCF bachelor/i);
+  });
+
+  it("forbids associate and transfer steps", () => {
+    expect(built.systemPrompt).toMatch(/NO associate degree step/i);
+    expect(built.systemPrompt).toMatch(/never include a transfer step/i);
+    expect(built.userQuery).toMatch(/do NOT include a transfer step/i);
+  });
+
+  it("embeds NCF's real program catalog, not a placeholder", () => {
+    expect(built.systemPrompt).not.toContain("${");
+
+    const undergrad = NCF_PROGRAMS.filter((p) => p.level === "bachelor");
+    expect(undergrad.length).toBeGreaterThan(40);
+    for (const program of undergrad.slice(0, 20)) {
+      expect(built.systemPrompt, program.name).toContain(program.name);
+    }
+  });
+
+  it("interpolates the career into both prompts", () => {
+    expect(built.systemPrompt).toContain("Data Scientist");
+    expect(built.userQuery).toContain("Data Scientist");
+  });
+
+  it("has no transfer partner recorded, since NCF is a transfer destination", () => {
+    expect(transferAgreementFor("ncf")).toBeNull();
+    expect(built.systemPrompt).not.toContain("TRANSFER PARTNER");
+  });
+});
+
+describe("UNF prompt (generic university template)", () => {
+  const built = buildPathwayRequest("unf", "Accountant")!;
+
+  it("builds a request", () => {
+    expect(built).not.toBeNull();
+  });
+
+  it("instructs the pathway to start at a bachelor's", () => {
+    expect(built.systemPrompt).toMatch(/STARTS with a bachelor/i);
+    expect(built.userQuery).toMatch(/FIRST step must be a UNF bachelor/i);
+  });
+
+  it("forbids associate and transfer steps", () => {
+    expect(built.systemPrompt).toMatch(/NO associate degree step/i);
+    expect(built.systemPrompt).toMatch(/never include a transfer step/i);
+    expect(built.userQuery).toMatch(/do NOT include a transfer step/i);
+  });
+
+  it("embeds UNF's real program catalog, not a placeholder", () => {
+    expect(built.systemPrompt).not.toContain("${");
+
+    const undergrad = UNF_PROGRAMS.filter((p) => p.level === "bachelor");
+    expect(undergrad.length).toBeGreaterThan(100);
+    for (const program of undergrad.slice(0, 20)) {
+      expect(built.systemPrompt, program.name).toContain(program.name);
+    }
+  });
+
+  it("interpolates the career into both prompts", () => {
+    expect(built.systemPrompt).toContain("Accountant");
+    expect(built.userQuery).toContain("Accountant");
+  });
+
+  it("does not mention Miami Dade College's catalog or FIU's/UCF's", () => {
+    expect(built.systemPrompt).not.toContain("Associate in Arts in Engineering");
+    expect(built.systemPrompt).not.toContain("Florida International University");
+    expect(built.systemPrompt).not.toContain("University of Central Florida");
+  });
+
+  it("has no transfer partner recorded, since UNF is a transfer destination", () => {
+    expect(transferAgreementFor("unf")).toBeNull();
+    expect(built.systemPrompt).not.toContain("TRANSFER PARTNER");
+  });
+});
+
+describe("FlPoly prompt (generic university template)", () => {
+  const built = buildPathwayRequest("flpoly", "Software Engineer")!;
+
+  it("builds a request", () => {
+    expect(built).not.toBeNull();
+  });
+
+  it("instructs the pathway to start at a bachelor's", () => {
+    expect(built.systemPrompt).toMatch(/STARTS with a bachelor/i);
+    expect(built.userQuery).toMatch(/FIRST step must be a FlPoly bachelor/i);
+  });
+
+  it("forbids associate and transfer steps", () => {
+    expect(built.systemPrompt).toMatch(/NO associate degree step/i);
+    expect(built.systemPrompt).toMatch(/never include a transfer step/i);
+    expect(built.userQuery).toMatch(/do NOT include a transfer step/i);
+  });
+
+  it("embeds FlPoly's real program catalog, not a placeholder", () => {
+    expect(built.systemPrompt).not.toContain("${");
+
+    const undergrad = FLPOLY_PROGRAMS.filter((p) => p.level === "bachelor");
+    expect(undergrad.length).toBeGreaterThan(10);
+    for (const program of undergrad) {
+      expect(built.systemPrompt, program.name).toContain(program.name);
+    }
+  });
+
+  it("interpolates the career into both prompts", () => {
+    expect(built.systemPrompt).toContain("Software Engineer");
+    expect(built.userQuery).toContain("Software Engineer");
+  });
+
+  it("does not mention Miami Dade College's catalog or FIU's/UCF's", () => {
+    expect(built.systemPrompt).not.toContain("Associate in Arts in Engineering");
+    expect(built.systemPrompt).not.toContain("Florida International University");
+    expect(built.systemPrompt).not.toContain("University of Central Florida");
+  });
+
+  it("has no transfer partner recorded, since FlPoly is a transfer destination", () => {
+    expect(transferAgreementFor("flpoly")).toBeNull();
+    expect(built.systemPrompt).not.toContain("TRANSFER PARTNER");
+  });
+});
+
+describe("USF prompt (generic university template)", () => {
+  const built = buildPathwayRequest("usf", "Accountant")!;
+
+  it("builds a request", () => {
+    expect(built).not.toBeNull();
+  });
+
+  it("instructs the pathway to start at a bachelor's", () => {
+    expect(built.systemPrompt).toMatch(/STARTS with a bachelor/i);
+    expect(built.userQuery).toMatch(/FIRST step must be a USF bachelor/i);
+  });
+
+  it("forbids associate and transfer steps", () => {
+    expect(built.systemPrompt).toMatch(/NO associate degree step/i);
+    expect(built.systemPrompt).toMatch(/never include a transfer step/i);
+    expect(built.userQuery).toMatch(/do NOT include a transfer step/i);
+  });
+
+  it("embeds USF's real program catalog, not a placeholder", () => {
+    expect(built.systemPrompt).not.toContain("${");
+
+    const undergrad = USF_PROGRAMS.filter((p) => p.level === "bachelor");
+    expect(undergrad.length).toBeGreaterThan(100);
+    for (const program of undergrad.slice(0, 20)) {
+      expect(built.systemPrompt, program.name).toContain(program.name);
+    }
+  });
+
+  it("interpolates the career into both prompts", () => {
+    expect(built.systemPrompt).toContain("Accountant");
+    expect(built.userQuery).toContain("Accountant");
+  });
+
+  it("does not mention Miami Dade College's catalog or FIU's/UCF's", () => {
+    expect(built.systemPrompt).not.toContain("Associate in Arts in Engineering");
+    expect(built.systemPrompt).not.toContain("Florida International University");
+    expect(built.systemPrompt).not.toContain("University of Central Florida");
+  });
+
+  it("has no transfer partner recorded, since USF is a transfer destination", () => {
+    expect(transferAgreementFor("usf")).toBeNull();
+    expect(built.systemPrompt).not.toContain("TRANSFER PARTNER");
+  });
+});
+
+describe("FAU prompt (generic university template)", () => {
+  const built = buildPathwayRequest("fau", "Accountant")!;
+
+  it("builds a request", () => {
+    expect(built).not.toBeNull();
+  });
+
+  it("instructs the pathway to start at a bachelor's", () => {
+    expect(built.systemPrompt).toMatch(/STARTS with a bachelor/i);
+    expect(built.userQuery).toMatch(/FIRST step must be an FAU bachelor/i);
+  });
+
+  it("forbids associate and transfer steps", () => {
+    expect(built.systemPrompt).toMatch(/NO associate degree step/i);
+    expect(built.systemPrompt).toMatch(/never include a transfer step/i);
+    expect(built.userQuery).toMatch(/do NOT include a transfer step/i);
+  });
+
+  it("embeds FAU's real program catalog, not a placeholder", () => {
+    expect(built.systemPrompt).not.toContain("${");
+
+    const undergrad = FAU_PROGRAMS.filter((p) => p.level === "bachelor");
+    expect(undergrad.length).toBeGreaterThan(50);
+    for (const program of undergrad.slice(0, 20)) {
+      expect(built.systemPrompt, program.name).toContain(program.name);
+    }
+  });
+
+  it("interpolates the career into both prompts", () => {
+    expect(built.systemPrompt).toContain("Accountant");
+    expect(built.userQuery).toContain("Accountant");
+  });
+
+  it("does not mention Miami Dade College's catalog or FIU's/UCF's", () => {
+    expect(built.systemPrompt).not.toContain("Associate in Arts in Engineering");
+    expect(built.systemPrompt).not.toContain("Florida International University");
+    expect(built.systemPrompt).not.toContain("University of Central Florida");
+  });
+
+  it("has no transfer partner recorded, since FAU is a transfer destination", () => {
+    expect(transferAgreementFor("fau")).toBeNull();
+    expect(built.systemPrompt).not.toContain("TRANSFER PARTNER");
+  });
+});
+
+describe("FAMU prompt (generic university template)", () => {
+  const built = buildPathwayRequest("famu", "Accountant")!;
+
+  it("builds a request", () => {
+    expect(built).not.toBeNull();
+  });
+
+  it("instructs the pathway to start at a bachelor's", () => {
+    expect(built.systemPrompt).toMatch(/STARTS with a bachelor/i);
+    expect(built.userQuery).toMatch(/FIRST step must be an FAMU bachelor/i);
+  });
+
+  it("forbids associate and transfer steps", () => {
+    expect(built.systemPrompt).toMatch(/NO associate degree step/i);
+    expect(built.systemPrompt).toMatch(/never include a transfer step/i);
+    expect(built.userQuery).toMatch(/do NOT include a transfer step/i);
+  });
+
+  it("embeds FAMU's real program catalog, not a placeholder", () => {
+    expect(built.systemPrompt).not.toContain("${");
+
+    const undergrad = FAMU_PROGRAMS.filter((p) => p.level === "bachelor");
+    expect(undergrad.length).toBeGreaterThan(30);
+    for (const program of undergrad.slice(0, 20)) {
+      expect(built.systemPrompt, program.name).toContain(program.name);
+    }
+  });
+
+  it("interpolates the career into both prompts", () => {
+    expect(built.systemPrompt).toContain("Accountant");
+    expect(built.userQuery).toContain("Accountant");
+  });
+
+  it("does not mention Miami Dade College's catalog or FIU's/UCF's", () => {
+    expect(built.systemPrompt).not.toContain("Associate in Arts in Engineering");
+    expect(built.systemPrompt).not.toContain("Florida International University");
+    expect(built.systemPrompt).not.toContain("University of Central Florida");
+  });
+
+  it("has no transfer partner recorded, since FAMU is a transfer destination", () => {
+    expect(transferAgreementFor("famu")).toBeNull();
+    expect(built.systemPrompt).not.toContain("TRANSFER PARTNER");
+  });
+});
+
+describe("FSU prompt (generic university template)", () => {
+  const built = buildPathwayRequest("fsu", "Accountant")!;
+
+  it("builds a request", () => {
+    expect(built).not.toBeNull();
+  });
+
+  it("instructs the pathway to start at a bachelor's", () => {
+    expect(built.systemPrompt).toMatch(/STARTS with a bachelor/i);
+    expect(built.userQuery).toMatch(/FIRST step must be an FSU bachelor/i);
+  });
+
+  it("forbids associate and transfer steps", () => {
+    expect(built.systemPrompt).toMatch(/NO associate degree step/i);
+    expect(built.systemPrompt).toMatch(/never include a transfer step/i);
+    expect(built.userQuery).toMatch(/do NOT include a transfer step/i);
+  });
+
+  it("embeds FSU's real program catalog, not a placeholder", () => {
+    expect(built.systemPrompt).not.toContain("${");
+
+    const undergrad = FSU_PROGRAMS.filter((p) => p.level === "bachelor");
+    expect(undergrad.length).toBeGreaterThan(100);
+    for (const program of undergrad.slice(0, 20)) {
+      expect(built.systemPrompt, program.name).toContain(program.name);
+    }
+  });
+
+  it("interpolates the career into both prompts", () => {
+    expect(built.systemPrompt).toContain("Accountant");
+    expect(built.userQuery).toContain("Accountant");
+  });
+
+  it("does not mention Miami Dade College's catalog or FIU's/UCF's", () => {
+    expect(built.systemPrompt).not.toContain("Associate in Arts in Engineering");
+    expect(built.systemPrompt).not.toContain("Florida International University");
+    expect(built.systemPrompt).not.toContain("University of Central Florida");
+  });
+
+  it("has no transfer partner recorded, since FSU is a transfer destination", () => {
+    expect(transferAgreementFor("fsu")).toBeNull();
+    expect(built.systemPrompt).not.toContain("TRANSFER PARTNER");
+  });
+
+  it("points every program at the same shared majors page, not a fabricated per-program URL", () => {
+    // FSU's real per-program links live in an unscrapable Power BI dashboard
+    // (see HANDOFF.md §13) — every entry shares one real, verifiable link
+    // instead of a guessed one.
+    const urls = new Set(FSU_PROGRAMS.map((p) => p.url));
+    expect(urls.size).toBe(1);
+    expect([...urls][0]).toBe("https://admissions.fsu.edu/majors");
   });
 });
 

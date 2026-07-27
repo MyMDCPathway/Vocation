@@ -13,6 +13,14 @@
     "test:watch": "vitest",
     "scrape:broward": "node scripts/scrape-broward-programs.mjs",
     "scrape:ucf": "node scripts/scrape-ucf-programs.mjs",
+    "scrape:uf": "node scripts/scrape-uf-programs.mjs",
+    "scrape:fgcu": "node scripts/scrape-fgcu-programs.mjs",
+    "scrape:uwf": "node scripts/scrape-uwf-programs.mjs",
+    "scrape:ncf": "node scripts/scrape-ncf-programs.mjs",
+    "scrape:unf": "node scripts/scrape-unf-programs.mjs",
+    "scrape:fau": "node scripts/scrape-fau-programs.mjs",
+    "scrape:famu": "node scripts/scrape-famu-programs.mjs",
+    "scrape:fsu": "node scripts/scrape-fsu-programs.mjs",
     "export-cache": "node scripts/export-cache.mjs"
   },
   "dependencies": {

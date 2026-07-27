@@ -24,13 +24,19 @@ import { CFK_PROGRAMS } from "./programs/cfk";
 import { CHIPOLA_PROGRAMS } from "./programs/chipola";
 import { DSC_PROGRAMS } from "./programs/dsc";
 import { EFSC_PROGRAMS } from "./programs/efsc";
+import { FAMU_PROGRAMS } from "./programs/famu";
+import { FAU_PROGRAMS } from "./programs/fau";
 import { FGC_PROGRAMS } from "./programs/fgc";
+import { FGCU_PROGRAMS } from "./programs/fgcu";
+import { FLPOLY_PROGRAMS } from "./programs/flpoly";
 import { FSCJ_PROGRAMS } from "./programs/fscj";
+import { FSU_PROGRAMS } from "./programs/fsu";
 import { FSW_PROGRAMS } from "./programs/fsw";
 import { GCSC_PROGRAMS } from "./programs/gcsc";
 import { HCC_PROGRAMS } from "./programs/hcc";
 import { IRSC_PROGRAMS } from "./programs/irsc";
 import { LSSC_PROGRAMS } from "./programs/lssc";
+import { NCF_PROGRAMS } from "./programs/ncf";
 import { NFC_PROGRAMS } from "./programs/nfc";
 import { NWFSC_PROGRAMS } from "./programs/nwfsc";
 import { PBSC_PROGRAMS } from "./programs/pbsc";
@@ -45,6 +51,10 @@ import { SPC_PROGRAMS } from "./programs/spc";
 import { SSC_PROGRAMS } from "./programs/ssc";
 import { TSC_PROGRAMS } from "./programs/tsc";
 import { UCF_PROGRAMS } from "./programs/ucf";
+import { UF_PROGRAMS } from "./programs/uf";
+import { UNF_PROGRAMS } from "./programs/unf";
+import { USF_PROGRAMS } from "./programs/usf";
+import { UWF_PROGRAMS } from "./programs/uwf";
 import { VALENCIA_PROGRAMS } from "./programs/valencia";
 import type { SchoolProgram } from "./programCatalog";
 import { SCHOOLS_WITH_CATALOG, hasCatalog, type CatalogSchoolId } from "./schoolCatalogs";
@@ -266,11 +276,31 @@ interface UniversityCatalog {
 const UNIVERSITY_SHORT_NAMES: Record<string, string> = {
   fiu: "FIU",
   ucf: "UCF",
+  uf: "UF",
+  fgcu: "FGCU",
+  uwf: "UWF",
+  ncf: "NCF",
+  unf: "UNF",
+  flpoly: "FlPoly",
+  usf: "USF",
+  fau: "FAU",
+  famu: "FAMU",
+  fsu: "FSU",
 };
 
 const UNIVERSITY_PROGRAMS: Record<string, SchoolProgram[]> = {
   fiu: FIU_PROGRAMS,
   ucf: UCF_PROGRAMS,
+  uf: UF_PROGRAMS,
+  fgcu: FGCU_PROGRAMS,
+  uwf: UWF_PROGRAMS,
+  ncf: NCF_PROGRAMS,
+  unf: UNF_PROGRAMS,
+  flpoly: FLPOLY_PROGRAMS,
+  usf: USF_PROGRAMS,
+  fau: FAU_PROGRAMS,
+  famu: FAMU_PROGRAMS,
+  fsu: FSU_PROGRAMS,
 };
 
 function universityCatalog(schoolId: string): UniversityCatalog | null {

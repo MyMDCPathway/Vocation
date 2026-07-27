@@ -14,7 +14,7 @@ describe("catalog registry", () => {
   });
 
   it("returns null for a school we hold no data for", () => {
-    expect(catalogFor("uf")).toBeNull();
+    expect(catalogFor("avemaria")).toBeNull();
     expect(catalogFor("")).toBeNull();
   });
 
@@ -38,10 +38,12 @@ describe("catalog registry", () => {
   it("prefers the associate for an unqualified name at a state college", () => {
     // A state-college pathway starts at an associate, so a bare "Nursing" in a
     // generated step should link to the A.S., not the RN-to-BSN. Every scraped
-    // catalog except the bachelor's-first universities (FIU, UCF) is a state
-    // college, so derive the list instead of hand-maintaining it — a new state
-    // college wired up here is covered automatically.
-    for (const id of scrapedCatalogIds().filter((sid) => sid !== "fiu" && sid !== "ucf")) {
+    // catalog except the bachelor's-first universities (FIU, UCF, UF, FGCU,
+    // UWF, NCF, UNF, FlPoly, USF, FAU, FAMU, FSU) is a state college, so
+    // derive the list instead of hand-maintaining it — a new state college
+    // wired up here is covered automatically.
+    const UNIVERSITY_IDS = new Set(["fiu", "ucf", "uf", "fgcu", "uwf", "ncf", "unf", "flpoly", "usf", "fau", "famu", "fsu"]);
+    for (const id of scrapedCatalogIds().filter((sid) => !UNIVERSITY_IDS.has(sid))) {
       const catalog = catalogFor(id)!;
       const ambiguous = catalog.programs.filter(
         (p) =>

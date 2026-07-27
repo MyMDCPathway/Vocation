@@ -1,20 +1,33 @@
 # Vocation — Project Handoff
 
 Everything a new developer needs to work on this codebase safely. Written
-2026-07-25, last updated **2026-07-26** against commit `3290c18` on `main`.
+2026-07-25, last updated **2026-07-27** against commit `3290c18` on `main`.
 
 Read the **Rules** section before writing code. Several of them exist because
 the obvious approach has already failed here in a way that wasn't visible until
 production.
 
-> **Next session: public and private universities, continued.**
-> The generic university prompt template now exists (`universitySystemPrompt`
-> in `pathwayPrompts.ts`, refactored out of what used to be FIU's hard-coded
-> prompt) and UCF is wired up as the pilot — scraped, tested, verified live in
-> a browser. 10 SUS universities and 21 private schools remain uncatalogued.
-> **Read §13 first — universities are not state colleges**, and read the UCF
-> entry in §13's per-school table before assuming the next university's
-> catalog site works the same way UCF's did.
+> **Next session: private universities.**
+> All **12 SUS public universities are wired up and done**: FIU (original),
+> UCF, UF, FGCU, UWF, NCF, UNF, FlPoly, USF, FAU, FAMU, and **FSU** — each
+> verified live in a browser. That's every public university in Florida.
+> **Read §13 first.** FlPoly and USF are both Acalog sites WAF-blocked for
+> `fetch()`/`curl`, but a real browser navigating directly to each page still
+> gets through — both were hand-collected that way (navigate, read the
+> rendered DOM, no committed scraper). FAU and FAMU both turned out to have
+> no WAF at all — their real catalogs live on the university's own site, not
+> the Acalog `catalog.*.edu` instance the earlier survey looked at, and each
+> got a real committed scraper once the actual page was found. **FSU took a
+> different resolution than the others**: its best data (550 majors, real
+> per-program AND per-college links) lives in a Power BI dashboard that
+> resists every automated interaction technique tried (see §13) — rather than
+> keep fighting that, FSU's catalog uses real major names pulled from FSU's
+> own plain HTML program-listing pages instead, with every entry pointing at
+> one shared link (`admissions.fsu.edu/majors`) rather than a per-program URL
+> this scraper has no way to verify. **Next up: the 21 private (SACSCOC)
+> schools** — expect each to need its own survey the way every university
+> did; read §13's "universities are not state colleges" section before
+> starting, since the private schools will differ from these public ones too.
 
 ---
 
@@ -29,13 +42,15 @@ Router, TypeScript, no database.
 
 **The one rule everything else follows from:** Gemini prompts are grounded in
 scraped real program catalogs (`app/lib/programs/*.ts`, `app/lib/fiu-programs.ts`,
-`app/lib/mdc-programs.ts` — 3,313 real programs across 28 files). Never let the
+`app/lib/mdc-programs.ts` — 5,173 real programs across 38 files). Never let the
 model free-generate a program name — it invents plausible-sounding degrees that
 don't exist. If you add a school, you scrape its catalog first (§2, §7).
 
-**29 of 61 schools can generate pathways** (27 state colleges + FIU + UCF). The
-other 32 — 10 SUS universities and 21 private schools — are gated off and show
-a "we don't have this catalog yet" notice. That's the next body of work (§13).
+**39 of 61 schools can generate pathways** — all 27 state colleges and all 12
+SUS public universities (FIU + UCF + UF + FGCU + UWF + NCF + UNF + FlPoly +
+USF + FAU + FAMU + FSU). The other 22 — all private (SACSCOC) — are gated off
+and show a "we don't have this catalog yet" notice. That's the next body of
+work (§13).
 
 **There is no traditional database.** Persistence is `data/seed-cache.json` (a
 committed JSON file, §5), an optional Redis/KV durable layer (§5.1), and a
@@ -78,7 +93,7 @@ the logo-flash bug both passed every automated check while still being broken.
 
 **Golden commands:**
 ```bash
-npm test          # 364 tests; 363 pass, 1 known pre-existing failure (§8)
+npm test          # 434 tests; 433 pass, 1 known pre-existing failure (§8)
 npm run build     # must compile; NEVER run this while `npm run dev` is up (§8)
 ```
 
@@ -564,7 +579,7 @@ responses to the console on every call. Harmless, noisy.
 npm install
 cp .env.example .env.local     # add GEMINI_API_KEY from aistudio.google.com
 npm run dev                    # http://localhost:3000
-npm test                       # 364 tests (363 pass, 1 known failure — §8)
+npm test                       # 434 tests (433 pass, 1 known failure — §8)
 npm run build                  # production build
 ```
 
@@ -603,7 +618,7 @@ these figures.
 
 ---
 
-## 12. Test suite — 364 tests, 20 files
+## 12. Test suite — 434 tests, 20 files
 
 | Area | Files | Notable coverage |
 |---|---|---|
@@ -630,17 +645,18 @@ real bugs; a test asserting one specific program would have caught none.
 
 ---
 
-## 13. Next up — public and private universities
+## 13. Next up — private universities (all public universities are done)
 
-**Status as of 2026-07-26:** all 27 Florida College System schools are wired up
-and generating pathways. UCF is the first SUS university, done as the pilot
-that validated the university template. What remains:
+**Status as of 2026-07-27:** all 27 Florida College System schools AND all 12
+SUS public universities are wired up and generating pathways: FIU (original),
+UCF (the pilot that validated the university template), UF, FGCU, UWF, NCF,
+UNF, FlPoly, USF, FAU, FAMU, and FSU. What remains:
 
 | Group | Count | Catalogued | Notes |
 |---|---|---|---|
 | State colleges | 29* | 27 | Done. (*29 includes MDC + Broward) |
-| SUS public universities | 12 | 2 (FIU, UCF) | **Next.** FAMU, FAU, FGCU, FlPoly, FSU, NCF, UF, UNF, USF, UWF |
-| Private (SACSCOC) | 21 | 0 | After that |
+| SUS public universities | 12 | 12 (all of them) | Done. |
+| Private (SACSCOC) | 21 | 0 | **Next.** Expect another per-school survey — read "universities are not state colleges" below before assuming these behave like the SUS batch |
 
 Until a school is catalogued it's gated off in `schoolCatalogs.ts` and the UI
 shows "we don't have this catalog yet" — so partial progress is safe to ship.
@@ -666,40 +682,304 @@ Per point 2 above, **UCF has no `transferAgreements.ts` entry, and that's
 correct, not an oversight** — it's the destination FGC/TSC/Valencia/etc. name
 in their own transfer sections, not a school that needs one of its own.
 
-### UCF-specific findings, useful before starting the next university
+### Twelve different catalog platforms for twelve universities — expect the same for private schools
 
-**Catalog platform: Kuali Catalog, a JSON REST API — not what the FCS schools used.**
-Point 4 above said to expect bespoke platforms; UCF's `catalog.ucf.edu` (really
-`www.ucf.edu/catalog/*`) is a Kuali Catalog SPA that renders nothing without
-JavaScript, but backs onto a plain, unauthenticated REST endpoint:
-`https://ucf.kuali.co/api/v1/catalog/programs/<catalogId>?q=`. Two separate
-catalog ids exist (undergraduate and graduate editions); `scripts/scrape-ucf-programs.mjs`
-fetches both directly and reconstructs the browsable URL from each program's
-`pid` (`https://www.ucf.edu/catalog/undergraduate/#/programs/<pid>`, hash-routed
-by the SPA, confirmed to resolve correctly in a real browser). **Don't assume
-the next university's catalog works this way** — check for a Kuali, Acalog, or
-CourseLeaf backend before writing a scraper; if you find `<school>.kuali.co` in
-the network tab, the API-first approach here is directly reusable.
+Point 4 above said to expect bespoke platforms per school. Confirmed, twelve
+times over — every single SUS university needed its own survey and its own
+scraper shape:
 
-**The round-trip test caught two real matcher bugs, exactly as predicted.**
-Both are now fixed in `programCatalog.ts`'s `requestedLevel`, not worked around
-in UCF's data:
-- `DEGREE_TRANSITION` — an accelerated dual-degree title like "Environmental
-  Engineering MSEnvE, Accelerated BS to MSEnvE" is entirely a graduate program,
-  but the "BS" naming the accelerated track's entry point read as a bachelor's
-  hint. Stripped the same way `GRADUATE_OF_A_DEGREE` already strips "AA
-  Graduates" — the credential named right before "to" is the entry point, not
-  this program's own level.
-- `EMBEDDED_DEGREE_FRAGMENT` — compound engineering credentials like
+| School | Platform | Scraper approach |
+|---|---|---|
+| UCF | Kuali Catalog (a JS SPA over a plain JSON REST API) | Hit `https://ucf.kuali.co/api/v1/catalog/programs/<catalogId>?q=` directly (two catalog ids: undergrad + grad). Reconstruct the URL from each program's `pid`. |
+| UF | CourseLeaf, two different shapes on two subdomains | `catalog.ufl.edu/UGRD/programs/` is a filterable card grid (undergrad); `gradcatalog.ufl.edu/graduate/programs-college/` is a flat majors-by-college sitemap (grad). Both are plain server-rendered HTML — regex, no browser needed. |
+| FGCU | CourseLeaf, single unified page, behind AWS WAF | `catalog.fgcu.edu/programs/` — one A-Z sitemap combining undergrad AND grad, each link already stating its own credential in parens. `fetch()` is blocked (see below); scraper shells out to `curl` instead. |
+| UWF | CourseLeaf, two A-Z pages, no WAF | `catalog.uwf.edu/{undergraduate,graduate}/azindex/` — real programs are the entries whose link text ends in "Name, CREDENTIAL"; policy/topic entries on the same page never have that suffix. |
+| UNF | Bespoke static site, one giant combined page, no WAF | `unf.edu/catalog/programs/index.html` — a single ~4.7MB page listing all 430 programs across both levels and every college, each with a real link and its own credential code (`ug/`/`gr/` path prefix states the level directly). Simplest of the nine to parse once found. |
+| NCF | No real catalog platform at all | See below — this one is genuinely different, not just a different vendor. |
+| FlPoly | Acalog, real Program entities, behind AWS WAF that blocks even in-page `fetch()` | Hand-collected via browser navigation, not scraped — see below. |
+| USF | Acalog, real Program entities (same shape as the state colleges'), behind AWS WAF | Same hand-collection technique as FlPoly — see below. Two A-Z index pages (`content.php?catoid=25&navoid=4346` undergrad, `catoid=28&navoid=5315` graduate), 428 programs total. |
+| FAU | Bespoke single registrar page, no WAF, but hand-authored broken HTML | `www.fau.edu/registrar/university-catalog/catalog/degree-programs/` — one page, one `<h3>` per degree type, each followed by its majors. No per-program page exists; every major links only to its COLLEGE's catalog page, which is the "school of interest" link this scraper stores. See below — this is a real committed scraper (`scrape:fau`), unlike FlPoly/USF, but the parser has to route around inconsistent markup (see below). |
+| FAMU | Bespoke, split across two sites by level, no WAF on either | Undergrad: `www.famu.edu/academics/undergraduate-academics/index.php`, one plain-text major list per college (no per-major links, so every major gets its college's link — same shape as FAU). Grad: `graduateschool.famu.edu/graduate-programs/graduate-programs-<slug>.php`, one page per college (11 total), each a clean grid of real per-program links with their own credential badge — better structured than the undergrad page. **`catalog.famu.edu` (Acalog) is a dead end and was the wrong site all along** — WAF-blocked AND has no Program entities; the real catalog was never there. See below. |
+| FSU | Best data (Power BI dashboard, 550 majors, real per-program AND per-college links) exists but isn't automatable; catalog instead built from plain HTML program-listing pages | No WAF anywhere involved. `academic-guide.fsu.edu/all-programs` (undergrad, clean Views listing) plus three `gradschool.fsu.edu` degree-programs pages (master's/doctoral/specialist, each really a department-contact directory, not a program listing — only the row title is a usable program name). Every entry points at the single `admissions.fsu.edu/majors` page rather than a per-program URL, since this scraper has no way to get or verify individual links — see below for the full Power BI investigation. |
+| FIU | Bespoke (predates this batch) | See §7, §9. |
+
+**Before writing a scraper, check for `x-amzn-waf-action: challenge` in the
+response headers.** This is AWS WAF Bot Control, and it is common — FGCU, USF,
+FAMU, and FlPoly all hit it. **The pattern that emerged: Acalog-hosted
+catalogs (FAMU, FlPoly, USF) are consistently WAF-blocked for BOTH `fetch()`
+and `curl` in this environment; CourseLeaf-hosted ones (UF, UWF) are usually
+not WAF-protected at all, and on the one that is (FGCU) plain `curl` with an
+ordinary browser `User-Agent` gets through where `fetch()` doesn't** (the WAF
+rule keys off TLS/HTTP client fingerprint, not the User-Agent string). FGCU's
+scraper (`scripts/scrape-fgcu-programs.mjs`) shells out to `curl` via
+`child_process.execFileSync` — copy that pattern for a CourseLeaf site that
+shows this symptom. For an Acalog site, don't expect the curl workaround to
+help; USF, FAMU, and FlPoly all confirmed curl fails there too.
+
+**FlPoly and USF both confirmed the next layer of that picture: a real
+browser can still get through where curl can't — but only via top-level
+navigation, not `fetch()`, even from inside a page that itself loaded fine.**
+Navigating the browser tool directly to a WAF-blocked Acalog `content.php` /
+`preview_program.php` page works (the WAF's challenge is solved like any
+other page load); calling `fetch()` against that same URL from *within* that
+already-loaded page's own JS console returns an empty body — the WAF
+differentiates by request type (top-level navigation vs. XHR/fetch), not just
+by TLS/JS fingerprint. Net effect: for a WAF-blocked Acalog site with real
+Program entities, you can still get the data, just not via any
+`npm run scrape:*` script — navigate to each page and read the rendered DOM
+by hand. That's how both `app/lib/programs/flpoly.ts` (9 undergraduate
+department pages + 1 graduate page) and `app/lib/programs/usf.ts` (2 A-Z
+index pages, 428 programs total, the largest hand-collected catalog so far)
+were built: one browser navigation per page,
+`document.querySelectorAll('a[href*="preview_program"]')` (or, for FlPoly's
+department pages, filtered to `.textContent.includes('(Program Description)')`)
+read out after each. **These two files have no committed scraper and are
+edited by hand** — re-verify against the live site if either goes stale, the
+same as the 25 original FCS catalogs (§9). **FAMU's WAF-blocked, no-Program-entities `catalog.famu.edu` turned out to be
+the wrong site entirely — see below for where its real catalog actually
+lives.** The browser-navigation technique wasn't needed there in the end.
+
+**FSU was the one SUS university that never got a per-program-link catalog —
+by design, not by giving up early.** Two document-style sites were tried
+first and both are bad in different ways: the clean-looking
+`academic-guide.fsu.edu/all-programs` is undergraduate-only, and graduate
+programs are scattered across dozens of separate department domains
+(`business.fsu.edu`, `bio.fsu.edu`, etc.) mixed with contact emails and
+nested sub-program variants. `bulletin.fsu.edu` (Coursedog) returns **1,689**
+"results" for its programs search — duplicates, "Pre-X" advising tracks, and
+catalog-year variants with no clean dedup signal. Not a WAF problem either.
+
+**FSU's actual best data lives at `admissions.fsu.edu/majors`, embedded as a
+public Power BI report** — a single table covering all **550 majors** (194
+bachelor's, 212 master's, 15 specialist, 127 doctoral, 2 professional), each
+row carrying a real per-major program URL AND a real per-college URL. This is
+better-structured than any of the document-style sources — if it were
+scrapable, it would fully solve FSU in one pass with real per-program links
+like FAU/FAMU's catalogs. **It isn't automatable with this session's tools,
+and that's a real, well-tested finding, not a shortcut given up on early:**
+- The report only renders ~20 rows into the DOM at a time and virtualizes
+  the rest. `scrollTop` assignment, synthetic `wheel`/`keydown`/`click`/
+  `input` events, and even genuinely trusted OS-level clicks and keypresses
+  (via the browser tool, landing on confirmed-correct coordinates, correct
+  tab targeting double-checked) are all silently ignored by the report's
+  canvas — it appears to require input Power BI's own anti-automation layer
+  accepts as genuinely human, which this environment's tooling could not
+  produce. The one thing that DOES respond to a normal click is the *outer
+  viewer chrome* (zoom controls, fit-to-page) — confirming the canvas
+  itself, not general click delivery, is what's gated.
+- Also tried and ruled out: clipboard copy/paste (permission denied),
+  calling the report's own internal `renderReport()` re-render function
+  (re-rendered from cache, issued no new network calls), a blind in-memory
+  heap search from `window` for the full dataset (not reachable via any
+  enumerable property chain — it's held in a module-private closure), typing
+  directly into an already-focused filter combobox, and a second "mobile"
+  version of the same report (a different `r` token, same page, linked as
+  "Programs of Study Mobile") — identical virtualization, identical
+  resistance to interaction.
+- **If real per-program FSU links are ever wanted, this is where to pick
+  back up**: either a tooling fix for real trusted mouse-wheel scroll (the
+  browser tool's `scroll` action requires a working `screenshot` call first,
+  which failed with "the Browser pane is not displayed" every time this was
+  tried — check whether that's resolved), or a human scrolling through the
+  report by hand while an assistant parses pasted text (the row shape is
+  simple and already reverse-engineered: `Select Row / Major Name (+ url) /
+  B M S D P flags / College (+ url) / Degree Program`).
+
+**The catalog actually shipped takes a different, simpler path, per explicit
+direction: use real major names, but just one shared link for every entry
+rather than chase individual URLs.** `scripts/scrape-fsu-programs.mjs` pulls
+names from FSU's own plain HTML pages instead — no WAF, no Power BI, no
+browser needed at all:
+- Undergraduate: `academic-guide.fsu.edu/all-programs` — a clean Drupal Views
+  listing, one `<h4>Name</h4>` per major, 167 real majors in one `fetch()`.
+- Graduate: three `gradschool.fsu.edu` degree-programs pages (master's,
+  doctoral, specialist) — each is genuinely a **department-contact
+  directory** (photo, name, phone, email per row), not a program listing, but
+  every row's own title text (e.g. "Accounting (MAcc)", "Anthropology") is a
+  real, usable program name. 137 more real programs, deduped per page.
+
+Every one of the 304 entries links to `https://admissions.fsu.edu/majors`
+rather than a per-program page — credentials are spelled out
+("Bachelor's"/"Master's"/"Doctoral"/"Specialist") rather than abbreviated,
+since these source pages don't state a clean per-program abbreviation for
+most entries (the same call NCF's scraper made for its two unlabeled
+graduate programs). No new `requestedLevel` matcher fixes were needed — the
+spelled-out words already match existing `GRADUATE_HINT`/`BACHELOR_HINT`
+patterns (`master`, `doctoral`, `specialist`, `bachelor`).
+
+**FAU was previously on this skip list and turned out to be solvable —
+correcting that earlier assessment.** The user pointed out the actual page to
+scrape: `www.fau.edu/registrar/university-catalog/catalog/degree-programs/`,
+not a per-college prose page. This one page lists every degree type as a
+`<h3>` heading (e.g. "BACHELOR OF ARTS (B.A.)"), each followed by its majors —
+and FAU has **no per-program catalog page at all**, so a major's only real
+link is to its own COLLEGE's catalog page (e.g. "(College of Science)"). That
+college link *is* the "school of interest" link this catalog stores for every
+program — there is nothing more specific to link to, by design of FAU's own
+site. No WAF blocks a plain `fetch()` here, unlike FAMU/FlPoly/USF's Acalog
+sites — the earlier "skip" was a survey mistake (looking at the wrong page),
+not a real platform blocker.
+
+The page's HTML is inconsistently hand-authored, and `scripts/scrape-fau-programs.mjs`
+has to route around several distinct issues before it produces a clean list —
+worth reading in full if a similar bespoke registrar page comes up again:
+- Some anchors wrap the college name in `"(...)"`; others just write
+  `College of Business` with no parens at all — a naive "find the next `)`"
+  boundary search bleeds into the *next* major's text when a paren never
+  comes. Fixed by capping that search at the position of the next anchor.
+- Co-listed majors (two colleges) sometimes close the `<a>` tag early and
+  continue the second college's name as plain text before the real `)` —
+  e.g. `<a href="...">(College of Arts and Letters</a> and College of
+  Engineering and Computer Science)`. The paren-based boundary still finds
+  the right end here; it's the anchor-tag-based boundary that would cut it
+  short.
+- Single-major degree types (e.g. "BACHELOR OF ARTS IN COMPUTER SCIENCE
+  (B.A.C.S.)") have no separate major-name line at all — the heading text
+  itself names the one major. Falls back to the heading, title-cased and
+  stripped of its leading "Bachelor of .../Master of ..." phrase.
+- A few stray empty anchors (`<a href="..."><br/></a>`) are copy-paste
+  debris with no content, filtered out before they're mistaken for a major.
+- Undergraduate/graduate "Minors" and "Certificates" follow the last major
+  list with no heading of their own, so an implausibly large gap (or a
+  literal "Graduate Certificates"/"Minors" marker) between one anchor and the
+  next ends the major list for that degree type rather than ingesting them
+  as if they were majors — this is also what stops Ph.D. (the last heading
+  on the page) from absorbing the entire page footer.
+- "Combined degree" headings (e.g. "B.A./M.A.") mix two credential levels
+  under one heading and are skipped entirely — they don't map to a single
+  `ProgramLevel`. A.A. (no majors listed), B.S.E. (plain descriptive text,
+  no link), and B.G.S. (only a same-page `#bgs` anchor, not a real college
+  link) are skipped for the same "no real link" reason. A handful of majors
+  tagged "currently on suspension"/"not accepting students" are excluded too.
+
+Result: 156 programs (74 bachelor, 82 graduate) from a single fetch, verified
+by hand against a scratch extraction before the scraper was written, and
+round-tripped clean in `programCatalogs.test.ts`.
+
+**FAMU was also on the skip list, for the same root cause as FAU: the survey
+had been looking at the wrong site.** `catalog.famu.edu` (Acalog) really is
+both WAF-blocked and empty of Program entities — that part of the original
+assessment was correct — but it was never FAMU's real catalog. The user
+pointed to the actual source: FAMU's own site, split across two URLs by
+level, neither behind any WAF:
+- **Undergraduate** — `www.famu.edu/academics/undergraduate-academics/index.php`,
+  one long page with one `<strong>COLLEGE NAME</strong>` heading and one
+  college link per section, followed by a plain-text list of "Bachelor of
+  ..." majors. No per-major link exists, so — same pattern as FAU — every
+  major in a section gets that section's one college link.
+- **Graduate** — `graduateschool.famu.edu/graduate-programs/graduate-programs-<slug>.php`,
+  one page per college (11 slugs: `cafs`, `coe`, `pharmacy`, `csat`, `cssah`,
+  `engineering`, `ahealth`, `saet`, `sbi`, `son`, `soe`), each a clean grid of
+  real per-program links with their own credential badge (MS, PhD, MASS,
+  MSW, DPT) and title — genuinely better-structured than the undergraduate
+  page, closer to UCF/UF's catalogs than to FAU's.
+
+`scripts/scrape-famu-programs.mjs` needed two real fixes past a naive parse,
+both in the undergraduate page:
+- FAMU uses stray formatting-only `<strong><br><br></strong>` tags between a
+  college's own link and its major list. A heading regex that doesn't
+  require real letters inside the `<strong>` mistakes one of these for a new
+  heading — and then steals the *next* real college's link while losing that
+  college's name entirely (the regex's own match already consumed it as
+  filler between the bogus heading and the stolen link). Fixed by finding
+  real heading text and its nearest link in two independent passes, so a
+  formatting-only `<strong>` can never intercept a link meant for the
+  college whose name follows it.
+- Several majors are offered as "Bachelor of X/Bachelor of Y in Z" (one
+  major, two credential options, e.g. "Bachelor of Science/Bachelor of Arts
+  in African-American Studies"). Splitting on every "Bachelor of" occurrence
+  cuts these into a bogus "Bachelor of Science/" fragment plus a stray
+  second major — fixed by only splitting on a "Bachelor of" that isn't
+  immediately preceded by "/".
+
+One real exclusion, not a parser bug: a "Community Psychology (coming soon)"
+graduate entry links to a bare `/index.php` placeholder rather than a real
+page — FAMU's own site marking an announced-but-not-yet-live program. Same
+"exclude rather than recommend a dead link" call as UF's suspended Religion
+program and FAU's suspended majors.
+
+Result: 103 programs (53 bachelor, 50 graduate) from 12 fetches (1
+undergraduate + 11 graduate), round-tripped clean in `programCatalogs.test.ts`
+with no new `requestedLevel` matcher fixes needed — every FAMU credential
+(`B.S.`, `B.A.`, `B.Arch.`, dual `B.S./B.A.`, `MS`, `PhD`, `MASS`, `MSW`,
+`DPT`) was already covered by existing patterns.
+
+**NCF is a special case, not just another platform.** New College of Florida
+has no per-credential catalog because it doesn't need one: it confers exactly
+one undergraduate degree (the B.A.) across 49 "areas of concentration," listed
+cleanly at `ncf.edu/programs/`. Graduate is the opposite problem — no index
+page exists at all, just three individually-announced named programs
+scattered across the site. `scripts/scrape-ncf-programs.mjs` hardcodes those
+three with hand-verified URLs rather than inventing a listing page that
+doesn't exist. Two of the three never state a specific credential abbreviation
+anywhere on their own pages (just "Master's in X") — the scraper uses the
+literal word "Master's" rather than guessing "M.S.", since "master" is already
+a recognized `GRADUATE_HINT` keyword and guessing the wrong abbreviation would
+be worse than a generic-but-accurate one.
+
+**The round-trip test caught real matcher bugs on every single university so
+far, without exception — budget time for this, it is not optional.** All
+fixed in `programCatalog.ts`'s `requestedLevel`, never worked around in a
+school's data:
+- `DEGREE_TRANSITION` (UCF) — an accelerated dual-degree title like
+  "Environmental Engineering MSEnvE, Accelerated BS to MSEnvE" is entirely a
+  graduate program, but the "BS" naming the accelerated track's entry point
+  read as a bachelor's hint. Stripped the credential named right before "to",
+  the same shape as `GRADUATE_OF_A_DEGREE`'s existing "AA Graduates" strip.
+- `EMBEDDED_DEGREE_FRAGMENT` (UCF) — compound engineering credentials like
   "(B.S.M.S.E.)" (Bachelor of Science in **M**aterials **S**cience and
   Engineering) coincidentally spell "M.S." with no space before it, which read
-  as a graduate hint on a bachelor's program. Fixed by only stripping the
-  no-space-before variant — a genuine "M.S." credential is always its own
-  token (preceded by a space, a paren, or the string start).
+  as a graduate hint. Fixed by stripping only the no-space-before variant — a
+  genuine "M.S." credential is always its own token. **This one is deliberately
+  narrow (just `m.s.`/`m.a.`)** — widening it to also catch `a.s.`/`a.a.`/
+  `b.s.`/`b.a.` fragments (tried while fixing FGCU's M.P.A.S., below) broke
+  PSC's real "B.A.S." (Bachelor of Applied Science) credential, whose trailing
+  "A.S." isn't a stray fragment — it's the actual complete credential. Add a
+  new short code here only once a real school's data proves it's needed.
+- `M.Ed.` and dot-tolerant `mpas`/`mph` (FGCU, UWF) — FGCU and UWF spell
+  credentials *with* periods ("M.Ed.", "M.P.A.S.", "M.P.H."), unlike FIU's
+  undotted style ("MACC", "MSN") the bare codes in `GRADUATE_HINT` were
+  written for. "M.Ed." wasn't recognized at all; "M.P.A.S." and "M.P.H."
+  matched *wrong* or not at all — "M.P.A.S." specifically because its embedded
+  "A.S." read as an associate degree. Fixed narrowly, one code at a time
+  (`m.?ed.?`, dot-tolerant `mpas`, dot-tolerant `mph`) rather than making every
+  bare code dot-tolerant at once, for the same regression reason as above.
+- `mscj`/`msee`/`msme` (UNF) — the exact same shape again, but UNF's codes are
+  bare (undotted, "MSCJ" not "M.S.C.J."), so this isn't a dots problem — it's
+  that bare "ms" alone has no word boundary before the two subject letters
+  that immediately follow, so it never matches at all. Added the three whole
+  codes as new bare alternatives, the same way `macc`/`mha`/etc. already were.
+- `m.?arch.?`, dot-tolerant `dba`, and new `dr.?p.?h.?` (USF) — "M.Arch."
+  (Master of Architecture) was an entirely new, unlisted code; "D.B.A."
+  (Doctor of Business Administration) already had a bare `dba` but, dotted,
+  it never matched (same undotted-vs-dotted gap as `mpas`/`mph`); "Dr.P.H."
+  (Doctor of Public Health) was new outright. Three separate one-line fixes,
+  not one broad change.
+- UF's many identically-named bachelor's/graduate majors (e.g. "Accounting" is
+  both, unlike FIU/UCF where the credential is embedded in the name) needed a
+  real `credential` field joined from UF's separate Graduate Degree Table page
+  — see `scripts/scrape-uf-programs.mjs`. One residual case (a "Religion"
+  graduate program listed in the sitemap but absent from the active degree
+  table) turned out to be a genuinely suspended admission, not a scraper bug —
+  excluded outright rather than credentialed, since recommending an
+  unavailable program is worse than one fewer listing.
+- Dot-tolerant `bm`/`mm`/`mfa` (FAU) — FAU dots every credential letter, the
+  same style as FGCU/UWF, so its bare `bm`/`mm`/`mfa` codes had the same
+  undotted-vs-dotted gap as `mpas`/`mph`. Only surfaced as a real test
+  failure for "Music" (B.M./M.M.) and "Theatre" (B.A./M.F.A.) — FAU has 23
+  other same-named bachelor's/graduate pairs, but they all share a
+  level-agnostic code (B.S./M.S., B.A./Ph.D., …) that was already
+  dot-tolerant, so no other code needed touching.
 
-Expect more of these as the remaining 10 universities' engineering and health
-programs get scraped — **run `programCatalogs.test.ts` immediately after each
-scrape**, before wiring the school into `pathwayPrompts.ts`.
+**Expect this exact failure shape on every remaining university, without
+exception — it has happened on every single one so far, no fewer times as the
+batch has grown.** A dotted or bare graduate credential either won't match at
+all, or will match the *wrong* level via an embedded fragment. The fix is
+always the same: check the round-trip test's specific failure, add only the
+one code it names, never guess ahead at codes that haven't actually collided.
+**Run `programCatalogs.test.ts` immediately after each scrape**, before wiring
+the school into `pathwayPrompts.ts`, and read every failure as a real finding
+about either the matcher or the data, never as noise to silence.
 
 ### Read this before starting: universities are not state colleges
 
@@ -736,6 +1016,67 @@ Acalog, and SmartCatalogIQ. Universities are larger and more bespoke; expect
 per-school work and paginated JS-driven catalogs. Survey before writing a
 parser.
 
+### Private universities are next — expect them to differ again, not to repeat the SUS batch
+
+All 21 are SACSCOC-accredited private (non-state) schools. Full list, from
+`floridaSchools.ts` (id — name — city):
+
+| id | Name | City |
+|---|---|---|
+| `avemaria` | Ave Maria University | Ave Maria |
+| `barry` | Barry University | Miami Shores |
+| `cookman` | Bethune-Cookman University | Daytona Beach |
+| `eckerd` | Eckerd College | St. Petersburg |
+| `ewu` | Edward Waters University | Jacksonville |
+| `erau` | Embry-Riddle Aeronautical University | Daytona Beach |
+| `flagler` | Flagler College | St. Augustine |
+| `fit` | Florida Institute of Technology | Melbourne |
+| `fmu` | Florida Memorial University | Miami Gardens |
+| `fsc` | Florida Southern College | Lakeland |
+| `ju` | Jacksonville University | Jacksonville |
+| `keiser` | Keiser University | Fort Lauderdale |
+| `lynn` | Lynn University | Boca Raton |
+| `nova` | Nova Southeastern University | Davie |
+| `pba` | Palm Beach Atlantic University | West Palm Beach |
+| `rollins` | Rollins College | Winter Park |
+| `saintleo` | Saint Leo University | St. Leo |
+| `stu` | St. Thomas University | Miami Gardens |
+| `stetson` | Stetson University | DeLand |
+| `miami` | University of Miami | Coral Gables |
+| `tampa` | University of Tampa | Tampa |
+
+**Don't assume the SUS playbook just repeats.** Some real differences to
+expect, not yet confirmed against any specific school (survey each before
+assuming):
+- **Size varies enormously.** NSU is a large research university (likely
+  closer to UF/UCF in catalog size); Ave Maria, Eckerd, Flagler, and similar
+  small liberal-arts colleges may have well under 50 total programs. Don't
+  be surprised by a tiny catalog — that's not a broken scrape, it's the
+  school. Keiser and ERAU are career/professional-focused and may structure
+  degrees around licensure tracks rather than traditional majors.
+- **Tuition is very likely flat-rate, not resident/non-resident split.**
+  Private schools charge the same tuition regardless of Florida residency —
+  unlike every SUS school and state college so far. If a school's cost data
+  is a single flat number, that's expected; don't force it into the
+  `outOfStateAmount` shape that only makes sense for public schools.
+- **Transfer agreements probably still don't apply, but check per school
+  rather than assuming.** No private school currently has a
+  `transferAgreements.ts` entry, and per the same logic as UCF/FIU/FAU/etc.
+  (these are destinations, not origins) most should stay that way — but a
+  few private schools actively recruit AA transfer students with named
+  articulation programs, so don't rule it out reflexively the way point 2
+  above says not to invent one; just don't assume the answer without
+  looking.
+- **Catalog platforms will vary by vendor just as much as they did for SUS
+  schools** — expect the same CourseLeaf/Acalog/bespoke/Kuali spread, the
+  same possibility of a WAF, and the same possibility that the platform
+  survey needs a second look (as FAU's and FAMU's did) before concluding a
+  school is hard.
+- **No obvious pilot school stands out the way UCF did for the SUS batch.**
+  Consider starting with a smaller school (lower risk if the catalog turns
+  out messy) to re-validate the university template still fits, before
+  tackling NSU-scale schools.
+
 ### The mechanical part (unchanged from the FCS batches)
 
 Per school: scrape → `app/lib/programs/<id>.ts` → register in **three** places:
@@ -750,7 +1091,8 @@ nothing can reach and nothing fails loudly.
 ### Verification bar
 
 Every batch so far ended with: `npx tsc --noEmit` clean, `npm test` at the known
-356/357, **all scraped URLs confirmed HTTP 200**, and one live end-to-end
+433/434 (the one known failure is `fiuCoverage`, unrelated to any given batch —
+see §12), **all scraped URLs confirmed HTTP 200**, and one live end-to-end
 pathway generated in a real browser with its program links checked. That last
 step caught bugs the first three missed every single time — including a 29-URL
 break in Daytona State's catalog where the school's own index linked to a dead

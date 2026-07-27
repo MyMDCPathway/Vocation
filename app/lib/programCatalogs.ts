@@ -17,13 +17,19 @@ import { CFK_PROGRAMS } from "./programs/cfk";
 import { CHIPOLA_PROGRAMS } from "./programs/chipola";
 import { DSC_PROGRAMS } from "./programs/dsc";
 import { EFSC_PROGRAMS } from "./programs/efsc";
+import { famuCatalog } from "./programs/famu";
+import { fauCatalog } from "./programs/fau";
 import { FGC_PROGRAMS } from "./programs/fgc";
+import { fgcuCatalog } from "./programs/fgcu";
+import { flpolyCatalog } from "./programs/flpoly";
 import { FSCJ_PROGRAMS } from "./programs/fscj";
+import { fsuCatalog } from "./programs/fsu";
 import { FSW_PROGRAMS } from "./programs/fsw";
 import { GCSC_PROGRAMS } from "./programs/gcsc";
 import { HCC_PROGRAMS } from "./programs/hcc";
 import { IRSC_PROGRAMS } from "./programs/irsc";
 import { LSSC_PROGRAMS } from "./programs/lssc";
+import { ncfCatalog } from "./programs/ncf";
 import { NFC_PROGRAMS } from "./programs/nfc";
 import { NWFSC_PROGRAMS } from "./programs/nwfsc";
 import { PBSC_PROGRAMS } from "./programs/pbsc";
@@ -38,6 +44,10 @@ import { SPC_PROGRAMS } from "./programs/spc";
 import { SSC_PROGRAMS } from "./programs/ssc";
 import { TSC_PROGRAMS } from "./programs/tsc";
 import { ucfCatalog } from "./programs/ucf";
+import { ufCatalog } from "./programs/uf";
+import { unfCatalog } from "./programs/unf";
+import { usfCatalog } from "./programs/usf";
+import { uwfCatalog } from "./programs/uwf";
 import { VALENCIA_PROGRAMS } from "./programs/valencia";
 import { createProgramCatalog, type ProgramCatalog } from "./programCatalog";
 
@@ -52,6 +62,16 @@ const asCollege = (programs: Parameters<typeof createProgramCatalog>[0]) =>
 const CATALOGS: Record<string, ProgramCatalog> = {
   fiu: fiuCatalog,
   ucf: ucfCatalog,
+  uf: ufCatalog,
+  fgcu: fgcuCatalog,
+  uwf: uwfCatalog,
+  unf: unfCatalog,
+  flpoly: flpolyCatalog,
+  usf: usfCatalog,
+  ncf: ncfCatalog,
+  fau: fauCatalog,
+  famu: famuCatalog,
+  fsu: fsuCatalog,
   broward: browardCatalog,
   cf: asCollege(CF_PROGRAMS),
   efsc: asCollege(EFSC_PROGRAMS),

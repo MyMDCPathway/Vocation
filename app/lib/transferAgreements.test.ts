@@ -88,6 +88,16 @@ describe("transfer agreements", () => {
     expect(transferAgreementFor("mdc")).toBeNull();
     expect(transferAgreementFor("fiu")).toBeNull();
     expect(transferAgreementFor("ucf")).toBeNull();
+    expect(transferAgreementFor("uf")).toBeNull();
+    expect(transferAgreementFor("fgcu")).toBeNull();
+    expect(transferAgreementFor("uwf")).toBeNull();
+    expect(transferAgreementFor("ncf")).toBeNull();
+    expect(transferAgreementFor("unf")).toBeNull();
+    expect(transferAgreementFor("flpoly")).toBeNull();
+    expect(transferAgreementFor("usf")).toBeNull();
+    expect(transferAgreementFor("fau")).toBeNull();
+    expect(transferAgreementFor("famu")).toBeNull();
+    expect(transferAgreementFor("fsu")).toBeNull();
     expect(transferAgreementFor("nope")).toBeNull();
     expect(transferAgreementFor("")).toBeNull();
   });

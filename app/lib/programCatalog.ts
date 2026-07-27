@@ -67,11 +67,35 @@ export function programMatchKey(value: string): string {
 // is how FIU's "Art Education (MAT)" used to resolve to the bachelor's of the
 // same name. programCatalogs.test.ts round-trips every program to keep that
 // from happening again as new catalogs land.
+// "Specialist" (e.g. an Ed.S.) is its own credential tier between a master's
+// and a doctorate — UF's Graduate Degree Table lists "Specialist in
+// Education (Ed.S.)" alongside its Master's and Doctoral sections.
+// mpas and mph are dot-tolerant (m\.?p\.?a\.?s\.?, m\.?p\.?h\.?), not bare,
+// because FGCU and UWF spell their Physician Assistant Studies and Public
+// Health master's "M.P.A.S." / "M.P.H." — with dots, unlike the undotted
+// style (e.g. FIU's "MACC") the other bare codes below were scraped from.
+// mpas's embedded "A.S." would otherwise read as an associate degree; mph
+// bare simply never matched a dotted credential at all.
+// mscj/msee/msme (UNF) are the same "MS" + two-letter-subject shape as mpa —
+// bare "ms" alone can't catch these because there's no word boundary between
+// the "S" and the subject letters that follow.
+// march and dr.p.h are USF: "M.Arch." (Master of Architecture) was entirely
+// unrecognized; "D.B.A." (Doctor of Business Administration) already had a
+// bare "dba" code but, dotted, it never matched — same undotted-vs-dotted gap
+// as mpas/mph — so dba is now dot-tolerant too. "Dr.P.H." (Doctor of Public
+// Health) is a new code outright.
+// mm/bm/mfa are FAU: "Music" (B.M./M.M.) and "Theatre" (B.A./M.F.A.) are each
+// offered at both levels, and FAU dots every credential letter, so the same
+// undotted-vs-dotted gap as mpas/mph meant neither code matched its own
+// program — collapsing both to the bachelor's, the only collisions among
+// FAU's many same-named bachelor's/graduate pairs (the rest share a
+// level-agnostic code like B.S./M.S. or B.A./Ph.D. that was already
+// dot-tolerant).
 const GRADUATE_HINT =
-  /\b(master|masters|doctor|doctoral|graduate|ph\.?d|ed\.?d|m\.?s\.?|m\.?a\.?|m\.?b\.?a|macc|mat|mfa|mha|mhsa|mia|mib|mla|mm|mpa|mpas|mph|msn|msw|psm|dba|ddes|dnp|dpt|jd|jm|llm)\b/i;
+  /\b(master|masters|doctor|doctoral|specialist|graduate|ph\.?d|ed\.?d|m\.?ed\.?|m\.?s\.?|m\.?a\.?|m\.?b\.?a|m\.?arch\.?|macc|mat|m\.?f\.?a\.?|mha|mhsa|mia|mib|mla|m\.?m\.?|mpa|m\.?p\.?a\.?s\.?|m\.?p\.?h\.?|mscj|msee|msme|msn|msw|psm|d\.?b\.?a\.?|ddes|dnp|dpt|dr\.?p\.?h\.?|jd|jm|llm)\b/i;
 
 const BACHELOR_HINT =
-  /\b(bachelor|bachelors|undergraduate|b\.?s\.?|b\.?a\.?|b\.?b\.?a|b\.?f\.?a|b\.?a\.?s|bacc|bhsa|bm|bppa|bpps|bsn)\b/i;
+  /\b(bachelor|bachelors|undergraduate|b\.?s\.?|b\.?a\.?|b\.?b\.?a|b\.?f\.?a|b\.?a\.?s|bacc|bhsa|b\.?m\.?|bppa|bpps|bsn)\b/i;
 
 const ASSOCIATE_HINT =
   /\b(associate|associates|a\.?a\.?|a\.?s\.?|a\.?a\.?s|saat)\b/i;
@@ -104,6 +128,13 @@ const DEGREE_TRANSITION = /\b(a\.?a\.?|a\.?s\.?|b\.?a\.?|b\.?s\.?|m\.?s\.?|m\.?a
 // paren, or the string start immediately before it, so only the run-together
 // variant (which can only occur buried inside a longer bachelor's code, never
 // as a credential in its own right) gets stripped.
+//
+// This is deliberately narrow (just m.s./m.a.) rather than covering every
+// short degree code: widening it to a.s./a.a./b.s./b.a. once broke PSC's
+// real "B.A.S." (Bachelor of Applied Science) credential, whose trailing
+// "A.S." isn't a fragment to strip — it's part of the genuine, complete
+// credential. Add a case here only once a real school's data proves it's
+// needed, the way UCF's and FGCU's did.
 const EMBEDDED_DEGREE_FRAGMENT = /(?<=[A-Za-z]\.)(m\.?s\.?|m\.?a\.?)\b/gi;
 
 /** Which level a free-text query is explicitly asking for, if any. */

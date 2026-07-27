@@ -35,6 +35,16 @@ export const SCHOOLS_WITH_CATALOG = [
   "spc",
   "seminole",
   "ucf",
+  "uf",
+  "fgcu",
+  "uwf",
+  "ncf",
+  "unf",
+  "flpoly",
+  "usf",
+  "fau",
+  "famu",
+  "fsu",
 ] as const;
 
 export type CatalogSchoolId = (typeof SCHOOLS_WITH_CATALOG)[number];
