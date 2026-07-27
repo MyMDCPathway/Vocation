@@ -982,6 +982,14 @@ export default function Home() {
                     </a>
                   </li>
                 ))}
+                <li>
+                  <a
+                    href="/team"
+                    className="hover:text-school-600 transition-colors"
+                  >
+                    Meet the Team
+                  </a>
+                </li>
               </ul>
             </div>
 
