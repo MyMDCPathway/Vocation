@@ -330,7 +330,7 @@ export default function Home() {
       </header>
 
       {/* Hero Section */}
-      <section className="px-6 md:px-8 pt-24 md:pt-32 pb-12 md:pb-16 text-center">
+      <section className="px-6 md:px-8 pt-16 md:pt-24 pb-12 md:pb-16 text-center">
         <div className="max-w-4xl mx-auto">
           {/* Main Title - Vocation */}
           <h1 className="text-7xl md:text-9xl font-bold mb-2 select-none">
@@ -729,8 +729,14 @@ export default function Home() {
         )}
       </div>
 
-      {/* How Vocation Works Section */}
-      <div className={`px-6 md:px-8 pb-12 ${pathwayData ? 'pt-16' : 'pt-24 md:pt-32'}`}>
+      {/* How Vocation Works Section.
+          The landing-page top padding is deliberately modest: with the hero's
+          own pb-16 above it, a larger gap pushed the three cards past the fold
+          on ~850-950px viewports (a very common laptop/desktop size), where
+          they were clipped just enough to look broken rather than clearly
+          "scroll for more". Keep the combined hero-bottom + section-top gap
+          under ~120px. */}
+      <div className={`px-6 md:px-8 pb-12 ${pathwayData ? 'pt-16' : 'pt-12 md:pt-16'}`}>
         <div className="max-w-4xl mx-auto">
           <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
             How Vocation Works
