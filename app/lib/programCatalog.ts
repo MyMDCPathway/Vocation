@@ -145,6 +145,23 @@ const DEGREE_TRANSITION = /\b(a\.?a\.?|a\.?s\.?|b\.?a\.?|b\.?s\.?|m\.?s\.?|m\.?a
 // needed, the way UCF's and FGCU's did.
 const EMBEDDED_DEGREE_FRAGMENT = /(?<=[A-Za-z]\.)(m\.?s\.?|m\.?a\.?)\b/gi;
 
+// PBA's "Biology: Concentration in Graduate School Preparation, B.S." is
+// entirely a bachelor's — "Graduate School" here is the destination a
+// student is being prepped for, not the level of this program. Same shape
+// as GRADUATE_OF_A_DEGREE (a real word that means something other than
+// "this program is graduate-level" in context), one phrase further.
+const GRADUATE_SCHOOL_PHRASE = /\bgraduate\s+school\b/gi;
+
+// St. Thomas's "BA-JD in Political Science" (and its Criminal Justice,
+// English, Psychology siblings) is an accelerated law-track option entirely
+// at the bachelor's level — the student enrolls as a normal undergrad, and
+// "JD" names the eventual destination the track is aimed at, not this
+// program's own level. Same "a degree code names something other than this
+// program's level" shape as DEGREE_TRANSITION's "BS to MSEnvE", one
+// compound abbreviation further: bare "jd" is a real GRADUATE_HINT token,
+// and it would otherwise outrank the "BA" right next to it.
+const BA_JD_PATHWAY = /\bba[\s/-]*jd\b/gi;
+
 /** Which level a free-text query is explicitly asking for, if any. */
 export function requestedLevel(...hints: (string | undefined)[]): ProgramLevel | null {
   const text = hints
@@ -152,7 +169,9 @@ export function requestedLevel(...hints: (string | undefined)[]): ProgramLevel |
     .join(" ")
     .replace(GRADUATE_OF_A_DEGREE, " ")
     .replace(DEGREE_TRANSITION, " ")
-    .replace(EMBEDDED_DEGREE_FRAGMENT, " ");
+    .replace(EMBEDDED_DEGREE_FRAGMENT, " ")
+    .replace(GRADUATE_SCHOOL_PHRASE, " ")
+    .replace(BA_JD_PATHWAY, " ");
   if (!text.trim()) return null;
   // Order matters: "Bachelor of Applied Science" contains "applied science",
   // and a master's step often names the bachelor's it builds on.

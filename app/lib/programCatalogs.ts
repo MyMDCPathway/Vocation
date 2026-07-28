@@ -11,6 +11,7 @@
 // it stays on its own path until there's a reason to move it.
 
 import { fiuCatalog } from "./fiu-programs";
+import { avemariaCatalog } from "./programs/avemaria";
 import { barryCatalog } from "./programs/barry";
 import { browardCatalog } from "./programs/broward";
 import { CF_PROGRAMS } from "./programs/cf";
@@ -23,6 +24,8 @@ import { famuCatalog } from "./programs/famu";
 import { fauCatalog } from "./programs/fau";
 import { FGC_PROGRAMS } from "./programs/fgc";
 import { fgcuCatalog } from "./programs/fgcu";
+import { fitCatalog } from "./programs/fit";
+import { flaglerCatalog } from "./programs/flagler";
 import { flpolyCatalog } from "./programs/flpoly";
 import { FSCJ_PROGRAMS } from "./programs/fscj";
 import { fsuCatalog } from "./programs/fsu";
@@ -36,10 +39,13 @@ import { umCatalog } from "./programs/miami";
 import { ncfCatalog } from "./programs/ncf";
 import { NFC_PROGRAMS } from "./programs/nfc";
 import { NWFSC_PROGRAMS } from "./programs/nwfsc";
+import { pbaCatalog } from "./programs/pba";
 import { PBSC_PROGRAMS } from "./programs/pbsc";
 import { PHSC_PROGRAMS } from "./programs/phsc";
 import { POLK_PROGRAMS } from "./programs/polk";
 import { PSC_PROGRAMS } from "./programs/psc";
+import { rollinsCatalog } from "./programs/rollins";
+import { saintleoCatalog } from "./programs/saintleo";
 import { SCF_PROGRAMS } from "./programs/scf";
 import { SF_PROGRAMS } from "./programs/sf";
 import { SFSC_PROGRAMS } from "./programs/sfsc";
@@ -47,6 +53,7 @@ import { SJR_PROGRAMS } from "./programs/sjr";
 import { SPC_PROGRAMS } from "./programs/spc";
 import { SSC_PROGRAMS } from "./programs/ssc";
 import { stetsonCatalog } from "./programs/stetson";
+import { stuCatalog } from "./programs/stu";
 import { tampaCatalog } from "./programs/tampa";
 import { TSC_PROGRAMS } from "./programs/tsc";
 import { ucfCatalog } from "./programs/ucf";
@@ -84,6 +91,13 @@ const CATALOGS: Record<string, ProgramCatalog> = {
   tampa: tampaCatalog,
   barry: barryCatalog,
   lynn: lynnCatalog,
+  rollins: rollinsCatalog,
+  flagler: flaglerCatalog,
+  pba: pbaCatalog,
+  fit: fitCatalog,
+  saintleo: saintleoCatalog,
+  stu: stuCatalog,
+  avemaria: avemariaCatalog,
   broward: browardCatalog,
   cf: asCollege(CF_PROGRAMS),
   efsc: asCollege(EFSC_PROGRAMS),

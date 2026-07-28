@@ -18,6 +18,7 @@
 
 import { FIU_PROGRAMS } from "./fiu-programs";
 import { FLORIDA_SCHOOLS } from "./floridaSchools";
+import { AVEMARIA_PROGRAMS } from "./programs/avemaria";
 import { BARRY_PROGRAMS } from "./programs/barry";
 import { BROWARD_PROGRAMS } from "./programs/broward";
 import { CF_PROGRAMS } from "./programs/cf";
@@ -30,6 +31,8 @@ import { FAMU_PROGRAMS } from "./programs/famu";
 import { FAU_PROGRAMS } from "./programs/fau";
 import { FGC_PROGRAMS } from "./programs/fgc";
 import { FGCU_PROGRAMS } from "./programs/fgcu";
+import { FIT_PROGRAMS } from "./programs/fit";
+import { FLAGLER_PROGRAMS } from "./programs/flagler";
 import { FLPOLY_PROGRAMS } from "./programs/flpoly";
 import { FSCJ_PROGRAMS } from "./programs/fscj";
 import { FSU_PROGRAMS } from "./programs/fsu";
@@ -43,10 +46,13 @@ import { UM_PROGRAMS } from "./programs/miami";
 import { NCF_PROGRAMS } from "./programs/ncf";
 import { NFC_PROGRAMS } from "./programs/nfc";
 import { NWFSC_PROGRAMS } from "./programs/nwfsc";
+import { PBA_PROGRAMS } from "./programs/pba";
 import { PBSC_PROGRAMS } from "./programs/pbsc";
 import { PHSC_PROGRAMS } from "./programs/phsc";
 import { POLK_PROGRAMS } from "./programs/polk";
 import { PSC_PROGRAMS } from "./programs/psc";
+import { ROLLINS_PROGRAMS } from "./programs/rollins";
+import { SAINTLEO_PROGRAMS } from "./programs/saintleo";
 import { SCF_PROGRAMS } from "./programs/scf";
 import { SF_PROGRAMS } from "./programs/sf";
 import { SFSC_PROGRAMS } from "./programs/sfsc";
@@ -54,6 +60,7 @@ import { SJR_PROGRAMS } from "./programs/sjr";
 import { SPC_PROGRAMS } from "./programs/spc";
 import { SSC_PROGRAMS } from "./programs/ssc";
 import { STETSON_PROGRAMS } from "./programs/stetson";
+import { STU_PROGRAMS } from "./programs/stu";
 import { TAMPA_PROGRAMS } from "./programs/tampa";
 import { TSC_PROGRAMS } from "./programs/tsc";
 import { UCF_PROGRAMS } from "./programs/ucf";
@@ -298,6 +305,13 @@ const UNIVERSITY_SHORT_NAMES: Record<string, string> = {
   tampa: "UT",
   barry: "Barry",
   lynn: "Lynn",
+  rollins: "Rollins",
+  flagler: "Flagler",
+  pba: "PBA",
+  fit: "Florida Tech",
+  saintleo: "Saint Leo",
+  stu: "STU",
+  avemaria: "Ave Maria",
 };
 
 const UNIVERSITY_PROGRAMS: Record<string, SchoolProgram[]> = {
@@ -319,6 +333,13 @@ const UNIVERSITY_PROGRAMS: Record<string, SchoolProgram[]> = {
   tampa: TAMPA_PROGRAMS,
   barry: BARRY_PROGRAMS,
   lynn: LYNN_PROGRAMS,
+  rollins: ROLLINS_PROGRAMS,
+  flagler: FLAGLER_PROGRAMS,
+  pba: PBA_PROGRAMS,
+  fit: FIT_PROGRAMS,
+  saintleo: SAINTLEO_PROGRAMS,
+  stu: STU_PROGRAMS,
+  avemaria: AVEMARIA_PROGRAMS,
 };
 
 function universityCatalog(schoolId: string): UniversityCatalog | null {
