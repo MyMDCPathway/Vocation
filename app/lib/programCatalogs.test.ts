@@ -14,7 +14,7 @@ describe("catalog registry", () => {
   });
 
   it("returns null for a school we hold no data for", () => {
-    expect(catalogFor("cookman")).toBeNull();
+    expect(catalogFor("nova")).toBeNull();
     expect(catalogFor("")).toBeNull();
   });
 

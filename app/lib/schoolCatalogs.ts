@@ -58,6 +58,10 @@ export const SCHOOLS_WITH_CATALOG = [
   "saintleo",
   "stu",
   "avemaria",
+  "cookman",
+  "eckerd",
+  "fmu",
+  "ju",
 ] as const;
 
 export type CatalogSchoolId = (typeof SCHOOLS_WITH_CATALOG)[number];

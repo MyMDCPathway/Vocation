@@ -17,7 +17,9 @@ import { browardCatalog } from "./programs/broward";
 import { CF_PROGRAMS } from "./programs/cf";
 import { CFK_PROGRAMS } from "./programs/cfk";
 import { CHIPOLA_PROGRAMS } from "./programs/chipola";
+import { cookmanCatalog } from "./programs/cookman";
 import { DSC_PROGRAMS } from "./programs/dsc";
+import { eckerdCatalog } from "./programs/eckerd";
 import { EFSC_PROGRAMS } from "./programs/efsc";
 import { erauCatalog } from "./programs/erau";
 import { famuCatalog } from "./programs/famu";
@@ -27,12 +29,14 @@ import { fgcuCatalog } from "./programs/fgcu";
 import { fitCatalog } from "./programs/fit";
 import { flaglerCatalog } from "./programs/flagler";
 import { flpolyCatalog } from "./programs/flpoly";
+import { fmuCatalog } from "./programs/fmu";
 import { FSCJ_PROGRAMS } from "./programs/fscj";
 import { fsuCatalog } from "./programs/fsu";
 import { FSW_PROGRAMS } from "./programs/fsw";
 import { GCSC_PROGRAMS } from "./programs/gcsc";
 import { HCC_PROGRAMS } from "./programs/hcc";
 import { IRSC_PROGRAMS } from "./programs/irsc";
+import { juCatalog } from "./programs/ju";
 import { LSSC_PROGRAMS } from "./programs/lssc";
 import { lynnCatalog } from "./programs/lynn";
 import { umCatalog } from "./programs/miami";
@@ -98,6 +102,10 @@ const CATALOGS: Record<string, ProgramCatalog> = {
   saintleo: saintleoCatalog,
   stu: stuCatalog,
   avemaria: avemariaCatalog,
+  cookman: cookmanCatalog,
+  eckerd: eckerdCatalog,
+  fmu: fmuCatalog,
+  ju: juCatalog,
   broward: browardCatalog,
   cf: asCollege(CF_PROGRAMS),
   efsc: asCollege(EFSC_PROGRAMS),

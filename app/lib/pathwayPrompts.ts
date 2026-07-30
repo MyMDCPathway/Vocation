@@ -24,7 +24,9 @@ import { BROWARD_PROGRAMS } from "./programs/broward";
 import { CF_PROGRAMS } from "./programs/cf";
 import { CFK_PROGRAMS } from "./programs/cfk";
 import { CHIPOLA_PROGRAMS } from "./programs/chipola";
+import { COOKMAN_PROGRAMS } from "./programs/cookman";
 import { DSC_PROGRAMS } from "./programs/dsc";
+import { ECKERD_PROGRAMS } from "./programs/eckerd";
 import { EFSC_PROGRAMS } from "./programs/efsc";
 import { ERAU_PROGRAMS } from "./programs/erau";
 import { FAMU_PROGRAMS } from "./programs/famu";
@@ -34,12 +36,14 @@ import { FGCU_PROGRAMS } from "./programs/fgcu";
 import { FIT_PROGRAMS } from "./programs/fit";
 import { FLAGLER_PROGRAMS } from "./programs/flagler";
 import { FLPOLY_PROGRAMS } from "./programs/flpoly";
+import { FMU_PROGRAMS } from "./programs/fmu";
 import { FSCJ_PROGRAMS } from "./programs/fscj";
 import { FSU_PROGRAMS } from "./programs/fsu";
 import { FSW_PROGRAMS } from "./programs/fsw";
 import { GCSC_PROGRAMS } from "./programs/gcsc";
 import { HCC_PROGRAMS } from "./programs/hcc";
 import { IRSC_PROGRAMS } from "./programs/irsc";
+import { JU_PROGRAMS } from "./programs/ju";
 import { LSSC_PROGRAMS } from "./programs/lssc";
 import { LYNN_PROGRAMS } from "./programs/lynn";
 import { UM_PROGRAMS } from "./programs/miami";
@@ -312,6 +316,10 @@ const UNIVERSITY_SHORT_NAMES: Record<string, string> = {
   saintleo: "Saint Leo",
   stu: "STU",
   avemaria: "Ave Maria",
+  cookman: "Bethune-Cookman",
+  eckerd: "Eckerd",
+  fmu: "Florida Memorial",
+  ju: "Jacksonville University",
 };
 
 const UNIVERSITY_PROGRAMS: Record<string, SchoolProgram[]> = {
@@ -340,6 +348,10 @@ const UNIVERSITY_PROGRAMS: Record<string, SchoolProgram[]> = {
   saintleo: SAINTLEO_PROGRAMS,
   stu: STU_PROGRAMS,
   avemaria: AVEMARIA_PROGRAMS,
+  cookman: COOKMAN_PROGRAMS,
+  eckerd: ECKERD_PROGRAMS,
+  fmu: FMU_PROGRAMS,
+  ju: JU_PROGRAMS,
 };
 
 function universityCatalog(schoolId: string): UniversityCatalog | null {
