@@ -949,7 +949,7 @@ app/
                               ⚠ dsc.ts = id "daytona", ssc.ts = id "seminole".
     fiu-programs.ts           GENERATED. 287 FIU programs.
     mdc-programs.ts           MDC catalog. Hand-written, slug-based (§7).
-    transferAgreements.ts     25 flagship articulation agreements (§7).
+    transferAgreements.ts     27 flagship articulation agreements (§7).
 
     ── generation ──
     pathwayPrompts.ts         Per-school prompt construction.
@@ -1176,6 +1176,57 @@ Three rules the file enforces, each because reality violated the simple version:
   no entry and falls back to the generic instruction. A test asserts this.
 - **The prompt always states the statewide 2+2 floor** and explicitly says never
   to imply the named partner is the only option — because it isn't.
+- **`universityId` points at the partner's own catalog, and that closes the last
+  free-generation hole.** Naming the partner in prose still left the *degree*
+  unnamed: the bachelor's a student transfers INTO was the one step in the whole
+  app the model could invent, and it's the step the pathway is aiming at. Each
+  agreement now carries the partner's catalog id, so `transferPartnerSection`
+  embeds that university's real bachelor's list ("the transfer bachelor's must
+  be one of these, named EXACTLY") and `ProgramLink` resolves the post-transfer
+  step against the partner's catalog to render "Offered at FIU: Accounting
+  (BACC)" with a link to the real page. A test asserts every `universityId`
+  resolves to a catalog we hold, and that **`gcsc` is the only agreement without
+  one** — its partner is FSU's *Panama City* branch, whose degree list is much
+  narrower than the main-campus catalog we hold under `fsu`, so pointing it
+  there would offer programs Panama City doesn't teach. It stays prose-only.
+- **MDC is in this table too, not a special case anymore.** MDC predates
+  `transferAgreements.ts` — its own prompt and `ProgramLink` used to hardcode
+  FIU as the transfer destination directly (`findFIUProgram`, imported only for
+  MDC's benefit). MDC's own transfer page names three guaranteed-admission
+  programs (FIU Connect4Success, FAU LINK, UCF Transfer Connect) with no
+  explicit "flagship" label, but FIU's is the one that singles MDC out by
+  name — FIU's own C4S page calls MDC a "longtime partner," and FIU's Bridge
+  Advisors are housed at only three colleges statewide, MDC listed first —
+  so `mdc: { universityId: "fiu", ... }` is now a normal table entry like
+  every other school's, `mdcSystemPrompt`/`mdcUserQuery` call the same
+  `transferPartnerSection`/`transferAgreementFor` helpers, and `ProgramLink`'s
+  MDC branch falls through to the same `transferPartnerLink` helper the
+  colleges use — same FIU destination, same "Offered at FIU: Accounting
+  (BACC)" output, now driven by data instead of a hardcoded import.
+- **A real bug this generalization surfaced: 9 colleges' own bachelor's
+  programs share a bare name with their partner's.** Diffing every college's
+  own bachelor list against its partner's found real overlaps — Santa Fe
+  College and UF both grant an "Accounting" bachelor's; TSC/FSU, IRSC/FAU,
+  FSW/FGCU, PSC/UWF, SPC/USF, NWFSC/UWF, FSCJ/UNF, and FGC/UF each collide on
+  at least one subject (mostly "Nursing," also "Elementary Education,"
+  "Business Administration," "Cybersecurity," "Biology," "Criminal Justice,"
+  "Biomedical Sciences"). Confirmed live: a Santa Fe → Accountant pathway's
+  post-transfer "Accounting" bachelor's step resolved to Santa Fe's OWN
+  Accounting page instead of UF's, because `catalogFor("sf").find()` tried
+  (and matched) the school's own catalog first with no way to know the step
+  was meant for the partner. Fixed in `resolveProgramLink.ts` (ProgramLink.tsx
+  is now a thin renderer around it — extracted so this bug has a real unit
+  test, since this repo's vitest config runs Node, not jsdom, and there was no
+  component-test setup to render `ProgramLink` directly) with two signals,
+  tried in order: **`afterTransfer`** — whether a transfer step precedes this
+  one in the SAME pathway, computed by the caller (`app/pathway/page.tsx`)
+  from the full steps array, the reliable structural signal — and, as a
+  fallback, whether the model tagged the step's own `level` with the
+  partner's name ("B.S. (UF)"), the convention `collegeSystemPrompt`/
+  `mdcSystemPrompt` teach it. Either one makes `ProgramLink` try the partner's
+  catalog BEFORE the school's own, so the same-named local program can't
+  shadow it. `resolveProgramLink.test.ts` covers both signals plus the
+  ordinary "no partner signal, resolve to the school's own program" default.
 
 **Two catalog files are named differently from their school id.** `dsc.ts` →
 `daytona`, `ssc.ts` → `seminole`. All three registries key on the
@@ -1369,13 +1420,13 @@ these figures.
 
 ---
 
-## 12. Test suite — 602 tests, 20 files
+## 12. Test suite — 649 tests, 21 files
 
 | Area | Files | Notable coverage |
 |---|---|---|
 | Catalogs | `programCatalogs`, `fiu-programs`, `programs/broward`, `mdc-programs`, `fiuCoverage` | Every program round-trips to itself at the right level; no tracking params; coverage floor |
 | Generation | `pathwayPrompts` (177 tests), route tests | Per-school: own catalog embedded, own transfer partner named, no other school's catalog leaked, no un-interpolated `${` |
-| Transfers | `transferAgreements` | Every agreement has a real school, a live `.edu` link, and a non-stub summary; Chipola stays `null` |
+| Transfers | `transferAgreements`, `resolveProgramLink` | Every agreement has a real school, a live `.edu` link, and a non-stub summary; every `universityId` resolves to a catalog we hold; Chipola stays `null`, GCSC is the only agreement without a partner catalog; a same-named school/partner program (e.g. Santa Fe's and UF's "Accounting") resolves to whichever one the step was actually taken at |
 | Caching | `apiCache`, `durableCache` | Seed layer authoritative; layer 3 no-ops unconfigured and degrades to a miss on every failure |
 | Limits | `rateLimit` | Per-IP window, daily ceiling, header parsing |
 | Theming | `schoolTheme` | **WCAG AA for all 61 schools** |

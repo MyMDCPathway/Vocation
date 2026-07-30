@@ -67,6 +67,7 @@ import { TSC_PROGRAMS } from "@/app/lib/programs/tsc";
 import { VALENCIA_PROGRAMS } from "@/app/lib/programs/valencia";
 import type { SchoolProgram } from "@/app/lib/programCatalog";
 import { transferAgreementFor } from "@/app/lib/transferAgreements";
+import { catalogFor } from "@/app/lib/programCatalogs";
 
 describe("catalog gating", () => {
   it("recognizes only the schools with real program data", () => {
@@ -146,6 +147,25 @@ describe("MDC prompt", () => {
 
   it("keeps the transfer step, since MDC students transfer out", () => {
     expect(built.systemPrompt).toMatch(/transfer/i);
+  });
+
+  it("names FIU as its flagship transfer partner, migrated off the old hardcoded fallback", () => {
+    const agreement = transferAgreementFor("mdc")!;
+    expect(agreement).not.toBeNull();
+    expect(agreement.universityShortName).toBe("FIU");
+    expect(agreement.universityId).toBe("fiu");
+    expect(built.systemPrompt).toContain("TRANSFER PARTNER");
+    expect(built.systemPrompt).toContain("Florida International University");
+    expect(built.userQuery).toContain("Connect4Success");
+  });
+
+  it("embeds FIU's real bachelor's list so the transfer degree can't be invented", () => {
+    expect(built.systemPrompt).toContain("FIU BACHELOR'S DEGREES");
+    const fiuBachelors = FIU_PROGRAMS.filter((p) => p.level === "bachelor");
+    expect(fiuBachelors.length).toBeGreaterThan(50);
+    for (const p of fiuBachelors.slice(0, 15)) {
+      expect(built.systemPrompt, p.name).toContain(p.name);
+    }
   });
 });
 
@@ -1850,11 +1870,26 @@ describe("Broward prompt (generic state-college template)", () => {
     expect(built.userQuery).toContain("Registered Nurse");
   });
 
-  it("has no transfer partner recorded yet, and says nothing rather than guessing", () => {
-    expect(transferAgreementFor("broward")).toBeNull();
-    expect(built.systemPrompt).not.toContain("TRANSFER PARTNER");
-    // The generic instruction must survive so the step is still produced.
-    expect(built.systemPrompt).toMatch(/TRANSFER step to a four-year university/i);
+  it("names FIU as its flagship transfer partner", () => {
+    const agreement = transferAgreementFor("broward")!;
+    expect(agreement).not.toBeNull();
+    expect(agreement.universityShortName).toBe("FIU");
+    expect(agreement.programName).toBe("Connect4Success");
+    expect(built.systemPrompt).toContain("TRANSFER PARTNER");
+    expect(built.systemPrompt).toContain("Florida International University");
+    expect(built.userQuery).toContain("Connect4Success");
+  });
+
+  it("embeds FIU's real bachelor's list so the transfer degree can't be invented", () => {
+    // The bachelor's a Broward student transfers into is the step the whole
+    // pathway aims at; before the partner catalog was embedded it was the one
+    // step the model could free-generate.
+    expect(built.systemPrompt).toContain("FIU BACHELOR'S DEGREES");
+    const fiuBachelors = FIU_PROGRAMS.filter((p) => p.level === "bachelor");
+    expect(fiuBachelors.length).toBeGreaterThan(50);
+    for (const p of fiuBachelors.slice(0, 15)) {
+      expect(built.systemPrompt, p.name).toContain(p.name);
+    }
   });
 });
 
@@ -1873,6 +1908,7 @@ const STATE_COLLEGES: {
   schoolName: string;
   programs: SchoolProgram[];
 }[] = [
+  { id: "broward", shortName: "Broward", schoolName: "Broward College", programs: BROWARD_PROGRAMS },
   { id: "cf", shortName: "CF", schoolName: "College of Central Florida", programs: CF_PROGRAMS },
   { id: "efsc", shortName: "EFSC", schoolName: "Eastern Florida State College", programs: EFSC_PROGRAMS },
   { id: "fgc", shortName: "FGC", schoolName: "Florida Gateway College", programs: FGC_PROGRAMS },
@@ -1950,7 +1986,31 @@ describe.each(STATE_COLLEGES)(
     it("does not leak another school's catalog", () => {
       expect(built.systemPrompt).not.toContain("Miami Dade College");
       expect(built.systemPrompt).not.toContain("Associate in Arts in Engineering");
-      expect(built.systemPrompt).not.toContain("Broward College");
+      if (id !== "broward") {
+        expect(built.systemPrompt).not.toContain("Broward College");
+      }
+    });
+
+    it("constrains the transfer bachelor's to the partner's real catalog", () => {
+      // Without this the post-transfer bachelor's is free-generated, which is
+      // the one thing this whole app is built to prevent. GCSC is the sole
+      // exception: its partner is FSU's Panama City branch, whose narrower
+      // degree list we do not hold.
+      const agreement = transferAgreementFor(id)!;
+      if (!agreement.universityId) {
+        expect(id).toBe("gcsc");
+        expect(built.systemPrompt).not.toContain("BACHELOR'S DEGREES — the transfer");
+        return;
+      }
+
+      const partnerBachelors = catalogFor(agreement.universityId)!.byLevel("bachelor");
+      expect(built.systemPrompt).toContain(
+        `${agreement.universityShortName.toUpperCase()} BACHELOR'S DEGREES`
+      );
+      expect(built.systemPrompt).toMatch(/must be copied verbatim from that list/i);
+      for (const p of partnerBachelors.slice(0, 10)) {
+        expect(built.systemPrompt, `${id} -> ${p.name}`).toContain(p.name);
+      }
     });
   }
 );

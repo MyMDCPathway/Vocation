@@ -205,7 +205,7 @@ SPECIFIC REQUIREMENTS:
      * Transfer to a specialized program (e.g., architecture, pharmacy) is required, OR
      * Transfer provides a better pathway than completing a bachelor's at MDC
    - If MDC offers a bachelor's degree that directly leads to the career, DO NOT include a transfer step - use MDC's bachelor's program instead
-   - The transfer step should mention articulation agreements and transfer to accredited institutions (e.g., FIU, UF, UCF, etc.)
+   - The transfer step should mention MDC's real articulation agreements — see TRANSFER PARTNER below for the named default and the university's actual bachelor's list. When you do include a bachelor's degree step after transferring, it MUST be one of the programs from that list, and its 'level' field should name the university like "B.S. (${transferPartnerShortName("mdc") ?? "university"})" so the student can see where the step happens.
    - Include information about GPA requirements, portfolio requirements (for design fields), or other admission prerequisites
 
 3. PROFESSIONAL EXPERIENCE/INTERNSHIPS:
@@ -247,12 +247,17 @@ EXAMPLES (using ACTUAL MDC programs):
 - For IT Professional: "Associate in Science in Computer Information Technology" or "Associate in Science in Computer Programming and Analysis" (MDC) -> B.S. in Information Systems Technology (MDC, if available) -> Professional Experience -> Optional Certifications
 - For Dental Hygienist: "Associate in Science in Dental Hygiene" (MDC) -> Direct Employment -> Licensure Exam -> Optional B.S. for advancement
 - For Computer Programmer: "Associate in Science in Computer Programming and Analysis - Mobile Applications Development" or "Associate in Science in Computer Programming and Analysis - Business Application Programming" (MDC) -> Transfer or B.S. -> Professional Experience
-
+${transferPartnerSection("mdc", "MDC")}
 You must only respond with a JSON object following the schema provided.`;
 }
 
 function mdcUserQuery(canonicalCareer: string): string {
-  return `Generate comprehensive educational pathway(s) for becoming a "${canonicalCareer}". 
+  const agreement = transferAgreementFor("mdc");
+  const transferLine = agreement
+    ? `Transfer to a 4-year university (ONLY if bachelor's degree is required AND MDC doesn't offer a bachelor's program in that field), defaulting to ${agreement.universityShortName} via ${agreement.programName} and naming the bachelor's degree exactly from ${agreement.universityShortName}'s own list`
+    : "Transfer to a 4-year university (ONLY if bachelor's degree is required AND MDC doesn't offer a bachelor's program in that field)";
+
+  return `Generate comprehensive educational pathway(s) for becoming a "${canonicalCareer}".
 
 CRITICAL REQUIREMENTS:
 - You MUST provide MULTIPLE alternative pathways when different MDC programs can lead to the same career
@@ -264,7 +269,7 @@ CRITICAL REQUIREMENTS:
   * Mark the most direct/recommended pathway as primary (isPrimary: true)
 - Each pathway must include:
   * The MDC program as the starting point (A.S., A.A., Certificate, or Bachelor's - only if MDC offers it)
-  * Transfer to a 4-year university (ONLY if bachelor's degree is required AND MDC doesn't offer a bachelor's program in that field)
+  * ${transferLine}
   * Bachelor's degree (if required - prefer MDC's bachelor's program if available)
   * Required professional experience/internships
   * All required licensure exams and certifications
@@ -546,6 +551,19 @@ function programList(programs: SchoolProgram[], level: SchoolProgram["level"]): 
 // school's real partner instead of saying "a four-year university". The
 // statewide 2+2 floor is stated alongside it so the model does not present the
 // named partner as the student's only option.
+//
+// When we hold the partner's catalog, its real bachelor's list is embedded too.
+// Without it the bachelor's a student transfers INTO was the one free-generated
+// step left in the whole app — the exact "model invents a plausible degree"
+// failure this project exists to prevent, and worse here than elsewhere because
+// it's the step the pathway is actually aiming at. With the list embedded, the
+// name resolves against the partner's catalog and ProgramLink can link it to
+// the real program page (see ProgramLink.tsx).
+/** The partner's short name, for the 'level' label on a post-transfer step. */
+function transferPartnerShortName(schoolId: string): string | null {
+  return transferAgreementFor(schoolId)?.universityShortName ?? null;
+}
+
 function transferPartnerSection(schoolId: string, shortName: string): string {
   const agreement = transferAgreementFor(schoolId);
   if (!agreement) return "";
@@ -554,12 +572,31 @@ function transferPartnerSection(schoolId: string, shortName: string): string {
     ? ` ${shortName} also holds transfer agreements with ${agreement.alsoPartnersWith.join(", ")}.`
     : "";
 
+  const partner = agreement.universityShortName;
+  // UNIVERSITY_PROGRAMS is the same data catalogFor() indexes, already in this
+  // module — reusing it keeps this free of a programCatalogs import.
+  const partnerProgramList = agreement.universityId
+    ? UNIVERSITY_PROGRAMS[agreement.universityId]
+    : undefined;
+
+  // No catalog for the partner (GCSC's FSU Panama City branch campus) leaves
+  // the transfer bachelor's unconstrained rather than pointing a student at a
+  // program list that isn't really theirs.
+  const partnerPrograms = partnerProgramList
+    ? `
+${partner.toUpperCase()} BACHELOR'S DEGREES — the transfer bachelor's must be one of these, named EXACTLY:
+${programList(partnerProgramList, "bachelor")}
+
+If you send the student to ${partner}, the bachelor's degree step's 'name' MUST be copied verbatim from that list — do not paraphrase it, shorten it, or invent one. If no program on that list fits the career, transfer somewhere else instead and say why.
+`
+    : "";
+
   return `
 TRANSFER PARTNER:
-${shortName}'s flagship articulation agreement is "${agreement.programName}" with ${agreement.university} (${agreement.universityShortName}). ${agreement.summary}${also}
+${shortName}'s flagship articulation agreement is "${agreement.programName}" with ${agreement.university} (${partner}). ${agreement.summary}${also}
 
-When you emit a transfer step, default to ${agreement.universityShortName} and name "${agreement.programName}" in the description. Choose a different university only when the career needs a program ${agreement.universityShortName} does not offer — and say why. Florida's statewide 2+2 articulation separately guarantees Associate in Arts graduates admission to one of the twelve State University System universities, so other public universities remain legitimate destinations; never imply ${agreement.universityShortName} is the only option.
-`;
+When you emit a transfer step, default to ${partner} and name "${agreement.programName}" in the description. Choose a different university only when the career needs a program ${partner} does not offer — and say why. Florida's statewide 2+2 articulation separately guarantees Associate in Arts graduates admission to one of the twelve State University System universities, so other public universities remain legitimate destinations; never imply ${partner} is the only option.
+${partnerPrograms}`;
 }
 
 function collegeSystemPrompt(
@@ -571,6 +608,12 @@ function collegeSystemPrompt(
   const bachelors = programList(school.programs, "bachelor");
   const certificates = programList(school.programs, "certificate");
   const transferPartner = transferPartnerSection(schoolId, school.shortName);
+  // Only point at the TRANSFER PARTNER section when there actually is one —
+  // Chipola and MDC have no recorded flagship, and referring them to a section
+  // the prompt never emits is worse than saying nothing.
+  const transferRule = transferPartner
+    ? "A step taken at a transfer university is governed by the TRANSFER PARTNER section further down — if that section lists the partner's degrees, the transfer bachelor's must come from that list just as strictly."
+    : "Steps at a transfer university are not constrained by these lists.";
 
   return `You are an academic advisor at ${school.schoolName}, a Florida College System institution. Generate a comprehensive educational pathway for a student starting at ${school.shortName} who wants to become a "${canonicalCareer}".
 
@@ -588,7 +631,7 @@ ${school.shortName} is a two-year college that also grants some bachelor's degre
 6. Include OPTIONAL graduate degrees (M.S., M.A., Ph.D.) where they matter for advancement.
 
 CRITICAL — USE ONLY REAL ${school.shortName.toUpperCase()} PROGRAMS:
-Do NOT invent programs. Any step taken AT ${school.shortName} must use a program name EXACTLY as written in the lists below. Steps at a transfer university are not constrained by these lists.
+Do NOT invent programs. Any step taken AT ${school.shortName} must use a program name EXACTLY as written in the lists below. ${transferRule}
 
 ${school.shortName.toUpperCase()} ASSOCIATE DEGREES:
 ${associates}
@@ -601,7 +644,7 @@ ${certificates}
 ${transferPartner}
 STEP FIELD REQUIREMENTS:
 - 'type' must be one of: degree, transfer, internship, exam.
-- 'level' must state the credential and, for steps at ${school.shortName}, the school: "A.A. (${school.shortName})", "A.S. (${school.shortName})", "B.S. (${school.shortName})". For a bachelor's earned after transferring, use "B.S." or "B.A." without a school. For non-degree steps use a short label such as "Transfer", "Internship", or "Licensure Exam".
+- 'level' must state the credential and the school in parentheses: "A.A. (${school.shortName})", "A.S. (${school.shortName})", "B.S. (${school.shortName})". For a bachelor's earned after transferring, name the university you transferred to the same way — "B.S. (${transferPartnerShortName(schoolId) ?? "university"})" — so the student can see where each step happens. For non-degree steps use a short label such as "Transfer", "Internship", or "Licensure Exam".
 - 'name' for a degree step at ${school.shortName} must be the exact program title from the lists above.
 - 'description' should be 1-3 sentences on what the student does at this step and why it matters.
 

@@ -5,12 +5,14 @@ import {
 } from "@/app/lib/transferAgreements";
 import { FLORIDA_SCHOOLS } from "@/app/lib/floridaSchools";
 import { hasCatalog } from "@/app/lib/schoolCatalogs";
+import { catalogFor } from "@/app/lib/programCatalogs";
 
 describe("transfer agreements", () => {
   const ids = schoolsWithTransferAgreement();
 
   it("covers the state colleges wired up so far", () => {
     expect(ids).toEqual([
+      "broward",
       "cf",
       "cfk",
       "daytona",
@@ -22,6 +24,7 @@ describe("transfer agreements", () => {
       "hcc",
       "irsc",
       "lssc",
+      "mdc",
       "nfc",
       "nwfsc",
       "pbsc",
@@ -37,6 +40,18 @@ describe("transfer agreements", () => {
       "tsc",
       "valencia",
     ]);
+  });
+
+  it("names FIU as MDC's flagship, migrated off the old hardcoded assumption", () => {
+    // MDC predates this table; its prompt and ProgramLink used to hardcode FIU
+    // directly rather than going through transferAgreementFor. This is the
+    // migration — same destination, now driven by the same data every other
+    // school uses.
+    const a = transferAgreementFor("mdc")!;
+    expect(a).not.toBeNull();
+    expect(a.universityShortName).toBe("FIU");
+    expect(a.universityId).toBe("fiu");
+    expect(a.programName).toBe("Connect4Success");
   });
 
   it("has no forced flagship for a school with no real one, rather than guessing", () => {
@@ -85,7 +100,6 @@ describe("transfer agreements", () => {
   });
 
   it("returns null for schools with no recorded agreement", () => {
-    expect(transferAgreementFor("mdc")).toBeNull();
     expect(transferAgreementFor("fiu")).toBeNull();
     expect(transferAgreementFor("ucf")).toBeNull();
     expect(transferAgreementFor("uf")).toBeNull();
@@ -107,5 +121,36 @@ describe("transfer agreements", () => {
       const a = transferAgreementFor(id)!;
       expect(a.alsoPartnersWith ?? [], id).not.toContain(a.university);
     }
+  });
+
+  it("points universityId at a school whose catalog we actually hold", () => {
+    // A typo'd or uncatalogued id would silently drop the partner's program
+    // list out of the prompt and the link off the transfer step — a quiet
+    // downgrade to the free-generated bachelor's this table exists to prevent.
+    for (const id of ids) {
+      const a = transferAgreementFor(id)!;
+      if (!a.universityId) continue;
+      expect(hasCatalog(a.universityId), `${id} -> ${a.universityId}`).toBe(true);
+      expect(catalogFor(a.universityId), `${id} -> ${a.universityId}`).not.toBeNull();
+    }
+  });
+
+  it("gives every partner a real bachelor's list to constrain the transfer step", () => {
+    for (const id of ids) {
+      const a = transferAgreementFor(id)!;
+      if (!a.universityId) continue;
+      const bachelors = catalogFor(a.universityId)!.byLevel("bachelor");
+      expect(bachelors.length, `${id} -> ${a.universityId}`).toBeGreaterThan(20);
+    }
+  });
+
+  it("only omits universityId where the partner genuinely has no catalog", () => {
+    // GCSC's partner is FSU's Panama City branch campus, whose degree list is
+    // much narrower than the main-campus catalog we hold under `fsu`. Pointing
+    // it at `fsu` would offer programs Panama City does not teach. If another
+    // agreement ever loses its id, this test should fail rather than let the
+    // transfer step quietly go back to being free-generated.
+    const withoutId = ids.filter((id) => !transferAgreementFor(id)!.universityId);
+    expect(withoutId).toEqual(["gcsc"]);
   });
 });
