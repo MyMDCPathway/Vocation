@@ -99,8 +99,18 @@ export function programMatchKey(value: string): string {
 // (Master of Professional Science, "...B.A.M.A./M.P.S. Program") and "MSF"
 // (Master of Science in Finance, "BBA/BSBA - MSF Dual Degree Program") were
 // both entirely unrecognized codes.
+// Dot-tolerant m.acc., ed.s., j.d., m.b.s., and d.n.p. are all NSU: its
+// Degree Finder dots every letter of every credential ("Accounting
+// (M.Acc.)", "Education (Ed.S.)", "Law (J.D.)", "Biomedical Sciences
+// (M.B.S.)", "Nursing (D.N.P.)"), and each of these previously only had a
+// bare/undotted form (macc, jd, dnp) or none at all (Ed.S. relied on the
+// spelled-out word "specialist," which NSU's own abbreviation never
+// includes; M.B.S. had no code at all). Left bare, each dotted credential
+// fell through GRADUATE_HINT and matched a same-named bachelor's instead —
+// e.g. "Nursing (D.N.P.)" resolving to "Nursing (Accelerated B.S.)" — the
+// exact wrong-level mis-link this module exists to prevent.
 const GRADUATE_HINT =
-  /\b(master|masters|doctor|doctoral|specialist|graduate|ph\.?d|ed\.?d|m\.?ed\.?|m\.?s\.?|m\.?a\.?|m\.?b\.?a|m\.?arch\.?|macc|mat|m\.?f\.?a\.?|mha|mhsa|mia|mib|mla|m\.?m\.?|mpa|m\.?p\.?a\.?s\.?|m\.?p\.?h\.?|m\.?p\.?s\.?|mscj|msee|msme|msf|msn|msw|psm|d\.?b\.?a\.?|ddes|dnp|dpt|dr\.?p\.?h\.?|m\.?d\.?|jd|jm|llm)\b/i;
+  /\b(master|masters|doctor|doctoral|specialist|graduate|ph\.?d|ed\.?d|ed\.?s\.?|m\.?ed\.?|m\.?s\.?|m\.?a\.?|m\.?b\.?a|m\.?arch\.?|m\.?a\.?c\.?c\.?|mat|m\.?f\.?a\.?|m\.?b\.?s\.?|mha|mhsa|mia|mib|mla|m\.?m\.?|mpa|m\.?p\.?a\.?s\.?|m\.?p\.?h\.?|m\.?p\.?s\.?|mscj|msee|msme|msf|msn|msw|psm|d\.?b\.?a\.?|ddes|d\.?n\.?p\.?|dpt|dr\.?p\.?h\.?|m\.?d\.?|j\.?d\.?|jm|llm)\b/i;
 
 const BACHELOR_HINT =
   /\b(bachelor|bachelors|undergraduate|b\.?s\.?|b\.?a\.?|b\.?b\.?a|b\.?f\.?a|b\.?a\.?s|bacc|bhsa|b\.?m\.?|bppa|bpps|bsn)\b/i;
@@ -162,6 +172,16 @@ const GRADUATE_SCHOOL_PHRASE = /\bgraduate\s+school\b/gi;
 // and it would otherwise outrank the "BA" right next to it.
 const BA_JD_PATHWAY = /\bba[\s/-]*jd\b/gi;
 
+// Keiser's "Biomedical Sciences (BMT, Pre-Med), BS" and "Interdisciplinary
+// Studies, Pre-DPT Bridge, BS" are entirely bachelor's-level — "Pre-Med" and
+// "Pre-DPT" name the graduate program a student is preparing to apply to
+// next, not this program's own level. Same "a degree code names something
+// other than this program's level" shape as BA_JD_PATHWAY: bare "dpt" is a
+// real GRADUATE_HINT token, and "Med" is caught by the dot-tolerant
+// "m.?ed.?" (Master of Education) token via the real word "Pre-Med" — both
+// would otherwise outrank the "BS" right next to them.
+const PRE_PROFESSIONAL_TRACK = /\bpre-?(med|dpt)\b/gi;
+
 /** Which level a free-text query is explicitly asking for, if any. */
 export function requestedLevel(...hints: (string | undefined)[]): ProgramLevel | null {
   const text = hints
@@ -171,7 +191,8 @@ export function requestedLevel(...hints: (string | undefined)[]): ProgramLevel |
     .replace(DEGREE_TRANSITION, " ")
     .replace(EMBEDDED_DEGREE_FRAGMENT, " ")
     .replace(GRADUATE_SCHOOL_PHRASE, " ")
-    .replace(BA_JD_PATHWAY, " ");
+    .replace(BA_JD_PATHWAY, " ")
+    .replace(PRE_PROFESSIONAL_TRACK, " ");
   if (!text.trim()) return null;
   // Order matters: "Bachelor of Applied Science" contains "applied science",
   // and a master's step often names the bachelor's it builds on.

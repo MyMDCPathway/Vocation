@@ -62,6 +62,10 @@ export const SCHOOLS_WITH_CATALOG = [
   "eckerd",
   "fmu",
   "ju",
+  "keiser",
+  "fsc",
+  "nova",
+  "ewu",
 ] as const;
 
 export type CatalogSchoolId = (typeof SCHOOLS_WITH_CATALOG)[number];

@@ -29,6 +29,7 @@ import { DSC_PROGRAMS } from "./programs/dsc";
 import { ECKERD_PROGRAMS } from "./programs/eckerd";
 import { EFSC_PROGRAMS } from "./programs/efsc";
 import { ERAU_PROGRAMS } from "./programs/erau";
+import { EWU_PROGRAMS } from "./programs/ewu";
 import { FAMU_PROGRAMS } from "./programs/famu";
 import { FAU_PROGRAMS } from "./programs/fau";
 import { FGC_PROGRAMS } from "./programs/fgc";
@@ -37,6 +38,7 @@ import { FIT_PROGRAMS } from "./programs/fit";
 import { FLAGLER_PROGRAMS } from "./programs/flagler";
 import { FLPOLY_PROGRAMS } from "./programs/flpoly";
 import { FMU_PROGRAMS } from "./programs/fmu";
+import { FSC_PROGRAMS } from "./programs/fsc";
 import { FSCJ_PROGRAMS } from "./programs/fscj";
 import { FSU_PROGRAMS } from "./programs/fsu";
 import { FSW_PROGRAMS } from "./programs/fsw";
@@ -44,7 +46,9 @@ import { GCSC_PROGRAMS } from "./programs/gcsc";
 import { HCC_PROGRAMS } from "./programs/hcc";
 import { IRSC_PROGRAMS } from "./programs/irsc";
 import { JU_PROGRAMS } from "./programs/ju";
+import { KEISER_PROGRAMS } from "./programs/keiser";
 import { LSSC_PROGRAMS } from "./programs/lssc";
+import { NOVA_PROGRAMS } from "./programs/nova";
 import { LYNN_PROGRAMS } from "./programs/lynn";
 import { UM_PROGRAMS } from "./programs/miami";
 import { NCF_PROGRAMS } from "./programs/ncf";
@@ -320,6 +324,10 @@ const UNIVERSITY_SHORT_NAMES: Record<string, string> = {
   eckerd: "Eckerd",
   fmu: "Florida Memorial",
   ju: "Jacksonville University",
+  keiser: "Keiser",
+  fsc: "Florida Southern",
+  nova: "Nova Southeastern",
+  ewu: "Edward Waters",
 };
 
 const UNIVERSITY_PROGRAMS: Record<string, SchoolProgram[]> = {
@@ -352,6 +360,10 @@ const UNIVERSITY_PROGRAMS: Record<string, SchoolProgram[]> = {
   eckerd: ECKERD_PROGRAMS,
   fmu: FMU_PROGRAMS,
   ju: JU_PROGRAMS,
+  keiser: KEISER_PROGRAMS,
+  fsc: FSC_PROGRAMS,
+  nova: NOVA_PROGRAMS,
+  ewu: EWU_PROGRAMS,
 };
 
 function universityCatalog(schoolId: string): UniversityCatalog | null {

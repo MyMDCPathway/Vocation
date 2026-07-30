@@ -22,6 +22,7 @@ import { DSC_PROGRAMS } from "./programs/dsc";
 import { eckerdCatalog } from "./programs/eckerd";
 import { EFSC_PROGRAMS } from "./programs/efsc";
 import { erauCatalog } from "./programs/erau";
+import { ewuCatalog } from "./programs/ewu";
 import { famuCatalog } from "./programs/famu";
 import { fauCatalog } from "./programs/fau";
 import { FGC_PROGRAMS } from "./programs/fgc";
@@ -30,6 +31,7 @@ import { fitCatalog } from "./programs/fit";
 import { flaglerCatalog } from "./programs/flagler";
 import { flpolyCatalog } from "./programs/flpoly";
 import { fmuCatalog } from "./programs/fmu";
+import { fscCatalog } from "./programs/fsc";
 import { FSCJ_PROGRAMS } from "./programs/fscj";
 import { fsuCatalog } from "./programs/fsu";
 import { FSW_PROGRAMS } from "./programs/fsw";
@@ -37,6 +39,8 @@ import { GCSC_PROGRAMS } from "./programs/gcsc";
 import { HCC_PROGRAMS } from "./programs/hcc";
 import { IRSC_PROGRAMS } from "./programs/irsc";
 import { juCatalog } from "./programs/ju";
+import { keiserCatalog } from "./programs/keiser";
+import { novaCatalog } from "./programs/nova";
 import { LSSC_PROGRAMS } from "./programs/lssc";
 import { lynnCatalog } from "./programs/lynn";
 import { umCatalog } from "./programs/miami";
@@ -106,6 +110,10 @@ const CATALOGS: Record<string, ProgramCatalog> = {
   eckerd: eckerdCatalog,
   fmu: fmuCatalog,
   ju: juCatalog,
+  keiser: keiserCatalog,
+  fsc: fscCatalog,
+  nova: novaCatalog,
+  ewu: ewuCatalog,
   broward: browardCatalog,
   cf: asCollege(CF_PROGRAMS),
   efsc: asCollege(EFSC_PROGRAMS),
