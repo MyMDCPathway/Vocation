@@ -2102,3 +2102,130 @@ pathway generated in a real browser with its program links checked. That last
 step caught bugs the first three missed every single time — including a 29-URL
 break in Daytona State's catalog where the school's own index linked to a dead
 path. Keep it.
+
+---
+
+## 14. The 2.0 flow — branch `Vocation-2.0`
+
+Everything above §13 describes `main`. This section describes the branch that
+inverts the product's entry point. Nothing above is invalidated: the catalog
+work, the prompt templates, the cache layers, and the school cookie are all
+unchanged and still load-bearing. What changed is what the app asks first.
+
+**Branch name:** `Vocation-2.0`. Git rejects spaces in ref names, so "Vocation
+2.0" isn't a legal branch. Unrelated to CHANGELOG's "Version 2.0.0".
+
+### Why
+
+1.0's flow was: **select school → Start → look up career**. A student who
+doesn't yet know what they want to study cannot answer the first question, and
+the school they'd name is often the wrong one for the career they land on.
+Worse, it produces one pathway when the honest answer is "here are three ways
+to do this and here's what each costs".
+
+2.0 asks the career first and derives the schools:
+
+```
+career ─▶ /api/refine-career ─┬─ specific? ──▶ skip the follow-up
+                              └─ vague? ─────▶ ask which kind
+   ▼
+location ▶ education ▶ finances ▶ desired schools ▶ priority ▶ mobility
+   ▼
+/api/plan-tracks  (no Gemini — pure catalog + geography)
+   ▼
+up to 3 schools ──▶ /api/generate-pathway ×N in parallel ──▶ /plan
+```
+
+### The pieces
+
+| File | What it does |
+|---|---|
+| `app/page.tsx` | Now the first question. Server component wrapping the wizard. |
+| `app/components/IntakeWizard.tsx` | The whole wizard. One question per screen. |
+| `app/lib/intake.ts` | Answer types + option tables. No logic. |
+| `app/lib/intakeStorage.ts` | sessionStorage, **not** a cookie — see below. |
+| `app/lib/geography.ts` | 61 school coordinates, 17 regions, distance. |
+| `app/lib/planTracks.ts` | Intake → schools. **Server only** (reads all catalogs). |
+| `app/lib/planTypes.ts` | The wire types, importable by the browser. |
+| `app/lib/planCost.ts` | Per-school cost model with an honesty `basis` field. |
+| `app/plan/page.tsx` | Three routes, priced, side by side. |
+| `app/api/refine-career/route.ts` | Is this career specific enough to plan? |
+| `app/api/plan-tracks/route.ts` | Thin wrapper over `resolveTracks`. |
+
+### Decisions worth not re-litigating
+
+**The intake is sessionStorage, not a cookie.** §6's cookie argument is about
+things the *server* must know before it paints — the school decides the logo
+and palette in `layout.tsx`. Nothing about the intake is needed before paint,
+so a cookie would ship someone's household income on every request for no
+benefit. sessionStorage also clears with the tab, which is the right lifetime
+for that data.
+
+**Three tracks reuse `/api/generate-pathway` rather than a new endpoint.** That
+route already has canonicalization, three cache layers, and correctly-ordered
+rate limiting. A "generate three at once" route would reimplement all of it and
+would put three sequential Gemini calls inside one serverless timeout. Tracks
+are de-duped *before* generation, so overlapping picks cost one call.
+
+**`planTracks.ts` is server-only and `planTypes.ts` exists because of it.**
+`resolveTracks` reads every catalog to score program relevance. `import type`
+from a client component would be erased and technically fine, but one careless
+edit away from dragging megabytes into the bundle. The types live in a file
+with no imports so that mistake is impossible rather than merely unlikely.
+
+**Cost figures carry a `basis`.** `listed` means a figure curated for that
+specific school in `universities.ts` (all 12 publics, 8 privates). `sector`
+means a band for the school's sector. Rule 1 says never invent school data —
+"Florida private universities typically run $25k–$45k a year" is a true claim
+about a sector; printing `$31,400` next to a school nobody looked up is not.
+The private band is deliberately wide. Don't narrow it without real numbers.
+
+**The paywall renders nothing, rather than blurring something.** Every figure
+on `/plan` is computed in the browser from data the browser already has. A CSS
+blur over real numbers is readable in two clicks of devtools, so the locked
+rows are skeletons describing what you'd get. **A real paid tier requires
+moving that computation to an authenticated server route** — you cannot gate it
+in a client component, and building it that way now would be the wrong thing to
+migrate later.
+
+### The bug this flow already produced
+
+**Relevance scoring must never gate the local track, and needs a broad match
+before it gates anything.** `relevanceScore` matches career-title words against
+program-title words by shared prefix ("nurse" → "Nursing"). Applied as a filter
+before picking the *closest* school, it sent a Miami student asking about
+pediatricians to **Eastern Florida State College, 184 miles away** — because
+exactly two schools in Florida list a program containing "Pediatric" (EFSC's
+Cardiac Sonography and SPC's Respiratory Care), neither of which is a route to
+becoming a pediatrician, and that fluke evicted MDC from the pool.
+
+Two rules came out of it, both now covered by tests in `planTracks.test.ts`:
+
+1. **"Closest to home" uses the unfiltered candidate list.** Proximity is the
+   track's definition; narrowing by anything else can only push it further away.
+2. **A relevance match counts only when it's broad** (`MIN_RELEVANT_SCHOOLS`,
+   currently 5). Token overlap is reliable when it fires across dozens of
+   schools and is noise when it fires on two. Below the floor, fall back to the
+   full pool and let the catalog-grounded prompt pick the program — which is
+   its job, and what 1.0 did.
+
+This is the same lesson as §2's core insight, one level up: constrain the model
+where you have real data, and don't invent constraints where you don't.
+
+### What's still open
+
+- **No payment or auth**, so "Vocation Plus" is a labelled coming-soon panel.
+  Wiring it means auth + moving the itemization server-side (see above).
+- **Florida only.** Picking "I'm not in Florida" drops the local track and says
+  why, but out-of-state tuition isn't modeled — the figures shown are in-state.
+- **`/plan` ships every catalog to the browser** (232 kB first load), because
+  `ProgramLink` imports `catalogFor`. `/pathway` has always done this, so it's
+  pre-existing rather than new, but resolving program links server-side would
+  fix both pages at once.
+- **Graduate-level tuition uses undergraduate rates.** A generated M.D. step
+  prices at the university sector band, and medical school costs far more than
+  that. It's labelled a sector estimate, but it's the biggest known
+  understatement in the model.
+- **`career-discovery` and `/pathway` still use the 1.0 flow.** Both work and
+  are linked; folding the quiz into the intake as an "I don't know yet" branch
+  off question one is the obvious next step.

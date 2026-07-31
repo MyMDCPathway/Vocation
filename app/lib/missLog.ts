@@ -24,7 +24,7 @@ function sanitize(value: string): string {
 }
 
 export function logCacheMiss(
-  kind: "pathway" | "exam" | "suggestions",
+  kind: "pathway" | "exam" | "suggestions" | "refine",
   raw: string,
   canonical?: string
 ): void {

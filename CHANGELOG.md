@@ -4,6 +4,85 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## Unreleased — branch `Vocation-2.0`
+
+> **Naming note:** the branch is called "Vocation 2.0" after the product
+> redesign. It is unrelated to the "Version 2.0.0" entry further down, which
+> was a feature release on `main` some time ago. Git refuses spaces in branch
+> names, so the branch itself is `Vocation-2.0`.
+
+### The flow is inverted
+
+1.0 asked **which school are you at**, then generated one pathway from that
+school's catalog. That is backwards: most students can't name a school until
+they know what they're studying, and it produces one answer where the real
+question has several.
+
+2.0 opens on **what career do you want** and derives the schools from
+everything the student says afterwards, then plans the same career three ways.
+
+**Old:** select school → press Start → look up career → one pathway
+**New:** career → job specifics → location → education level → finances →
+desired schools → budget priority → work mobility → three priced routes
+
+### New
+
+- **Career-first landing page.** `/` is now the first question. The old hero,
+  school picker, and Start button are gone, along with the dead
+  pathway-generation code path `app/page.tsx` carried (HANDOFF §8/§9 flagged it
+  for deletion or wiring; this deletes it).
+- **`/api/refine-career`.** Asks Gemini whether a career is already specific
+  enough to plan against. "Doctor" gets a specialty question with real options
+  and their residency lengths; **"BCBA" gets no question at all** and skips the
+  step. Also returns a career-specific note on how location flexibility affects
+  entry, which becomes the help text on the mobility question.
+- **`/api/plan-tracks`.** Turns a completed intake into up to three schools —
+  closest, cheapest, and the one the student named. No Gemini call, no rate
+  limiting. Server-side because it reads every catalog to score relevance.
+- **`/plan`.** The three routes side by side, each priced. Tracks that resolve
+  to the same school collapse into one card carrying both badges, so a Miami
+  student who names MDC generates once rather than three times.
+- **`geography.ts`.** Main-campus coordinates for all 61 schools and 17 Florida
+  regions, so "closest to home" is a real answer. Regions rather than ZIP
+  codes: no geocoder dependency and no address to store.
+- **`planCost.ts`.** Generalizes cost estimation beyond MDC. Every figure
+  carries a `basis` — `listed` (curated for that school in `universities.ts`)
+  or `sector` (a band for its sector). Wide honest bands beat narrow invented
+  numbers, and rule 1 says never invent school data.
+- **Gated financial breakdown.** The headline range and the aid outlook are
+  free; itemization, net-of-aid price, living costs, and year-by-year cash flow
+  are behind a "Vocation Plus — coming soon" panel. The locked rows are **not
+  rendered at all** rather than blurred: everything is computed client-side, so
+  a CSS blur would be readable in devtools. A real paid tier has to move that
+  computation behind an authenticated server route.
+
+### Fixed during development
+
+- **Local track ignored proximity.** Relevance scoring filtered the candidate
+  pool before the "closest to home" pick, so a Miami student asking about
+  pediatricians was sent to Eastern Florida State College — 184 miles away —
+  because two schools statewide happen to list *Pediatric Cardiac Sonography*
+  and *Pediatric Respiratory Care*. The local track now uses the unfiltered
+  list, and relevance filtering requires a broad match (5+ schools) before it
+  is trusted at all.
+
+### Unchanged on purpose
+
+- `/pathway` still works and is linked from the footer as "Classic search".
+- The school cookie, `SchoolProvider`, and server-side theming are untouched
+  (HANDOFF §6). The intake is school-agnostic and renders Vocation's own blue.
+- `/api/generate-pathway` is unmodified. The three tracks each call it once, so
+  canonicalization, all three cache layers, and rate limiting apply exactly as
+  before, and a track someone already generated costs nothing.
+
+### Tests
+
+68 added (606 total). The `fiuCoverage` failure documented in HANDOFF §8 is
+still the only failing test and is unrelated — the ratio is unchanged at
+166/651.
+
+---
+
 ## Version 2.0.0 - Major Feature Update
 
 ### 🎉 New Features
