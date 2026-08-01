@@ -4,9 +4,13 @@ import { useEffect, useState, type ReactNode } from "react";
 import {
   RESOURCE_KIND_LABELS,
   type CareerProfile,
+  type CareerVoice,
   type DemandLevel,
+  type VoiceTone,
 } from "@/app/lib/careerProfileTypes";
 import { ContinueButton, StepShell } from "@/app/components/intake/StepShell";
+import { LaborStatsPanel, NoStatsNote } from "@/app/components/intake/LaborStatsPanel";
+import { leadWageArea } from "@/app/lib/blsStats";
 
 // What the job actually is, before anyone commits years to it.
 //
@@ -15,6 +19,13 @@ import { ContinueButton, StepShell } from "@/app/components/intake/StepShell";
 // every question after it costs the student effort, and some of them will
 // decide this isn't the job for them once they read what it pays and how
 // competitive it is. Better here than four screens later.
+//
+// TWO CLASSES OF FACT LIVE ON THIS PAGE and they are never allowed to blur
+// together. Wages and employment come from the BLS survey and say so. Demand
+// commentary, the route in, and what practitioners report are the model's
+// judgement, and where they sit next to a sourced figure the page says which
+// is which. A student can't tell an estimate from a measurement by looking at
+// it, so the page has to tell them.
 //
 // Demand is not colour-coded green-for-good. "Competitive" gets amber and
 // "Shrinking" gets red because those are real signals a student should feel,
@@ -25,6 +36,12 @@ const DEMAND_STYLES: Record<DemandLevel, string> = {
   "Steady demand": "bg-blue-50 text-blue-800 ring-blue-200",
   Competitive: "bg-amber-50 text-amber-900 ring-amber-200",
   Shrinking: "bg-red-50 text-red-800 ring-red-200",
+};
+
+const VOICE_STYLES: Record<VoiceTone, { ring: string; dot: string; label: string }> = {
+  reward: { ring: "ring-green-200", dot: "bg-green-500", label: "Why people stay" },
+  tradeoff: { ring: "ring-amber-200", dot: "bg-amber-500", label: "The trade-off" },
+  warning: { ring: "ring-red-200", dot: "bg-red-500", label: "Why people leave" },
 };
 
 function formatPay(amount: number, currency: string): string {
@@ -44,6 +61,8 @@ function formatPay(amount: number, currency: string): string {
 export function CareerProfileStep({
   career,
   countryCode,
+  subdivision,
+  city,
   stepNumber,
   stepCount,
   onBack,
@@ -52,6 +71,9 @@ export function CareerProfileStep({
 }: {
   career: string;
   countryCode?: string;
+  /** State or province — resolves the BLS area, so pay is local. */
+  subdivision?: string;
+  city?: string;
   stepNumber: number;
   stepCount: number;
   onBack: () => void;
@@ -76,7 +98,7 @@ export function CareerProfileStep({
         const response = await fetch("/api/career-profile", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ career, countryCode }),
+          body: JSON.stringify({ career, countryCode, subdivision, city }),
         });
         const body = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(body.error || "Couldn't load that career.");
@@ -91,7 +113,16 @@ export function CareerProfileStep({
     return () => {
       cancelled = true;
     };
-  }, [career, countryCode, attempt]);
+  }, [career, countryCode, subdivision, city, attempt]);
+
+  // BLS is the better answer for the headline number when we have it: it's
+  // measured rather than estimated, and it's for the student's own metro.
+  //
+  // The figure and the place name come from the SAME area object on purpose —
+  // taking the wage from one and the label from another is how you print a
+  // state median under a city's name. See leadWageArea.
+  const localWageArea = profile?.stats ? leadWageArea(profile.stats) : null;
+  const localWage = localWageArea?.wages.median ?? null;
 
   return (
     <StepShell
@@ -101,6 +132,7 @@ export function CareerProfileStep({
       help={loading ? "Pulling together what this job is really like…" : undefined}
       onBack={onBack}
       rail={rail}
+      wide
       footer={<ContinueButton onClick={onNext} label="Build my plan" />}
     >
       {loading && (
@@ -141,13 +173,33 @@ export function CareerProfileStep({
               <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint">
                 Typical pay
               </p>
-              <p className="mt-1 text-2xl font-bold text-ink">
-                {formatPay(profile.pay.median, profile.pay.currency)}
-              </p>
-              <p className="mt-0.5 text-xs text-ink-faint">
-                {formatPay(profile.pay.low, profile.pay.currency)} –{" "}
-                {formatPay(profile.pay.high, profile.pay.currency)} · {profile.pay.market}
-              </p>
+              {localWage !== null ? (
+                <>
+                  <p className="mt-1 text-2xl font-bold text-ink">
+                    {formatPay(localWage, "USD")}
+                  </p>
+                  <p className="mt-0.5 text-xs text-ink-faint">
+                    median · {localWageArea?.name}
+                  </p>
+                  <p className="mt-1 text-[11px] font-medium uppercase tracking-wide text-green-700">
+                    BLS survey figure
+                  </p>
+                </>
+              ) : (
+                <>
+                  <p className="mt-1 text-2xl font-bold text-ink">
+                    {formatPay(profile.pay.median, profile.pay.currency)}
+                  </p>
+                  <p className="mt-0.5 text-xs text-ink-faint">
+                    {formatPay(profile.pay.low, profile.pay.currency)} –{" "}
+                    {formatPay(profile.pay.high, profile.pay.currency)} ·{" "}
+                    {profile.pay.market}
+                  </p>
+                  <p className="mt-1 text-[11px] font-medium uppercase tracking-wide text-ink-faint">
+                    Estimate
+                  </p>
+                </>
+              )}
             </div>
 
             <div className="rounded-2xl border border-black/10 bg-white p-4">
@@ -161,24 +213,46 @@ export function CareerProfileStep({
               >
                 {profile.demand.level}
               </span>
+              {profile.stats?.national.employment != null && (
+                <p className="mt-2 text-xs text-ink-faint">
+                  {new Intl.NumberFormat("en-US").format(
+                    profile.stats.national.employment
+                  )}{" "}
+                  employed nationally
+                </p>
+              )}
             </div>
 
             <div className="rounded-2xl border border-black/10 bg-white p-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint">
                 Time to get there
               </p>
-              <p className="mt-1 text-2xl font-bold text-ink">
-                {profile.timeToEntry}
-              </p>
-              <p className="mt-0.5 text-xs text-ink-faint">from starting study</p>
+              <p className="mt-1 text-2xl font-bold text-ink">{profile.timeToEntry}</p>
+              <p className="mt-0.5 text-xs text-ink-faint">from where most people start</p>
             </div>
           </div>
 
-          {profile.pay.note && (
-            <p className="-mt-4 text-sm text-ink-soft">{profile.pay.note}</p>
-          )}
           {profile.demand.detail && (
-            <p className="-mt-6 text-sm text-ink-soft">{profile.demand.detail}</p>
+            <p className="-mt-4 text-sm text-ink-soft">{profile.demand.detail}</p>
+          )}
+
+          {/* The measured half of the page. */}
+          {profile.stats ? (
+            <LaborStatsPanel stats={profile.stats} />
+          ) : (
+            <div className="rounded-2xl border border-black/10 bg-white p-5">
+              <p className="text-sm text-ink-soft">{profile.pay.note}</p>
+              <div className="mt-3 border-t border-black/5 pt-3">
+                <NoStatsNote
+                  status={profile.statsStatus ?? "unmatched"}
+                  market={profile.pay.market}
+                />
+              </div>
+            </div>
+          )}
+
+          {profile.stats && profile.pay.note && (
+            <p className="-mt-4 text-sm text-ink-soft">{profile.pay.note}</p>
           )}
 
           {profile.dayToDay.length > 0 && (
@@ -187,7 +261,10 @@ export function CareerProfileStep({
               <ul className="mt-3 space-y-2">
                 {profile.dayToDay.map((item) => (
                   <li key={item} className="flex gap-3 text-ink-soft">
-                    <span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-ink" />
+                    <span
+                      aria-hidden="true"
+                      className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-ink"
+                    />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -195,18 +272,8 @@ export function CareerProfileStep({
             </section>
           )}
 
-          {profile.entryRoute && (
-            <section className="rounded-2xl border border-black/10 bg-white p-5">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">
-                The usual way in
-              </h2>
-              <p className="mt-2 text-ink">{profile.entryRoute}</p>
-              <p className="mt-3 text-sm text-ink-faint">
-                The next few questions turn this into a plan built around where you
-                live, what you can spend, and where you are in school now.
-              </p>
-            </section>
-          )}
+          <TypicalPath profile={profile} />
+          <Voices profile={profile} />
 
           {profile.relatedCareers.length > 0 && (
             <section>
@@ -231,6 +298,129 @@ export function CareerProfileStep({
         </div>
       )}
     </StepShell>
+  );
+}
+
+/**
+ * The usual route in, stage by stage.
+ *
+ * This is the CANONICAL path — what it takes anyone. The rail beside the
+ * wizard shows the student's own version once it knows what they've already
+ * finished, which is a different question and deliberately a different answer.
+ */
+function TypicalPath({ profile }: { profile: CareerProfile }) {
+  if (!profile.typicalPath.length) return null;
+
+  return (
+    <section>
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4">
+        <h2 className="text-lg font-bold text-ink">How people actually get in</h2>
+        <p className="text-sm text-ink-faint">{profile.timeToEntry} end to end</p>
+      </div>
+
+      <ol className="mt-4 space-y-3">
+        {profile.typicalPath.map((stage, index) => (
+          <li
+            key={`${stage.label}-${index}`}
+            className="flex gap-4 rounded-2xl border border-black/10 bg-white p-4"
+          >
+            <span
+              aria-hidden="true"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sand-deep text-sm font-bold text-ink"
+            >
+              {index + 1}
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+                <h3 className="font-semibold text-ink">{stage.label}</h3>
+                <span className="text-sm font-medium text-ink-faint">
+                  {stage.duration}
+                </span>
+              </div>
+              <p className="mt-1 text-sm leading-relaxed text-ink-soft">
+                {stage.detail}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ol>
+
+      {profile.entryRoute && (
+        <p className="mt-3 text-sm text-ink-soft">{profile.entryRoute}</p>
+      )}
+    </section>
+  );
+}
+
+/**
+ * What people who do the job say about it.
+ *
+ * A SYNTHESIS, NOT QUOTES, and the page says so in as many words. We don't
+ * scrape Glassdoor, Indeed, or Reddit — the reasons are in careerVoices.ts and
+ * they're legal as well as editorial. What this section can honestly do is name
+ * the themes that recur and then send the student to read the real thing.
+ */
+function Voices({ profile }: { profile: CareerProfile }) {
+  if (!profile.voices.length && !profile.venues.length) return null;
+
+  return (
+    <section>
+      <h2 className="text-lg font-bold text-ink">What people in the job say</h2>
+      <p className="mt-1 text-sm text-ink-faint">
+        The themes that come up again and again when people who do this work
+        talk about it — summarised, not quoted.
+      </p>
+
+      {profile.voices.length > 0 && (
+        <div className="mt-4 space-y-3">
+          {profile.voices.map((voice) => (
+            <VoiceCard key={voice.theme} voice={voice} />
+          ))}
+        </div>
+      )}
+
+      {profile.venues.length > 0 && (
+        <div className="mt-5 rounded-2xl bg-sand-deep p-5">
+          <h3 className="font-semibold text-ink">Go and read it first-hand</h3>
+          <p className="mt-1 text-sm leading-relaxed text-ink-soft">
+            We won&apos;t republish other people&apos;s reviews, and a summary is
+            no substitute for an hour spent reading what practitioners argue
+            about. These open a search for this job on each site.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {profile.venues.map((venue) => (
+              <a
+                key={venue.url}
+                href={venue.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                title={venue.detail}
+                className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-ink ring-1 ring-black/10 transition-all hover:ring-ink/40"
+              >
+                {venue.label} →
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function VoiceCard({ voice }: { voice: CareerVoice }) {
+  const style = VOICE_STYLES[voice.tone] ?? VOICE_STYLES.tradeoff;
+
+  return (
+    <div className={`rounded-2xl bg-white p-4 ring-1 ${style.ring}`}>
+      <div className="flex items-center gap-2">
+        <span aria-hidden="true" className={`h-2 w-2 rounded-full ${style.dot}`} />
+        <span className="text-xs font-semibold uppercase tracking-wide text-ink-faint">
+          {style.label}
+        </span>
+      </div>
+      <h3 className="mt-1.5 font-semibold text-ink">{voice.theme}</h3>
+      <p className="mt-1 text-sm leading-relaxed text-ink-soft">{voice.detail}</p>
+    </div>
   );
 }
 
@@ -320,9 +510,7 @@ function Resources({ profile }: { profile: CareerProfile }) {
             <span className="text-xs font-medium uppercase tracking-wide text-ink">
               {RESOURCE_KIND_LABELS[resource.kind] ?? "Resource"}
             </span>
-            <span className="mt-1 block font-semibold text-ink">
-              {resource.label}
-            </span>
+            <span className="mt-1 block font-semibold text-ink">{resource.label}</span>
             <span className="mt-1 block text-sm text-ink-soft">{resource.detail}</span>
           </a>
         ))}

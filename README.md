@@ -48,6 +48,14 @@ GEMINI_API_KEY=your_actual_key_here
 
 Every AI feature — pathway generation, career suggestions, the quiz, and exam lookups — runs through this key. Without it, those routes return `"API key not configured"`. The `.env.local` file is gitignored, so your key never gets committed.
 
+Optionally, also add a Bureau of Labor Statistics key:
+
+```bash
+BLS_API_KEY=your_bls_key_here
+```
+
+The career overview shows real wage percentiles and employment counts from the BLS survey, for the student's own metro area. That works with no key at all — but unregistered callers get 25 requests a day per IP, and past that the overview quietly falls back to model estimates. A key ([free, about a minute](https://data.bls.gov/registrationEngine/)) raises it to 500 requests a day. Estimates are always labelled as estimates either way.
+
 ### 3. Run it
 
 ```bash

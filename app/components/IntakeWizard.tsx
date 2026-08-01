@@ -366,8 +366,12 @@ export default function IntakeWizard() {
         career={answers.career.resolved}
         // Always known by now — location is the step before this one, which is
         // the whole reason it was moved. Pay is quoted in their market's own
-        // currency instead of defaulting to US dollars.
+        // currency instead of defaulting to US dollars, and for a US student
+        // the state and city resolve a BLS metro area, so the wage figures are
+        // their city's rather than the country's.
         countryCode={answers.location?.countryCode}
+        subdivision={answers.location?.subdivision}
+        city={answers.location?.city}
         stepNumber={stepNumber}
         stepCount={stepCount}
         onBack={back}
