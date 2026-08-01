@@ -6,6 +6,7 @@ import { distanceMiles } from "@/app/lib/geography";
 import { hasUsableCoordinates, type SchoolRef } from "@/app/lib/schoolRef";
 import { ContinueButton, StepShell } from "@/app/components/intake/StepShell";
 import { SchoolMap } from "@/app/components/intake/SchoolMap";
+import { archetypeProfile } from "@/app/lib/routeArchetype";
 
 // Which of these schools do you already have in mind?
 //
@@ -65,6 +66,9 @@ export function SchoolsStep({ answers, stepNumber, stepCount, onBack, onDone }: 
   const rowRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   const origin = answers.location;
+  // The route decides the vocabulary. Asking a would-be electrician which
+  // "schools" they have in mind is the wrong question in the wrong words.
+  const profile = archetypeProfile(answers.career?.routeArchetype);
 
   useEffect(() => {
     let cancelled = false;
@@ -81,6 +85,9 @@ export function SchoolsStep({ answers, stepNumber, stepCount, onBack, onDone }: 
             city: answers.location?.city,
             latitude: answers.location?.latitude,
             longitude: answers.location?.longitude,
+            // Decides whether this returns universities, union halls, or a
+            // recruiter. Without it every route defaults to degree-shaped.
+            routeArchetype: answers.career?.routeArchetype,
           }),
         });
         const body = await response.json().catch(() => ({}));
@@ -195,10 +202,8 @@ export function SchoolsStep({ answers, stepNumber, stepCount, onBack, onDone }: 
     <StepShell
       stepNumber={stepNumber}
       stepCount={stepCount}
-      question="Any of these you already have in mind?"
-      help={`Schools near ${answers.location?.city || "you"} that could lead to ${
-        answers.career?.resolved?.toLowerCase() ?? "this career"
-      }. Pick any, or skip and we'll choose for you.`}
+      question={profile.providerQuestion}
+      help={`${profile.providerHelp} Pick any, or skip and we'll choose for you.`}
       onBack={onBack}
       footer={
         <ContinueButton
@@ -211,7 +216,7 @@ export function SchoolsStep({ answers, stepNumber, stepCount, onBack, onDone }: 
       {loading && (
         <p className="flex items-center gap-3 text-gray-500">
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-school-600 border-t-transparent" />
-          Finding schools near {answers.location?.city}…
+          Finding {profile.providerNounPlural} near {answers.location?.city}…
         </p>
       )}
 
@@ -251,7 +256,7 @@ export function SchoolsStep({ answers, stepNumber, stepCount, onBack, onDone }: 
                     if (filtered.length === 0) searchByName();
                   }
                 }}
-                placeholder="Search, or name any school…"
+                placeholder={`Search, or name any ${profile.providerNoun}…`}
                 className="min-w-0 flex-1 rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-school-500 focus:outline-none focus:ring-2 focus:ring-school-500"
               />
               {canSearchByName && (

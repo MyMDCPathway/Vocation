@@ -14,6 +14,7 @@ import {
   openSchoolId,
   type SchoolRef,
 } from "@/app/lib/schoolRef";
+import { archetypeProfile, type ArchetypeProfile } from "@/app/lib/routeArchetype";
 
 // Which schools could get this student to this career, from where they live.
 //
@@ -137,29 +138,38 @@ const RESPONSE_SCHEMA = {
   required: ["schools"],
 };
 
-const SYSTEM_PROMPT = `You identify real universities and colleges that could realistically lead a student to a specific career, given where they live.
+function systemPrompt(profile: ArchetypeProfile): string {
+  return `You identify real TRAINING PROVIDERS that could get a student into a specific career, given where they live.
+
+THE ROUTE MATTERS MORE THAN ANYTHING ELSE HERE.
+This career is entered by: ${profile.label}. ${profile.summary}
+
+So what you are looking for is: ${profile.discoveryTarget}.
+
+Do NOT return universities for a career that isn't entered through one. Someone who wants to weld needs union halls, trade schools, and contractors taking apprentices — a list of degree programs is a wrong answer, not a partial one. Match the route.
 
 HARD RULES:
-- Every institution must genuinely exist and currently enrol students. Never invent a school, and never merge two real schools into one name.
-- Include a school ONLY if it plausibly offers education relevant to the stated career. A polytechnic with no medical faculty is not an answer for someone who wants to be a doctor.
-- Prefer institutions in or near the stated city. Include the nearest realistic options even if that means a neighbouring city or region, and say so in distanceNote.
-- Give a mix where one exists: cheaper public options AND stronger-reputation options, so the student can see the trade. Do not return six near-identical private universities.
+- Every provider must genuinely exist and currently take on students or apprentices. Never invent one, and never merge two real organisations into one name.
+- Include a provider ONLY if it plausibly trains people for the stated career.
+- Prefer providers in or near the stated city. Include the nearest realistic options even if that means a neighbouring city or region, and say so in distanceNote.
+- Give a mix where one exists: cheaper options AND stronger-reputation options, so the student can see the trade. Do not return six near-identical private universities.
 
 URLS — these are checked:
-- website must be the institution's real homepage.
-- programsUrl must be a real page that LISTS programs (a course finder, a majors index, an academic catalogue). Not a specific program page, not the homepage, not a search results URL with query parameters.
-- If you are not confident a specific URL is correct, give the homepage for website and the closest thing to a program index you are confident about for programsUrl. A URL we can fetch matters more than a URL that looks precise.
+- website must be the provider's real homepage.
+- programsUrl must be a real page that LISTS what they offer — a course finder, an apprenticeship intake page, a certification catalogue, a majors index. Not a specific program page, not the homepage, not a search results URL with query parameters.
+- If you are not confident a specific URL is correct, give the homepage for website and the closest thing to a listing page you are confident about. A URL we can fetch matters more than a URL that looks precise.
 
-TUITION:
-- Quote annual tuition and fees for a domestic undergraduate student, in the school's own currency.
-- Also convert to USD so schools in different countries can be compared.
-- These are estimates and will be labelled as such, but they must be in the right order of magnitude — the difference between a €200/year public university and a $60,000/year private one is the single most useful thing here.
+COST:
+- Quote what the student would actually pay per year, in local currency, plus a USD conversion so options in different places can be compared.
+- **Where the route PAYS the trainee rather than charging them — most registered apprenticeships, and military service — use 0 for the cost fields and say so in the note.** Printing a tuition figure for an apprenticeship that pays a wage is worse than printing nothing.
+- Figures are estimates and labelled as such, but they must be the right order of magnitude.
 
 COORDINATES:
-- These drop a pin on a map the student looks at, so an error is immediately visible — a school in the wrong county is obvious, and one in the wrong ocean is worse.
-- Give the main campus if you know it. If you don't, give the centre of the city you named for that school; being a mile off is invisible, being in the wrong country is not.
+- These drop a pin on a map the student looks at, so an error is immediately visible — a provider in the wrong county is obvious, and one in the wrong ocean is worse.
+- Give the main site if you know it. If you don't, give the centre of the city you named; being a mile off is invisible, being in the wrong country is not.
 
 Return only JSON matching the schema.`;
+}
 
 function catalogSchoolsFor(
   city: string,
@@ -287,7 +297,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { career, countryCode, subdivision, city, latitude, longitude } =
+    const { career, countryCode, subdivision, city, latitude, longitude, routeArchetype } =
       await request.json();
 
     if (!career || typeof career !== "string" || !career.trim()) {
@@ -302,6 +312,7 @@ export async function POST(request: NextRequest) {
 
     const canonicalCareer = resolveCareer(career).canonical;
     const place = [city, subdivision].filter(Boolean).join(", ");
+    const profile = archetypeProfile(routeArchetype);
 
     // Where to measure distances from, best source first:
     //
@@ -317,13 +328,21 @@ export async function POST(request: NextRequest) {
 
     // Catalog schools are free and deterministic, so they're assembled outside
     // the cache and merged onto whatever the AI half returns.
-    const catalog = hasLocalCatalogs(countryCode, subdivision)
-      ? catalogSchoolsFor(String(city ?? ""), origin)
-      : [];
+    // The catalog is 53 Florida COLLEGES. Merging it into an apprenticeship
+    // or enlistment route is the original bug this classification fixes: a
+    // welder was handed every university in the state. Only routes that
+    // genuinely run through a degree-granting institution get it.
+    const catalog =
+      profile.usesCollegeCatalog && hasLocalCatalogs(countryCode, subdivision)
+        ? catalogSchoolsFor(String(city ?? ""), origin)
+        : [];
 
+    // The archetype is part of the key because it changes the answer: the
+    // same career in the same city returns union halls or universities
+    // depending on it.
     const key = cacheKey(
       "schools",
-      `${countryCode}|${subdivision ?? ""}|${city ?? ""}|${canonicalCareer}`
+      `${countryCode}|${subdivision ?? ""}|${city ?? ""}|${canonicalCareer}|${profile.id}`
     );
 
     const cached = getCached<SchoolRef[]>(key);
@@ -344,12 +363,12 @@ export async function POST(request: NextRequest) {
 
     const result = await generateJson<{ schools: any[] }>({
       apiKey,
-      systemPrompt: SYSTEM_PROMPT,
+      systemPrompt: systemPrompt(profile),
       userQuery: `A student living in ${place || countryName(countryCode)}, ${countryName(
         countryCode
       )} wants to become a "${canonicalCareer}".
 
-List real institutions in or near ${place || countryName(countryCode)} that could get them there, with the URLs and tuition figures the schema asks for.${
+This career is entered by ${profile.label.toLowerCase()}, so find ${profile.discoveryTarget} in or near ${place || countryName(countryCode)} — with the URLs and cost figures the schema asks for.${
         catalog.length
           ? `\n\nDo NOT include Florida public colleges or state universities — those are already covered from our own data. Include private, out-of-state, or international options that add something different.`
           : ""

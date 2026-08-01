@@ -17,6 +17,7 @@ import {
   type WorkMobility,
 } from "@/app/lib/intake";
 import type { SchoolRef } from "@/app/lib/schoolRef";
+import type { RouteArchetype } from "@/app/lib/routeArchetype";
 import { loadIntake, saveIntake } from "@/app/lib/intakeStorage";
 import { ContinueButton, OptionCard, StepShell } from "@/app/components/intake/StepShell";
 import { LocationStep } from "@/app/components/intake/LocationStep";
@@ -43,6 +44,9 @@ interface Refinement {
   helpText: string;
   options: RefineOption[];
   mobilityNote: string;
+  /** How people actually get into this job — steers every later question. */
+  routeArchetype?: RouteArchetype;
+  routeReason?: string;
 }
 
 type Step =
@@ -155,11 +159,26 @@ export default function IntakeWizard() {
       setRefinement(result);
 
       if (result.needsSpecifics) {
-        patch({ career: { raw, resolved: "", question: result.question } });
+        patch({
+          career: {
+            raw,
+            resolved: "",
+            question: result.question,
+            routeArchetype: result.routeArchetype,
+            routeReason: result.routeReason,
+          },
+        });
         goTo("specifics");
       } else {
         // Already specific enough to plan against â€” no follow-up worth asking.
-        patch({ career: { raw, resolved: result.career || raw } });
+        patch({
+          career: {
+            raw,
+            resolved: result.career || raw,
+            routeArchetype: result.routeArchetype,
+            routeReason: result.routeReason,
+          },
+        });
         goTo("location");
       }
     } catch (err: any) {
@@ -172,7 +191,12 @@ export default function IntakeWizard() {
       setError(
         "We couldn't load follow-up options just now, so we'll plan against exactly what you typed."
       );
-      goTo("profile");
+      // "location", not "profile". This path skipped the location question
+      // outright, which left the plan with no country — so the profile quoted
+      // a default market and /plan bounced the student home for an incomplete
+      // intake. It survived the step reorder because it sits one indent level
+      // deeper than the success path that was rewritten alongside it.
+      goTo("location");
     } finally {
       setBusy(false);
     }
@@ -295,7 +319,14 @@ export default function IntakeWizard() {
           type="button"
           onClick={() => {
             const raw = answers.career?.raw ?? careerInput;
-            patch({ career: { raw, resolved: refinement.career || raw } });
+            patch({
+              career: {
+                raw,
+                resolved: refinement.career || raw,
+                routeArchetype: refinement.routeArchetype,
+                routeReason: refinement.routeReason,
+              },
+            });
             goTo("location");
           }}
           className="mt-6 text-sm text-gray-500 underline hover:text-gray-800"

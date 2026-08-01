@@ -5,6 +5,7 @@ import { resolveCareer } from "@/app/lib/careerCanonical";
 import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
 import { geminiUrl } from "@/app/lib/geminiModel";
 import { logCacheMiss } from "@/app/lib/missLog";
+import { archetypeProfile } from "@/app/lib/routeArchetype";
 
 // Step two of the 2.0 intake: "you said doctor — what kind?"
 //
@@ -70,8 +71,35 @@ const RESPONSE_SCHEMA = {
       description:
         "One sentence on how willingness to work in rural areas, relocate, or work abroad affects entry into THIS career specifically. Concrete and factual, or empty string if it genuinely doesn't matter for this career.",
     },
+    routeArchetype: {
+      type: "STRING",
+      enum: [
+        "degree",
+        "credential",
+        "apprenticeship",
+        "certification",
+        "enlistment",
+        "talent",
+        "direct-entry",
+      ],
+      description:
+        "How people ACTUALLY get into this job — see the classification rules. This decides whether the student is shown universities, union halls, certification bodies, or recruiters, so it must reflect the real dominant route rather than the most prestigious one.",
+    },
+    routeReason: {
+      type: "STRING",
+      description:
+        "One short sentence on why that is the route, naming the actual gate — the licence, the union, the exam, the audition. Shown to the student.",
+    },
   },
-  required: ["needsSpecifics", "question", "helpText", "options", "mobilityNote"],
+  required: [
+    "needsSpecifics",
+    "question",
+    "helpText",
+    "options",
+    "mobilityNote",
+    "routeArchetype",
+    "routeReason",
+  ],
 };
 
 const SYSTEM_PROMPT = `You are a career advisor helping a student turn a rough idea into a plannable goal.
@@ -91,6 +119,25 @@ The test is strictly practical: would two different answers produce DIFFERENT de
 When you do ask, the options must be real, distinct jobs a person actually holds, not categories. Order them from most common to least common.
 
 For mobilityNote, say something concrete and true about how location flexibility affects this specific career — rural shortage areas and loan repayment for healthcare, overseas postings for military and energy work, market concentration for finance or entertainment. If location genuinely doesn't change anything for this career, return an empty string rather than filler.
+
+CLASSIFY THE ROUTE — this is the other half of your job.
+
+Set routeArchetype to how people ACTUALLY get into this job today. This decides what the student is shown next: universities, union halls, certification bodies, or a recruiter. Getting it wrong sends a future electrician to look at degree programs.
+
+- degree — a university degree is the genuine gate. Doctor, lawyer, mechanical engineer, teacher, architect, pharmacist.
+- credential — a specific licence or accredited program is the gate, usually shorter than a bachelor's and often at a community college. Registered nurse, dental hygienist, radiologic technologist, paralegal, BCBA, EMT.
+- apprenticeship — learned on the job, earning while training, typically through a union local or contractor. Electrician, plumber, welder, pipefitter, ironworker, elevator mechanic, HVAC technician.
+- certification — hired on demonstrated skill plus industry certifications; a degree is common but not required. Cloud engineer, network administrator, cybersecurity analyst, IT support, web developer.
+- enlistment — the route runs through joining the armed forces. Any military role or MOS.
+- talent — entry is competitive and gated on ability, audition, portfolio, or scouting rather than credentials. Professional athlete, actor, musician, dancer, model, visual artist.
+- direct-entry — you can start with little or no formal training, then progress on the job. Sales rep, truck driver (CDL is short), retail manager, bartender, rideshare driver, warehouse lead.
+
+RULES FOR CLASSIFYING:
+1. Choose the DOMINANT real route, not the most prestigious one. Many electricians hold degrees; almost none needed one. Many software developers have CS degrees, but the field hires on demonstrated skill — that is 'certification', not 'degree'.
+2. When a career has two genuine routes, choose the one that is cheaper and faster, since that is the one a student is least likely to already know about.
+3. 'degree' is the default only when a degree is genuinely required by law, by licensure, or by essentially every employer.
+
+routeReason should name the actual gate in one sentence — "licensed by the state board after an accredited program", "IBEW locals run five-year paid apprenticeships", "hired on portfolio and certifications, not transcripts".
 
 Respond only with JSON matching the provided schema.`;
 
@@ -113,7 +160,12 @@ export async function POST(request: NextRequest) {
     // want to be a nurse" share one answer instead of three.
     const canonicalCareer = resolveCareer(career).canonical;
 
-    const key = cacheKey("refine", canonicalCareer);
+    // "refine2", not "refine": entries cached before route classification
+    // existed have no archetype, and serving one would silently fall back to
+    // "degree" — handing a welder a list of universities, which is the exact
+    // bug this classification was added to fix. A namespace bump costs one
+    // regeneration per career and guarantees every answer carries a route.
+    const key = cacheKey("refine2", canonicalCareer);
     const cached = getCached(key);
     if (cached) {
       return NextResponse.json(cached);
@@ -201,6 +253,11 @@ export async function POST(request: NextRequest) {
       helpText: parsed.helpText || "",
       options,
       mobilityNote: parsed.mobilityNote || "",
+      // Normalised through archetypeProfile so an unrecognised value can
+      // never reach the rest of the app — the enum constrains the model, but
+      // the fallback is what makes that guarantee rather than a hope.
+      routeArchetype: archetypeProfile(parsed.routeArchetype).id,
+      routeReason: parsed.routeReason || "",
     };
 
     setCached(key, refined);

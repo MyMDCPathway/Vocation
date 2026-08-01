@@ -12,6 +12,7 @@
 // doesn't throw away six answers. `isComplete` is the gate, not the type.
 
 import type { SchoolRef } from "@/app/lib/schoolRef";
+import type { RouteArchetype } from "@/app/lib/routeArchetype";
 
 export interface CareerSpecifics {
   /** What the student typed, verbatim. */
@@ -24,6 +25,18 @@ export interface CareerSpecifics {
   resolved: string;
   /** The follow-up question that produced `resolved`, for the summary line. */
   question?: string;
+  /**
+   * How people actually get into this job — see routeArchetype.ts.
+   *
+   * Decided once, at the career step, and then steers every later question:
+   * whether the student is shown universities, union halls, certification
+   * bodies, or a recruiter. Absent on an intake restored from before
+   * classification existed, which callers handle by falling back to the
+   * default rather than guessing.
+   */
+  routeArchetype?: RouteArchetype;
+  /** One line naming the real gate — the licence, the union, the audition. */
+  routeReason?: string;
 }
 
 export type EducationLevel =

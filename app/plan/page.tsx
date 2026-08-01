@@ -77,6 +77,9 @@ export default function PlanPage() {
             city: answers.location?.city,
             latitude: answers.location?.latitude,
             longitude: answers.location?.longitude,
+            // Decides whether this returns universities, union halls, or a
+            // recruiter. Without it every route defaults to degree-shaped.
+            routeArchetype: answers.career?.routeArchetype,
           }),
         });
         const body = await response.json().catch(() => ({}));

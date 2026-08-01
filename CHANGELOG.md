@@ -4,6 +4,94 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## Unreleased — branch `Vocation-2.0`, part 7: not every career runs through college
+
+Asked about welding, Vocation confidently produced a list of universities.
+That isn't a missing feature — it's a wrong answer, and wrong in the way that
+costs trust fastest. The app still carried its Miami Dade College DNA: pick a
+school, get a degree, here's the cost. True for a doctor, false for most of the
+working world.
+
+The route is now classified **before** any route-specific question is asked,
+and the rest of the intake follows it.
+
+### Seven routes
+
+| Route | Example | What the student is shown |
+|---|---|---|
+| `degree` | Pediatrician | Universities |
+| `credential` | Registered nurse | Accredited programs + licensure board |
+| `apprenticeship` | Welder, electrician | Union halls, contractors, trade schools |
+| `certification` | Cloud engineer | Certification bodies, bootcamps |
+| `enlistment` | Military | Branches and recruiting entry points |
+| `talent` | Basketball player | Academies, leagues, overseas circuits |
+| `direct-entry` | Truck driver | Employers, short licences |
+
+Classification happens inside the existing `/api/refine-career` call, so it
+costs nothing extra. Verified live — every one of these came back right:
+
+```
+welder            → apprenticeship  "paid union apprenticeships or trade school"
+electrician       → apprenticeship  "IBEW locals run four- to five-year paid…"
+registered nurse  → credential      "licensed by state nursing boards…"
+cloud engineer    → certification   "hired on demonstrated skill and vendor certs"
+pediatrician      → degree          "4-year medical degree then residency"
+basketball player → talent          "gated by ability, scouting, performance"
+truck driver      → direct-entry    "CDL through a short training course"
+```
+
+Note `cloud engineer → certification`, not `degree`. The prompt is explicit
+that the **dominant real route** wins over the most prestigious one — plenty of
+developers hold CS degrees, but the field hires on demonstrated skill.
+
+### What actually changed for a welder
+
+Before: 53 Florida colleges plus AI universities. After, same city, same query:
+
+```
+Miami Dade College                    welding certificate
+Lindsey Hopkins Technical College     career certificate, Welding
+Ironworkers Local 272 JATC            $0 — paid 4-year apprenticeship
+Pipefitters Local 725 JATC            $0 — paid 5-year apprenticeship
+Sheridan / McFatter / Robert Morgan   technical colleges
+```
+
+Not one university, and the two union locals cost **nothing** — the prompt now
+says outright that where a route pays the trainee, print 0 rather than
+inventing a tuition figure.
+
+The whole step changes vocabulary with the route: *"Any of these
+**apprenticeships** you already have in mind?"* over *"Union halls,
+contractors, and trade schools near you that take on apprentices. **Most of
+these pay you while you train.**"*
+
+The degree path is untouched — pediatrician in Miami still returns 51 catalog
+schools plus 5 AI, nearest-first.
+
+### Fixed during development
+
+- **The refine-career failure path skipped the location question entirely**,
+  jumping straight to the profile. That left the plan with no country, so the
+  profile quoted a default market and `/plan` bounced the student home for an
+  incomplete intake. It survived the part-4 step reorder because it sits one
+  indent level deeper than the success path rewritten alongside it.
+
+### Notes
+
+- The `refine` cache namespace is bumped to `refine2`. Entries cached before
+  classification existed have no route, and serving one would silently fall
+  back to `degree` — reintroducing the exact bug. One regeneration per career
+  buys the guarantee.
+- `degree` is the fallback for anything unrecognised, deliberately: showing a
+  degree path for a job that doesn't need one gives the student an expensive
+  option they can decline, whereas telling a future surgeon they can start
+  tomorrow does not fail safe.
+- The archetype is part of the discovery cache key — the same career in the
+  same city returns union halls or universities depending on it.
+- 710 tests (17 added). `fiuCoverage` remains the only failure.
+
+---
+
 ## Unreleased — branch `Vocation-2.0`, part 6: the schools map
 
 The schools step is now a map beside a nearest-first list. Hovering a row

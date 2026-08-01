@@ -2299,6 +2299,41 @@ that render amber and red, and the prompt requires the unglamorous parts. Don't
 school's course index; a dead licensing-board link has nowhere to go. Rule 7
 applies — it goes, and the count of what went is shown.
 
+### Part 7 — route archetypes
+
+`routeArchetype.ts`. Read this before adding anything to the intake.
+
+**Not every career runs through college, and the app used to assume it did.**
+Asked about welding it returned a list of universities. The route is now
+classified at the career step — inside the existing `/api/refine-career` call,
+so it costs nothing extra — and every later question follows it.
+
+**`usesCollegeCatalog` gates the Florida merge.** The catalog is 53 *colleges*.
+Merging it into an apprenticeship, enlistment, or talent route is the original
+bug. Only `degree` and `credential` get it, because those are the routes that
+genuinely run through a degree-granting institution (a nurse earns their
+credential at a college; a welder does not).
+
+**`degree` is the fallback on purpose.** Unrecognised value, missing field, old
+cache entry — all resolve to `degree` via `archetypeProfile`. That's the
+recoverable wrong answer: a student shown a degree path for a job that doesn't
+need one has an expensive option they can decline; a future surgeon told they
+can start tomorrow does not. Don't "improve" this to a cheaper default.
+
+**The cache namespace is `refine2`, not `refine`.** Entries cached before
+classification existed carry no route, and serving one silently falls back to
+`degree` — handing welders universities again. If you ever change the shape of
+that response, bump the namespace rather than defaulting the new field.
+
+**The archetype is part of the find-schools cache key.** Same career, same
+city, different route ⇒ genuinely different providers. Leaving it out serves
+one route's answer to another.
+
+**The prompt must keep saying "print 0 where the route pays you."** Registered
+apprenticeships and military service pay a wage; quoting tuition for them is
+worse than quoting nothing. Verified: Ironworkers Local 272 and Pipefitters
+Local 725 both come back at 0.
+
 ### Part 6 — the schools map
 
 `SchoolMap.tsx` + `leaflet`. Read this before touching either.
