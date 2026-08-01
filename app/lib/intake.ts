@@ -39,6 +39,16 @@ export interface CareerSpecifics {
   /** One line naming the real gate — the licence, the union, the audition. */
   routeReason?: string;
   /**
+   * The BLS occupation the summary matched this career to.
+   *
+   * Carried forward so the plan page's wage panel describes the SAME
+   * occupation the summary did. Without it the plan re-matches from the career
+   * text alone and can land somewhere else — the summary had the model's SOC
+   * hint to work from and the plan wouldn't, so a career that only resolved
+   * via the hint would show figures on one page and nothing on the other.
+   */
+  socCode?: string;
+  /**
    * The rough shape of the route, from the same call that classified it.
    *
    * Shown from the career question onward and sharpened locally as answers

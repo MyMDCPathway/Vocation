@@ -410,6 +410,14 @@ export default function IntakeWizard() {
         stepCount={stepCount}
         onBack={back}
         onNext={advance}
+        // Remember which BLS occupation this career resolved to, so the plan
+        // page's wage panel describes the same one.
+        onLoaded={(profile) => {
+          if (!profile.socCode || answers.career?.socCode === profile.socCode) return;
+          patch({
+            career: { ...answers.career!, socCode: profile.socCode },
+          });
+        }}
       />
     );
   }

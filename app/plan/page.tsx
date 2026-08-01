@@ -13,6 +13,7 @@ import { estimatePlanCost, formatCostRangeShort } from "@/app/lib/planCost";
 import { PathwayFlow } from "@/app/components/plan/PathwayFlow";
 import { CostPanel } from "@/app/components/plan/CostPanel";
 import { ConfidenceBanner } from "@/app/components/plan/ConfidenceBanner";
+import { LocalPayPanel } from "@/app/components/plan/LocalPayPanel";
 
 // The payoff screen: the same career, planned up to three ways.
 //
@@ -226,6 +227,15 @@ export default function PlanPage() {
             </span>
           ))}
         </div>
+
+        {/* Above the routes, because every cost below is only meaningful
+            against this number — and a payoff shown after the price reads as
+            justification rather than information. */}
+        <LocalPayPanel
+          career={career}
+          location={answers.location}
+          socCode={answers.career?.socCode}
+        />
 
         {fatal && (
           <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-6">

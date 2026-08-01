@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   RESOURCE_KIND_LABELS,
   type CareerProfile,
@@ -9,7 +9,7 @@ import {
   type VoiceTone,
 } from "@/app/lib/careerProfileTypes";
 import { ContinueButton, StepShell } from "@/app/components/intake/StepShell";
-import { LaborStatsPanel, NoStatsNote } from "@/app/components/intake/LaborStatsPanel";
+import { LaborStatsPanel, NoStatsNote } from "@/app/components/LaborStatsPanel";
 import { leadWageArea } from "@/app/lib/blsStats";
 
 // What the job actually is, before anyone commits years to it.
@@ -67,6 +67,7 @@ export function CareerProfileStep({
   stepCount,
   onBack,
   onNext,
+  onLoaded,
   rail,
 }: {
   career: string;
@@ -78,6 +79,11 @@ export function CareerProfileStep({
   stepCount: number;
   onBack: () => void;
   onNext: () => void;
+  /**
+   * Hands the resolved BLS occupation back to the intake, so the plan page's
+   * wage panel can ask about the same one rather than re-deriving it.
+   */
+  onLoaded?: (profile: CareerProfile) => void;
   rail?: ReactNode;
 }) {
   const [profile, setProfile] = useState<CareerProfile | null>(null);
@@ -87,6 +93,14 @@ export function CareerProfileStep({
   // often enough that a page with no way to retry is a page that strands
   // people on an error for no reason.
   const [attempt, setAttempt] = useState(0);
+
+  // Held in a ref, not a dependency. The wizard passes this inline, so it's a
+  // new function every render — as a dependency it would re-run the fetch on
+  // every keystroke's worth of parent state, and each re-run calls it again.
+  const onLoadedRef = useRef(onLoaded);
+  useEffect(() => {
+    onLoadedRef.current = onLoaded;
+  }, [onLoaded]);
 
   useEffect(() => {
     let cancelled = false;
@@ -102,7 +116,10 @@ export function CareerProfileStep({
         });
         const body = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(body.error || "Couldn't load that career.");
-        if (!cancelled) setProfile(body);
+        if (!cancelled) {
+          setProfile(body);
+          onLoadedRef.current?.(body);
+        }
       } catch (err: any) {
         if (!cancelled) setError(err.message || "Couldn't load that career.");
       } finally {
