@@ -2299,6 +2299,34 @@ that render amber and red, and the prompt requires the unglamorous parts. Don't
 school's course index; a dead licensing-board link has nowhere to go. Rule 7
 applies — it goes, and the count of what went is shown.
 
+### Part 5 — location is four screens, not one
+
+`LocationStep.tsx` renders one of `"country" | "region" | "city" | "postal"`
+at a time via local `subStep` state, not one big form. This is still a single
+entry in the WIZARD's outer step list — `stepNumber`/`stepCount` passed in
+from `IntakeWizard` don't change across the four, same as they don't change
+while `SchoolsStep` is internally loading or searching.
+
+**Back is internal until it isn't.** `back()` inside `LocationStep` steps
+`postal → city → region → country`, and only at `country` does it call the
+`onBack` prop up to the wizard. Don't wire the wizard's own back button
+directly to any of the sub-screens — it has to go through this component's
+`back()` or the chain breaks.
+
+**Re-entering resumes at the last question, not the first.** The initial
+`subStep` is computed once from `value`: empty/partial answers start at
+`"country"`; a fully-answered location (the student went forward, then came
+back) starts at the last applicable sub-step, via `subStepsFor(countryCode)`.
+Getting this wrong means every "← Back" from the profile screen forces the
+student through country → region → city again just to reach postal.
+
+**Click-to-advance vs. click-to-fill is deliberate, not an oversight.**
+Country and region are single-pick lists — clicking one advances immediately,
+matching every other single-select question in the wizard (education level,
+budget priority). City and postal are free-text-capable, so a chip only fills
+the field and a real Continue click is still required — the same reason the
+career screen's example chips don't auto-submit.
+
 ### Part 4 — postal codes and local pay
 
 **Step order is load-bearing.** `career → specifics? → location → profile → …`.

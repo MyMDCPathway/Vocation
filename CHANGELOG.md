@@ -4,6 +4,39 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## Unreleased — branch `Vocation-2.0`, part 5: one location question at a time
+
+The location step asked for country, region, city, and postal code all on one
+scrolling screen. Every other question in the wizard asks exactly one thing;
+this one didn't, and it read as a form dropped into the middle of a
+conversation.
+
+`LocationStep` is now four small screens — country, then region, then city,
+then (optional) postal code — each with its own back button, still living
+inside one entry in the wizard's outer step list. The outer "Step X of Y"
+counter doesn't advance across the four; it doesn't need to know there are
+four of them, any more than it needs to know the schools step has its own
+internal search box.
+
+Selecting a country or a region advances immediately, same as every other
+single-pick question in the wizard (education level, budget priority). City
+and postal code still need an explicit **Continue**, because they accept free
+text and a stray keystroke shouldn't submit early.
+
+**Back is a real back**, not an exit. Pressing it from postal returns to city,
+from city to region, from region to country, and only from country does it
+hand off to the wizard's own back button. Re-entering the step (student
+answered the next question, then pressed back) picks up on the last question
+they'd answered rather than marching them through all four again.
+
+Nothing about *what* gets asked changed — same fields, same optional postal
+code, same `usesPostalCode`/`postalLabel` gating from part 4. This is purely
+the one-screen-per-question restructuring.
+
+679 tests, unchanged. `fiuCoverage` remains the only failure.
+
+---
+
 ## Unreleased — branch `Vocation-2.0`, part 4: local pay, and postal codes
 
 ### Location now comes before the profile
