@@ -266,15 +266,19 @@ export const NO_MOBILITY: WorkMobility = {
  * `specifics` is in the list but conditionally skipped — see
  * `nextStepAfter`. Everything else always runs.
  */
-// Location comes BEFORE the profile so the pay and demand figures on it are
-// for the student's own market. Shown first, the profile could only quote a
-// default market, which for anyone outside the US meant salary figures in the
-// wrong currency for the wrong country.
+// The profile comes straight after the career, before any other question.
+//
+// It's the screen most likely to make a student decide this isn't the job for
+// them, and every question after it costs them effort — so it goes first, not
+// fourth. The cost is that it runs before we know where they live, so its wage
+// figures are national rather than their metro's. That's handled by showing
+// national figures AS national (see blsAreas.resolveAreas), never by dressing
+// a country-wide number up as a local one.
 export const INTAKE_STEPS = [
   "career",
   "specifics",
-  "location",
   "profile",
+  "location",
   "education",
   "finances",
   "schools",

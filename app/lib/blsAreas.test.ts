@@ -64,6 +64,18 @@ describe("resolveAreas", () => {
     expect(areas!.metro?.name).toMatch(/Miami/);
   });
 
+  // The career summary now runs BEFORE the location question — the country
+  // comes from the corner chip, the metro is asked for on the next screen. So
+  // country-with-nothing-else has to resolve to the national area rather than
+  // to null, or the summary silently loses its wage figures for every student.
+  it("resolves national figures from the country alone", () => {
+    const areas = resolveAreas({ countryCode: "US", subdivision: "", city: "" });
+    expect(areas).not.toBeNull();
+    expect(areas!.national.code).toBe("0000000");
+    expect(areas!.state).toBeNull();
+    expect(areas!.metro).toBeNull();
+  });
+
   it("still resolves the state when the city matches no metro", () => {
     const areas = resolveAreas({
       countryCode: "US",

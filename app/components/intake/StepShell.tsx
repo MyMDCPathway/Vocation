@@ -25,6 +25,7 @@ export function StepShell({
   wide,
   hero,
   rail,
+  corner,
   children,
 }: {
   stepNumber: number;
@@ -56,6 +57,14 @@ export function StepShell({
    * wiring, and so the heading can't drift a few pixels between screens.
    */
   rail?: ReactNode;
+  /**
+   * A control pinned to the top-right, level with the wordmark.
+   *
+   * Only the country switcher uses this, and only on the hero. It's a setting
+   * rather than a question, so it sits in the corner the way every storefront
+   * puts its locale picker — not as a screen the student has to get past.
+   */
+  corner?: ReactNode;
   children: ReactNode;
 }) {
   const percent = Math.round((stepNumber / stepCount) * 100);
@@ -66,6 +75,20 @@ export function StepShell({
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden">
       <Confetti blobs={hero ? undefined : QUIET_BLOBS} />
+
+      {/* Pinned to the PAGE corner, not the reading column — a locale switcher
+          that floats 280px in from the edge doesn't read as chrome, it reads
+          as part of the form. Outside the centred column entirely, so the
+          wordmark stays optically centred rather than being pushed left by
+          half the chip's width.
+
+          z-30 clears the z-10 content: the popover has to open over the
+          heading beneath it. */}
+      {corner && (
+        <div className="absolute right-5 top-8 z-30 md:right-8 md:top-11">
+          {corner}
+        </div>
+      )}
 
       {/* z-10 across the content: the confetti sits at z-0 and must never be
           able to take a click meant for the form. */}

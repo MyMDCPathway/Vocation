@@ -16,6 +16,7 @@ import {
   type SupportSituation,
   type WorkMobility,
 } from "@/app/lib/intake";
+import { DEFAULT_COUNTRY } from "@/app/lib/countries";
 import type { SchoolRef } from "@/app/lib/schoolRef";
 import type { RouteArchetype } from "@/app/lib/routeArchetype";
 import type { OutlineStep } from "@/app/lib/pathOutline";
@@ -25,6 +26,7 @@ import { LocationStep } from "@/app/components/intake/LocationStep";
 import { SchoolsStep } from "@/app/components/intake/SchoolsStep";
 import { CareerProfileStep } from "@/app/components/intake/CareerProfileStep";
 import { PathRail } from "@/app/components/intake/PathRail";
+import { CountryChip } from "@/app/components/intake/CountryChip";
 
 // The 2.0 intake, front to back.
 //
@@ -107,11 +109,17 @@ export default function IntakeWizard() {
   const steps = useMemo<Step[]>(() => {
     const list: Step[] = ["career"];
     if (refinement?.needsSpecifics) list.push("specifics");
-    // Order matters twice over. The profile sits after any NARROWING, so it
-    // describes the specific job they settled on rather than figures spanning
-    // a GP and a neurosurgeon. And it sits after LOCATION, so the pay and
-    // demand on it are for their own market rather than a default one.
-    list.push("location", "profile", "education", "finances", "schools", "priority", "mobility");
+    // The profile sits immediately after the career — right after any
+    // NARROWING, so it describes the specific job they settled on rather than
+    // figures spanning a GP and a neurosurgeon, but BEFORE anything else.
+    //
+    // It's the first thing the student gets back rather than the fourth, which
+    // is the point: it's the screen most likely to change their mind, and the
+    // questions after it all cost effort. The trade is that it runs before we
+    // know where they live, so its wage figures are national. See
+    // resolveAreas — no location means national-only, never a metro figure
+    // labelled as theirs.
+    list.push("profile", "location", "education", "finances", "schools", "priority", "mobility");
     return list;
   }, [refinement]);
 
@@ -187,7 +195,7 @@ export default function IntakeWizard() {
             outline: result.outline,
           },
         });
-        goTo("location");
+        goTo("profile");
       }
     } catch (err: any) {
       // A failure here must not dead-end the student. The narrowing question
@@ -199,12 +207,12 @@ export default function IntakeWizard() {
       setError(
         "We couldn't load follow-up options just now, so we'll plan against exactly what you typed."
       );
-      // "location", not "profile". This path skipped the location question
-      // outright, which left the plan with no country — so the profile quoted
-      // a default market and /plan bounced the student home for an incomplete
-      // intake. It survived the step reorder because it sits one indent level
-      // deeper than the success path that was rewritten alongside it.
-      goTo("location");
+      // This path has bitten twice now — it sits one indent level deeper than
+      // the success path above, so both previous reorders rewrote that one and
+      // left this one pointing at the old step. It must go wherever the
+      // success path goes, or a student whose refine call failed skips a
+      // question and /plan bounces them home for an incomplete intake.
+      goTo("profile");
     } finally {
       setBusy(false);
     }
@@ -252,6 +260,27 @@ export default function IntakeWizard() {
         question="What career do you want?"
         help="Anything from a job title to a rough idea. We'll work out the route together — and it isn't always a degree."
         hero
+        // Set before the first API call, which is the point: the career
+        // summary on the next screen quotes wages for this market rather than
+        // a default one.
+        corner={
+          <CountryChip
+            value={answers.location?.countryCode}
+            onChange={(countryCode) =>
+              patch({
+                // Switching country CLEARS the finer detail. A Florida and a
+                // "33132" carried over into France would survive as a
+                // subdivision that country doesn't have and a postcode that
+                // resolves somewhere else entirely. Re-picking the same
+                // country keeps what's there.
+                location:
+                  answers.location?.countryCode === countryCode
+                    ? { ...answers.location, countryCode }
+                    : { countryCode, subdivision: "", city: "" },
+              })
+            }
+          />
+        }
       >
         <div className="mx-auto max-w-2xl">
           <div className="rounded-3xl bg-white p-2 shadow-[0_10px_40px_-12px_rgba(32,20,54,0.25)]">
@@ -330,7 +359,7 @@ export default function IntakeWizard() {
                     question: refinement.question,
                   },
                 });
-                goTo("location");
+                goTo("profile");
               }}
             />
           ))}
@@ -349,7 +378,7 @@ export default function IntakeWizard() {
                 outline: refinement.outline,
               },
             });
-            goTo("location");
+            goTo("profile");
           }}
           className="mt-6 text-sm text-ink-faint underline hover:text-ink"
         >
@@ -364,12 +393,17 @@ export default function IntakeWizard() {
       <CareerProfileStep
         rail={rail}
         career={answers.career.resolved}
-        // Always known by now — location is the step before this one, which is
-        // the whole reason it was moved. Pay is quoted in their market's own
-        // currency instead of defaulting to US dollars, and for a US student
-        // the state and city resolve a BLS metro area, so the wage figures are
-        // their city's rather than the country's.
-        countryCode={answers.location?.countryCode}
+        // From the corner chip on the opening screen, so pay is quoted in
+        // this market's currency rather than defaulting to US dollars.
+        //
+        // Falls back to DEFAULT_COUNTRY rather than passing undefined: the
+        // chip DISPLAYS "US" before it's been touched, and a student who never
+        // touches it would otherwise get no country at all — which reads to
+        // resolveAreas as "not in the US" and drops the BLS figures the chip
+        // was showing them as available.
+        countryCode={answers.location?.countryCode || DEFAULT_COUNTRY}
+        // Usually empty here — the metro is asked for on the NEXT screen, so
+        // these figures are national until then, and the panel says so.
         subdivision={answers.location?.subdivision}
         city={answers.location?.city}
         stepNumber={stepNumber}

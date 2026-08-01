@@ -108,6 +108,16 @@ export function LaborStatsPanel({ stats }: { stats: LaborStats }) {
       <p className="mt-5 text-xs leading-relaxed text-ink-faint">
         The bar spans the 10th to the 90th percentile; the notch is the median.
         The bottom tenth and top tenth of earners fall outside it.
+        {/* The metro is asked for on the next screen, so this panel is
+            national on first read. Saying so beats letting a country-wide
+            figure pass as a local one. */}
+        {!stats.hasLocal && (
+          <>
+            {" "}
+            These are national figures — tell us your area next and they narrow
+            to your own market, which is often thousands of dollars different.
+          </>
+        )}
       </p>
 
       <Concentration stats={stats} />

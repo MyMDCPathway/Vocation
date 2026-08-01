@@ -1,12 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ReactNode } from "react";
-import {
-  COUNTRIES,
-  DEFAULT_COUNTRY,
-  flagEmoji,
-  subdivisionLabel,
-} from "@/app/lib/countries";
+import { useEffect, useState, type ReactNode } from "react";
+import { DEFAULT_COUNTRY, subdivisionLabel } from "@/app/lib/countries";
 import type { StudentLocation } from "@/app/lib/intake";
 import {
   normalizePostalCode,
@@ -17,17 +12,20 @@ import {
 } from "@/app/lib/postalCode";
 import { ContinueButton, StepShell } from "@/app/components/intake/StepShell";
 
-// Where do you live — one question at a time: country, then region, then
-// city, then (optionally) a postal code.
+// Where exactly do you live — ideally one field, not four screens.
 //
-// This used to be all four on one scrolling screen, in the name of "it's one
-// thought." Real feedback was that it didn't read that way — it read as a
-// form, out of step with every other screen in the wizard asking exactly one
-// thing. So it's four small screens now, each with its own back button,
-// nested inside this one wizard step rather than four separate entries in the
-// outer step list — the outer "Step X of Y" counter doesn't need to know
-// there are four of them, any more than it needs to know the schools step has
-// its own internal search box.
+// This has been through three shapes. It started as country/region/city/postal
+// on one scrolling page, which read as a form rather than a question. It became
+// four separate screens, which read right but meant three questions stood
+// between "what career do you want" and the first useful answer.
+//
+// Now the COUNTRY is a corner control on the opening screen (see CountryChip)
+// rather than a question, and this step leads with the postal code — because a
+// postal code resolves to a town, a region AND coordinates in one lookup. For a
+// US student that's the whole location step: type a ZIP, done. The
+// region-then-city screens are still here, but only as the fallback for someone
+// whose code didn't resolve, who'd rather not give one, or who lives in one of
+// the ~60 countries with no postal system at all.
 //
 // The region list is fetched per country rather than shipped. Hand-typing ISO
 // 3166-2 for 190 countries is ~5,000 rows entered from memory, and a wrong
@@ -39,15 +37,7 @@ interface Subdivision {
   largestCities: string[];
 }
 
-type LocalStep = "country" | "region" | "city" | "postal";
-
-/** Which sub-questions apply once a country is known. */
-function subStepsFor(countryCode: string): LocalStep[] {
-  if (!countryCode) return ["country"];
-  const steps: LocalStep[] = ["country", "region", "city"];
-  if (usesPostalCode(countryCode)) steps.push("postal");
-  return steps;
-}
+type LocalStep = "postal" | "region" | "city";
 
 export function LocationStep({
   value,
@@ -64,54 +54,46 @@ export function LocationStep({
   onDone: (location: StudentLocation) => void;
   rail?: ReactNode;
 }) {
-  const [countryCode, setCountryCode] = useState(value?.countryCode ?? "");
+  // Chosen on the opening screen. Defaulted here too so this step still works
+  // if it's somehow reached without one, rather than rendering a question with
+  // no country to ask it about.
+  const countryCode = value?.countryCode || DEFAULT_COUNTRY;
+  const asksPostal = usesPostalCode(countryCode);
+
   const [subdivision, setSubdivision] = useState(value?.subdivision ?? "");
   const [city, setCity] = useState(value?.city ?? "");
   const [postal, setPostal] = useState(value?.postalCode ?? "");
 
-  // Landing back on this step (the student pressed "Back" from the next
-  // question) should return them to the last thing they answered, not march
-  // them through country/region/city again. A fresh, empty intake starts at
-  // the first question as normal.
+  // Coming back into this step (the student pressed "Back" from the next
+  // question) should land on the last thing they answered rather than march
+  // them through it again.
   const [subStep, setSubStep] = useState<LocalStep>(() => {
-    if (!value?.countryCode || !value?.city) return "country";
-    const applicable = subStepsFor(value.countryCode);
-    return applicable[applicable.length - 1];
+    if (value?.city) return asksPostal ? "postal" : "city";
+    return asksPostal ? "postal" : "region";
   });
 
   const [subdivisions, setSubdivisions] = useState<Subdivision[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [countryQuery, setCountryQuery] = useState("");
 
   // Resolved coordinates for the postal code, when one was entered and
-  // recognised. Undefined means "not looked up or not found", which is a
-  // perfectly fine end state — the field is optional.
+  // recognised. Null means "not looked up or not found", which is a perfectly
+  // fine end state — the fallback screens cover it.
   const [place, setPlace] = useState<PostalPlace | null>(null);
   const [postalState, setPostalState] = useState<"idle" | "looking" | "found" | "missing">(
     "idle"
   );
 
-  const countries = useMemo(() => {
-    const q = countryQuery.trim().toLowerCase();
-    const matches = q
-      ? COUNTRIES.filter((c) => c.name.toLowerCase().includes(q))
-      : COUNTRIES;
-    if (q) return matches;
-    // With no search, surface the country we hold real catalogs for first —
-    // it's the only place the app has scraped program data, and burying it
-    // under Afghanistan helps nobody.
-    const preferred = COUNTRIES.filter((c) => c.code === DEFAULT_COUNTRY);
-    return [...preferred, ...matches.filter((c) => c.code !== DEFAULT_COUNTRY)];
-  }, [countryQuery]);
+  // Only fetch the region list if the student actually needs it — most won't,
+  // now that a postal code answers the whole question.
+  const needsRegions = subStep === "region" || subStep === "city";
 
   useEffect(() => {
-    if (!countryCode) return;
+    if (!needsRegions || subdivisions.length > 0) return;
     let cancelled = false;
 
     setLoading(true);
     setError(null);
-    setSubdivisions([]);
 
     (async () => {
       try {
@@ -135,14 +117,15 @@ export function LocationStep({
     return () => {
       cancelled = true;
     };
-  }, [countryCode]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [needsRegions, countryCode]);
 
   // Look the postal code up once the student stops typing. Debounced because
   // otherwise every keystroke of "EH1 1YZ" is a request, and most prefixes of
   // a valid code are not themselves valid.
   useEffect(() => {
     const code = normalizePostalCode(postal);
-    if (!countryCode || code.length < 3) {
+    if (code.length < 3) {
       setPlace(null);
       setPostalState("idle");
       return;
@@ -164,10 +147,6 @@ export function LocationStep({
         if (body?.place) {
           setPlace(body.place);
           setPostalState("found");
-          // Fill the city in if they haven't typed one. Never overwrite what
-          // they did type — the postal code resolves to a delivery area, and
-          // people know their own address better than a lookup table does.
-          setCity((current) => current.trim() || body.place.city);
         } else {
           setPlace(null);
           setPostalState("missing");
@@ -188,29 +167,31 @@ export function LocationStep({
 
   const cities =
     subdivisions.find((s) => s.name === subdivision)?.largestCities ?? [];
-  const showPostal = Boolean(countryCode) && usesPostalCode(countryCode);
 
-  const finish = (finalCity: string) => {
+  const finish = (finalCity: string, resolved?: PostalPlace | null) => {
+    const from = resolved ?? place;
     onDone({
       countryCode,
       // A resolved postal code knows the region better than a dropdown does,
       // but only fills a gap — never overrides a choice the student made.
-      subdivision: subdivision.trim() || place?.subdivision || "",
+      subdivision: subdivision.trim() || from?.subdivision || "",
       city: finalCity.trim(),
       postalCode: normalizePostalCode(postal) || undefined,
-      latitude: place?.latitude,
-      longitude: place?.longitude,
+      latitude: from?.latitude,
+      longitude: from?.longitude,
     });
   };
 
-  const selectCountry = (code: string) => {
-    setCountryCode(code);
-    setSubdivision("");
-    setCity("");
-    // A postal code from the previous country means nothing here.
-    setPostal("");
-    setPlace(null);
-    setPostalState("idle");
+  /**
+   * The one-field path: a resolved code carries town, region and coordinates,
+   * so there is nothing left to ask. Anything else drops to picking an area,
+   * rather than finishing with a location we couldn't place.
+   */
+  const continueFromPostal = () => {
+    if (place) {
+      finish(city.trim() || place.city, place);
+      return;
+    }
     setSubStep("region");
   };
 
@@ -220,71 +201,83 @@ export function LocationStep({
     setSubStep("city");
   };
 
-  const continueFromCity = () => {
-    if (!city.trim()) return;
-    if (showPostal) {
-      setSubStep("postal");
-    } else {
-      finish(city);
-    }
-  };
-
   const back = () => {
-    if (subStep === "region") setSubStep("country");
-    else if (subStep === "city") setSubStep("region");
-    else if (subStep === "postal") setSubStep("city");
+    if (subStep === "city") setSubStep("region");
+    else if (subStep === "region" && asksPostal) setSubStep("postal");
     else onBack();
   };
 
-  // --- Country ---------------------------------------------------------
+  // --- Postal code, the fast path ------------------------------------------
 
-  if (subStep === "country") {
+  if (subStep === "postal") {
+    const label = postalLabel(countryCode);
+
     return (
       <StepShell
         stepNumber={stepNumber}
         stepCount={stepCount}
-        question="Which country do you live in?"
-        help="This decides which schools we can plan a route through, and which tuition rate applies to you."
+        question={`What's your ${label.toLowerCase()}?`}
+        help="It's the only location question we need — it gets us your town and your exact distance to each school."
         onBack={onBack}
-      rail={rail}
+        rail={rail}
+        footer={
+          <ContinueButton
+            onClick={continueFromPostal}
+            disabled={postalState === "looking"}
+          />
+        }
       >
         <input
-          id="country-search"
+          id="postal"
           type="text"
-          value={countryQuery}
-          onChange={(e) => setCountryQuery(e.target.value)}
-          placeholder="Search countries…"
-          aria-label="Search countries"
-          className="w-full rounded-xl border border-black/10 px-4 py-3 text-sm focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink"
+          value={postal}
+          onChange={(e) => setPostal(e.target.value.slice(0, 12))}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              continueFromPostal();
+            }
+          }}
+          placeholder={postalExample(countryCode) ?? ""}
+          aria-label={label}
+          autoComplete="postal-code"
+          inputMode="text"
+          autoFocus
+          className="w-full max-w-xs rounded-xl border border-black/10 px-4 py-3 text-lg uppercase focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink"
         />
-        <div className="mt-3 max-h-[50vh] overflow-y-auto rounded-2xl border border-black/10 bg-white">
-          {countries.length === 0 && (
-            <p className="px-4 py-6 text-sm text-ink-faint">No countries match that.</p>
-          )}
-          {countries.map((country) => (
-            <button
-              key={country.code}
-              type="button"
-              onClick={() => selectCountry(country.code)}
-              aria-pressed={countryCode === country.code}
-              className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors ${
-                countryCode === country.code
-                  ? "bg-sand-deep/60 font-semibold text-ink"
-                  : "hover:bg-sand text-ink"
-              }`}
-            >
-              <span aria-hidden="true" className="text-lg leading-none">
-                {flagEmoji(country.code)}
-              </span>
-              {country.name}
-            </button>
-          ))}
-        </div>
+
+        {postalState === "looking" && (
+          <p className="mt-3 flex items-center gap-2 text-sm text-ink-faint">
+            <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-ink border-t-transparent" />
+            Checking…
+          </p>
+        )}
+        {postalState === "found" && place && (
+          <p className="mt-3 text-sm font-medium text-green-700">
+            {place.city}
+            {place.subdivision ? `, ${place.subdivision}` : ""} — that&apos;s
+            everything we need.
+          </p>
+        )}
+        {postalState === "missing" && (
+          <p className="mt-3 text-sm text-amber-700">
+            We couldn&apos;t place that one. Continue and we&apos;ll ask which
+            area you&apos;re in instead.
+          </p>
+        )}
+
+        <button
+          type="button"
+          onClick={() => setSubStep("region")}
+          className="mt-6 block text-sm text-ink-faint underline hover:text-ink"
+        >
+          I&apos;d rather pick my area
+        </button>
       </StepShell>
     );
   }
 
-  // --- Region ------------------------------------------------------------
+  // --- Region ---------------------------------------------------------------
 
   if (subStep === "region") {
     return (
@@ -294,7 +287,7 @@ export function LocationStep({
         question={`Which ${subdivisionLabel(countryCode).toLowerCase()} are you in?`}
         help="Pick the one closest to where you live."
         onBack={back}
-      rail={rail}
+        rail={rail}
       >
         {loading && (
           <p className="flex items-center gap-2 text-sm text-ink-faint">
@@ -340,112 +333,57 @@ export function LocationStep({
     );
   }
 
-  // --- City ----------------------------------------------------------------
-
-  if (subStep === "city") {
-    return (
-      <StepShell
-        stepNumber={stepNumber}
-        stepCount={stepCount}
-        question="Which city or town?"
-        help="This decides which schools you could realistically get to."
-        onBack={back}
-      rail={rail}
-        footer={
-          city.trim() ? <ContinueButton onClick={continueFromCity} /> : undefined
-        }
-      >
-        {cities.length > 0 && (
-          <div className="mb-3 flex flex-wrap gap-2">
-            {cities.map((name) => (
-              <button
-                key={name}
-                type="button"
-                onClick={() => setCity(name)}
-                aria-pressed={city === name}
-                className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
-                  city === name
-                    ? "border-ink bg-ink text-white"
-                    : "border-black/10 bg-white text-ink-soft hover:border-ink/40"
-                }`}
-              >
-                {name}
-              </button>
-            ))}
-          </div>
-        )}
-        {/* Free text, always. There are roughly four million cities on earth
-            and any list we showed would exclude most people. */}
-        <input
-          id="city"
-          type="text"
-          value={city}
-          onChange={(e) => setCity(e.target.value.slice(0, 80))}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              continueFromCity();
-            }
-          }}
-          placeholder={cities.length ? "…or type somewhere else" : "Where do you live?"}
-          aria-label="Your city or town"
-          autoFocus
-          className="w-full rounded-xl border border-black/10 px-4 py-3 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink"
-        />
-      </StepShell>
-    );
-  }
-
-  // --- Postal code -----------------------------------------------------
+  // --- City -----------------------------------------------------------------
 
   return (
     <StepShell
       stepNumber={stepNumber}
       stepCount={stepCount}
-      question={`What's your ${postalLabel(countryCode).toLowerCase()}?`}
-      help="Optional — it gets us your exact distance to each school. Skip it and we'll work from your city."
+      question="Which city or town?"
+      help="This decides which schools you could realistically get to."
       onBack={back}
       rail={rail}
-      footer={<ContinueButton onClick={() => finish(city)} />}
+      footer={
+        city.trim() ? <ContinueButton onClick={() => finish(city)} /> : undefined
+      }
     >
+      {cities.length > 0 && (
+        <div className="mb-3 flex flex-wrap gap-2">
+          {cities.map((name) => (
+            <button
+              key={name}
+              type="button"
+              onClick={() => setCity(name)}
+              aria-pressed={city === name}
+              className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
+                city === name
+                  ? "border-ink bg-ink text-white"
+                  : "border-black/10 bg-white text-ink-soft hover:border-ink/40"
+              }`}
+            >
+              {name}
+            </button>
+          ))}
+        </div>
+      )}
+      {/* Free text, always. There are roughly four million cities on earth
+          and any list we showed would exclude most people. */}
       <input
-        id="postal"
+        id="city"
         type="text"
-        value={postal}
-        onChange={(e) => setPostal(e.target.value.slice(0, 12))}
+        value={city}
+        onChange={(e) => setCity(e.target.value.slice(0, 80))}
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();
-            finish(city);
+            if (city.trim()) finish(city);
           }
         }}
-        placeholder={postalExample(countryCode) ?? ""}
-        aria-label={postalLabel(countryCode)}
-        autoComplete="postal-code"
-        inputMode="text"
+        placeholder={cities.length ? "…or type somewhere else" : "Where do you live?"}
+        aria-label="Your city or town"
         autoFocus
-        className="w-full max-w-xs rounded-xl border border-black/10 px-4 py-3 uppercase focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink"
+        className="w-full rounded-xl border border-black/10 px-4 py-3 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink"
       />
-
-      {postalState === "looking" && (
-        <p className="mt-2 flex items-center gap-2 text-sm text-ink-faint">
-          <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-ink border-t-transparent" />
-          Checking…
-        </p>
-      )}
-      {postalState === "found" && place && (
-        <p className="mt-2 text-sm text-green-700">
-          Found {place.city}
-          {place.subdivision ? `, ${place.subdivision}` : ""} — we&apos;ll measure
-          distances from there.
-        </p>
-      )}
-      {postalState === "missing" && (
-        <p className="mt-2 text-sm text-ink-faint">
-          We couldn&apos;t look that one up, which is fine — plenty of countries
-          aren&apos;t covered. We&apos;ll use your city instead.
-        </p>
-      )}
     </StepShell>
   );
 }
