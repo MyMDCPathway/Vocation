@@ -345,6 +345,9 @@ export default function IntakeWizard() {
         question="Where are you in school right now?"
         help="There's no point planning an associate degree for someone who already has one."
         onBack={back}
+        footer={
+          answers.educationLevel ? <ContinueButton onClick={advance} /> : undefined
+        }
       >
         <div className="grid gap-3 sm:grid-cols-2">
           {EDUCATION_LEVELS.map((level) => (
@@ -353,10 +356,7 @@ export default function IntakeWizard() {
               label={level.label}
               detail={level.detail}
               selected={answers.educationLevel === level.id}
-              onClick={() => {
-                patch({ educationLevel: level.id as EducationLevel });
-                advance();
-              }}
+              onClick={() => patch({ educationLevel: level.id as EducationLevel })}
             />
           ))}
         </div>
