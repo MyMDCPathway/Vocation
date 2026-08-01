@@ -8,6 +8,7 @@ import {
 } from "@/app/lib/planCost";
 import type { IncomeBand } from "@/app/lib/intake";
 import type { PathwayOption } from "@/app/lib/types";
+import type { SchoolRef } from "@/app/lib/schoolRef";
 
 // What a route costs — the free half.
 //
@@ -46,15 +47,18 @@ const LOCKED_ROWS = [
 
 export function CostPanel({
   pathway,
-  schoolId,
+  school,
   incomeBand,
+  countryCode,
 }: {
   pathway: PathwayOption;
-  schoolId: string;
+  school: SchoolRef;
   incomeBand: IncomeBand | undefined;
+  /** Where the STUDENT lives — aid eligibility follows them, not the school. */
+  countryCode: string | undefined;
 }) {
-  const cost = estimatePlanCost(pathway.steps, schoolId);
-  const aid = estimateAid(incomeBand);
+  const cost = estimatePlanCost(pathway.steps, school.id, school.tuition);
+  const aid = estimateAid(incomeBand, countryCode);
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">

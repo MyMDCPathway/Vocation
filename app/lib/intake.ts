@@ -11,6 +11,8 @@
 // intake is a real state: the wizard persists after each step so a refresh
 // doesn't throw away six answers. `isComplete` is the gate, not the type.
 
+import type { SchoolRef } from "@/app/lib/schoolRef";
+
 export interface CareerSpecifics {
   /** What the student typed, verbatim. */
   raw: string;
@@ -146,36 +148,71 @@ export const MOBILITY_OPTIONS: {
   id: keyof WorkMobility;
   label: string;
   detail: string;
+  /**
+   * How the option reads inside "Open to …" on the plan summary.
+   *
+   * Written out rather than lowercasing `label`, because that turned
+   * "Anywhere in the US" into "anywhere in the us".
+   */
+  summaryLabel: string;
 }[] = [
   {
     id: "rural",
     label: "Rural or underserved areas",
     detail: "Small towns and shortage areas — often the fastest way in, and where loan-forgiveness programs live",
+    summaryLabel: "rural areas",
   },
   {
     id: "relocate",
-    label: "Anywhere in the US",
-    detail: "You'd move out of state for the right role",
+    label: "Relocating for the right role",
+    detail: "You'd move to another part of the country",
+    summaryLabel: "relocating",
   },
   {
     id: "international",
-    label: "Outside the country",
-    detail: "You'd work abroad, at least for a while",
+    label: "Working abroad",
+    detail: "You'd work in another country, at least for a while",
+    summaryLabel: "working abroad",
   },
 ];
 
+/** Where the student lives, anywhere on earth. */
+export interface StudentLocation {
+  /** ISO 3166-1 alpha-2. */
+  countryCode: string;
+  /** State, province, prefecture — whatever that country calls it. */
+  subdivision: string;
+  city: string;
+}
+
 export interface IntakeAnswers {
   career?: CareerSpecifics;
-  /** A FLORIDA_REGIONS id, or ELSEWHERE_REGION_ID. */
-  regionId?: string;
+  location?: StudentLocation;
   educationLevel?: EducationLevel;
   support?: SupportSituation;
   incomeBand?: IncomeBand;
   /**
-   * School ids the student named. Empty is a real answer ("no preference"),
-   * which is why `schoolsAnswered` tracks *whether they were asked* separately.
+   * The schools the student named, stored whole rather than by id.
+   *
+   * An AI-discovered school exists in no table we ship — its name, URLs, and
+   * tuition come back from one discovery call and nothing can look them up
+   * again later. Keeping the record means a plan can still be generated for
+   * it after a refresh.
+   *
+   * Empty is a real answer ("no preference"), which is why `schoolsAnswered`
+   * tracks whether they were asked separately.
    */
-  desiredSchoolIds?: string[];
+  desiredSchools?: SchoolRef[];
+  /**
+   * Everything the schools step found, not just what was picked.
+   *
+   * Carried forward so /plan doesn't repeat the discovery call it already
+   * paid for — that was doubling the Gemini cost of every plan and adding a
+   * few seconds to a screen the student is already waiting on. /plan still
+   * fetches if this is missing, so an intake restored from an older session
+   * degrades rather than breaks.
+   */
+  discoveredSchools?: SchoolRef[];
   schoolsAnswered?: boolean;
   budgetPriority?: BudgetPriority;
   mobility?: WorkMobility;
@@ -212,7 +249,8 @@ export type IntakeStep = (typeof INTAKE_STEPS)[number];
 export function isComplete(answers: IntakeAnswers): boolean {
   return Boolean(
     answers.career?.resolved &&
-      answers.regionId &&
+      answers.location?.countryCode &&
+      answers.location?.city &&
       answers.educationLevel &&
       answers.support &&
       answers.incomeBand &&
@@ -239,7 +277,7 @@ export function summarize(answers: IntakeAnswers): string[] {
 
   const willing = MOBILITY_OPTIONS.filter(
     (option) => answers.mobility?.[option.id]
-  ).map((option) => option.label.toLowerCase());
+  ).map((option) => option.summaryLabel);
   if (willing.length) parts.push(`Open to ${willing.join(", ")}`);
 
   return parts;

@@ -1,27 +1,28 @@
-// The wire shape of a resolved plan, split out so the browser can hold these
-// types without holding the module that produces them.
-//
-// planTracks.ts imports every school's catalog — megabytes of program data
-// that has no business in a client bundle. `import type` from there would be
-// erased at compile time and technically fine, but it's one careless edit away
-// from dragging the whole thing in. Keeping the types in their own file with
-// no imports makes that mistake impossible rather than merely unlikely.
+// The wire shape of a resolved plan.
+
+import type { SchoolRef } from "@/app/lib/schoolRef";
 
 export type TrackKind = "local" | "affordable" | "desired";
 
 export interface PlanTrack {
   kind: TrackKind;
-  schoolId: string;
-  schoolName: string;
+  /**
+   * The full school record, not just an id.
+   *
+   * An AI-discovered school has no entry in any table we ship — its name,
+   * URLs, and tuition only exist in the discovery response. /plan has to hand
+   * all of that back to /api/generate-pathway to plan against it, so the track
+   * carries the whole thing rather than a key that resolves to nothing.
+   */
+  school: SchoolRef;
   /** Card heading, e.g. "Closest to home". */
   title: string;
-  /** One line under the heading, e.g. "Miami Dade College · 4 mi away". */
+  /** One line under the heading. */
   subtitle: string;
   /** Why this school was picked, in a sentence a student would say back. */
   why: string;
   /** Other track kinds this same school also satisfies. */
   alsoCovers: TrackKind[];
-  distanceMiles: number | null;
 }
 
 export interface ResolvedTracks {

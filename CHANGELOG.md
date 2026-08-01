@@ -4,6 +4,93 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## Unreleased — branch `Vocation-2.0`, part 2: open-world schools
+
+Vocation now plans against **any school in the world**, not only the 53 Florida
+schools whose catalogs were scraped.
+
+### How this doesn't reintroduce the bug the scraping fixed
+
+HANDOFF §2 records why every school got scraped: asked for pathways
+unconstrained, Gemini confidently returned MDC degrees that don't exist, and
+instructing it to be careful didn't help. Planning open-world reintroduces that
+risk — so the model now has to make a **checkable** claim instead of just a
+confident one.
+
+Along with each program it must state the URL of that program's page. The
+server fetches it. Three outcomes, following rule 7 (prefer no link over a
+wrong link):
+
+| Outcome | Meaning | What the student sees |
+|---|---|---|
+| `verified` | The page loaded and is a real program page | Direct link, "Program page confirmed" |
+| `fallback` | It didn't, but the school's program index did | Link to the index, "Specific page not found" |
+| `unverified` | Neither resolved | No link at all |
+
+A soft 404 counts as a failure. Universities serve "page not found" with HTTP
+200 constantly, so status codes alone would mark most dead links as verified —
+`urlVerify.ts` checks the `<title>`, known not-found phrasings, and whether the
+request got bounced to the site root.
+
+**This is weaker than a scraped catalog and the UI says so.** Every plan carries
+a banner stating which of the two it is, and AI-sourced plans report how many
+program pages actually resolved.
+
+### New
+
+- **Country → region → city.** All ~190 countries with flags derived from ISO
+  codes. Regions are fetched per country and cached rather than shipped —
+  hand-typing ISO 3166-2 would be ~5,000 rows entered from memory, and a wrong
+  province is invisible until someone from there can't find where they live.
+- **`/api/find-schools`.** Real institutions near the student that could lead to
+  *their specific career*, with tuition in local currency plus USD. Florida's
+  catalog schools are merged in and marked as the stronger source.
+- **`/api/regions`.** Subdivisions and their main cities, per country.
+- **`urlVerify.ts`.** The verification described above, plus an SSRF guard —
+  these URLs come from a model whose input includes free text a student typed,
+  and the server fetches them. Loopback, private ranges, cloud metadata
+  (`169.254.169.254`), and non-http schemes are refused before any request.
+- **`openSchoolPrompt.ts`.** The URL-claiming prompt, told outright that its
+  URLs get fetched. Builds around how education works in the student's country
+  rather than defaulting to the American model.
+- **Confidence banners and per-step badges** so catalog-backed and AI-sourced
+  plans are never mistaken for each other.
+
+### Fixed during development
+
+- **Verified links recovered from stale URL suffixes.** Asked for Heriot-Watt's
+  marine biology degree, the model returned `…/marine-biology.htm`; the real
+  page is that exact path without the `.htm`. Every degree step on that plan
+  lost its link over four characters — **0 of 4 verified**. The verifier now
+  retries mechanical rewrites of the *same* path (drop the extension, toggle the
+  trailing slash), each still fetched and checked. Same plan now verifies
+  **2 of 2**, linking the genuine program pages.
+- **US financial aid no longer described to non-US students.** A student in
+  Edinburgh was told they'd "likely qualify for a partial Pell Grant" — a
+  programme they cannot apply to — while nothing was said about the SAAS
+  funding that actually pays their fees. `estimateAid` now takes the student's
+  country and declines to model outside the US.
+- **School discovery ran twice per plan.** The schools step and `/plan` each
+  called `/api/find-schools` with identical arguments, doubling the Gemini cost
+  of every plan. The result is carried forward in the intake.
+- **`Open to anywhere in the us`** — the plan summary lowercased option labels.
+
+### Removed
+
+- `/api/plan-tracks`. Track resolution no longer needs a catalog (discovery
+  already returns career-relevant schools), so it's a pure function called
+  client-side. That also retires `relevanceScore` and its prefix-matching.
+
+### Notes
+
+- The Florida catalog path is **byte-identical** to before. Two route tests
+  deep-equal the response against their fixture and 411 seed entries hold that
+  shape, so nothing is stamped onto it — the plan page reads provenance from
+  the school record instead.
+- 638 tests (68 → 106 new). `fiuCoverage` remains the only failure, unchanged.
+
+---
+
 ## Unreleased — branch `Vocation-2.0`
 
 > **Naming note:** the branch is called "Vocation 2.0" after the product

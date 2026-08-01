@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -16,11 +16,11 @@ import {
   type SupportSituation,
   type WorkMobility,
 } from "@/app/lib/intake";
-import { ELSEWHERE_REGION_ID, FLORIDA_REGIONS } from "@/app/lib/geography";
-import { FLORIDA_SCHOOLS, SCHOOL_KIND_LABELS, type SchoolKind } from "@/app/lib/floridaSchools";
-import { hasCatalog } from "@/app/lib/schoolCatalogs";
+import type { SchoolRef } from "@/app/lib/schoolRef";
 import { loadIntake, saveIntake } from "@/app/lib/intakeStorage";
 import { ContinueButton, OptionCard, StepShell } from "@/app/components/intake/StepShell";
+import { LocationStep } from "@/app/components/intake/LocationStep";
+import { SchoolsStep } from "@/app/components/intake/SchoolsStep";
 
 // The 2.0 intake, front to back.
 //
@@ -63,12 +63,6 @@ const CAREER_EXAMPLES = [
   "architect",
 ];
 
-const SCHOOL_GROUP_ORDER: SchoolKind[] = [
-  "state-college",
-  "public-university",
-  "private",
-];
-
 export default function IntakeWizard() {
   const router = useRouter();
 
@@ -82,7 +76,7 @@ export default function IntakeWizard() {
   const inputRef = useRef<HTMLInputElement>(null);
 
   // Restore a half-finished intake so a refresh doesn't cost six answers. Runs
-  // once, after mount — sessionStorage doesn't exist during the server render.
+  // once, after mount â€” sessionStorage doesn't exist during the server render.
   useEffect(() => {
     const stored = loadIntake();
     setAnswers(stored);
@@ -158,7 +152,7 @@ export default function IntakeWizard() {
         patch({ career: { raw, resolved: "", question: result.question } });
         goTo("specifics");
       } else {
-        // Already specific enough to plan against — no follow-up worth asking.
+        // Already specific enough to plan against â€” no follow-up worth asking.
         patch({ career: { raw, resolved: result.career || raw } });
         goTo("location");
       }
@@ -252,7 +246,7 @@ export default function IntakeWizard() {
             <ContinueButton
               onClick={submitCareer}
               disabled={busy || !careerInput.trim()}
-              label={busy ? "Looking that up…" : "Continue"}
+              label={busy ? "Looking that upâ€¦" : "Continue"}
             />
           </div>
         </div>
@@ -300,7 +294,7 @@ export default function IntakeWizard() {
           }}
           className="mt-6 text-sm text-gray-500 underline hover:text-gray-800"
         >
-          None of these — plan for &ldquo;{refinement.career}&rdquo; generally
+          None of these â€” plan for &ldquo;{refinement.career}&rdquo; generally
         </button>
       </StepShell>
     );
@@ -308,50 +302,16 @@ export default function IntakeWizard() {
 
   if (step === "location") {
     return (
-      <StepShell
+      <LocationStep
+        value={answers.location}
         stepNumber={stepNumber}
         stepCount={stepCount}
-        question="Where do you live?"
-        help="This decides which schools you could actually commute to, and whether you'd pay in-state tuition."
         onBack={back}
-      >
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {FLORIDA_REGIONS.map((region) => (
-            <OptionCard
-              key={region.id}
-              label={region.label}
-              detail={region.examples}
-              selected={answers.regionId === region.id}
-              onClick={() => {
-                patch({ regionId: region.id });
-                advance();
-              }}
-            />
-          ))}
-        </div>
-
-        <button
-          type="button"
-          onClick={() => {
-            patch({ regionId: ELSEWHERE_REGION_ID });
-            advance();
-          }}
-          className={`mt-4 w-full rounded-xl border p-4 text-left transition-all ${
-            answers.regionId === ELSEWHERE_REGION_ID
-              ? "border-school-600 ring-2 ring-school-600 bg-school-50"
-              : "border-gray-200 bg-white hover:border-school-400"
-          }`}
-        >
-          <span className="block font-semibold text-gray-900">
-            I&apos;m not in Florida
-          </span>
-          <span className="mt-1 block text-sm text-gray-600">
-            Vocation only holds Florida program catalogs right now, so you&apos;ll
-            still get real routes — just not a local one, and out-of-state
-            tuition would run higher than the figures we show.
-          </span>
-        </button>
-      </StepShell>
+        onDone={(location) => {
+          patch({ location });
+          advance();
+        }}
+      />
     );
   }
 
@@ -418,7 +378,7 @@ export default function IntakeWizard() {
               {situation.incomeLabel}
             </h2>
             <p className="mt-1 text-sm text-gray-600">
-              A rough band is enough — we use it to estimate grant aid, not to
+              A rough band is enough â€” we use it to estimate grant aid, not to
               verify anything.
             </p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -444,8 +404,12 @@ export default function IntakeWizard() {
         stepNumber={stepNumber}
         stepCount={stepCount}
         onBack={back}
-        onDone={(ids) => {
-          patch({ desiredSchoolIds: ids, schoolsAnswered: true });
+        onDone={(picked: SchoolRef[], discovered: SchoolRef[]) => {
+          patch({
+            desiredSchools: picked,
+            discoveredSchools: discovered,
+            schoolsAnswered: true,
+          });
           advance();
         }}
       />
@@ -458,7 +422,7 @@ export default function IntakeWizard() {
         stepNumber={stepNumber}
         stepCount={stepCount}
         question="What matters most to you?"
-        help="We'll still show you every route — this just decides which one leads."
+        help="We'll still show you every route â€” this just decides which one leads."
         onBack={back}
       >
         <div className="grid gap-3">
@@ -514,149 +478,11 @@ export default function IntakeWizard() {
           onClick={() => finish(NO_MOBILITY)}
           className="mt-6 text-sm text-gray-500 underline hover:text-gray-800"
         >
-          None of these — I want to stay where I am
+          None of these â€” I want to stay where I am
         </button>
       </StepShell>
     );
   }
 
   return null;
-}
-
-// --- Schools step ----------------------------------------------------------
-
-/**
- * Split out because it's the only step with its own search state, and leaving
- * that state in the parent would reset the query every time an answer changed.
- */
-function SchoolsStep({
-  answers,
-  stepNumber,
-  stepCount,
-  onBack,
-  onDone,
-}: {
-  answers: IntakeAnswers;
-  stepNumber: number;
-  stepCount: number;
-  onBack: () => void;
-  onDone: (ids: string[]) => void;
-}) {
-  const [query, setQuery] = useState("");
-  const [picked, setPicked] = useState<string[]>(answers.desiredSchoolIds ?? []);
-
-  const groups = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const matches = FLORIDA_SCHOOLS.filter(
-      (school) =>
-        !q ||
-        school.name.toLowerCase().includes(q) ||
-        school.shortName.toLowerCase().includes(q) ||
-        school.city.toLowerCase().includes(q)
-    );
-    return SCHOOL_GROUP_ORDER.map((kind) => ({
-      kind,
-      label: SCHOOL_KIND_LABELS[kind],
-      schools: matches
-        .filter((school) => school.kind === kind)
-        .sort((a, b) => a.name.localeCompare(b.name)),
-    })).filter((group) => group.schools.length > 0);
-  }, [query]);
-
-  const toggle = (id: string) =>
-    setPicked((current) =>
-      current.includes(id)
-        ? current.filter((existing) => existing !== id)
-        : [...current, id]
-    );
-
-  return (
-    <StepShell
-      stepNumber={stepNumber}
-      stepCount={stepCount}
-      question="Any schools you already have in mind?"
-      help="Pick as many as you like, or skip — we'll suggest schools either way."
-      onBack={onBack}
-      footer={
-        <ContinueButton
-          onClick={() => onDone(picked)}
-          label={picked.length ? `Continue with ${picked.length}` : "Continue"}
-        />
-      }
-    >
-      <input
-        type="text"
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        placeholder="Search by name or city…"
-        aria-label="Search schools"
-        className="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm focus:border-school-500 focus:outline-none focus:ring-2 focus:ring-school-500"
-      />
-
-      <div className="mt-4 max-h-[45vh] overflow-y-auto rounded-xl border border-gray-200 bg-white">
-        {groups.length === 0 && (
-          <p className="px-4 py-6 text-sm text-gray-500">No schools match that.</p>
-        )}
-        {groups.map((group) => (
-          <div key={group.kind}>
-            <p className="sticky top-0 bg-gray-50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
-              {group.label}
-            </p>
-            {group.schools.map((school) => {
-              const selected = picked.includes(school.id);
-              const planable = hasCatalog(school.id);
-              return (
-                <button
-                  key={school.id}
-                  type="button"
-                  onClick={() => toggle(school.id)}
-                  aria-pressed={selected}
-                  className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors ${
-                    selected ? "bg-school-50" : "hover:bg-gray-50"
-                  }`}
-                >
-                  <span
-                    aria-hidden="true"
-                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded border ${
-                      selected
-                        ? "border-school-600 bg-school-600 text-white"
-                        : "border-gray-300"
-                    }`}
-                  >
-                    {selected && (
-                      <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
-                    )}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block truncate text-sm font-medium text-gray-800">
-                      {school.name}
-                    </span>
-                    <span className="block text-xs text-gray-500">{school.city}</span>
-                  </span>
-                  {/* Naming a school we hold no catalog for is allowed, but it
-                      can't be planned against, and finding that out on the
-                      results page would feel like a bug. */}
-                  {!planable && (
-                    <span className="shrink-0 rounded bg-amber-50 px-2 py-0.5 text-xs text-amber-700">
-                      No catalog yet
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </div>
-        ))}
-      </div>
-
-      <button
-        type="button"
-        onClick={() => onDone([])}
-        className="mt-6 text-sm text-gray-500 underline hover:text-gray-800"
-      >
-        I don&apos;t have a preference — pick for me
-      </button>
-    </StepShell>
-  );
 }

@@ -258,7 +258,16 @@ export interface PlanCost {
  */
 export function estimatePlanCost(
   steps: PathwayStep[],
-  schoolId: string
+  schoolId: string,
+  /**
+   * Tuition for a school we hold no table entry for.
+   *
+   * An AI-discovered school's price comes back from the discovery call and
+   * exists nowhere else. Without this, every school outside Florida would be
+   * priced at the public-university sector band — which would quietly tell a
+   * student that Harvard and their local state school cost the same.
+   */
+  openTuition?: { usdLow: number; usdHigh: number } | null
 ): PlanCost {
   let transferred = false;
   let holdsAssociate = false;
@@ -319,19 +328,34 @@ export function estimatePlanCost(
     }
     if (level === "associate") holdsAssociate = true;
 
-    const annual = stepSchoolId
-      ? annualCostFor(stepSchoolId, level)
-      : {
-          range: PUBLIC_UNIVERSITY_SECTOR,
+    // A step at the starting school, when that school is one we only know via
+    // discovery, prices off the figure that came back with it. Steps that name
+    // a different school still resolve through the tables — a transfer
+    // destination is not the school we were given a price for.
+    const useOpenTuition =
+      openTuition && !named && (openTuition.usdLow > 0 || openTuition.usdHigh > 0);
+
+    const annual = useOpenTuition
+      ? {
+          range: { low: openTuition!.usdLow, high: openTuition!.usdHigh },
           basis: "sector" as CostBasis,
-          note: "Typical Florida public university in-state rate, per year",
-        };
+          note: "Estimated annual tuition & fees for this school, in USD",
+        }
+      : stepSchoolId
+        ? annualCostFor(stepSchoolId, level)
+        : {
+            range: PUBLIC_UNIVERSITY_SECTOR,
+            basis: "sector" as CostBasis,
+            note: "Typical public university in-state rate, per year",
+          };
 
     if (annual.basis === "sector") hasSectorEstimate = true;
 
-    const schoolName = stepSchoolId
-      ? getSchoolById(stepSchoolId)?.name ?? "University"
-      : "A four-year university";
+    const schoolName = useOpenTuition
+      ? "This school"
+      : stepSchoolId
+        ? getSchoolById(stepSchoolId)?.name ?? "University"
+        : "A four-year university";
 
     return {
       step,
@@ -377,8 +401,29 @@ export interface AidEstimate {
  * income. A student under $30k is nearly always Pell-eligible; one over $100k
  * nearly never is.
  */
-export function estimateAid(band: IncomeBand | undefined): AidEstimate {
+export function estimateAid(
+  band: IncomeBand | undefined,
+  /**
+   * Where the student lives. Everything this function models — Pell, FAFSA,
+   * Bright Futures — is United States federal or Florida state aid. Told a
+   * student in Scotland they'd "likely qualify for a partial Pell Grant", the
+   * app would be confidently describing a programme they cannot apply to,
+   * while saying nothing about the SAAS funding that actually pays their fees.
+   * Silence is the honest answer outside the system we model.
+   */
+  countryCode?: string
+): AidEstimate {
   const midpoint = incomeMidpoint(band);
+
+  if (countryCode && countryCode.toUpperCase() !== "US") {
+    return {
+      annual: ZERO,
+      headline: "Not modelled for your country",
+      detail:
+        "Our aid estimates cover United States federal and state programmes only. Most countries fund students very differently — grants, income-contingent loans, or free tuition — so check your national student finance body for what you'd actually pay.",
+      estimated: false,
+    };
+  }
 
   if (midpoint === null) {
     return {

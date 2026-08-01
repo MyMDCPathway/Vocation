@@ -223,6 +223,26 @@ describe("estimateAid", () => {
     expect(estimateAid(undefined).estimated).toBe(false);
   });
 
+  it("refuses to describe US aid to a student outside the US", () => {
+    // Regression: a student in Edinburgh was told they'd "likely qualify for a
+    // partial Pell Grant" — a US federal programme they cannot apply to — while
+    // nothing was said about the SAAS funding that actually pays their fees.
+    for (const country of ["GB", "CA", "JP", "NG"]) {
+      const aid = estimateAid("30-60k", country);
+      expect(aid.estimated, country).toBe(false);
+      expect(aid.headline.toLowerCase(), country).not.toContain("pell");
+      expect(aid.detail.toLowerCase(), country).not.toContain("bright futures");
+      expect(aid.annual, country).toEqual({ low: 0, high: 0 });
+    }
+  });
+
+  it("still estimates for a US student", () => {
+    expect(estimateAid("under-30k", "US").estimated).toBe(true);
+    // No country given at all keeps the old behavior, so existing callers and
+    // restored intakes don't silently lose their estimate.
+    expect(estimateAid("under-30k").estimated).toBe(true);
+  });
+
   it("never awards more aid to a higher income", () => {
     const bands = INCOME_BANDS.filter((b) => b.midpoint !== null);
     for (let i = 1; i < bands.length; i++) {

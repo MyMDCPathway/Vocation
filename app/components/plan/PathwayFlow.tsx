@@ -7,6 +7,8 @@ import { ExamStepComponent } from "@/app/components/ExamStep";
 import type { CertificationInfo } from "@/app/lib/certifications";
 import type { PathwayOption, PathwayStep } from "@/app/lib/types";
 import { estimatePlanCost, formatCostRange } from "@/app/lib/planCost";
+import type { SchoolRef } from "@/app/lib/schoolRef";
+import { StepVerificationBadge } from "@/app/components/plan/ConfidenceBanner";
 
 /**
  * One pathway rendered as the horizontal step flow.
@@ -18,11 +20,11 @@ import { estimatePlanCost, formatCostRange } from "@/app/lib/planCost";
  */
 export function PathwayFlow({
   pathway,
-  schoolId,
+  school,
   showStepCosts,
 }: {
   pathway: PathwayOption;
-  schoolId: string;
+  school: SchoolRef;
   showStepCosts: boolean;
 }) {
   const [requirements, setRequirements] = useState<{
@@ -30,7 +32,8 @@ export function PathwayFlow({
     info: CertificationInfo;
   } | null>(null);
 
-  const costs = estimatePlanCost(pathway.steps, schoolId);
+  const schoolId = school.id;
+  const costs = estimatePlanCost(pathway.steps, schoolId, school.tuition);
 
   return (
     <>
@@ -62,7 +65,42 @@ export function PathwayFlow({
                     </div>
                   )}
 
-                  <ProgramLink step={step} schoolId={schoolId} />
+                  {/* A catalog school resolves its own links from the scraped
+                      name→URL table. An open school has no table, so the link
+                      is whatever the server managed to verify — and the badge
+                      says which of the three outcomes this step got. */}
+                  {school.source === "catalog" ? (
+                    <ProgramLink step={step} schoolId={schoolId} />
+                  ) : (
+                    step.link && (
+                      <div>
+                        {step.link.url && (
+                          <a
+                            href={step.link.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={step.link.reason}
+                            className={`mt-4 inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium transition duration-150 ${
+                              step.link.status === "verified"
+                                ? "border-transparent bg-school-600 text-white shadow-sm hover:bg-school-700"
+                                : "border-school-600 bg-white text-school-700 hover:bg-school-50"
+                            }`}
+                          >
+                            <i className="fas fa-external-link-alt mr-2" />
+                            {step.link.status === "verified"
+                              ? "View Program Page"
+                              : "View School's Program List"}
+                          </a>
+                        )}
+                        <div>
+                          <StepVerificationBadge
+                            status={step.link.status}
+                            reason={step.link.reason}
+                          />
+                        </div>
+                      </div>
+                    )
+                  )}
 
                   {step.type === "exam" && (
                     <ExamStepComponent

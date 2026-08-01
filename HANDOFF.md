@@ -2212,6 +2212,56 @@ Two rules came out of it, both now covered by tests in `planTracks.test.ts`:
 This is the same lesson as §2's core insight, one level up: constrain the model
 where you have real data, and don't invent constraints where you don't.
 
+### Part 2 — open-world schools
+
+The app plans against any school on earth, not just the 53 with scraped
+catalogs. Read this before touching `urlVerify.ts` or the open prompt.
+
+**The scraped catalogs are still the strongest thing here.** Nothing about §2
+is retracted. What changed is that "we have no catalog" now produces a weaker
+plan with a stated confidence level, instead of a refusal.
+
+**Grounding for open schools is verification, not constraint.** There is no
+program list to constrain the model to, so instead it must state the URL of
+each program's page, and the server fetches it before the student sees
+anything. A program whose page doesn't exist is reported as unconfirmed. That
+is the entire reason this is defensible — if you remove or weaken the fetch,
+you are back to 1.0's failure with a wider blast radius.
+
+**Soft 404s are the hard part.** Universities serve "page not found" with HTTP
+200 constantly. `looksLikeSoftNotFound` checks the `<title>` first (highest
+signal), then known phrasings, and `redirectedToRoot` catches the other common
+shape — a dead path bounced to the homepage. Body patterns are *phrases*, never
+a bare "404", because a real course page can mention Room 404 or BIOL 404.
+
+**`isPubliclyRoutable` is a security control, not tidiness.** These URLs come
+from an LLM whose input includes free text a student typed, and we fetch them
+server-side. That is an SSRF sink. `http://169.254.169.254/latest/meta-data/`
+is an ordinary-looking string for a model to emit and hands out cloud
+credentials to anything that can reach it. Do not relax this to "fix" a link.
+
+**URL variants are rewrites, not guesses.** When the exact URL fails, the
+verifier retries the *same path* with the page extension dropped and the
+trailing slash toggled. This came from a real miss: the model returned
+Heriot-Watt's `…/marine-biology.htm` when the live page is that path without
+the `.htm`, and all four degree steps lost their links over four characters.
+Every variant is still fetched and checked, and a test asserts no variant can
+reach a different program's path. **Don't widen this into pattern-guessing** —
+the moment a variant could reach a program the model didn't name, it stops
+being verification.
+
+**Aid estimation is US-only and must stay gated.** `estimateAid` models Pell,
+FAFSA, and Bright Futures. A student in Edinburgh was briefly told they'd
+"likely qualify for a partial Pell Grant". It now takes a country code and
+declines outside the US rather than describing a programme someone cannot
+apply to.
+
+**The catalog path was left byte-identical on purpose.** Two route tests
+deep-equal the response against their fixture, and 411 committed seed entries
+hold that shape. Provenance is read from the school record (`source`), not
+stamped onto the payload. If you add a field to catalog responses, expect those
+tests to fail and think about the seed file before you "fix" them.
+
 ### What's still open
 
 - **No payment or auth**, so "Vocation Plus" is a labelled coming-soon panel.
@@ -2229,3 +2279,19 @@ where you have real data, and don't invent constraints where you don't.
 - **`career-discovery` and `/pathway` still use the 1.0 flow.** Both work and
   are linked; folding the quiz into the intake as an "I don't know yet" branch
   off question one is the obvious next step.
+- **Open-school link quality is the number to watch.** The Heriot-Watt run
+  verifies 2 of 2 after the variant fix, but that's one school. If you log the
+  verified/fallback/unverified tally over real traffic, that ratio tells you
+  whether the open prompt is worth its cost — and a school with a consistently
+  bad ratio is a candidate for scraping properly.
+- **Costs display in USD even for non-US schools.** The GBP figure is captured
+  in `SchoolRef.tuition.currency` and shown on the schools step, but `/plan`
+  converts to USD so tracks in different countries can be compared. Showing
+  both would be better.
+- **Graduate tuition still uses undergraduate rates** for catalog schools (see
+  part 1). Unchanged, and still the biggest known understatement.
+- **An M.S. step can link to a PhD program.** `ProgramLevel` buckets every
+  graduate credential together, so strict level matching doesn't separate
+  them — MDC's M.S. in Nursing offers "Nursing (PhD)" at FIU as its example
+  link. Pre-existing 1.0 behavior, visible on the new page, worth a finer
+  level tier if anyone cares.
