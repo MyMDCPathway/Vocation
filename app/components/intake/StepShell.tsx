@@ -1,14 +1,19 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { Confetti, QUIET_BLOBS } from "@/app/components/Confetti";
 
 /**
  * The frame every intake question renders inside.
  *
- * One question per screen, centered, with the progress bar and the back
- * control in fixed positions. Keeping that chrome here rather than in each
- * step is what stops the heading from shifting a few pixels between questions
- * — which reads as the page reloading rather than advancing.
+ * One question per screen, with the wordmark, progress and back control in
+ * fixed positions. Keeping that chrome here rather than in each step is what
+ * stops the heading from shifting a few pixels between questions — which
+ * reads as the page reloading rather than advancing.
+ *
+ * There is no nav bar anywhere in the intake. The wordmark below is the only
+ * branding, centred, because the page has exactly one job and a row of links
+ * is an invitation to leave.
  */
 export function StepShell({
   stepNumber,
@@ -18,6 +23,7 @@ export function StepShell({
   onBack,
   footer,
   wide,
+  hero,
   rail,
   children,
 }: {
@@ -37,11 +43,17 @@ export function StepShell({
    */
   wide?: boolean;
   /**
+   * The opening screen. Centres everything, drops the progress bar, and turns
+   * the confetti up — this is the only screen a first-time visitor sees
+   * before deciding whether to bother, so it gets to be a hero rather than
+   * question one of eight.
+   */
+  hero?: boolean;
+  /**
    * The evolving route, shown beside the question.
    *
    * Lives here rather than in each step so every question gets it without
-   * wiring, and so the heading can't drift a few pixels between screens —
-   * which reads as the page reloading rather than advancing.
+   * wiring, and so the heading can't drift a few pixels between screens.
    */
   rail?: ReactNode;
   children: ReactNode;
@@ -52,25 +64,41 @@ export function StepShell({
   const column = wide || rail ? "max-w-6xl" : "max-w-3xl";
 
   return (
-    <div className="min-h-[calc(100vh-73px)] flex flex-col">
-      {/* Progress. aria-hidden on the bar itself because the label below it
-          already says the same thing to a screen reader. */}
-      <div className={`w-full ${column} mx-auto px-6 pt-8`}>
-        <div className="h-1 w-full rounded-full bg-gray-200" aria-hidden="true">
-          <div
-            className="h-1 rounded-full bg-school-600 transition-all duration-500 ease-out"
-            style={{ width: `${percent}%` }}
-          />
-        </div>
-        {/* "Step", not "Question" — the career profile is a screen to read,
-            not something to answer, and calling it question 2 of 8 made it
-            look like we'd lost the question. */}
-        <p className="mt-2 text-xs text-gray-500">
-          Step {stepNumber} of {stepCount}
+    <div className="relative flex min-h-screen flex-col overflow-hidden">
+      <Confetti blobs={hero ? undefined : QUIET_BLOBS} />
+
+      {/* z-10 across the content: the confetti sits at z-0 and must never be
+          able to take a click meant for the form. */}
+      <div className={`relative z-10 mx-auto w-full ${column} px-6 pt-10 md:pt-14`}>
+        <p className="text-center">
+          <span className="display text-[26px] font-black tracking-[-0.045em] text-ink">
+            Vocation
+          </span>
         </p>
+
+        {/* The hero has nothing to be N-of-M about — it's the first thing you
+            see, and a progress bar there says "this is a form" before you've
+            typed anything. */}
+        {!hero && (
+          <div className="mx-auto mt-8 max-w-md">
+            <div className="h-1.5 w-full rounded-full bg-sand-deep" aria-hidden="true">
+              <div
+                className="h-1.5 rounded-full bg-ink transition-all duration-500 ease-out"
+                style={{ width: `${percent}%` }}
+              />
+            </div>
+            <p className="mt-2 text-center text-xs font-medium text-ink-faint">
+              Step {stepNumber} of {stepCount}
+            </p>
+          </div>
+        )}
       </div>
 
-      <div className={`flex-1 w-full ${column} mx-auto px-6 py-10 md:py-14`}>
+      <div
+        className={`relative z-10 mx-auto w-full flex-1 ${column} px-6 ${
+          hero ? "pb-16 pt-10 md:pt-16" : "py-10 md:py-14"
+        }`}
+      >
         <div
           className={
             rail && !wide
@@ -78,13 +106,27 @@ export function StepShell({
               : undefined
           }
         >
-          <div className="min-w-0">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+          <div className={`min-w-0 ${hero ? "text-center" : ""}`}>
+            <h1
+              className={
+                hero
+                  ? "text-[44px] font-black leading-[1.02] text-ink sm:text-6xl md:text-7xl"
+                  : "text-3xl font-extrabold text-ink md:text-[42px]"
+              }
+            >
               {question}
             </h1>
-            {help && <p className="mt-3 text-gray-600 md:text-lg">{help}</p>}
+            {help && (
+              <p
+                className={`mt-4 text-ink-soft ${
+                  hero ? "mx-auto max-w-xl text-lg md:text-xl" : "md:text-lg"
+                }`}
+              >
+                {help}
+              </p>
+            )}
 
-            <div className="mt-8">{children}</div>
+            <div className={hero ? "mt-10" : "mt-8"}>{children}</div>
           </div>
 
           {/* Sticky so the path stays put while a long option list scrolls
@@ -100,18 +142,22 @@ export function StepShell({
         {rail && wide && <div className="mt-10 max-w-md">{rail}</div>}
       </div>
 
-      <div className={`w-full ${column} mx-auto px-6 pb-10 flex items-center gap-4`}>
-        {onBack && (
-          <button
-            type="button"
-            onClick={onBack}
-            className="text-sm text-gray-500 hover:text-gray-800 transition-colors"
-          >
-            ← Back
-          </button>
-        )}
-        <div className="ml-auto">{footer}</div>
-      </div>
+      {(onBack || footer) && (
+        <div
+          className={`relative z-10 mx-auto flex w-full ${column} items-center gap-4 px-6 pb-12`}
+        >
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="text-sm font-medium text-ink-faint transition-colors hover:text-ink"
+            >
+              ← Back
+            </button>
+          )}
+          <div className="ml-auto">{footer}</div>
+        </div>
+      )}
     </div>
   );
 }
@@ -119,9 +165,9 @@ export function StepShell({
 /**
  * A selectable answer card.
  *
- * `selected` drives a ring rather than a fill so that multi-select steps read
- * as "these three are on" at a glance without the page turning into a block of
- * school color.
+ * `selected` drives a solid ink border and a tinted fill rather than a colour
+ * wash, so a multi-select screen reads as "these three are on" at a glance
+ * without the page turning into a block of colour.
  */
 export function OptionCard({
   label,
@@ -141,22 +187,26 @@ export function OptionCard({
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      className={`w-full text-left rounded-xl border p-4 transition-all ${
+      className={`w-full rounded-2xl border-2 p-5 text-left transition-all duration-150 ${
         selected
-          ? "border-school-600 ring-2 ring-school-600 bg-school-50"
-          : "border-gray-200 bg-white hover:border-school-400 hover:shadow-md"
+          ? "border-ink bg-white shadow-[0_6px_0_0_var(--ink)]"
+          : "border-transparent bg-white shadow-sm hover:-translate-y-0.5 hover:shadow-md"
       }`}
     >
-      <span className="block font-semibold text-gray-900">{label}</span>
-      {detail && <span className="mt-1 block text-sm text-gray-600">{detail}</span>}
+      <span className="block font-bold text-ink">{label}</span>
+      {detail && (
+        <span className="mt-1 block text-sm leading-relaxed text-ink-soft">{detail}</span>
+      )}
       {meta && (
-        <span className="mt-2 block text-xs font-medium text-school-700">{meta}</span>
+        <span className="mt-3 inline-block rounded-full bg-sand-deep px-3 py-1 text-xs font-semibold text-ink-soft">
+          {meta}
+        </span>
       )}
     </button>
   );
 }
 
-/** The primary "move on" button, disabled until the step has an answer. */
+/** The primary "move on" button. Solid ink, generous radius. */
 export function ContinueButton({
   onClick,
   disabled,
@@ -171,7 +221,7 @@ export function ContinueButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="px-8 py-3 rounded-lg font-semibold text-white bg-school-600 hover:bg-school-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+      className="rounded-xl bg-ink px-8 py-4 text-base font-bold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-ink-faint/40 disabled:shadow-none"
     >
       {label}
     </button>

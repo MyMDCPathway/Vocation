@@ -2,7 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+/* 800/900 are new: the reference leans on very heavy, tightly-tracked
+   headings, and Inter at 700 reads noticeably lighter than that. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 /* Selected school's palette, generated from its brand color.
    These defaults are Miami Dade College blue and are what renders on the
@@ -20,6 +22,24 @@
   --school-700: #00437f;
   --school-800: #00325f;
   --school-900: #002548;
+}
+
+/* Vocation's own brand palette.
+   Deliberately separate from --school-*: those are retinted at runtime from
+   whichever school is selected (HANDOFF §6) and must keep working on the
+   pathway pages. These are constant, and they're what the intake — which is
+   school-agnostic — is built from. */
+:root {
+  --sand: #f5f3ef;        /* page background, warm off-white */
+  --sand-deep: #ebe7e0;   /* the curved divider and quiet fills */
+  --ink: #201436;         /* near-black with a purple cast, like the ref */
+  --ink-soft: #4a4058;    /* body copy */
+  --ink-faint: #7b7389;   /* captions */
+
+  --pop-orange: #e8994f;
+  --pop-blue: #a3c7d9;
+  --pop-purple: #c5a8eb;
+  --pop-mint: #cfe3dd;
 }
 
 /* Color variables for flowchart steps */
@@ -105,9 +125,98 @@
 /* Use Inter as the default font */
 body {
   font-family: 'Inter', sans-serif;
-  /* Soft app background to match Canvas-style cards */
-  background-color: #f7fafc; /* tailwind gray-50 */
+  background-color: var(--sand);
+  color: var(--ink-soft);
   min-height: 100vh;
+}
+
+/* Headings are the loudest part of this look: very heavy, tight tracking,
+   tight leading. Set once here so every screen inherits it rather than each
+   one re-deciding. */
+h1, h2, h3, .display {
+  color: var(--ink);
+  letter-spacing: -0.035em;
+  line-height: 1.05;
+}
+
+/* --- Decorative geometry -------------------------------------------------
+   The scattered confetti. Pure CSS rather than images: they're simple shapes,
+   they need to retint with the palette, and an <img> per blob would be a
+   dozen requests for decoration. All of it is aria-hidden and
+   pointer-events:none — it must never intercept a click meant for the form
+   underneath. */
+
+.shape-field {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.shape {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* A superellipse — rounder than a rounded square, flatter than a circle. */
+.shape-squircle { border-radius: 42%; }
+
+.shape-triangle { clip-path: polygon(50% 4%, 96% 92%, 4% 92%); border-radius: 12%; }
+
+.shape-hexagon {
+  clip-path: polygon(25% 3%, 75% 3%, 99% 50%, 75% 97%, 25% 97%, 1% 50%);
+}
+
+/* The quarter-round fan, like the lilac shape top-right of the reference. */
+.shape-fan { border-radius: 100% 12% 46% 12%; }
+
+.shape-pill { border-radius: 999px; }
+
+/* Gentle drift so the page feels alive without anything actually moving far.
+   Disabled wholesale under reduced-motion below. */
+@keyframes shape-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) rotate(var(--shape-rot, 0deg)); }
+  50% { transform: translate3d(0, -14px, 0) rotate(calc(var(--shape-rot, 0deg) + 6deg)); }
+}
+
+.shape-drift { animation: shape-drift 9s ease-in-out infinite; }
+
+/* --- Curved section divider ---------------------------------------------
+   The big arc the reference uses to hand off between coloured bands. A
+   border-radius on an over-wide block, which stays smooth at any viewport
+   width — an SVG wave would need a viewBox that distorts. */
+.arc-top {
+  position: relative;
+  /* The ::before below is 160% wide so the curve stays shallow at any
+     viewport. Without clipping here that overhang is real layout width and
+     the whole page scrolls sideways — measured at 1645px inside a 1265px
+     window before this line existed. */
+  overflow: hidden;
+}
+
+.arc-top::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: -1px;
+  width: 160%;
+  height: 120px;
+  transform: translateX(-50%) translateY(-60%);
+  background: inherit;
+  border-radius: 50% 50% 0 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shape-drift,
+  .letter-fade-in,
+  .fade-in,
+  .fade-in-delay-1,
+  .fade-in-delay-2 {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
 
 /* New Flowchart Styles */

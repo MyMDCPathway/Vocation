@@ -4,6 +4,67 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## Unreleased — branch `Vocation-2.0`, part 9: a look of its own
+
+Restyled against a reference the owner supplied (Podia): warm sand
+background, scattered geometric confetti, very heavy tightly-tracked
+headings, solid near-black buttons, and a curved arc handing off between
+bands.
+
+### No nav bar
+
+The header is gone from the intake and the plan. There is exactly one thing to
+do on these pages and a row of links is an invitation to do something else.
+The wordmark sits centred above the question instead — rendered once by
+`StepShell`, so every step gets it and it can't drift between screens.
+
+The career screen is now a proper hero: centred, 72px heading, no progress bar
+(a "step 1 of 8" before you've typed anything says *form*), and the confetti
+turned up. Inner questions keep their left-aligned heading and a quieter set of
+three shapes.
+
+### Tokens, not a repaint
+
+`--sand`, `--ink`, and `--pop-*` are a **separate** palette from `--school-*`.
+Those retint at runtime from whichever school is selected and are load-bearing
+on the pathway pages (HANDOFF §6); the intake is school-agnostic, so it's built
+from the constant set instead. Both are exposed through Tailwind, so the sweep
+was a token change rather than a pile of hex codes.
+
+### Confetti that can't get in the way
+
+Pure CSS shapes — squircle, triangle, hexagon, fan, pill — because they're a
+few polygons, they need to pick up the palette, and a dozen image requests for
+decoration is a waste. All of it is `aria-hidden`, `pointer-events: none`, and
+pinned to `z-0` under `z-10` content, so a blob sitting over the career input
+can never swallow the click. The gentle drift animation is disabled under
+`prefers-reduced-motion`, along with the older letter and fade animations.
+
+### Fixed during development
+
+- **The page scrolled sideways.** The arc divider's pseudo-element is 160% wide
+  so the curve stays shallow at any viewport, but with `overflow: visible` that
+  overhang was real layout width — measured at **1645px inside a 1265px
+  window**. The confetti was innocent; its field already clipped correctly.
+- The career examples were six degree jobs, which advertised the wrong product
+  after part 7. Now `doctor · electrician · nurse · welder · cloud engineer ·
+  graphic designer` — a degree, a trade, a credential, a certification, a
+  talent path.
+- Rail step dots now use the accent palette per step kind, so a trade route
+  reads as mostly orange and a degree route as mostly blue before you read a
+  word of it.
+
+### Notes
+
+- Inter is now loaded at 800/900; at 700 the headings read noticeably lighter
+  than the reference.
+- Verified at 1265px and 375px: no horizontal overflow, heading scales 72 → 44,
+  and the confetti thins to two shapes on mobile so it frames rather than
+  crowds.
+- 729 tests, unchanged. `fiuCoverage` remains the only failure.
+
+---
+
 ## Unreleased — branch `Vocation-2.0`, part 8: the path builds as you answer
 
 The intake was: answer eight questions, receive a plan. That's a form. The

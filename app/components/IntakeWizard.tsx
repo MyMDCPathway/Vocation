@@ -63,13 +63,16 @@ type Step =
   | "priority"
   | "mobility";
 
+// Chosen to advertise the range of ROUTES, not just a list of jobs: a
+// degree, a trade, a credential, a certification, a talent path. Someone who
+// thinks this is a college-finder should see otherwise before they type.
 const CAREER_EXAMPLES = [
   "doctor",
-  "BCBA",
-  "mechanical engineer",
-  "police officer",
+  "electrician",
   "nurse",
-  "architect",
+  "welder",
+  "cloud engineer",
+  "graphic designer",
 ];
 
 export default function IntakeWizard() {
@@ -247,48 +250,54 @@ export default function IntakeWizard() {
         stepNumber={1}
         stepCount={stepCount}
         question="What career do you want?"
-        help="Anything from a job title to a rough idea. We'll narrow it down together."
+        help="Anything from a job title to a rough idea. We'll work out the route together — and it isn't always a degree."
+        hero
       >
-        <div>
-          <input
-            ref={inputRef}
-            type="text"
-            value={careerInput}
-            onChange={(e) => setCareerInput(e.target.value.slice(0, 60))}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                submitCareer();
-              }
-            }}
-            placeholder="doctor"
-            aria-label="The career you want"
-            disabled={busy}
-            className="w-full border-0 border-b-2 border-gray-200 bg-transparent pb-3 text-3xl md:text-5xl text-gray-900 placeholder:text-gray-300 focus:border-school-600 focus:outline-none focus:ring-0 transition-colors"
-          />
+        <div className="mx-auto max-w-2xl">
+          <div className="rounded-3xl bg-white p-2 shadow-[0_10px_40px_-12px_rgba(32,20,54,0.25)]">
+            <input
+              ref={inputRef}
+              type="text"
+              value={careerInput}
+              onChange={(e) => setCareerInput(e.target.value.slice(0, 60))}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  submitCareer();
+                }
+              }}
+              placeholder="electrician"
+              aria-label="The career you want"
+              disabled={busy}
+              className="w-full rounded-2xl border-0 bg-transparent px-6 py-5 text-center text-2xl font-bold text-ink placeholder:font-normal placeholder:text-ink-faint/50 focus:outline-none focus:ring-0 md:text-3xl"
+            />
+          </div>
 
-          <div className="mt-6 flex flex-wrap gap-2">
+          <div className="mt-8">
+            <ContinueButton
+              onClick={submitCareer}
+              disabled={busy || !careerInput.trim()}
+              label={busy ? "Looking that up…" : "Start your plan"}
+            />
+          </div>
+
+          {error && <p className="mt-5 text-sm font-medium text-red-600">{error}</p>}
+
+          <p className="mt-12 text-sm font-semibold uppercase tracking-widest text-ink-faint">
+            Or try one of these
+          </p>
+          <div className="mt-4 flex flex-wrap justify-center gap-2.5">
             {CAREER_EXAMPLES.map((example) => (
               <button
                 key={example}
                 type="button"
                 onClick={() => setCareerInput(example)}
                 disabled={busy}
-                className="rounded-full border border-gray-200 bg-white px-4 py-1.5 text-sm text-gray-600 hover:border-school-400 hover:text-school-700 transition-colors disabled:opacity-50"
+                className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-ink-soft shadow-sm transition-all hover:-translate-y-0.5 hover:text-ink hover:shadow-md disabled:opacity-50"
               >
                 {example}
               </button>
             ))}
-          </div>
-
-          {error && <p className="mt-6 text-sm text-red-600">{error}</p>}
-
-          <div className="mt-10">
-            <ContinueButton
-              onClick={submitCareer}
-              disabled={busy || !careerInput.trim()}
-              label={busy ? "Looking that upâ€¦" : "Continue"}
-            />
           </div>
         </div>
       </StepShell>
@@ -342,7 +351,7 @@ export default function IntakeWizard() {
             });
             goTo("location");
           }}
-          className="mt-6 text-sm text-gray-500 underline hover:text-gray-800"
+          className="mt-6 text-sm text-ink-faint underline hover:text-ink"
         >
           None of these â€” plan for &ldquo;{refinement.career}&rdquo; generally
         </button>
@@ -444,10 +453,10 @@ export default function IntakeWizard() {
 
         {situation && (
           <div className="mt-10">
-            <h2 className="text-lg font-semibold text-gray-900">
+            <h2 className="text-lg font-semibold text-ink">
               {situation.incomeLabel}
             </h2>
-            <p className="mt-1 text-sm text-gray-600">
+            <p className="mt-1 text-sm text-ink-soft">
               A rough band is enough â€” we use it to estimate grant aid, not to
               verify anything.
             </p>
@@ -549,7 +558,7 @@ export default function IntakeWizard() {
         <button
           type="button"
           onClick={() => finish(NO_MOBILITY)}
-          className="mt-6 text-sm text-gray-500 underline hover:text-gray-800"
+          className="mt-6 text-sm text-ink-faint underline hover:text-ink"
         >
           None of these â€” I want to stay where I am
         </button>

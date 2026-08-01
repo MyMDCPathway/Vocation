@@ -255,11 +255,11 @@ export function LocationStep({
           onChange={(e) => setCountryQuery(e.target.value)}
           placeholder="Search countries…"
           aria-label="Search countries"
-          className="w-full rounded-lg border border-gray-200 px-4 py-3 text-sm focus:border-school-500 focus:outline-none focus:ring-2 focus:ring-school-500"
+          className="w-full rounded-xl border border-black/10 px-4 py-3 text-sm focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink"
         />
-        <div className="mt-3 max-h-[50vh] overflow-y-auto rounded-xl border border-gray-200 bg-white">
+        <div className="mt-3 max-h-[50vh] overflow-y-auto rounded-2xl border border-black/10 bg-white">
           {countries.length === 0 && (
-            <p className="px-4 py-6 text-sm text-gray-500">No countries match that.</p>
+            <p className="px-4 py-6 text-sm text-ink-faint">No countries match that.</p>
           )}
           {countries.map((country) => (
             <button
@@ -269,8 +269,8 @@ export function LocationStep({
               aria-pressed={countryCode === country.code}
               className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition-colors ${
                 countryCode === country.code
-                  ? "bg-school-50 font-semibold text-school-800"
-                  : "hover:bg-gray-50 text-gray-800"
+                  ? "bg-sand-deep/60 font-semibold text-ink"
+                  : "hover:bg-sand text-ink"
               }`}
             >
               <span aria-hidden="true" className="text-lg leading-none">
@@ -297,8 +297,8 @@ export function LocationStep({
       rail={rail}
       >
         {loading && (
-          <p className="flex items-center gap-2 text-sm text-gray-500">
-            <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-school-600 border-t-transparent" />
+          <p className="flex items-center gap-2 text-sm text-ink-faint">
+            <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-ink border-t-transparent" />
             Loading {subdivisionLabel(countryCode).toLowerCase()}s…
           </p>
         )}
@@ -317,7 +317,7 @@ export function LocationStep({
                 type="button"
                 onClick={() => selectRegion(entry.name)}
                 aria-pressed={subdivision === entry.name}
-                className="rounded-full border border-gray-200 bg-white px-3.5 py-1.5 text-sm text-gray-700 transition-colors hover:border-school-400"
+                className="rounded-full border border-black/10 bg-white px-3.5 py-1.5 text-sm text-ink-soft transition-colors hover:border-ink/40"
               >
                 {entry.name}
               </button>
@@ -329,7 +329,7 @@ export function LocationStep({
           <button
             type="button"
             onClick={() => setSubStep("city")}
-            className="mt-6 text-sm text-gray-500 underline hover:text-gray-800"
+            className="mt-6 text-sm text-ink-faint underline hover:text-ink"
           >
             {subdivisions.length > 0
               ? "Not sure — skip this"
@@ -365,8 +365,8 @@ export function LocationStep({
                 aria-pressed={city === name}
                 className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
                   city === name
-                    ? "border-school-600 bg-school-600 text-white"
-                    : "border-gray-200 bg-white text-gray-700 hover:border-school-400"
+                    ? "border-ink bg-ink text-white"
+                    : "border-black/10 bg-white text-ink-soft hover:border-ink/40"
                 }`}
               >
                 {name}
@@ -390,7 +390,7 @@ export function LocationStep({
           placeholder={cities.length ? "…or type somewhere else" : "Where do you live?"}
           aria-label="Your city or town"
           autoFocus
-          className="w-full rounded-lg border border-gray-200 px-4 py-3 focus:border-school-500 focus:outline-none focus:ring-2 focus:ring-school-500"
+          className="w-full rounded-xl border border-black/10 px-4 py-3 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink"
         />
       </StepShell>
     );
@@ -424,12 +424,12 @@ export function LocationStep({
         autoComplete="postal-code"
         inputMode="text"
         autoFocus
-        className="w-full max-w-xs rounded-lg border border-gray-200 px-4 py-3 uppercase focus:border-school-500 focus:outline-none focus:ring-2 focus:ring-school-500"
+        className="w-full max-w-xs rounded-xl border border-black/10 px-4 py-3 uppercase focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink"
       />
 
       {postalState === "looking" && (
-        <p className="mt-2 flex items-center gap-2 text-sm text-gray-500">
-          <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-school-600 border-t-transparent" />
+        <p className="mt-2 flex items-center gap-2 text-sm text-ink-faint">
+          <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-ink border-t-transparent" />
           Checking…
         </p>
       )}
@@ -441,7 +441,7 @@ export function LocationStep({
         </p>
       )}
       {postalState === "missing" && (
-        <p className="mt-2 text-sm text-gray-500">
+        <p className="mt-2 text-sm text-ink-faint">
           We couldn&apos;t look that one up, which is fine — plenty of countries
           aren&apos;t covered. We&apos;ll use your city instead.
         </p>

@@ -216,14 +216,14 @@ export function SchoolsStep({ answers, stepNumber, stepCount, onBack, onDone, ra
       wide
     >
       {loading && (
-        <p className="flex items-center gap-3 text-gray-500">
-          <span className="h-4 w-4 animate-spin rounded-full border-2 border-school-600 border-t-transparent" />
+        <p className="flex items-center gap-3 text-ink-faint">
+          <span className="h-4 w-4 animate-spin rounded-full border-2 border-ink border-t-transparent" />
           Finding {profile.providerNounPlural} near {answers.location?.city}…
         </p>
       )}
 
       {error && !loading && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
           {error} You can continue without picking one — we&apos;ll still work out
           routes for you.
         </div>
@@ -259,14 +259,14 @@ export function SchoolsStep({ answers, stepNumber, stepCount, onBack, onDone, ra
                   }
                 }}
                 placeholder={`Search, or name any ${profile.providerNoun}…`}
-                className="min-w-0 flex-1 rounded-lg border border-gray-200 px-4 py-2.5 text-sm focus:border-school-500 focus:outline-none focus:ring-2 focus:ring-school-500"
+                className="min-w-0 flex-1 rounded-xl border border-black/10 px-4 py-2.5 text-sm focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink"
               />
               {canSearchByName && (
                 <button
                   type="button"
                   onClick={searchByName}
                   disabled={searching}
-                  className="shrink-0 rounded-lg bg-school-600 px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-school-700 disabled:bg-gray-300"
+                  className="shrink-0 rounded-xl bg-ink px-3 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-ink disabled:bg-ink-faint/40"
                 >
                   {searching ? "Looking…" : "Find it"}
                 </button>
@@ -276,7 +276,7 @@ export function SchoolsStep({ answers, stepNumber, stepCount, onBack, onDone, ra
             {searchNote && <p className="mt-2 text-sm text-amber-700">{searchNote}</p>}
 
             {filtered.length === 0 && !searchNote && (
-              <p className="mt-3 text-sm text-gray-500">
+              <p className="mt-3 text-sm text-ink-faint">
                 None of the suggestions match &ldquo;{query}&rdquo;.{" "}
                 {canSearchByName
                   ? "Press Find it to look it up anywhere in the world."
@@ -301,37 +301,37 @@ export function SchoolsStep({ answers, stepNumber, stepCount, onBack, onDone, ra
                     onFocus={() => setFocusedId(school.id)}
                     onMouseLeave={() => setFocusedId(null)}
                     aria-pressed={selected}
-                    className={`w-full rounded-xl border p-4 text-left transition-all ${
+                    className={`w-full rounded-2xl border p-4 text-left transition-all ${
                       selected
-                        ? "border-school-600 bg-school-50 ring-2 ring-school-600"
-                        : "border-gray-200 bg-white hover:border-school-400 hover:shadow-md"
+                        ? "border-ink bg-sand-deep/60 ring-2 ring-ink"
+                        : "border-black/10 bg-white hover:border-ink/40 hover:shadow-md"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-2">
-                      <span className="font-semibold text-gray-900">{school.name}</span>
+                      <span className="font-semibold text-ink">{school.name}</span>
                       <span
                         aria-hidden="true"
                         className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
-                          school.source === "catalog" ? "bg-green-600" : "bg-school-600"
+                          school.source === "catalog" ? "bg-green-600" : "bg-ink"
                         }`}
                       />
                     </div>
-                    <p className="mt-0.5 text-sm text-gray-500">
+                    <p className="mt-0.5 text-sm text-ink-faint">
                       {[school.city, school.subdivision].filter(Boolean).join(", ")}
                       {typeof school.distanceMiles === "number" &&
                         ` · ${Math.round(school.distanceMiles)} mi`}
                     </p>
                     {price && (
-                      <p className="mt-1 text-sm font-medium text-gray-700">{price}</p>
+                      <p className="mt-1 text-sm font-medium text-ink-soft">{price}</p>
                     )}
                     {school.note && (
-                      <p className="mt-2 text-sm text-gray-600">{school.note}</p>
+                      <p className="mt-2 text-sm text-ink-soft">{school.note}</p>
                     )}
                     <span
                       className={`mt-3 inline-block rounded px-2 py-0.5 text-xs font-medium ${
                         school.source === "catalog"
                           ? "bg-green-50 text-green-800"
-                          : "bg-gray-100 text-gray-600"
+                          : "bg-sand-deep text-ink-soft"
                       }`}
                     >
                       {school.source === "catalog"
@@ -346,7 +346,7 @@ export function SchoolsStep({ answers, stepNumber, stepCount, onBack, onDone, ra
             <button
               type="button"
               onClick={() => onDone([], schools)}
-              className="mt-4 self-start text-sm text-gray-500 underline hover:text-gray-800"
+              className="mt-4 self-start text-sm text-ink-faint underline hover:text-ink"
             >
               I don&apos;t have a preference — pick for me
             </button>

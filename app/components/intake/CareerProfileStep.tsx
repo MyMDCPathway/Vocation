@@ -105,20 +105,20 @@ export function CareerProfileStep({
     >
       {loading && (
         <div className="space-y-4" aria-live="polite">
-          <div className="h-48 animate-pulse rounded-xl bg-gray-200" />
-          <div className="h-4 w-3/4 animate-pulse rounded bg-gray-200" />
-          <div className="h-4 w-1/2 animate-pulse rounded bg-gray-200" />
+          <div className="h-48 animate-pulse rounded-2xl bg-sand-deep" />
+          <div className="h-4 w-3/4 animate-pulse rounded bg-sand-deep" />
+          <div className="h-4 w-1/2 animate-pulse rounded bg-sand-deep" />
         </div>
       )}
 
       {error && !loading && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
           <p className="text-sm text-amber-900">{error}</p>
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={() => setAttempt((n) => n + 1)}
-              className="rounded-lg bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
+              className="rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
             >
               Try again
             </button>
@@ -133,25 +133,25 @@ export function CareerProfileStep({
         <div className="space-y-8">
           <Photos profile={profile} />
 
-          <p className="text-lg leading-relaxed text-gray-800">{profile.summary}</p>
+          <p className="text-lg leading-relaxed text-ink">{profile.summary}</p>
 
           {/* The three numbers that decide whether to keep reading. */}
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-xl border border-gray-200 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <div className="rounded-2xl border border-black/10 bg-white p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint">
                 Typical pay
               </p>
-              <p className="mt-1 text-2xl font-bold text-gray-900">
+              <p className="mt-1 text-2xl font-bold text-ink">
                 {formatPay(profile.pay.median, profile.pay.currency)}
               </p>
-              <p className="mt-0.5 text-xs text-gray-500">
+              <p className="mt-0.5 text-xs text-ink-faint">
                 {formatPay(profile.pay.low, profile.pay.currency)} –{" "}
                 {formatPay(profile.pay.high, profile.pay.currency)} · {profile.pay.market}
               </p>
             </div>
 
-            <div className="rounded-xl border border-gray-200 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <div className="rounded-2xl border border-black/10 bg-white p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint">
                 Hiring
               </p>
               <span
@@ -163,31 +163,31 @@ export function CareerProfileStep({
               </span>
             </div>
 
-            <div className="rounded-xl border border-gray-200 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+            <div className="rounded-2xl border border-black/10 bg-white p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint">
                 Time to get there
               </p>
-              <p className="mt-1 text-2xl font-bold text-gray-900">
+              <p className="mt-1 text-2xl font-bold text-ink">
                 {profile.timeToEntry}
               </p>
-              <p className="mt-0.5 text-xs text-gray-500">from starting study</p>
+              <p className="mt-0.5 text-xs text-ink-faint">from starting study</p>
             </div>
           </div>
 
           {profile.pay.note && (
-            <p className="-mt-4 text-sm text-gray-600">{profile.pay.note}</p>
+            <p className="-mt-4 text-sm text-ink-soft">{profile.pay.note}</p>
           )}
           {profile.demand.detail && (
-            <p className="-mt-6 text-sm text-gray-600">{profile.demand.detail}</p>
+            <p className="-mt-6 text-sm text-ink-soft">{profile.demand.detail}</p>
           )}
 
           {profile.dayToDay.length > 0 && (
             <section>
-              <h2 className="text-lg font-bold text-gray-900">What the work looks like</h2>
+              <h2 className="text-lg font-bold text-ink">What the work looks like</h2>
               <ul className="mt-3 space-y-2">
                 {profile.dayToDay.map((item) => (
-                  <li key={item} className="flex gap-3 text-gray-700">
-                    <span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-school-600" />
+                  <li key={item} className="flex gap-3 text-ink-soft">
+                    <span aria-hidden="true" className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-ink" />
                     <span>{item}</span>
                   </li>
                 ))}
@@ -196,12 +196,12 @@ export function CareerProfileStep({
           )}
 
           {profile.entryRoute && (
-            <section className="rounded-xl border border-gray-200 bg-white p-5">
-              <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+            <section className="rounded-2xl border border-black/10 bg-white p-5">
+              <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">
                 The usual way in
               </h2>
-              <p className="mt-2 text-gray-800">{profile.entryRoute}</p>
-              <p className="mt-3 text-sm text-gray-500">
+              <p className="mt-2 text-ink">{profile.entryRoute}</p>
+              <p className="mt-3 text-sm text-ink-faint">
                 The next few questions turn this into a plan built around where you
                 live, what you can spend, and where you are in school now.
               </p>
@@ -210,18 +210,18 @@ export function CareerProfileStep({
 
           {profile.relatedCareers.length > 0 && (
             <section>
-              <h2 className="text-lg font-bold text-gray-900">If this isn&apos;t quite it</h2>
+              <h2 className="text-lg font-bold text-ink">If this isn&apos;t quite it</h2>
               <div className="mt-3 flex flex-wrap gap-2">
                 {profile.relatedCareers.map((related) => (
                   <span
                     key={related}
-                    className="rounded-full bg-white px-3 py-1.5 text-sm text-gray-700 ring-1 ring-gray-200"
+                    className="rounded-full bg-white px-3 py-1.5 text-sm text-ink-soft ring-1 ring-black/10"
                   >
                     {related}
                   </span>
                 ))}
               </div>
-              <p className="mt-2 text-xs text-gray-500">
+              <p className="mt-2 text-xs text-ink-faint">
                 Go back a step to plan for one of these instead.
               </p>
             </section>
@@ -259,7 +259,7 @@ function Photos({ profile }: { profile: CareerProfile }) {
             // rest can wait until they're scrolled to.
             loading={index === 0 ? "eager" : "lazy"}
             onError={() => setBroken((b) => ({ ...b, [photo.src]: true }))}
-            className={`w-full rounded-xl bg-gray-100 object-cover ${
+            className={`w-full rounded-2xl bg-sand-deep object-cover ${
               usable.length === 1 ? "max-h-80" : "h-40"
             }`}
           />
@@ -267,7 +267,7 @@ function Photos({ profile }: { profile: CareerProfile }) {
       </div>
       {/* Attribution isn't optional — most of these are CC BY-SA, which
           requires crediting the author and naming the licence. */}
-      <figcaption className="mt-2 text-xs leading-relaxed text-gray-400">
+      <figcaption className="mt-2 text-xs leading-relaxed text-ink-faint">
         {usable.map((photo, index) => (
           <span key={photo.src}>
             {index > 0 && " · "}
@@ -275,7 +275,7 @@ function Photos({ profile }: { profile: CareerProfile }) {
               href={photo.descriptionUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-gray-600 hover:underline"
+              className="hover:text-ink-soft hover:underline"
             >
               {photo.title}
             </a>
@@ -291,7 +291,7 @@ function Photos({ profile }: { profile: CareerProfile }) {
 function Resources({ profile }: { profile: CareerProfile }) {
   if (!profile.resources.length) {
     return profile.droppedResources > 0 ? (
-      <p className="text-sm text-gray-500">
+      <p className="text-sm text-ink-faint">
         We couldn&apos;t confirm any of the links suggested for this career, so
         none are shown rather than sending you somewhere dead.
       </p>
@@ -300,8 +300,8 @@ function Resources({ profile }: { profile: CareerProfile }) {
 
   return (
     <section>
-      <h2 className="text-lg font-bold text-gray-900">Where to look next</h2>
-      <p className="mt-1 text-sm text-gray-500">
+      <h2 className="text-lg font-bold text-ink">Where to look next</h2>
+      <p className="mt-1 text-sm text-ink-faint">
         We opened each of these to check it loads.
         {profile.droppedResources > 0 &&
           (profile.droppedResources === 1
@@ -315,27 +315,27 @@ function Resources({ profile }: { profile: CareerProfile }) {
             href={resource.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-xl border border-gray-200 bg-white p-4 transition-all hover:border-school-400 hover:shadow-md"
+            className="rounded-2xl border border-black/10 bg-white p-4 transition-all hover:border-ink/40 hover:shadow-md"
           >
-            <span className="text-xs font-medium uppercase tracking-wide text-school-700">
+            <span className="text-xs font-medium uppercase tracking-wide text-ink">
               {RESOURCE_KIND_LABELS[resource.kind] ?? "Resource"}
             </span>
-            <span className="mt-1 block font-semibold text-gray-900">
+            <span className="mt-1 block font-semibold text-ink">
               {resource.label}
             </span>
-            <span className="mt-1 block text-sm text-gray-600">{resource.detail}</span>
+            <span className="mt-1 block text-sm text-ink-soft">{resource.detail}</span>
           </a>
         ))}
       </div>
 
       {profile.article && (
-        <p className="mt-4 text-xs text-gray-400">
+        <p className="mt-4 text-xs text-ink-faint">
           Description and photos from{" "}
           <a
             href={profile.article.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="underline hover:text-gray-600"
+            className="underline hover:text-ink-soft"
           >
             Wikipedia: {profile.article.title}
           </a>

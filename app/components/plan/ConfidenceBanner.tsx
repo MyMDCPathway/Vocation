@@ -25,7 +25,7 @@ export function ConfidenceBanner({
 }) {
   if (school.source === "catalog") {
     return (
-      <div className="mt-6 rounded-xl border border-green-200 bg-green-50 p-4">
+      <div className="mt-6 rounded-2xl border border-green-200 bg-green-50 p-4">
         <p className="text-sm font-semibold text-green-900">
           Built from {school.name}&apos;s real program catalog
         </p>
@@ -44,7 +44,7 @@ export function ConfidenceBanner({
   const confirmed = verification?.verified ?? 0;
 
   return (
-    <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4">
+    <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4">
       <p className="text-sm font-semibold text-amber-900">
         AI-generated for {school.name} — program pages checked
       </p>
@@ -94,7 +94,7 @@ export function StepVerificationBadge({
   const styles = {
     verified: "bg-green-50 text-green-800",
     fallback: "bg-amber-50 text-amber-800",
-    unverified: "bg-gray-100 text-gray-600",
+    unverified: "bg-sand-deep text-ink-soft",
   } as const;
 
   const labels = {

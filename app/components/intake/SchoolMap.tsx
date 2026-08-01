@@ -231,10 +231,10 @@ export function SchoolMap({ schools, selectedIds, focusedId, onToggle, origin }:
         ref={containerRef}
         role="application"
         aria-label="Map of schools near you"
-        className="h-[320px] w-full rounded-xl border border-gray-200 bg-gray-100 lg:h-[560px]"
+        className="h-[320px] w-full rounded-3xl bg-sand-deep lg:h-[560px]"
       />
-      <p className="mt-2 text-xs text-gray-500">
-        Scroll the page normally — hold <kbd className="rounded bg-gray-100 px-1">Ctrl</kbd>{" "}
+      <p className="mt-2 text-xs text-ink-faint">
+        Scroll the page normally — hold <kbd className="rounded bg-sand-deep px-1">Ctrl</kbd>{" "}
         to zoom, or drag to pan.
         {unplaceable > 0 &&
           ` ${unplaceable} school${unplaceable === 1 ? "" : "s"} couldn't be placed on the map, but ${unplaceable === 1 ? "it's" : "they're"} still listed.`}
@@ -259,11 +259,13 @@ function buildIcon(
 ): LeafletNS.DivIcon {
   // Catalog schools are the ones whose programs are real rather than
   // estimated, so they read differently on the map too.
-  const base = school.source === "catalog" ? "bg-green-600" : "bg-school-600";
+  // Catalog schools are the ones whose programs are real rather than
+  // estimated, so they read differently on the map too.
+  const base = school.source === "catalog" ? "bg-ink" : "bg-pop-orange";
   const ring = selected
-    ? "ring-4 ring-school-300"
+    ? "ring-4 ring-ink/25"
     : focused
-      ? "ring-4 ring-gray-300"
+      ? "ring-4 ring-ink/15"
       : "ring-2 ring-white";
   const size = selected || focused ? 18 : 14;
 

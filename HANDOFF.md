@@ -2299,6 +2299,33 @@ that render amber and red, and the prompt requires the unglamorous parts. Don't
 school's course index; a dead licensing-board link has nowhere to go. Rule 7
 applies — it goes, and the count of what went is shown.
 
+### Part 9 — the visual language
+
+`globals.css` tokens + `Confetti.tsx` + `StepShell.tsx`.
+
+**Two palettes, on purpose.** `--school-*` retints at runtime from the selected
+school and is load-bearing on the pathway pages (§6). `--sand` / `--ink` /
+`--pop-*` are constant and are what the school-agnostic intake is built from.
+Don't merge them, and don't reach for `school-*` on an intake screen.
+
+**The confetti must stay inert.** `aria-hidden`, `pointer-events: none` on the
+field *and* each shape, `z-0` beneath `z-10` content. A decorative blob that
+eats a click on the career input is the failure mode here.
+
+**`.arc-top` needs its `overflow: hidden`.** The pseudo-element is 160% wide so
+the curve stays shallow at any width; without clipping, that overhang is real
+layout width and the whole document scrolls sideways — 1645px inside a 1265px
+window when it was missing.
+
+**There is no nav bar and that is a decision.** One thing to do per screen. The
+centred wordmark in `StepShell` is the only branding; if you add a header,
+you're re-adding the exit doors.
+
+**`hero` on StepShell** centres the content, drops the progress bar, and turns
+the confetti up. It's for the career screen only — a progress bar on the first
+screen tells a first-time visitor they're filling in a form before they've
+typed anything.
+
 ### Part 8 — the evolving path rail
 
 `pathOutline.ts` + `PathRail.tsx`. The route sketch that sits beside every

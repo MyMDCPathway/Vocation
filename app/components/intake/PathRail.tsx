@@ -23,12 +23,15 @@ import { archetypeProfile } from "@/app/lib/routeArchetype";
 // It is explicitly a sketch, and says so. The real plan — costed, with named
 // programs and verified links — is still generated at the end.
 
+// Each kind of step gets its own accent so the shape of a route is legible
+// at a glance — a trade path reads as mostly orange, a degree path as mostly
+// blue, before you read a word of it.
 const KIND_DOT: Record<OutlineStepKind, string> = {
-  education: "bg-school-600",
-  training: "bg-amber-500",
-  credential: "bg-purple-600",
-  experience: "bg-green-600",
-  work: "bg-gray-800",
+  education: "bg-pop-blue",
+  training: "bg-pop-orange",
+  credential: "bg-pop-purple",
+  experience: "bg-pop-mint",
+  work: "bg-ink",
 };
 
 export function PathRail({ answers }: { answers: IntakeAnswers }) {
@@ -45,10 +48,10 @@ export function PathRail({ answers }: { answers: IntakeAnswers }) {
   return (
     <aside
       aria-label="Your route so far"
-      className="rounded-xl border border-gray-200 bg-white p-5"
+      className="rounded-3xl bg-white p-6 shadow-sm"
     >
       <div className="flex items-baseline justify-between gap-2">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-gray-500">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">
           Your route
         </h2>
         {/* Mobile gets a collapsed rail: on a phone the path would otherwise
@@ -56,15 +59,15 @@ export function PathRail({ answers }: { answers: IntakeAnswers }) {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="text-xs text-gray-500 underline hover:text-gray-800 lg:hidden"
+          className="text-xs text-ink-faint underline hover:text-ink lg:hidden"
         >
           {open ? "Hide" : "Show"}
         </button>
       </div>
 
-      <p className="mt-1 text-sm font-medium text-gray-900">{profile.label}</p>
+      <p className="mt-1 text-sm font-medium text-ink">{profile.label}</p>
       {answers.career?.routeReason && (
-        <p className="mt-1 text-xs leading-relaxed text-gray-500">
+        <p className="mt-1 text-xs leading-relaxed text-ink-faint">
           {answers.career.routeReason}
         </p>
       )}
@@ -80,19 +83,19 @@ export function PathRail({ answers }: { answers: IntakeAnswers }) {
             returns "about N years", and stacking the two hedges read as
             "Roughly about 9 years". */}
         {remaining && (
-          <p className="mt-5 border-t border-gray-100 pt-4 text-xs text-gray-500">
-            <strong className="text-gray-700 first-letter:uppercase">{remaining}</strong>{" "}
+          <p className="mt-5 border-t border-black/5 pt-4 text-xs text-ink-faint">
+            <strong className="text-ink-soft first-letter:uppercase">{remaining}</strong>{" "}
             of this left from where you are now.
           </p>
         )}
 
         {done > 0 && (
-          <p className="mt-1 text-xs text-green-700">
+          <p className="mt-1 text-xs font-medium text-ink-soft">
             You&apos;ve already cleared {Math.round(done * 100)}% of it.
           </p>
         )}
 
-        <p className="mt-4 text-xs leading-relaxed text-gray-400">
+        <p className="mt-4 text-xs leading-relaxed text-ink-faint">
           A sketch, sharpening as you answer. The full plan at the end has real
           programs, costs, and checked links.
         </p>
@@ -112,38 +115,38 @@ function Step({ step, last }: { step: EnrichedStep; last: boolean }) {
       {!last && (
         <span
           aria-hidden="true"
-          className="absolute left-[5px] top-4 h-full w-px bg-gray-200"
+          className="absolute left-[5px] top-4 h-full w-px bg-sand-deep"
         />
       )}
 
       <span
         aria-hidden="true"
         className={`relative mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${
-          cleared ? "bg-gray-300" : KIND_DOT[step.kind] ?? "bg-gray-400"
-        } ${next ? "ring-4 ring-school-100" : ""}`}
+          cleared ? "bg-sand-deep" : KIND_DOT[step.kind] ?? "bg-sand-deep"
+        } ${next ? "ring-4 ring-ink/10" : ""}`}
       />
 
       <div className="min-w-0 flex-1">
         <p
           className={`text-sm font-semibold ${
-            cleared ? "text-gray-400 line-through" : "text-gray-900"
+            cleared ? "text-ink-faint line-through" : "text-ink"
           }`}
         >
           {step.label}
         </p>
 
         {step.duration && !cleared && (
-          <p className="text-xs text-gray-500">{step.duration}</p>
+          <p className="text-xs text-ink-faint">{step.duration}</p>
         )}
 
         {next && (
-          <p className="mt-1 text-xs leading-relaxed text-gray-600">{step.detail}</p>
+          <p className="mt-1 text-xs leading-relaxed text-ink-soft">{step.detail}</p>
         )}
 
-        {cleared && <p className="text-xs text-gray-400">Already done</p>}
+        {cleared && <p className="text-xs text-ink-faint">Already done</p>}
 
         {step.notes.map((note) => (
-          <p key={note} className="mt-1 text-xs font-medium text-school-700">
+          <p key={note} className="mt-1 text-xs font-medium text-ink">
             {note}
           </p>
         ))}

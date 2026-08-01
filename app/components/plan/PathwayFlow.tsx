@@ -53,15 +53,15 @@ export function PathwayFlow({
                   </span>
                 </div>
                 <div className="flowchart-step-content">
-                  <h3 className="text-lg font-semibold text-gray-900">{step.name}</h3>
-                  <p className="mt-2 text-gray-600">{step.description}</p>
+                  <h3 className="text-lg font-semibold text-ink">{step.name}</h3>
+                  <p className="mt-2 text-ink-soft">{step.description}</p>
 
                   {showStepCosts && (
-                    <div className="mt-4 rounded-lg bg-gray-50 px-3 py-2">
-                      <p className="text-sm font-semibold text-gray-900">
+                    <div className="mt-4 rounded-xl bg-sand px-3 py-2">
+                      <p className="text-sm font-semibold text-ink">
                         {isFree ? "No tuition cost" : formatCostRange(stepCost.range)}
                       </p>
-                      <p className="mt-0.5 text-xs text-gray-500">{stepCost.label}</p>
+                      <p className="mt-0.5 text-xs text-ink-faint">{stepCost.label}</p>
                     </div>
                   )}
 
@@ -82,8 +82,8 @@ export function PathwayFlow({
                             title={step.link.reason}
                             className={`mt-4 inline-flex items-center rounded-md border px-4 py-2 text-sm font-medium transition duration-150 ${
                               step.link.status === "verified"
-                                ? "border-transparent bg-school-600 text-white shadow-sm hover:bg-school-700"
-                                : "border-school-600 bg-white text-school-700 hover:bg-school-50"
+                                ? "border-transparent bg-ink text-white shadow-sm hover:opacity-90"
+                                : "border-ink bg-white text-ink hover:bg-sand"
                             }`}
                           >
                             <i className="fas fa-external-link-alt mr-2" />
@@ -122,30 +122,30 @@ export function PathwayFlow({
           onClick={() => setRequirements(null)}
         >
           <div
-            className="flex max-h-[80vh] w-full max-w-md flex-col rounded-lg bg-white shadow-xl"
+            className="flex max-h-[80vh] w-full max-w-md flex-col rounded-xl bg-white shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <header className="flex items-center justify-between border-b border-gray-200 p-5">
-              <h2 className="text-lg font-bold text-gray-800">
+            <header className="flex items-center justify-between border-b border-black/10 p-5">
+              <h2 className="text-lg font-bold text-ink">
                 {requirements.name} — Requirements
               </h2>
               <button
                 onClick={() => setRequirements(null)}
-                className="text-gray-400 transition hover:text-gray-600"
+                className="text-ink-faint transition hover:text-ink"
                 aria-label="Close"
               >
                 <i className="fas fa-times text-xl" />
               </button>
             </header>
             <main className="overflow-y-auto p-6">
-              <ul className="space-y-2 pl-5 text-sm text-gray-700">
+              <ul className="space-y-2 pl-5 text-sm text-ink-soft">
                 {requirements.info.requirements.map((req, i) => (
                   <li key={i} className="list-outside list-disc leading-relaxed">
                     {req}
                   </li>
                 ))}
               </ul>
-              <div className="mt-6 border-t border-gray-200 pt-6">
+              <div className="mt-6 border-t border-black/10 pt-6">
                 <a
                   href={requirements.info.url}
                   target="_blank"
