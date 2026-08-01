@@ -13,6 +13,7 @@
 
 import type { SchoolRef } from "@/app/lib/schoolRef";
 import type { RouteArchetype } from "@/app/lib/routeArchetype";
+import type { OutlineStep } from "@/app/lib/pathOutline";
 
 export interface CareerSpecifics {
   /** What the student typed, verbatim. */
@@ -37,6 +38,14 @@ export interface CareerSpecifics {
   routeArchetype?: RouteArchetype;
   /** One line naming the real gate — the licence, the union, the audition. */
   routeReason?: string;
+  /**
+   * The rough shape of the route, from the same call that classified it.
+   *
+   * Shown from the career question onward and sharpened locally as answers
+   * arrive — see pathOutline.ts. Stored so a refresh mid-intake doesn't blank
+   * the path the student has been watching fill in.
+   */
+  outline?: OutlineStep[];
 }
 
 export type EducationLevel =

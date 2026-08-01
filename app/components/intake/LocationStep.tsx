@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   COUNTRIES,
   DEFAULT_COUNTRY,
@@ -55,12 +55,14 @@ export function LocationStep({
   stepCount,
   onBack,
   onDone,
+  rail,
 }: {
   value: StudentLocation | undefined;
   stepNumber: number;
   stepCount: number;
   onBack: () => void;
   onDone: (location: StudentLocation) => void;
+  rail?: ReactNode;
 }) {
   const [countryCode, setCountryCode] = useState(value?.countryCode ?? "");
   const [subdivision, setSubdivision] = useState(value?.subdivision ?? "");
@@ -244,6 +246,7 @@ export function LocationStep({
         question="Which country do you live in?"
         help="This decides which schools we can plan a route through, and which tuition rate applies to you."
         onBack={onBack}
+      rail={rail}
       >
         <input
           id="country-search"
@@ -291,6 +294,7 @@ export function LocationStep({
         question={`Which ${subdivisionLabel(countryCode).toLowerCase()} are you in?`}
         help="Pick the one closest to where you live."
         onBack={back}
+      rail={rail}
       >
         {loading && (
           <p className="flex items-center gap-2 text-sm text-gray-500">
@@ -346,6 +350,7 @@ export function LocationStep({
         question="Which city or town?"
         help="This decides which schools you could realistically get to."
         onBack={back}
+      rail={rail}
         footer={
           city.trim() ? <ContinueButton onClick={continueFromCity} /> : undefined
         }
@@ -400,6 +405,7 @@ export function LocationStep({
       question={`What's your ${postalLabel(countryCode).toLowerCase()}?`}
       help="Optional — it gets us your exact distance to each school. Skip it and we'll work from your city."
       onBack={back}
+      rail={rail}
       footer={<ContinueButton onClick={() => finish(city)} />}
     >
       <input

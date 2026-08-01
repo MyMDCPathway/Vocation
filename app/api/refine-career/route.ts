@@ -90,6 +90,50 @@ const RESPONSE_SCHEMA = {
       description:
         "One short sentence on why that is the route, naming the actual gate — the licence, the union, the exam, the audition. Shown to the student.",
     },
+    outline: {
+      type: "ARRAY",
+      description:
+        "4-6 steps from where someone starts to actually working in this job. This is shown to the student immediately and stays on screen for the rest of the intake, so it must match the route archetype — an apprenticeship outline does not begin with a degree.",
+      items: {
+        type: "OBJECT",
+        properties: {
+          label: {
+            type: "STRING",
+            description:
+              "Short name for the step, under 40 characters. 'Apprenticeship', 'Bachelor's degree', 'NCLEX-RN', 'CDL training'.",
+          },
+          detail: {
+            type: "STRING",
+            description: "One sentence on what actually happens at this step.",
+          },
+          kind: {
+            type: "STRING",
+            enum: ["education", "training", "credential", "experience", "work"],
+            description:
+              "education for academic study, training for trade/vocational/on-the-job programs, credential for exams and licences, experience for required hours or placements, work for actually being employed in the role.",
+          },
+          duration: {
+            type: "STRING",
+            description:
+              "Rough time this step takes, e.g. '4 years', '6-12 months'. Empty string if it isn't time-bounded.",
+          },
+          clearedBy: {
+            type: "STRING",
+            enum: [
+              "in-high-school",
+              "hs-diploma",
+              "some-college",
+              "associate",
+              "bachelor",
+              "graduate",
+            ],
+            description:
+              "The education level that makes this step ALREADY DONE. Set it only for steps a student could genuinely have completed already — a bachelor's step is clearedBy 'bachelor'. Omit for anything that can't be skipped by prior education, such as an apprenticeship, a licensing exam, or supervised hours.",
+          },
+        },
+        required: ["label", "detail", "kind", "duration"],
+      },
+    },
   },
   required: [
     "needsSpecifics",
@@ -99,6 +143,7 @@ const RESPONSE_SCHEMA = {
     "mobilityNote",
     "routeArchetype",
     "routeReason",
+    "outline",
   ],
 };
 
@@ -138,6 +183,15 @@ RULES FOR CLASSIFYING:
 3. 'degree' is the default only when a degree is genuinely required by law, by licensure, or by essentially every employer.
 
 routeReason should name the actual gate in one sentence — "licensed by the state board after an accredited program", "IBEW locals run five-year paid apprenticeships", "hired on portfolio and certifications, not transcripts".
+
+SKETCH THE ROUTE.
+
+outline is 4-6 steps from a standing start to actually doing the job. It is shown to the student straight away and stays beside every remaining question, so it is the first useful thing they get — make it concrete.
+
+- It MUST match the archetype you just chose. An apprenticeship outline starts with getting into an apprenticeship, not with a degree. A talent outline is about development and exposure, not coursework. Contradicting your own classification here is the single worst thing you can do in this response.
+- Name real things: the actual licence, the actual exam, the actual union step. "Pass the NCLEX-RN", not "obtain licensure".
+- Order them as they actually happen.
+- Set clearedBy ONLY where prior education genuinely completes the step. An apprenticeship is not cleared by holding a bachelor's; a bachelor's step is.
 
 Respond only with JSON matching the provided schema.`;
 
@@ -258,6 +312,11 @@ export async function POST(request: NextRequest) {
       // the fallback is what makes that guarantee rather than a hope.
       routeArchetype: archetypeProfile(parsed.routeArchetype).id,
       routeReason: parsed.routeReason || "",
+      // Filtered rather than trusted: a step with no label renders as a blank
+      // row in a rail that sits on screen for the rest of the intake.
+      outline: Array.isArray(parsed.outline)
+        ? parsed.outline.filter((step: any) => step?.label && step?.detail)
+        : [],
     };
 
     setCached(key, refined);

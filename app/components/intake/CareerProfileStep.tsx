@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import {
   RESOURCE_KIND_LABELS,
   type CareerProfile,
@@ -48,6 +48,7 @@ export function CareerProfileStep({
   stepCount,
   onBack,
   onNext,
+  rail,
 }: {
   career: string;
   countryCode?: string;
@@ -55,6 +56,7 @@ export function CareerProfileStep({
   stepCount: number;
   onBack: () => void;
   onNext: () => void;
+  rail?: ReactNode;
 }) {
   const [profile, setProfile] = useState<CareerProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -98,6 +100,7 @@ export function CareerProfileStep({
       question={career}
       help={loading ? "Pulling together what this job is really like…" : undefined}
       onBack={onBack}
+      rail={rail}
       footer={<ContinueButton onClick={onNext} label="Build my plan" />}
     >
       {loading && (

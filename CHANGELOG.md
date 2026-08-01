@@ -4,6 +4,78 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## Unreleased — branch `Vocation-2.0`, part 8: the path builds as you answer
+
+The intake was: answer eight questions, receive a plan. That's a form. The
+student gives eight answers on faith, and if they abandon halfway they leave
+with nothing.
+
+Now a route sketch appears as soon as the career is known and stays beside
+every remaining question, sharpening as answers arrive. Verified live for an
+electrician in Miami:
+
+**At the very first question after the career** — no degree anywhere, because
+the archetype from part 7 shapes the outline:
+
+```
+High school diploma or GED         4 years
+Apprenticeship application & test  3-6 months
+Paid electrical apprenticeship     4-5 years
+Journeyman licensing exam          1-2 months
+Journeyman Electrician
+                                   about 9 years of this left
+```
+
+**After answering location** — the three training steps pick up `Near Miami`.
+
+**After answering education** — high school strikes through to `Already done`,
+the apprenticeship test becomes the active step and reveals its detail, and the
+estimate drops to `about 5 years` with *"You've already cleared 20% of it."*
+
+### It costs nothing extra
+
+The outline comes back from the **same** `/api/refine-career` call that already
+classifies the route, so there is no new request. Enrichment is pure and local
+(`pathOutline.ts`) — regenerating on every answer would be five Gemini calls
+per intake and a spinner between every question. The model supplies the
+skeleton once; the app annotates it from answers it already holds. The real
+costed plan is still generated at the end, and the rail says so.
+
+### Non-degree routes no longer generate degree ladders
+
+Part 7 sent welders to union halls but `openSchoolPrompt` still said *"the
+starting program — always first, type 'degree'"*, so the plan came back as a
+diploma ladder anyway. It now follows the archetype. Generated live against
+IBEW Local 349 JATC:
+
+```
+Inside Wireman Apprenticeship        IBEW Local 349 JATC
+Paid Apprenticeship Work Experience  on-the-job
+Miami-Dade County Journeyman Exam    the real county licensing body
+```
+
+The archetype is also part of the pathway cache key — two routes through one
+provider are different answers and can't share an entry.
+
+### Fixed during development
+
+- **A JSX comment placed inside `{cond && ( … )}`** broke the whole build with
+  a misleading error pointing at the first element in the file, ~30 lines
+  above the actual mistake. Only one expression is allowed in that position.
+- `Roughly about 9 years` — the sentence and the helper were both hedging.
+
+### Notes
+
+- `clearedBy` is set per step by the model and compared by **rank**, so a
+  master's clears a bachelor's step. It's deliberately optional: an
+  apprenticeship is not cleared by holding a degree, and inferring it from
+  position would claim otherwise.
+- The rail is sticky beside the question on desktop, and collapses behind a
+  Show/Hide control on mobile so it can't push the actual question off screen.
+- 729 tests (19 added). `fiuCoverage` remains the only failure.
+
+---
+
 ## Unreleased — branch `Vocation-2.0`, part 7: not every career runs through college
 
 Asked about welding, Vocation confidently produced a list of universities.

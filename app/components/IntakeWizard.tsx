@@ -18,11 +18,13 @@ import {
 } from "@/app/lib/intake";
 import type { SchoolRef } from "@/app/lib/schoolRef";
 import type { RouteArchetype } from "@/app/lib/routeArchetype";
+import type { OutlineStep } from "@/app/lib/pathOutline";
 import { loadIntake, saveIntake } from "@/app/lib/intakeStorage";
 import { ContinueButton, OptionCard, StepShell } from "@/app/components/intake/StepShell";
 import { LocationStep } from "@/app/components/intake/LocationStep";
 import { SchoolsStep } from "@/app/components/intake/SchoolsStep";
 import { CareerProfileStep } from "@/app/components/intake/CareerProfileStep";
+import { PathRail } from "@/app/components/intake/PathRail";
 
 // The 2.0 intake, front to back.
 //
@@ -47,6 +49,7 @@ interface Refinement {
   /** How people actually get into this job — steers every later question. */
   routeArchetype?: RouteArchetype;
   routeReason?: string;
+  outline?: OutlineStep[];
 }
 
 type Step =
@@ -166,6 +169,7 @@ export default function IntakeWizard() {
             question: result.question,
             routeArchetype: result.routeArchetype,
             routeReason: result.routeReason,
+            outline: result.outline,
           },
         });
         goTo("specifics");
@@ -177,6 +181,7 @@ export default function IntakeWizard() {
             resolved: result.career || raw,
             routeArchetype: result.routeArchetype,
             routeReason: result.routeReason,
+            outline: result.outline,
           },
         });
         goTo("location");
@@ -227,6 +232,12 @@ export default function IntakeWizard() {
   }
 
   const stepCount = steps.length;
+
+  // The route sketch, from the career question onward. Passed to every step
+  // that renders its own StepShell; the steps that own their shell get it as
+  // a prop instead. Absent on the career screen itself, since there is no
+  // career yet to sketch.
+  const rail = answers.career?.outline?.length ? <PathRail answers={answers} /> : undefined;
 
   // --- Steps ---------------------------------------------------------------
 
@@ -290,6 +301,7 @@ export default function IntakeWizard() {
         stepNumber={stepNumber}
         stepCount={stepCount}
         question={refinement.question}
+        rail={rail}
         help={refinement.helpText}
         onBack={restartCareer}
       >
@@ -325,6 +337,7 @@ export default function IntakeWizard() {
                 resolved: refinement.career || raw,
                 routeArchetype: refinement.routeArchetype,
                 routeReason: refinement.routeReason,
+                outline: refinement.outline,
               },
             });
             goTo("location");
@@ -340,6 +353,7 @@ export default function IntakeWizard() {
   if (step === "profile" && answers.career?.resolved) {
     return (
       <CareerProfileStep
+        rail={rail}
         career={answers.career.resolved}
         // Always known by now — location is the step before this one, which is
         // the whole reason it was moved. Pay is quoted in their market's own
@@ -356,6 +370,7 @@ export default function IntakeWizard() {
   if (step === "location") {
     return (
       <LocationStep
+        rail={rail}
         value={answers.location}
         stepNumber={stepNumber}
         stepCount={stepCount}
@@ -374,6 +389,7 @@ export default function IntakeWizard() {
         stepNumber={stepNumber}
         stepCount={stepCount}
         question="Where are you in school right now?"
+        rail={rail}
         help="There's no point planning an associate degree for someone who already has one."
         onBack={back}
         footer={
@@ -403,6 +419,7 @@ export default function IntakeWizard() {
         stepNumber={stepNumber}
         stepCount={stepCount}
         question="How are you covering costs right now?"
+        rail={rail}
         help="This only affects the aid estimate. Nothing you enter is stored on a server or attached to you."
         onBack={back}
         footer={
@@ -453,6 +470,7 @@ export default function IntakeWizard() {
   if (step === "schools") {
     return (
       <SchoolsStep
+        rail={rail}
         answers={answers}
         stepNumber={stepNumber}
         stepCount={stepCount}
@@ -475,6 +493,7 @@ export default function IntakeWizard() {
         stepNumber={stepNumber}
         stepCount={stepCount}
         question="What matters most to you?"
+        rail={rail}
         help="We'll still show you every route â€” this just decides which one leads."
         onBack={back}
       >
@@ -507,6 +526,7 @@ export default function IntakeWizard() {
         stepNumber={stepNumber}
         stepCount={stepCount}
         question={`Once you're qualified, where would you work as a ${career.toLowerCase()}?`}
+        rail={rail}
         help={
           refinement?.mobilityNote ||
           "Pick everything you'd genuinely consider. Ruling nothing out opens up faster routes in."

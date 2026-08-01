@@ -18,6 +18,7 @@
 
 import type { SchoolRef } from "@/app/lib/schoolRef";
 import { countryName } from "@/app/lib/countries";
+import { archetypeProfile, type ArchetypeProfile } from "@/app/lib/routeArchetype";
 
 export interface OpenPathwayRequest {
   systemPrompt: string;
@@ -89,7 +90,11 @@ function buildResponseSchema(canonicalCareer: string): Record<string, unknown> {
   };
 }
 
-function systemPrompt(school: SchoolRef, canonicalCareer: string): string {
+function systemPrompt(
+  school: SchoolRef,
+  canonicalCareer: string,
+  profile: ArchetypeProfile
+): string {
   const location = [school.city, school.subdivision, countryName(school.countryCode)]
     .filter(Boolean)
     .join(", ");
@@ -102,13 +107,18 @@ You are being asked about a real institution, and a student may act on what you 
 1. Name only programs ${school.name} ACTUALLY OFFERS. If you are unsure whether this school offers a specific program, name the broader program you are confident it offers instead. "Bachelor of Science in Biology" that exists beats "Bachelor of Science in Pre-Medical Studies" that doesn't.
 2. For every degree step at ${school.name}, give programUrl: your best URL for that program's page on the school's own website. **These URLs are fetched and checked by our server.** A URL that 404s is detected and the student is told the program could not be confirmed. So a genuine best attempt is far more useful than a confident-looking guess — and if you truly don't know the URL pattern, give the school's program index rather than inventing a path.
 
+ROUTE — THIS DECIDES THE SHAPE OF THE WHOLE PATHWAY:
+This career is entered by ${profile.label.toLowerCase()}. ${profile.summary}
+
+**Do not force a degree onto a route that isn't one.** If this is an apprenticeship, the first step is getting accepted into the apprenticeship — not a diploma "to prepare". If it's certification, the first step is the certification or the training that leads to it. A degree step that the route does not actually require is padding the student's life by years and their bill by tens of thousands.
+
 STRUCTURE:
-Build the pathway around how education actually works in ${countryName(school.countryCode)}, not around the American model by default. Some countries go straight from secondary school into a professional degree; some require a general first degree first; licensing bodies differ everywhere.
+Build the pathway around how entry actually works in ${countryName(school.countryCode)}, not around the American university model by default. Some countries go straight from secondary school into a professional qualification; licensing bodies differ everywhere; trades are learned on the job.
 
 Include, in a sensible order:
-1. The starting program at ${school.name} — always first, type 'degree'.
-2. Any further degrees the career requires, at this school or elsewhere. If the student must go elsewhere, say so plainly and leave programUrl empty for that step.
-3. Required practical experience, placements, residencies, or supervised hours — type 'internship'.
+1. The starting program, apprenticeship, or training at ${school.name} — always first. Use type 'degree' only when it genuinely IS a degree or formal program; the step still carries programUrl either way.
+2. Any further qualification the career requires, here or elsewhere. If the student must go elsewhere, say so plainly and leave programUrl empty for that step.
+3. Required practical experience, placements, on-the-job hours, or residencies — type 'internship'. For an apprenticeship this is the paid working years, and it should say so.
 4. Required licensing exams or professional registration for ${countryName(school.countryCode)} — type 'exam'. Name the actual body and exam, not a generic "licensing exam".
 5. Optional further qualifications where they genuinely change the career.
 
@@ -138,10 +148,17 @@ Remember: only programs this school really offers, real licensing bodies for ${c
 
 export function buildOpenPathwayRequest(
   school: SchoolRef,
-  canonicalCareer: string
+  canonicalCareer: string,
+  /**
+   * How this career is actually entered. Without it every plan is shaped like
+   * a degree — so the welder we just sent to a union hall would be handed a
+   * diploma-first ladder anyway, undoing the whole point of classifying.
+   */
+  routeArchetype?: string
 ): OpenPathwayRequest {
+  const profile = archetypeProfile(routeArchetype);
   return {
-    systemPrompt: systemPrompt(school, canonicalCareer),
+    systemPrompt: systemPrompt(school, canonicalCareer, profile),
     userQuery: userQuery(school, canonicalCareer),
     responseSchema: buildResponseSchema(canonicalCareer),
   };

@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { career, school, schoolRef } = await request.json();
+    const { career, school, schoolRef, routeArchetype } = await request.json();
 
     if (!career || typeof career !== "string" || career.trim() === "") {
       return NextResponse.json(
@@ -70,7 +70,12 @@ export async function POST(request: NextRequest) {
     // The school is part of the key: "Accountant" at MDC and at FIU are
     // different pathways, and sharing one entry would serve whichever was
     // generated first to both.
-    const key = cacheKey(`pathway:${schoolId}`, canonicalCareer);
+    const key = cacheKey(
+      // The archetype changes the SHAPE of the plan, so two routes through the
+      // same school are different answers and cannot share an entry.
+      `pathway:${schoolId}${openSchool ? `:${routeArchetype ?? "degree"}` : ""}`,
+      canonicalCareer
+    );
     const cached = getCached(key);
     if (cached) {
       return NextResponse.json(cached);
@@ -101,7 +106,7 @@ export async function POST(request: NextRequest) {
     // school has no catalog to embed, so it gets the URL-claiming prompt whose
     // output is checked below instead.
     const prompt = openSchool
-      ? buildOpenPathwayRequest(openSchool, canonicalCareer)
+      ? buildOpenPathwayRequest(openSchool, canonicalCareer, routeArchetype)
       : buildPathwayRequest(schoolId, canonicalCareer)!;
     const { systemPrompt, userQuery, responseSchema } = prompt;
     const apiUrl = geminiUrl(apiKey);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { IntakeAnswers } from "@/app/lib/intake";
 import { distanceMiles } from "@/app/lib/geography";
 import { hasUsableCoordinates, type SchoolRef } from "@/app/lib/schoolRef";
@@ -36,6 +36,7 @@ interface Props {
   stepCount: number;
   onBack: () => void;
   onDone: (picked: SchoolRef[], discovered: SchoolRef[]) => void;
+  rail?: ReactNode;
 }
 
 function money(school: SchoolRef): string | null {
@@ -52,7 +53,7 @@ function money(school: SchoolRef): string | null {
     : `${format(t.low)} – ${format(t.high)}/yr`;
 }
 
-export function SchoolsStep({ answers, stepNumber, stepCount, onBack, onDone }: Props) {
+export function SchoolsStep({ answers, stepNumber, stepCount, onBack, onDone, rail }: Props) {
   const [schools, setSchools] = useState<SchoolRef[]>([]);
   const [picked, setPicked] = useState<SchoolRef[]>(answers.desiredSchools ?? []);
   const [loading, setLoading] = useState(true);
@@ -205,6 +206,7 @@ export function SchoolsStep({ answers, stepNumber, stepCount, onBack, onDone }: 
       question={profile.providerQuestion}
       help={`${profile.providerHelp} Pick any, or skip and we'll choose for you.`}
       onBack={onBack}
+      rail={rail}
       footer={
         <ContinueButton
           onClick={() => onDone(picked, schools)}

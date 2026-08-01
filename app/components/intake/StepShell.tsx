@@ -18,6 +18,7 @@ export function StepShell({
   onBack,
   footer,
   wide,
+  rail,
   children,
 }: {
   stepNumber: number;
@@ -35,10 +36,20 @@ export function StepShell({
    * frame rather than a different page.
    */
   wide?: boolean;
+  /**
+   * The evolving route, shown beside the question.
+   *
+   * Lives here rather than in each step so every question gets it without
+   * wiring, and so the heading can't drift a few pixels between screens —
+   * which reads as the page reloading rather than advancing.
+   */
+  rail?: ReactNode;
   children: ReactNode;
 }) {
   const percent = Math.round((stepNumber / stepCount) * 100);
-  const column = wide ? "max-w-6xl" : "max-w-3xl";
+  // The rail needs room beside the reading column, so a step that has one is
+  // widened even when it didn't ask to be.
+  const column = wide || rail ? "max-w-6xl" : "max-w-3xl";
 
   return (
     <div className="min-h-[calc(100vh-73px)] flex flex-col">
@@ -60,12 +71,33 @@ export function StepShell({
       </div>
 
       <div className={`flex-1 w-full ${column} mx-auto px-6 py-10 md:py-14`}>
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
-          {question}
-        </h1>
-        {help && <p className="mt-3 text-gray-600 md:text-lg">{help}</p>}
+        <div
+          className={
+            rail && !wide
+              ? "grid gap-10 lg:grid-cols-[minmax(0,1fr)_300px]"
+              : undefined
+          }
+        >
+          <div className="min-w-0">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
+              {question}
+            </h1>
+            {help && <p className="mt-3 text-gray-600 md:text-lg">{help}</p>}
 
-        <div className="mt-8">{children}</div>
+            <div className="mt-8">{children}</div>
+          </div>
+
+          {/* Sticky so the path stays put while a long option list scrolls
+              past it. Order-first on mobile would bury the question, so it
+              sits after and collapses itself. */}
+          {rail && !wide && (
+            <div className="lg:sticky lg:top-8 lg:self-start">{rail}</div>
+          )}
+        </div>
+
+        {/* A wide step (the map) has no room for a side rail, so it goes
+            underneath rather than being dropped. */}
+        {rail && wide && <div className="mt-10 max-w-md">{rail}</div>}
       </div>
 
       <div className={`w-full ${column} mx-auto px-6 pb-10 flex items-center gap-4`}>

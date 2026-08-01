@@ -2299,6 +2299,40 @@ that render amber and red, and the prompt requires the unglamorous parts. Don't
 school's course index; a dead licensing-board link has nowhere to go. Rule 7
 applies — it goes, and the count of what went is shown.
 
+### Part 8 — the evolving path rail
+
+`pathOutline.ts` + `PathRail.tsx`. The route sketch that sits beside every
+question from the career step onward.
+
+**The outline rides along on `/api/refine-career`.** It is NOT its own call.
+That route already classifies the archetype, so the skeleton comes back with
+it for free. Do not add a separate endpoint for this.
+
+**Enrichment is pure and local, and must stay that way.** `enrichOutline` takes
+the outline plus whatever answers exist and annotates — no fetch, no
+regeneration. Regenerating per answer would be five Gemini calls per intake and
+a spinner between every question. The model gives the skeleton once; the app
+sharpens it from what it already holds. The real costed plan is still generated
+at the end, and the rail says so in as many words.
+
+**`clearedBy` is optional on purpose and compared by RANK.** A master's clears
+a bachelor's step (rank), but an apprenticeship is cleared by nothing (no
+`clearedBy`). Inferring "steps before your level are done" from position would
+tell a graduate their electrical apprenticeship was behind them.
+
+**Every input to `enrichOutline` is optional** because it renders while the
+intake is half-answered. At question two nothing is cleared and nothing is
+annotated — that is correct, not a bug to paper over.
+
+**The rail lives in `StepShell`,** so every question gets it without wiring and
+the heading can't drift between screens. A step passing `wide` (the map) gets
+the rail underneath instead of beside, since there's no room.
+
+**JSX comments cannot go inside `{cond && ( … )}`.** Putting one there broke
+the entire build with an error pointing at the first element in the file, about
+thirty lines above the real mistake. Only one expression is allowed in that
+position.
+
 ### Part 7 — route archetypes
 
 `routeArchetype.ts`. Read this before adding anything to the intake.
@@ -2328,6 +2362,12 @@ that response, bump the namespace rather than defaulting the new field.
 **The archetype is part of the find-schools cache key.** Same career, same
 city, different route ⇒ genuinely different providers. Leaving it out serves
 one route's answer to another.
+
+**The open-school prompt follows the archetype too.** It used to say "the
+starting program — always first, type 'degree'", which meant a welder sent to a
+union hall still got a diploma ladder back. It now takes the archetype and is
+explicit that forcing a degree onto a non-degree route pads the student's life
+by years. The archetype is part of the pathway cache key for the same reason.
 
 **The prompt must keep saying "print 0 where the route pays you."** Registered
 apprenticeships and military service pay a wage; quoting tuition for them is

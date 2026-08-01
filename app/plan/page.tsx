@@ -127,6 +127,9 @@ export default function PlanPage() {
             // An AI-discovered school exists in no table the server ships, so
             // the record travels with the request or the route can't plan it.
             schoolRef: isOpenSchool(id) ? track.school : undefined,
+            // Without this an apprenticeship plan comes back as a degree
+            // ladder, undoing the classification two steps earlier.
+            routeArchetype: answers?.career?.routeArchetype,
           }),
         });
 
@@ -155,7 +158,7 @@ export default function PlanPage() {
         }));
       }
     },
-    [career]
+    [career, answers?.career?.routeArchetype]
   );
 
   useEffect(() => {
