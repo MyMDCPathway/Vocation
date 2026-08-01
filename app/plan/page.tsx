@@ -75,6 +75,8 @@ export default function PlanPage() {
             countryCode: answers.location?.countryCode,
             subdivision: answers.location?.subdivision,
             city: answers.location?.city,
+            latitude: answers.location?.latitude,
+            longitude: answers.location?.longitude,
           }),
         });
         const body = await response.json().catch(() => ({}));

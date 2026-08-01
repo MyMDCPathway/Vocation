@@ -4,6 +4,72 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## Unreleased — branch `Vocation-2.0`, part 4: local pay, and postal codes
+
+### Location now comes before the profile
+
+Pay, demand, and the entry route on the career profile are for the student's
+own market instead of a default. For a UK student asking about electricians
+that changes more than the currency:
+
+| | Before (US default) | After (UK) |
+|---|---|---|
+| Pay | `$61,590` | `£36,000` (£22,000 – £48,000) |
+| Entry route | "apprenticeship or trade school" | "NVQ Level 3 Diploma through a four-year apprenticeship, plus the AM2 practical exam" |
+
+The profile is cached per career **and** country, so the two don't collide.
+
+### Postal code, done for the whole world rather than the US
+
+New optional field after city: country → region → city → postal code.
+
+**It is not called a ZIP code.** ZIP is a USPS trademark for a US-only system.
+The field is labelled per country — Postcode, PIN code, Eircode, CEP, CAP — and
+**hidden entirely** for the ~60 countries with no postal system at all (UAE,
+Hong Kong, Panama…). A test asserts no country outside the US ever sees the
+word "ZIP".
+
+**It earns its place by resolving to coordinates.** Before this, distance to a
+school could only be computed inside Florida, because the only coordinates the
+app held were its own school table and the student's location was matched by
+city *name*. Everyone else got "closest to home" ranked by whatever order
+discovery happened to return. A resolved postal code gives real latitude and
+longitude anywhere the service covers, so great-circle distance now works
+worldwide. A field we collect and never use would be worse than not asking.
+
+Lookup is `api.zippopotam.us` — free, no key, no account, and it returns place,
+region *and* coordinates in one call. Alternatives weighed:
+
+| Option | Why not |
+|---|---|
+| Google Places | The industry default, but needs a billing account and an API key |
+| Nominatim / OSM | Free, but capped at 1 req/sec by policy, and it missed UK and Canadian partial codes that Zippopotam resolved |
+| GeoNames | Good data, needs a registered username, throttles the free tier |
+
+If this ever needs to be bulletproof, shipping a GeoNames postal dump as static
+data removes the third party from the request path entirely.
+
+### Fixed during development
+
+- **Correctly-typed postcodes were failing.** Verified against the live
+  service: `EH8 9YL` misses, `EH8` hits; `M5V 2T6` misses, `M5V` hits;
+  `1012 AB` misses, `1012` hits. UK, Canadian and Dutch data is keyed on the
+  first segment only — so the lookup failed for precisely the people who typed
+  their address correctly. It now retries progressively coarser truncations.
+  These are **truncations, never substitutions**: every candidate is a prefix
+  of what they typed, so the worst case is a broader area that still contains
+  them. A test asserts that property.
+- A transient upstream failure is no longer cached as a definitive miss.
+
+### Notes
+
+- The postal code never overwrites a city or region the student chose — it only
+  fills a gap. People know their own address better than a lookup table does.
+- Debounced at 600ms; most prefixes of a valid code are not themselves valid.
+- 679 tests (22 added). `fiuCoverage` remains the only failure.
+
+---
+
 ## Unreleased — branch `Vocation-2.0`, part 3: the career profile
 
 A screen between "which career" and the questions that build a plan, showing

@@ -142,16 +142,10 @@ TUITION:
 
 Return only JSON matching the schema.`;
 
-function catalogSchoolsFor(city: string, career: string): SchoolRef[] {
-  // Rank Florida's real schools by distance from the named city, when we can
-  // place that city. We only hold coordinates for school campuses, so the
-  // student's city is located by matching it against the schools' own cities —
-  // enough to tell "Miami" from "Pensacola", which is all the ranking needs.
-  const normalized = city.trim().toLowerCase();
-  const anchor = FLORIDA_SCHOOLS.find(
-    (school) => school.city.toLowerCase() === normalized
-  );
-  const origin = anchor ? SCHOOL_COORDINATES[anchor.id] : undefined;
+function catalogSchoolsFor(
+  city: string,
+  origin: { lat: number; lng: number } | undefined
+): SchoolRef[] {
 
   return (SCHOOLS_WITH_CATALOG as readonly string[])
     .map((id) => {
@@ -176,13 +170,35 @@ function catalogSchoolsFor(city: string, career: string): SchoolRef[] {
     });
 }
 
+/** Coordinates to measure school distances from, or undefined if we have none. */
+function resolveOrigin(
+  latitude: unknown,
+  longitude: unknown,
+  city: string
+): { lat: number; lng: number } | undefined {
+  const lat = Number(latitude);
+  const lng = Number(longitude);
+  if (Number.isFinite(lat) && Number.isFinite(lng) && (lat !== 0 || lng !== 0)) {
+    return { lat, lng };
+  }
+
+  const normalized = city.trim().toLowerCase();
+  if (!normalized) return undefined;
+
+  const anchor = FLORIDA_SCHOOLS.find(
+    (school) => school.city.toLowerCase() === normalized
+  );
+  return anchor ? SCHOOL_COORDINATES[anchor.id] : undefined;
+}
+
 export async function POST(request: NextRequest) {
   if (!apiKey) {
     return NextResponse.json({ error: "API key not configured" }, { status: 500 });
   }
 
   try {
-    const { career, countryCode, subdivision, city } = await request.json();
+    const { career, countryCode, subdivision, city, latitude, longitude } =
+      await request.json();
 
     if (!career || typeof career !== "string" || !career.trim()) {
       return NextResponse.json(
@@ -197,10 +213,22 @@ export async function POST(request: NextRequest) {
     const canonicalCareer = resolveCareer(career).canonical;
     const place = [city, subdivision].filter(Boolean).join(", ");
 
+    // Where to measure distances from, best source first:
+    //
+    //   1. Coordinates resolved from the student's postal code. Exact, and
+    //      available anywhere the lookup service covers.
+    //   2. The campus coordinates of a school in a city of the same name.
+    //      Florida-only and city-granular, but enough to tell Miami from
+    //      Pensacola, which is all the ranking needs.
+    //
+    // With neither, distances stay null and the UI shows the track's label
+    // instead of a mileage rather than inventing one.
+    const origin = resolveOrigin(latitude, longitude, String(city ?? ""));
+
     // Catalog schools are free and deterministic, so they're assembled outside
     // the cache and merged onto whatever the AI half returns.
     const catalog = hasLocalCatalogs(countryCode, subdivision)
-      ? catalogSchoolsFor(String(city ?? ""), canonicalCareer)
+      ? catalogSchoolsFor(String(city ?? ""), origin)
       : [];
 
     const key = cacheKey(

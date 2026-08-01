@@ -48,8 +48,8 @@ interface Refinement {
 type Step =
   | "career"
   | "specifics"
-  | "profile"
   | "location"
+  | "profile"
   | "education"
   | "finances"
   | "schools"
@@ -97,10 +97,11 @@ export default function IntakeWizard() {
   const steps = useMemo<Step[]>(() => {
     const list: Step[] = ["career"];
     if (refinement?.needsSpecifics) list.push("specifics");
-    // The profile sits after any narrowing, so it describes the SPECIFIC job
-    // they settled on. Showing pay and demand for "doctor" before they've said
-    // which kind would give figures spanning a GP and a neurosurgeon.
-    list.push("profile", "location", "education", "finances", "schools", "priority", "mobility");
+    // Order matters twice over. The profile sits after any NARROWING, so it
+    // describes the specific job they settled on rather than figures spanning
+    // a GP and a neurosurgeon. And it sits after LOCATION, so the pay and
+    // demand on it are for their own market rather than a default one.
+    list.push("location", "profile", "education", "finances", "schools", "priority", "mobility");
     return list;
   }, [refinement]);
 
@@ -159,7 +160,7 @@ export default function IntakeWizard() {
       } else {
         // Already specific enough to plan against â€” no follow-up worth asking.
         patch({ career: { raw, resolved: result.career || raw } });
-        goTo("profile");
+        goTo("location");
       }
     } catch (err: any) {
       // A failure here must not dead-end the student. The narrowing question
@@ -284,7 +285,7 @@ export default function IntakeWizard() {
                     question: refinement.question,
                   },
                 });
-                goTo("profile");
+                goTo("location");
               }}
             />
           ))}
@@ -295,7 +296,7 @@ export default function IntakeWizard() {
           onClick={() => {
             const raw = answers.career?.raw ?? careerInput;
             patch({ career: { raw, resolved: refinement.career || raw } });
-            goTo("profile");
+            goTo("location");
           }}
           className="mt-6 text-sm text-gray-500 underline hover:text-gray-800"
         >
@@ -309,13 +310,13 @@ export default function IntakeWizard() {
     return (
       <CareerProfileStep
         career={answers.career.resolved}
-        // Usually undefined here — location is the next question. When it is
-        // set (they went back, or restored a session) the pay figures follow
-        // their market instead of defaulting.
+        // Always known by now — location is the step before this one, which is
+        // the whole reason it was moved. Pay is quoted in their market's own
+        // currency instead of defaulting to US dollars.
         countryCode={answers.location?.countryCode}
         stepNumber={stepNumber}
         stepCount={stepCount}
-        onBack={refinement?.needsSpecifics ? back : restartCareer}
+        onBack={back}
         onNext={advance}
       />
     );

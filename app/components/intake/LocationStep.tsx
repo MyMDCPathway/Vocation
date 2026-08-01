@@ -8,6 +8,13 @@ import {
   subdivisionLabel,
 } from "@/app/lib/countries";
 import type { StudentLocation } from "@/app/lib/intake";
+import {
+  normalizePostalCode,
+  postalExample,
+  postalLabel,
+  usesPostalCode,
+  type PostalPlace,
+} from "@/app/lib/postalCode";
 import { ContinueButton, StepShell } from "@/app/components/intake/StepShell";
 
 // Where do you live — country, then region, then city.
@@ -42,11 +49,20 @@ export function LocationStep({
   const [countryCode, setCountryCode] = useState(value?.countryCode ?? "");
   const [subdivision, setSubdivision] = useState(value?.subdivision ?? "");
   const [city, setCity] = useState(value?.city ?? "");
+  const [postal, setPostal] = useState(value?.postalCode ?? "");
 
   const [subdivisions, setSubdivisions] = useState<Subdivision[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [countryQuery, setCountryQuery] = useState("");
+
+  // Resolved coordinates for the postal code, when one was entered and
+  // recognised. Undefined means "not looked up or not found", which is a
+  // perfectly fine end state — the field is optional.
+  const [place, setPlace] = useState<PostalPlace | null>(null);
+  const [postalState, setPostalState] = useState<"idle" | "looking" | "found" | "missing">(
+    "idle"
+  );
 
   const countries = useMemo(() => {
     const q = countryQuery.trim().toLowerCase();
@@ -93,9 +109,59 @@ export function LocationStep({
     };
   }, [countryCode]);
 
+  // Look the postal code up once the student stops typing. Debounced because
+  // otherwise every keystroke of "EH1 1YZ" is a request, and most prefixes of
+  // a valid code are not themselves valid.
+  useEffect(() => {
+    const code = normalizePostalCode(postal);
+    if (!countryCode || code.length < 3) {
+      setPlace(null);
+      setPostalState("idle");
+      return;
+    }
+
+    let cancelled = false;
+    setPostalState("looking");
+
+    const timer = setTimeout(async () => {
+      try {
+        const response = await fetch("/api/postal-lookup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ countryCode, postalCode: code }),
+        });
+        const body = await response.json().catch(() => ({}));
+        if (cancelled) return;
+
+        if (body?.place) {
+          setPlace(body.place);
+          setPostalState("found");
+          // Fill the city in if they haven't typed one. Never overwrite what
+          // they did type — the postal code resolves to a delivery area, and
+          // people know their own address better than a lookup table does.
+          setCity((current) => current.trim() || body.place.city);
+        } else {
+          setPlace(null);
+          setPostalState("missing");
+        }
+      } catch {
+        if (!cancelled) {
+          setPlace(null);
+          setPostalState("missing");
+        }
+      }
+    }, 600);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [postal, countryCode]);
+
   const cities =
     subdivisions.find((s) => s.name === subdivision)?.largestCities ?? [];
 
+  const showPostal = Boolean(countryCode) && usesPostalCode(countryCode);
   const ready = Boolean(countryCode && city.trim());
 
   return (
@@ -111,8 +177,14 @@ export function LocationStep({
             onClick={() =>
               onDone({
                 countryCode,
-                subdivision: subdivision.trim(),
+                // A resolved postal code knows the region better than a
+                // dropdown does, but only fills a gap — never overrides a
+                // choice they made themselves.
+                subdivision: subdivision.trim() || place?.subdivision || "",
                 city: city.trim(),
+                postalCode: normalizePostalCode(postal) || undefined,
+                latitude: place?.latitude,
+                longitude: place?.longitude,
               })
             }
           />
@@ -244,6 +316,50 @@ export function LocationStep({
             placeholder={cities.length ? "…or type somewhere else" : "Where do you live?"}
             className="mt-3 w-full rounded-lg border border-gray-200 px-4 py-3 focus:border-school-500 focus:outline-none focus:ring-2 focus:ring-school-500"
           />
+        </div>
+      )}
+
+      {/* Postal code — last, optional, and only where one exists. */}
+      {showPostal && city.trim() && (
+        <div className="mt-8">
+          <label htmlFor="postal" className="block text-sm font-semibold text-gray-900">
+            {postalLabel(countryCode)}{" "}
+            <span className="font-normal text-gray-500">— optional</span>
+          </label>
+          <p className="mt-1 text-sm text-gray-600">
+            Gets us your exact distance to each school. Skip it and we&apos;ll work
+            from your city.
+          </p>
+          <input
+            id="postal"
+            type="text"
+            value={postal}
+            onChange={(e) => setPostal(e.target.value.slice(0, 12))}
+            placeholder={postalExample(countryCode) ?? ""}
+            autoComplete="postal-code"
+            inputMode="text"
+            className="mt-3 w-full max-w-xs rounded-lg border border-gray-200 px-4 py-3 uppercase focus:border-school-500 focus:outline-none focus:ring-2 focus:ring-school-500"
+          />
+
+          {postalState === "looking" && (
+            <p className="mt-2 flex items-center gap-2 text-sm text-gray-500">
+              <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-school-600 border-t-transparent" />
+              Checking…
+            </p>
+          )}
+          {postalState === "found" && place && (
+            <p className="mt-2 text-sm text-green-700">
+              Found {place.city}
+              {place.subdivision ? `, ${place.subdivision}` : ""} — we&apos;ll measure
+              distances from there.
+            </p>
+          )}
+          {postalState === "missing" && (
+            <p className="mt-2 text-sm text-gray-500">
+              We couldn&apos;t look that one up, which is fine — plenty of countries
+              aren&apos;t covered. We&apos;ll use your city instead.
+            </p>
+          )}
         </div>
       )}
     </StepShell>

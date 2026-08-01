@@ -59,6 +59,10 @@ export function SchoolsStep({ answers, stepNumber, stepCount, onBack, onDone }: 
             countryCode: answers.location?.countryCode,
             subdivision: answers.location?.subdivision,
             city: answers.location?.city,
+            // Present when a postal code resolved. Turns "closest to home"
+            // from a city-name guess into an actual distance.
+            latitude: answers.location?.latitude,
+            longitude: answers.location?.longitude,
           }),
         });
         const body = await response.json().catch(() => ({}));

@@ -2299,6 +2299,45 @@ that render amber and red, and the prompt requires the unglamorous parts. Don't
 school's course index; a dead licensing-board link has nowhere to go. Rule 7
 applies — it goes, and the count of what went is shown.
 
+### Part 4 — postal codes and local pay
+
+**Step order is load-bearing.** `career → specifics? → location → profile → …`.
+The profile must come after *specifics* (so it describes the job they settled
+on, not figures spanning a GP and a neurosurgeon) **and** after *location* (so
+pay, demand, and the entry route are for their own market). Moving it earlier
+reverts a UK electrician from "£36,000, NVQ Level 3 plus the AM2 exam" to
+"$61,590, apprenticeship or trade school". The profile cache key includes the
+country, so markets don't collide.
+
+**It is not a ZIP code.** ZIP is a USPS trademark for a US-only system. The
+field is labelled per country (`postalLabel`) and hidden entirely for the ~60
+countries with no postal system (`usesPostalCode`). A test asserts no country
+outside the US ever renders the word "ZIP". If you add a country, you don't
+need to do anything — the default label is neutral.
+
+**The postal code exists to produce coordinates, not to be stored.** Before it,
+distance was computable only inside Florida: the app's only coordinates were
+its own `SCHOOL_COORDINATES` table and the student was placed by matching their
+city *name* against school cities. A resolved code gives real lat/lng anywhere,
+which is what makes "closest to home" mean something outside Florida. If you
+ever make the field required or drop the resolution, remove the field instead —
+collecting an address fragment we don't use is worse than not asking.
+
+**Correct postcodes fail without the truncation fallback.** Verified live:
+`EH8 9YL` misses and `EH8` hits; `M5V 2T6` misses and `M5V` hits; `1012 AB`
+misses and `1012` hits. UK, Canadian and Dutch data is keyed on the first
+segment only, so the naive lookup failed for exactly the people who typed their
+address correctly. `postalVariants` retries coarser forms, and every candidate
+is a **prefix** of what they typed — the worst case is a broader area that
+still contains them, never a different place. Don't widen this into
+pattern-guessing; the prefix property is what makes it safe, and a test asserts
+it.
+
+**Zippopotam covers ~60 countries and that's fine.** A miss degrades to the
+typed city, which is what the app did before. The upgrade path, if it ever
+matters, is a GeoNames postal dump shipped as static data — no third party in
+the request path.
+
 ### What's still open
 
 - **No payment or auth**, so "Vocation Plus" is a labelled coming-soon panel.

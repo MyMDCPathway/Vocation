@@ -183,6 +183,18 @@ export interface StudentLocation {
   /** State, province, prefecture — whatever that country calls it. */
   subdivision: string;
   city: string;
+  /** Optional, and absent entirely for countries with no postal system. */
+  postalCode?: string;
+  /**
+   * Resolved from the postal code when one was given and recognised.
+   *
+   * This is what makes "closest to home" mean anything outside Florida. With
+   * no coordinates, distance can only be computed against the school table we
+   * ship, which is Florida-only; with them, great-circle distance works
+   * anywhere.
+   */
+  latitude?: number;
+  longitude?: number;
 }
 
 export interface IntakeAnswers {
@@ -232,11 +244,15 @@ export const NO_MOBILITY: WorkMobility = {
  * `specifics` is in the list but conditionally skipped — see
  * `nextStepAfter`. Everything else always runs.
  */
+// Location comes BEFORE the profile so the pay and demand figures on it are
+// for the student's own market. Shown first, the profile could only quote a
+// default market, which for anyone outside the US meant salary figures in the
+// wrong currency for the wrong country.
 export const INTAKE_STEPS = [
   "career",
   "specifics",
-  "profile",
   "location",
+  "profile",
   "education",
   "finances",
   "schools",
