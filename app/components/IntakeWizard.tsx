@@ -21,6 +21,7 @@ import { loadIntake, saveIntake } from "@/app/lib/intakeStorage";
 import { ContinueButton, OptionCard, StepShell } from "@/app/components/intake/StepShell";
 import { LocationStep } from "@/app/components/intake/LocationStep";
 import { SchoolsStep } from "@/app/components/intake/SchoolsStep";
+import { CareerProfileStep } from "@/app/components/intake/CareerProfileStep";
 
 // The 2.0 intake, front to back.
 //
@@ -47,6 +48,7 @@ interface Refinement {
 type Step =
   | "career"
   | "specifics"
+  | "profile"
   | "location"
   | "education"
   | "finances"
@@ -95,7 +97,10 @@ export default function IntakeWizard() {
   const steps = useMemo<Step[]>(() => {
     const list: Step[] = ["career"];
     if (refinement?.needsSpecifics) list.push("specifics");
-    list.push("location", "education", "finances", "schools", "priority", "mobility");
+    // The profile sits after any narrowing, so it describes the SPECIFIC job
+    // they settled on. Showing pay and demand for "doctor" before they've said
+    // which kind would give figures spanning a GP and a neurosurgeon.
+    list.push("profile", "location", "education", "finances", "schools", "priority", "mobility");
     return list;
   }, [refinement]);
 
@@ -154,7 +159,7 @@ export default function IntakeWizard() {
       } else {
         // Already specific enough to plan against â€” no follow-up worth asking.
         patch({ career: { raw, resolved: result.career || raw } });
-        goTo("location");
+        goTo("profile");
       }
     } catch (err: any) {
       // A failure here must not dead-end the student. The narrowing question
@@ -166,7 +171,7 @@ export default function IntakeWizard() {
       setError(
         "We couldn't load follow-up options just now, so we'll plan against exactly what you typed."
       );
-      goTo("location");
+      goTo("profile");
     } finally {
       setBusy(false);
     }
@@ -279,7 +284,7 @@ export default function IntakeWizard() {
                     question: refinement.question,
                   },
                 });
-                goTo("location");
+                goTo("profile");
               }}
             />
           ))}
@@ -290,13 +295,29 @@ export default function IntakeWizard() {
           onClick={() => {
             const raw = answers.career?.raw ?? careerInput;
             patch({ career: { raw, resolved: refinement.career || raw } });
-            goTo("location");
+            goTo("profile");
           }}
           className="mt-6 text-sm text-gray-500 underline hover:text-gray-800"
         >
           None of these â€” plan for &ldquo;{refinement.career}&rdquo; generally
         </button>
       </StepShell>
+    );
+  }
+
+  if (step === "profile" && answers.career?.resolved) {
+    return (
+      <CareerProfileStep
+        career={answers.career.resolved}
+        // Usually undefined here — location is the next question. When it is
+        // set (they went back, or restored a session) the pay figures follow
+        // their market instead of defaulting.
+        countryCode={answers.location?.countryCode}
+        stepNumber={stepNumber}
+        stepCount={stepCount}
+        onBack={refinement?.needsSpecifics ? back : restartCareer}
+        onNext={advance}
+      />
     );
   }
 

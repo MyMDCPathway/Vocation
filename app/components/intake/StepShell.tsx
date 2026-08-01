@@ -40,8 +40,11 @@ export function StepShell({
             style={{ width: `${percent}%` }}
           />
         </div>
+        {/* "Step", not "Question" — the career profile is a screen to read,
+            not something to answer, and calling it question 2 of 8 made it
+            look like we'd lost the question. */}
         <p className="mt-2 text-xs text-gray-500">
-          Question {stepNumber} of {stepCount}
+          Step {stepNumber} of {stepCount}
         </p>
       </div>
 

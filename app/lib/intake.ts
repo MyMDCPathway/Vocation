@@ -235,6 +235,7 @@ export const NO_MOBILITY: WorkMobility = {
 export const INTAKE_STEPS = [
   "career",
   "specifics",
+  "profile",
   "location",
   "education",
   "finances",

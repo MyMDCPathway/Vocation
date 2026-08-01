@@ -4,6 +4,81 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## Unreleased — branch `Vocation-2.0`, part 3: the career profile
+
+A screen between "which career" and the questions that build a plan, showing
+what the job actually is before anyone commits years to it: photos, what the
+work looks like day to day, pay, hiring outlook, time to get there, adjacent
+careers, and links worth opening.
+
+It sits **after** any narrowing question, so it describes the specific job they
+settled on — pay for "doctor" before they've said which kind would span a GP
+and a neurosurgeon. Broad careers still get the follow-up question first; that
+machinery already existed and is unchanged.
+
+### Photos come from Wikipedia, not from the model
+
+The model is never asked for an image URL. Two reasons, either sufficient:
+
+1. **It's the hallucination problem in its worst form.** A wrong program URL
+   404s and gets caught. A wrong *image* URL either 404s or — far worse —
+   resolves to a real photograph of something else entirely, and nothing short
+   of looking at it can tell the difference.
+2. **Licensing.** Hotlinking whatever image a model names means publishing
+   someone's copyrighted photo on a page we ship to students.
+
+So photos come from the Wikipedia article's own media, which gives free
+licences with the metadata to attribute them, editorial curation (images in the
+"Marine biology" article were chosen by editors to illustrate marine biology,
+where a raw image search returns whatever matched the words), and no API key or
+new dependency. Attribution is rendered — most are CC BY-SA, which requires it.
+
+The model *is* asked which Wikipedia article to look at, which is a thing it's
+reliably good at. Playing to that split is the whole design.
+
+### Resources are verified, not just listed
+
+Every link the model proposes gets fetched with the same machinery as program
+URLs. Dead ones are dropped rather than falling back — a licensing board has
+nowhere to degrade to — and the page says how many went.
+
+### The prompt is told not to flatter the job
+
+A career page that only lists upsides is worse than useless: the student finds
+out the truth after paying for two years of study. The prompt requires the
+unglamorous parts, and `Competitive` / `Shrinking` are real options that render
+amber and red. In practice it produces things like *"desirable day-shift
+positions at prestigious hospitals are highly competitive, while night shifts,
+rural facilities, and nursing homes struggle to fill spots"* and *"entry-level
+shop jobs pay modestly; the highest-paying work often requires traveling long
+distances."*
+
+### Fixed during development
+
+- **Every career rendered with zero photos** while both Wikimedia requests
+  returned 200. The REST media list spells a file
+  `File:Florence_Nightingale_(H_Hering).jpg` and the Commons query spells the
+  same file `File:Florence Nightingale (H Hering).jpg`, so matching them
+  literally never succeeded. Unit tests used spaces on both sides and passed —
+  only a live run surfaced it.
+- **Gemini's 503 read as a flat error.** "High demand, try later" is retryable
+  and happens often enough to deserve its own message; the profile step now has
+  a **Try again** button rather than stranding people.
+- `1 more didn't and were dropped` — singular/plural.
+- The first photo is above the fold, so it loads eagerly rather than lazily.
+- The progress label said **Question** N of M on a screen that isn't a
+  question. It's **Step** now.
+
+### Notes
+
+- Pay is shown for a named market, labelled on the page. The profile is asked
+  for before the location question, so that's usually the United States; the
+  route already accepts a country code and uses it when one is known. Moving
+  the location question earlier would make pay and demand local from the start.
+- 657 tests (19 added). `fiuCoverage` remains the only failure.
+
+---
+
 ## Unreleased — branch `Vocation-2.0`, part 2: open-world schools
 
 Vocation now plans against **any school in the world**, not only the 53 Florida

@@ -2262,6 +2262,43 @@ hold that shape. Provenance is read from the school record (`source`), not
 stamped onto the payload. If you add a field to catalog responses, expect those
 tests to fail and think about the seed file before you "fix" them.
 
+### Part 3 — the career profile
+
+A read-only screen between the career question and the planning questions:
+photos, day-to-day work, pay, hiring outlook, adjacent careers, resources.
+`/api/career-profile` + `careerPhotos.ts` + `CareerProfileStep.tsx`.
+
+**Never ask the model for an image URL.** This is the one rule of that file. A
+wrong *program* URL 404s and the verifier catches it; a wrong *image* URL
+resolves to a real photograph of something else, and no automated check can
+tell. Photos come from the Wikipedia article's own media list, which is
+editorially curated and freely licensed. The model picks the article title —
+something it's reliably good at — and nothing more.
+
+**Attribution is a legal requirement, not decoration.** Most of these images
+are CC BY-SA, which requires crediting the author and naming the licence. The
+`figcaption` is doing that. Commons stores the author as an HTML fragment, so
+it is stripped to text before rendering.
+
+**The two Wikimedia APIs spell filenames differently** and this already caused
+a silent total failure: `/page/media-list/` returns
+`File:Florence_Nightingale_(H_Hering).jpg`, the Commons `imageinfo` query
+returns `File:Florence Nightingale (H Hering).jpg`, and matching them literally
+never succeeds — so every career rendered with no photos while both requests
+returned 200. Titles are normalised before the join. **The unit tests used
+spaces on both sides and passed**; only running it caught this. Add the
+underscore form to any new fixture.
+
+**The prompt is deliberately unflattering.** A career page that only lists
+upsides is worse than useless — the student discovers the truth after paying
+for two years of study. `Competitive` and `Shrinking` are real demand values
+that render amber and red, and the prompt requires the unglamorous parts. Don't
+"improve" this into marketing copy.
+
+**Resources are dropped, not fallen back.** A program step can degrade to the
+school's course index; a dead licensing-board link has nowhere to go. Rule 7
+applies — it goes, and the count of what went is shown.
+
 ### What's still open
 
 - **No payment or auth**, so "Vocation Plus" is a labelled coming-soon panel.

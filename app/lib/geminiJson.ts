@@ -56,6 +56,20 @@ export async function generateJson<T>(options: {
             "The AI service is receiving too many requests right now. Please wait about 30 seconds and try again.",
         };
       }
+
+      // 503 is Gemini saying "high demand, try later". It happens often enough
+      // in practice to be worth its own message: a flat "returned an error"
+      // reads as broken, when the honest answer is "this will work if you
+      // press it again".
+      if (response.status === 503) {
+        return {
+          ok: false,
+          status: 503,
+          error:
+            "The AI service is busy right now. This usually clears in a few seconds — try again.",
+        };
+      }
+
       return { ok: false, status: 502, error: "The AI service returned an error." };
     }
 
