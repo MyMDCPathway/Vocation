@@ -9,7 +9,11 @@ import { countryName, hasLocalCatalogs } from "@/app/lib/countries";
 import { FLORIDA_SCHOOLS, getSchoolById } from "@/app/lib/floridaSchools";
 import { SCHOOLS_WITH_CATALOG } from "@/app/lib/schoolCatalogs";
 import { distanceMiles, SCHOOL_COORDINATES } from "@/app/lib/geography";
-import { openSchoolId, type SchoolRef } from "@/app/lib/schoolRef";
+import {
+  hasUsableCoordinates,
+  openSchoolId,
+  type SchoolRef,
+} from "@/app/lib/schoolRef";
 
 // Which schools could get this student to this career, from where they live.
 //
@@ -90,6 +94,15 @@ const RESPONSE_SCHEMA = {
             type: "NUMBER",
             description: "Same upper bound converted to USD.",
           },
+          latitude: {
+            type: "NUMBER",
+            description:
+              "Latitude of the main campus, decimal degrees. Used to drop a pin on a map, so a wrong value visibly puts the school in the wrong place. If you are not confident, give the coordinates of the city centre rather than guessing at a campus.",
+          },
+          longitude: {
+            type: "NUMBER",
+            description: "Longitude of the main campus, decimal degrees.",
+          },
           distanceNote: {
             type: "STRING",
             description:
@@ -113,6 +126,8 @@ const RESPONSE_SCHEMA = {
           "currency",
           "annualTuitionUsdLow",
           "annualTuitionUsdHigh",
+          "latitude",
+          "longitude",
           "distanceNote",
           "note",
         ],
@@ -140,6 +155,10 @@ TUITION:
 - Also convert to USD so schools in different countries can be compared.
 - These are estimates and will be labelled as such, but they must be in the right order of magnitude — the difference between a €200/year public university and a $60,000/year private one is the single most useful thing here.
 
+COORDINATES:
+- These drop a pin on a map the student looks at, so an error is immediately visible — a school in the wrong county is obvious, and one in the wrong ocean is worse.
+- Give the main campus if you know it. If you don't, give the centre of the city you named for that school; being a mile off is invisible, being in the wrong country is not.
+
 Return only JSON matching the schema.`;
 
 function catalogSchoolsFor(
@@ -160,6 +179,9 @@ function catalogSchoolsFor(
         kind: school.kind,
         source: "catalog" as const,
         distanceMiles: origin && coords ? distanceMiles(origin, coords) : null,
+        // Hand-compiled in geography.ts, so these are the trustworthy pins.
+        latitude: coords?.lat,
+        longitude: coords?.lng,
         note: "We hold this school's full program catalog, so its plan is built from real programs rather than estimated.",
       } satisfies SchoolRef;
     })
@@ -168,6 +190,74 @@ function catalogSchoolsFor(
       if (b.distanceMiles === null) return -1;
       return a.distanceMiles - b.distanceMiles;
     });
+}
+
+/**
+ * Measure every school from this student, then sort nearest first.
+ *
+ * Distance is computed HERE, at response time, rather than stored — because
+ * the cache key is country/region/city/career and does not include the
+ * student's exact coordinates. Two students in the same city with different
+ * postcodes share a cache entry, and a stored distance would hand the second
+ * one the first one's mileage. The coordinates are the durable fact; the
+ * distance is derived from them per request.
+ *
+ * A school we can't place sorts last rather than to zero, which is where a
+ * missing distance would otherwise land it — the top of a list whose entire
+ * promise is "nearest first".
+ */
+/**
+ * Collapse the same school appearing from both sources.
+ *
+ * The prompt tells the model to skip Florida's public colleges and state
+ * universities because we already hold those, but Barry and the University of
+ * Miami are PRIVATE — so they're in our catalog *and* a reasonable thing for
+ * the model to suggest, and the student saw each of them listed twice with
+ * two pins a few hundred metres apart.
+ *
+ * The catalog copy always wins: its programs are real rather than estimated,
+ * and its coordinates were compiled by hand. Matching is on a normalised name,
+ * because the two sources punctuate differently ("St. Thomas University" vs
+ * "St Thomas University").
+ */
+function dedupeByName(schools: SchoolRef[]): SchoolRef[] {
+  const normalize = (name: string) =>
+    name
+      .toLowerCase()
+      .normalize("NFKD")
+      .replace(/[^a-z0-9]+/g, " ")
+      .replace(/\b(the|university|college|of|at)\b/g, " ")
+      .trim()
+      .replace(/\s+/g, " ");
+
+  const bySchool = new Map<string, SchoolRef>();
+  for (const school of schools) {
+    const key = normalize(school.name) || school.id;
+    const existing = bySchool.get(key);
+    if (!existing) {
+      bySchool.set(key, school);
+      continue;
+    }
+    if (existing.source !== "catalog" && school.source === "catalog") {
+      bySchool.set(key, school);
+    }
+  }
+  return [...bySchool.values()];
+}
+
+function withDistances(
+  schools: SchoolRef[],
+  origin: { lat: number; lng: number } | undefined
+): SchoolRef[] {
+  return dedupeByName(schools)
+    .map((school) => ({
+      ...school,
+      distanceMiles:
+        origin && hasUsableCoordinates(school)
+          ? distanceMiles(origin, { lat: school.latitude, lng: school.longitude })
+          : null,
+    }))
+    .sort((a, b) => (a.distanceMiles ?? Infinity) - (b.distanceMiles ?? Infinity));
 }
 
 /** Coordinates to measure school distances from, or undefined if we have none. */
@@ -238,13 +328,13 @@ export async function POST(request: NextRequest) {
 
     const cached = getCached<SchoolRef[]>(key);
     if (cached) {
-      return NextResponse.json({ schools: [...catalog, ...cached] });
+      return NextResponse.json({ schools: withDistances([...catalog, ...cached], origin) });
     }
 
     const durable = await getDurable<SchoolRef[]>(key);
     if (durable) {
       setCached(key, durable);
-      return NextResponse.json({ schools: [...catalog, ...durable] });
+      return NextResponse.json({ schools: withDistances([...catalog, ...durable], origin) });
     }
 
     const limited = enforceGenerationLimits(request);
@@ -274,7 +364,7 @@ List real institutions in or near ${place || countryName(countryCode)} that coul
       // The catalog half still works when the AI half fails, so a Florida
       // student gets a usable answer rather than an error page.
       if (catalog.length) {
-        return NextResponse.json({ schools: catalog, partial: true });
+        return NextResponse.json({ schools: withDistances(catalog, origin), partial: true });
       }
       return NextResponse.json({ error: result.error }, { status: result.status });
     }
@@ -298,16 +388,34 @@ List real institutions in or near ${place || countryName(countryCode)} that coul
           usdLow: Number(entry.annualTuitionUsdLow) || 0,
           usdHigh: Number(entry.annualTuitionUsdHigh) || 0,
         },
+        latitude: Number(entry.latitude),
+        longitude: Number(entry.longitude),
         distanceMiles: null,
         note: [entry.note, entry.distanceNote].filter(Boolean).join(" · "),
-      }));
+      }))
+      // Drop coordinates that failed validation rather than pinning a school
+      // into the sea, and — now that AI schools carry coordinates at all —
+      // give them a real distance instead of the null they used to get. This
+      // is what makes "nearest first" mean something outside Florida.
+      .map((school) => {
+        const placed = hasUsableCoordinates(school);
+        return {
+          ...school,
+          latitude: placed ? school.latitude : undefined,
+          longitude: placed ? school.longitude : undefined,
+          distanceMiles:
+            placed && origin
+              ? distanceMiles(origin, { lat: school.latitude, lng: school.longitude })
+              : null,
+        };
+      });
 
     if (discovered.length) {
       setCached(key, discovered);
       await setDurable(key, discovered);
     }
 
-    return NextResponse.json({ schools: [...catalog, ...discovered] });
+    return NextResponse.json({ schools: withDistances([...catalog, ...discovered], origin) });
   } catch (error: any) {
     console.error("Error finding schools:", error);
     return NextResponse.json(

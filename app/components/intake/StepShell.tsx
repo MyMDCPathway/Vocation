@@ -17,6 +17,7 @@ export function StepShell({
   help,
   onBack,
   footer,
+  wide,
   children,
 }: {
   stepNumber: number;
@@ -25,15 +26,25 @@ export function StepShell({
   help?: string;
   onBack?: () => void;
   footer?: ReactNode;
+  /**
+   * Widen the column for a step that genuinely needs it.
+   *
+   * Only the schools step sets this: a map beside a list doesn't fit in the
+   * reading-width column the questions use. The chrome — progress bar,
+   * heading, back button — widens with it so the step still reads as the same
+   * frame rather than a different page.
+   */
+  wide?: boolean;
   children: ReactNode;
 }) {
   const percent = Math.round((stepNumber / stepCount) * 100);
+  const column = wide ? "max-w-6xl" : "max-w-3xl";
 
   return (
     <div className="min-h-[calc(100vh-73px)] flex flex-col">
       {/* Progress. aria-hidden on the bar itself because the label below it
           already says the same thing to a screen reader. */}
-      <div className="w-full max-w-3xl mx-auto px-6 pt-8">
+      <div className={`w-full ${column} mx-auto px-6 pt-8`}>
         <div className="h-1 w-full rounded-full bg-gray-200" aria-hidden="true">
           <div
             className="h-1 rounded-full bg-school-600 transition-all duration-500 ease-out"
@@ -48,7 +59,7 @@ export function StepShell({
         </p>
       </div>
 
-      <div className="flex-1 w-full max-w-3xl mx-auto px-6 py-10 md:py-14">
+      <div className={`flex-1 w-full ${column} mx-auto px-6 py-10 md:py-14`}>
         <h1 className="text-3xl md:text-4xl font-bold text-gray-900 leading-tight">
           {question}
         </h1>
@@ -57,7 +68,7 @@ export function StepShell({
         <div className="mt-8">{children}</div>
       </div>
 
-      <div className="w-full max-w-3xl mx-auto px-6 pb-10 flex items-center gap-4">
+      <div className={`w-full ${column} mx-auto px-6 pb-10 flex items-center gap-4`}>
         {onBack && (
           <button
             type="button"

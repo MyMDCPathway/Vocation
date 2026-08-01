@@ -4,6 +4,78 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## Unreleased — branch `Vocation-2.0`, part 6: the schools map
+
+The schools step is now a map beside a nearest-first list. Hovering a row
+lifts its pin and pans to it, clicking either selects, and the search box
+finds schools we never suggested.
+
+### The first dependency in a while, and why
+
+`leaflet` — the project's fifth runtime dependency. HANDOFF rule 8 says don't
+add one "for something small", and this is the exception rather than a breach:
+a pannable, zoomable tile map is not small. Hand-rolling it means tile
+arithmetic, pointer-driven pan, wheel zoom, and marker projection — which is
+reimplementing Leaflet, badly. It needs no API key and no account, and
+OpenStreetMap's tiles are free with attribution (which is rendered — it's
+required, not optional). Google Maps and Mapbox both want a billing account.
+
+Leaflet is dynamically imported, so it stays in its own chunk rather than the
+initial bundle. The home page goes 5.5 kB → 14.7 kB (first load 105 → 111 kB).
+
+### Schools now have coordinates
+
+Catalog schools take them from the hand-compiled table in `geography.ts`;
+AI-discovered schools get them from the discovery call, validated by
+`hasUsableCoordinates` before anything is pinned. **(0, 0) is rejected** — it's
+in the Gulf of Guinea, and a model filling the field because the schema asked
+looks exactly like that. A school we can't place is still listed, just without
+a pin, and the map says how many.
+
+That also fixed a quieter thing: AI-discovered schools used to carry
+`distanceMiles: null` always, so "nearest first" only meant anything in
+Florida. They're now measured like everything else, and **distance is computed
+per request rather than stored** — the cache key is country/region/city/career
+and doesn't include the student's exact coordinates, so a stored distance would
+hand the second student in a city the first one's mileage.
+
+### Search finds any school, not just our suggestions
+
+Typing filters the loaded list; when nothing matches, **Find it** looks that
+school up anywhere in the world via the new `/api/school-lookup` and folds it
+into both list and map. It returns up to three candidates when a name is
+genuinely ambiguous — "Cambridge" is two famous universities on two continents
+— rather than guessing. Verified: searching Harvard from Miami added it at
+1,256 mi with its real tuition, and the map refit to include it.
+
+### Fixed during development
+
+- **Every pin was missing.** Leaflet is imported dynamically, so on the render
+  where the schools arrived the map didn't exist yet; the marker effect
+  returned early and — because its dependency (the school list) had already
+  settled — never ran again. The result was a fully working, tiled, attributed
+  map with nothing on it. Now gated on a `ready` flag set when the map is
+  built.
+- **Schools appeared twice.** The discovery prompt excludes Florida's *public*
+  colleges because we hold those, but Barry and the University of Miami are
+  private — so they came from our catalog *and* the model, and were listed
+  twice with two pins a few hundred metres apart. Deduped on a normalised
+  name, with the catalog copy always winning.
+- Markers use `divIcon` (plain HTML), never Leaflet's default image icons —
+  those resolve through relative paths that bundlers rewrite, which is the
+  classic "popups work, markers invisible" bug.
+
+### Notes
+
+- The map fits the schools rather than hardcoding the United States. A US
+  student gets a US map because that's where their schools are; the Edinburgh
+  student from part 2 gets Scotland, without the map needing to know which.
+- Scroll-wheel zoom is off by default. The map sits in a scrolling page, and
+  hijacking the wheel means someone scrolling past it gets zoomed instead.
+- 693 tests (14 added). `fiuCoverage` remains the only failure.
+
+---
+
 ## Unreleased — branch `Vocation-2.0`, part 5: one location question at a time
 
 The location step asked for country, region, city, and postal code all on one

@@ -60,8 +60,37 @@ export interface SchoolRef {
   tuition?: TuitionEstimate;
   /** Straight-line miles from the student, when we can compute it. */
   distanceMiles?: number | null;
+  /**
+   * Main-campus coordinates, for the map pin.
+   *
+   * Catalog schools take these from SCHOOL_COORDINATES, which was compiled by
+   * hand. AI-discovered schools get them from the discovery call, validated by
+   * `hasUsableCoordinates` before they're trusted — a school with no usable
+   * pair is listed without a pin rather than dropped, because being unable to
+   * place it on a map says nothing about whether it's a good school.
+   */
+  latitude?: number;
+  longitude?: number;
   /** One line on why this school is relevant to the career. */
   note?: string;
+}
+
+/**
+ * Whether a school can be put on a map.
+ *
+ * Null Island (0, 0) is the giveaway for a model that filled the field in
+ * because the schema asked rather than because it knew — it's in the Gulf of
+ * Guinea, and no university is there. Treating it as missing costs one pin;
+ * trusting it puts a school in the ocean.
+ */
+export function hasUsableCoordinates(
+  school: Pick<SchoolRef, "latitude" | "longitude">
+): school is SchoolRef & { latitude: number; longitude: number } {
+  const { latitude, longitude } = school;
+  if (typeof latitude !== "number" || typeof longitude !== "number") return false;
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return false;
+  if (latitude === 0 && longitude === 0) return false;
+  return latitude >= -90 && latitude <= 90 && longitude >= -180 && longitude <= 180;
 }
 
 export const OPEN_SCHOOL_PREFIX = "open:";

@@ -2299,6 +2299,50 @@ that render amber and red, and the prompt requires the unglamorous parts. Don't
 school's course index; a dead licensing-board link has nowhere to go. Rule 7
 applies — it goes, and the count of what went is shown.
 
+### Part 6 — the schools map
+
+`SchoolMap.tsx` + `leaflet`. Read this before touching either.
+
+**Leaflet is the one justified dependency.** Rule 8 is about not adding a
+package for something small; an interactive tile map is not small, and doing
+it by hand is reimplementing Leaflet. No API key, no account, OSM tiles free
+with attribution. **The attribution control is required by OSM's tile policy —
+do not remove it.**
+
+**Three Leaflet-in-Next gotchas, all already handled. Don't undo them:**
+
+1. **Import it dynamically.** Leaflet reads `window` at module evaluation, so a
+   top-level `import` crashes the server render.
+2. **Import its CSS statically.** Next only bundles statically-imported CSS; a
+   dynamic `import()` of a `.css` file silently does nothing, and the symptom
+   is a heap of unpositioned tiles rather than an error.
+3. **Never use the default marker icons.** They're PNGs referenced by relative
+   paths that bundlers rewrite and break — the classic "popups work, markers
+   invisible" bug. Pins are `divIcon` (plain HTML) throughout.
+
+**The `ready` flag is load-bearing.** Because Leaflet loads asynchronously, the
+map does not exist on the render where the schools arrive. Without `ready` in
+the deps, the marker effect ran once, found no map, returned early, and never
+re-ran — its dependency (the school list) had already settled. The result was a
+fully working, tiled, attributed map with zero pins. If you add an effect that
+touches the map, put `ready` in its dependency array.
+
+**(0, 0) is not a coordinate.** `hasUsableCoordinates` rejects Null Island
+because it's the signature of a model filling a required field it didn't know.
+A school that fails validation is still listed, just unpinned — being
+unplaceable says nothing about whether it's a good school.
+
+**Distance is computed per request, never stored.** The find-schools cache key
+is country/region/city/career and does NOT include the student's coordinates,
+so two students in one city share an entry. A stored distance would give the
+second one the first one's mileage. Coordinates are the durable fact.
+
+**Catalog and AI sources both return the same private schools.** The prompt
+excludes Florida's *public* institutions because we hold them, but Barry and UM
+are private and came back from both — listed twice, pinned twice. `dedupeByName`
+normalises and lets the catalog copy win. If you add another catalog region,
+expect the same collision.
+
 ### Part 5 — location is four screens, not one
 
 `LocationStep.tsx` renders one of `"country" | "region" | "city" | "postal"`
