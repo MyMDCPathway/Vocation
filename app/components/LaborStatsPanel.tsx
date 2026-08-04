@@ -66,16 +66,16 @@ export function LaborStatsPanel({ stats }: { stats: LaborStats }) {
   const position = wageScale(areas);
 
   return (
-    <section className="rounded-2xl border border-black/10 bg-white p-6">
+    <section className="rounded-xl border border-outline-variant bg-surface-lowest p-6">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <h2 className="text-lg font-bold text-ink">What it actually pays</h2>
-        <p className="text-xs text-ink-faint">
+        <h2 className="text-lg font-bold text-primary">What it actually pays</h2>
+        <p className="text-xs text-outline">
           US Bureau of Labor Statistics, {stats.year}
         </p>
       </div>
-      <p className="mt-1 text-sm text-ink-soft">
+      <p className="mt-1 text-sm text-on-surface-variant">
         Survey figures for{" "}
-        <span className="font-medium text-ink">{stats.occupation.title}</span> — annual
+        <span className="font-medium text-on-surface">{stats.occupation.title}</span> — annual
         wages, not model estimates.
       </p>
 
@@ -83,15 +83,15 @@ export function LaborStatsPanel({ stats }: { stats: LaborStats }) {
       {lead?.wages.median != null && (
         <div className="mt-5 flex flex-wrap items-end gap-x-6 gap-y-2">
           <div>
-            <p className="text-4xl font-bold tracking-tight text-ink">
+            <p className="text-4xl font-bold tracking-tight text-primary">
               {money.format(lead.wages.median)}
             </p>
-            <p className="text-sm text-ink-soft">
+            <p className="text-sm text-on-surface-variant">
               median · {lead.name}
             </p>
           </div>
           {lead.wages.p10 !== null && lead.wages.p90 !== null && (
-            <p className="pb-1 text-sm text-ink-faint">
+            <p className="pb-1 text-sm text-outline">
               Most earn between {money.format(lead.wages.p10)} and{" "}
               {money.format(lead.wages.p90)}
             </p>
@@ -105,7 +105,7 @@ export function LaborStatsPanel({ stats }: { stats: LaborStats }) {
         ))}
       </div>
 
-      <p className="mt-5 text-xs leading-relaxed text-ink-faint">
+      <p className="mt-5 text-xs leading-relaxed text-outline">
         The bar spans the 10th to the 90th percentile; the notch is the median.
         The bottom tenth and top tenth of earners fall outside it.
         {/* The metro is asked for on the next screen, so this panel is
@@ -141,25 +141,27 @@ function WageRow({
   return (
     <div>
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
-        <span className="font-medium text-ink">
+        <span className="font-medium text-on-surface">
           {area.name}
-          <span className="ml-2 text-xs font-normal text-ink-faint">
+          <span className="ml-2 text-xs font-normal text-outline">
             {areaKind(area)}
           </span>
         </span>
         {median !== null && (
-          <span className="font-semibold text-ink">{money.format(median)}</span>
+          <span className="font-semibold text-primary">{money.format(median)}</span>
         )}
       </div>
 
       {hasBar && (
         <div className="relative mt-2 h-7">
           {/* Track */}
-          <div className="absolute inset-x-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-sand-deep" />
+          <div className="absolute inset-x-0 top-1/2 h-2 -translate-y-1/2 rounded-full bg-surface-container" />
 
-          {/* 10th-90th */}
+          {/* 10th-90th — same hue as the inner band below, just lighter: the
+              two are meant to read as one distribution coming into focus, not
+              as two different categories. */}
           <div
-            className="absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-pop-blue"
+            className="absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-primary-fixed"
             style={{
               left: `${position(p10)}%`,
               width: `${Math.max(position(p90) - position(p10), 0.5)}%`,
@@ -169,7 +171,7 @@ function WageRow({
           {/* 25th-75th: where half the field actually sits. */}
           {p25 !== null && p75 !== null && (
             <div
-              className="absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-pop-purple"
+              className="absolute top-1/2 h-2 -translate-y-1/2 rounded-full bg-primary"
               style={{
                 left: `${position(p25)}%`,
                 width: `${Math.max(position(p75) - position(p25), 0.5)}%`,
@@ -180,7 +182,7 @@ function WageRow({
           {/* Median notch */}
           {median !== null && (
             <div
-              className="absolute top-1/2 h-5 w-[3px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-ink"
+              className="absolute top-1/2 h-5 w-[3px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-on-surface"
               style={{ left: `${position(median)}%` }}
             />
           )}
@@ -188,14 +190,14 @@ function WageRow({
       )}
 
       {hasBar && (
-        <div className="mt-1 flex justify-between text-xs text-ink-faint">
+        <div className="mt-1 flex justify-between text-xs text-outline">
           <span>{money.format(p10)}</span>
           <span>{money.format(p90)}</span>
         </div>
       )}
 
       {area.employment !== null && (
-        <p className="mt-1 text-xs text-ink-faint">
+        <p className="mt-1 text-xs text-outline">
           {count.format(area.employment)} people hold this job here
           {area.perThousand !== null && (
             <> · {area.perThousand.toFixed(1)} of every 1,000 jobs</>
@@ -237,14 +239,14 @@ function Concentration({ stats }: { stats: LaborStats }) {
   }
 
   return (
-    <div className="mt-5 rounded-xl bg-sand p-4">
+    <div className="mt-5 rounded-xl bg-surface p-4">
       <div className="flex items-baseline gap-3">
-        <span className="text-2xl font-bold text-ink">{quotient.toFixed(2)}×</span>
-        <span className="text-sm font-medium text-ink-soft">
+        <span className="text-2xl font-bold text-primary">{quotient.toFixed(2)}×</span>
+        <span className="text-sm font-medium text-on-surface-variant">
           how concentrated this job is near you
         </span>
       </div>
-      <p className="mt-1.5 text-sm leading-relaxed text-ink-soft">{verdict}</p>
+      <p className="mt-1.5 text-sm leading-relaxed text-on-surface-variant">{verdict}</p>
     </div>
   );
 }
@@ -266,7 +268,7 @@ export function NoStatsNote({
   market: string;
 }) {
   return (
-    <p className="text-xs leading-relaxed text-ink-faint">
+    <p className="text-xs leading-relaxed text-outline">
       The pay figures above are estimates.{" "}
       {status === "outside-us" && (
         <>

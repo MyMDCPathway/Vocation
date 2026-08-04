@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Confetti, QUIET_BLOBS } from "@/app/components/Confetti";
 
 /**
  * The frame every intake question renders inside.
@@ -14,6 +13,11 @@ import { Confetti, QUIET_BLOBS } from "@/app/components/Confetti";
  * There is no nav bar anywhere in the intake. The wordmark below is the only
  * branding, centred, because the page has exactly one job and a row of links
  * is an invitation to leave.
+ *
+ * No decorative shapes here (there were, in an earlier world — DESIGN.md now
+ * lists confetti as an anti-reference). The friendliness in this world comes
+ * from the blue-tinted canvas and the round geometry, not from scattered
+ * illustration.
  */
 export function StepShell({
   stepNumber,
@@ -73,16 +77,14 @@ export function StepShell({
   const column = wide || rail ? "max-w-6xl" : "max-w-3xl";
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden">
-      <Confetti blobs={hero ? undefined : QUIET_BLOBS} />
-
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-surface">
       {/* Pinned to the PAGE corner, not the reading column — a locale switcher
           that floats 280px in from the edge doesn't read as chrome, it reads
           as part of the form. Outside the centred column entirely, so the
           wordmark stays optically centred rather than being pushed left by
           half the chip's width.
 
-          z-30 clears the z-10 content: the popover has to open over the
+          z-30 clears the content below: the popover has to open over the
           heading beneath it. */}
       {corner && (
         <div className="absolute right-5 top-8 z-30 md:right-8 md:top-11">
@@ -90,11 +92,9 @@ export function StepShell({
         </div>
       )}
 
-      {/* z-10 across the content: the confetti sits at z-0 and must never be
-          able to take a click meant for the form. */}
       <div className={`relative z-10 mx-auto w-full ${column} px-6 pt-10 md:pt-14`}>
         <p className="text-center">
-          <span className="display text-[26px] font-black tracking-[-0.045em] text-ink">
+          <span className="text-lg font-bold tracking-tight text-primary">
             Vocation
           </span>
         </p>
@@ -104,13 +104,13 @@ export function StepShell({
             typed anything. */}
         {!hero && (
           <div className="mx-auto mt-8 max-w-md">
-            <div className="h-1.5 w-full rounded-full bg-sand-deep" aria-hidden="true">
+            <div className="h-1.5 w-full rounded-full bg-surface-container" aria-hidden="true">
               <div
-                className="h-1.5 rounded-full bg-ink transition-all duration-500 ease-out"
+                className="h-1.5 rounded-full bg-primary transition-all duration-500 ease-out"
                 style={{ width: `${percent}%` }}
               />
             </div>
-            <p className="mt-2 text-center text-xs font-medium text-ink-faint">
+            <p className="mt-2 text-center text-xs font-medium text-outline">
               Step {stepNumber} of {stepCount}
             </p>
           </div>
@@ -133,15 +133,15 @@ export function StepShell({
             <h1
               className={
                 hero
-                  ? "text-[44px] font-black leading-[1.02] text-ink sm:text-6xl md:text-7xl"
-                  : "text-3xl font-extrabold text-ink md:text-[42px]"
+                  ? "text-2xl font-extrabold leading-[1.15] tracking-[-0.02em] text-primary sm:text-5xl md:text-6xl"
+                  : "text-2xl font-bold leading-tight tracking-[-0.01em] text-primary md:text-[32px]"
               }
             >
               {question}
             </h1>
             {help && (
               <p
-                className={`mt-4 text-ink-soft ${
+                className={`mt-4 text-on-surface-variant ${
                   hero ? "mx-auto max-w-xl text-lg md:text-xl" : "md:text-lg"
                 }`}
               >
@@ -173,7 +173,7 @@ export function StepShell({
             <button
               type="button"
               onClick={onBack}
-              className="text-sm font-medium text-ink-faint transition-colors hover:text-ink"
+              className="text-sm font-medium text-outline transition-colors hover:text-primary"
             >
               ← Back
             </button>
@@ -188,9 +188,10 @@ export function StepShell({
 /**
  * A selectable answer card.
  *
- * `selected` drives a solid ink border and a tinted fill rather than a colour
- * wash, so a multi-select screen reads as "these three are on" at a glance
- * without the page turning into a block of colour.
+ * `selected` used to mean a hard offset shadow (DESIGN.md's previous world).
+ * This world has no such rule, so selection reads through a solid blue border
+ * plus a soft blue-tinted fill instead — still unmistakable at a glance across
+ * a multi-select screen, without a shadow vocabulary this system doesn't have.
  */
 export function OptionCard({
   label,
@@ -210,18 +211,20 @@ export function OptionCard({
       type="button"
       onClick={onClick}
       aria-pressed={selected}
-      className={`w-full rounded-2xl border-2 p-5 text-left transition-all duration-150 ${
+      className={`w-full rounded-lg border-2 p-5 text-left transition-all duration-150 ${
         selected
-          ? "border-ink bg-white shadow-[0_6px_0_0_var(--ink)]"
-          : "border-transparent bg-white shadow-sm hover:-translate-y-0.5 hover:shadow-md"
+          ? "border-primary bg-primary-fixed shadow-card"
+          : "border-transparent bg-surface-lowest shadow-card hover:-translate-y-0.5 hover:shadow-lift"
       }`}
     >
-      <span className="block font-bold text-ink">{label}</span>
+      <span className="block font-bold text-on-surface">{label}</span>
       {detail && (
-        <span className="mt-1 block text-sm leading-relaxed text-ink-soft">{detail}</span>
+        <span className="mt-1 block text-sm leading-relaxed text-on-surface-variant">
+          {detail}
+        </span>
       )}
       {meta && (
-        <span className="mt-3 inline-block rounded-full bg-sand-deep px-3 py-1 text-xs font-semibold text-ink-soft">
+        <span className="mt-3 inline-block rounded-full bg-surface-container px-3 py-1 text-xs font-semibold text-on-surface-variant">
           {meta}
         </span>
       )}
@@ -229,7 +232,7 @@ export function OptionCard({
   );
 }
 
-/** The primary "move on" button. Solid ink, generous radius. */
+/** The primary "move on" button. Solid blue, fully round. */
 export function ContinueButton({
   onClick,
   disabled,
@@ -244,7 +247,7 @@ export function ContinueButton({
       type="button"
       onClick={onClick}
       disabled={disabled}
-      className="rounded-xl bg-ink px-8 py-4 text-base font-bold text-white transition-all hover:-translate-y-0.5 hover:shadow-lg disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-ink-faint/40 disabled:shadow-none"
+      className="rounded-full bg-primary px-8 py-4 text-base font-bold text-on-primary transition-all hover:-translate-y-0.5 hover:bg-primary-container hover:shadow-lift disabled:translate-y-0 disabled:cursor-not-allowed disabled:bg-outline-variant disabled:text-outline disabled:shadow-none"
     >
       {label}
     </button>

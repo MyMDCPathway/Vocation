@@ -52,9 +52,9 @@ function GitHubIcon() {
 
 export default function MeetTheTeam() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-surface">
       <div className="max-w-4xl mx-auto px-6 py-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-8">Meet the Team</h1>
+        <h1 className="text-4xl font-bold text-on-surface mb-8">Meet the Team</h1>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-8 mb-10">
           {TEAM.map((member) => (
@@ -64,14 +64,14 @@ export default function MeetTheTeam() {
                 alt={member.name}
                 className="w-40 h-40 rounded-full object-cover shadow-md mb-4"
               />
-              <p className="font-semibold text-gray-900">{member.name}</p>
+              <p className="font-semibold text-on-surface">{member.name}</p>
               <div className="mt-2 flex items-center gap-3">
                 <a
                   href={member.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={`${member.name} on LinkedIn`}
-                  className="text-gray-500 hover:text-school-600 transition-colors"
+                  className="text-outline hover:text-primary transition-colors"
                 >
                   <LinkedInIcon />
                 </a>
@@ -80,7 +80,7 @@ export default function MeetTheTeam() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={`${member.name} on GitHub`}
-                  className="text-gray-500 hover:text-school-600 transition-colors"
+                  className="text-outline hover:text-primary transition-colors"
                 >
                   <GitHubIcon />
                 </a>
@@ -89,7 +89,7 @@ export default function MeetTheTeam() {
           ))}
         </div>
 
-        <div className="prose prose-gray max-w-none text-gray-700">
+        <div className="prose prose-slate max-w-none text-on-surface-variant">
           <p>
             Chris, Sean and Gerald came together to create Vocation for the 2025
             SharkByte Hackathon. Together they built an app that helps students
@@ -104,7 +104,7 @@ export default function MeetTheTeam() {
         <div className="mt-12">
           <a
             href="/"
-            className="text-school-600 hover:text-school-700 font-medium"
+            className="text-primary hover:text-primary-container font-medium"
           >
             ← Back to Vocation
           </a>

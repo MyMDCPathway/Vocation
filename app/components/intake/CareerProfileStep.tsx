@@ -154,20 +154,20 @@ export function CareerProfileStep({
     >
       {loading && (
         <div className="space-y-4" aria-live="polite">
-          <div className="h-48 animate-pulse rounded-2xl bg-sand-deep" />
-          <div className="h-4 w-3/4 animate-pulse rounded bg-sand-deep" />
-          <div className="h-4 w-1/2 animate-pulse rounded bg-sand-deep" />
+          <div className="h-48 animate-pulse rounded-xl bg-surface-container" />
+          <div className="h-4 w-3/4 animate-pulse rounded bg-surface-container" />
+          <div className="h-4 w-1/2 animate-pulse rounded bg-surface-container" />
         </div>
       )}
 
       {error && !loading && (
-        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
           <p className="text-sm text-amber-900">{error}</p>
           <div className="mt-3 flex flex-wrap items-center gap-3">
             <button
               type="button"
               onClick={() => setAttempt((n) => n + 1)}
-              className="rounded-xl bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
+              className="rounded-full bg-amber-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-amber-700"
             >
               Try again
             </button>
@@ -182,20 +182,20 @@ export function CareerProfileStep({
         <div className="space-y-8">
           <Photos profile={profile} />
 
-          <p className="text-lg leading-relaxed text-ink">{profile.summary}</p>
+          <p className="text-lg leading-relaxed text-on-surface">{profile.summary}</p>
 
           {/* The three numbers that decide whether to keep reading. */}
           <div className="grid gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl border border-black/10 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint">
+            <div className="rounded-xl border border-outline-variant bg-surface-lowest p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-outline">
                 Typical pay
               </p>
               {localWage !== null ? (
                 <>
-                  <p className="mt-1 text-2xl font-bold text-ink">
+                  <p className="mt-1 text-2xl font-bold text-primary">
                     {formatPay(localWage, "USD")}
                   </p>
-                  <p className="mt-0.5 text-xs text-ink-faint">
+                  <p className="mt-0.5 text-xs text-outline">
                     median · {localWageArea?.name}
                   </p>
                   <p className="mt-1 text-[11px] font-medium uppercase tracking-wide text-green-700">
@@ -204,23 +204,23 @@ export function CareerProfileStep({
                 </>
               ) : (
                 <>
-                  <p className="mt-1 text-2xl font-bold text-ink">
+                  <p className="mt-1 text-2xl font-bold text-primary">
                     {formatPay(profile.pay.median, profile.pay.currency)}
                   </p>
-                  <p className="mt-0.5 text-xs text-ink-faint">
+                  <p className="mt-0.5 text-xs text-outline">
                     {formatPay(profile.pay.low, profile.pay.currency)} –{" "}
                     {formatPay(profile.pay.high, profile.pay.currency)} ·{" "}
                     {profile.pay.market}
                   </p>
-                  <p className="mt-1 text-[11px] font-medium uppercase tracking-wide text-ink-faint">
+                  <p className="mt-1 text-[11px] font-medium uppercase tracking-wide text-outline">
                     Estimate
                   </p>
                 </>
               )}
             </div>
 
-            <div className="rounded-2xl border border-black/10 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint">
+            <div className="rounded-xl border border-outline-variant bg-surface-lowest p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-outline">
                 Hiring
               </p>
               <span
@@ -231,7 +231,7 @@ export function CareerProfileStep({
                 {profile.demand.level}
               </span>
               {profile.stats?.national.employment != null && (
-                <p className="mt-2 text-xs text-ink-faint">
+                <p className="mt-2 text-xs text-outline">
                   {new Intl.NumberFormat("en-US").format(
                     profile.stats.national.employment
                   )}{" "}
@@ -240,26 +240,26 @@ export function CareerProfileStep({
               )}
             </div>
 
-            <div className="rounded-2xl border border-black/10 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-ink-faint">
+            <div className="rounded-xl border border-outline-variant bg-surface-lowest p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-outline">
                 Time to get there
               </p>
-              <p className="mt-1 text-2xl font-bold text-ink">{profile.timeToEntry}</p>
-              <p className="mt-0.5 text-xs text-ink-faint">from where most people start</p>
+              <p className="mt-1 text-2xl font-bold text-primary">{profile.timeToEntry}</p>
+              <p className="mt-0.5 text-xs text-outline">from where most people start</p>
             </div>
           </div>
 
           {profile.demand.detail && (
-            <p className="-mt-4 text-sm text-ink-soft">{profile.demand.detail}</p>
+            <p className="-mt-4 text-sm text-on-surface-variant">{profile.demand.detail}</p>
           )}
 
           {/* The measured half of the page. */}
           {profile.stats ? (
             <LaborStatsPanel stats={profile.stats} />
           ) : (
-            <div className="rounded-2xl border border-black/10 bg-white p-5">
-              <p className="text-sm text-ink-soft">{profile.pay.note}</p>
-              <div className="mt-3 border-t border-black/5 pt-3">
+            <div className="rounded-xl border border-outline-variant bg-surface-lowest p-5">
+              <p className="text-sm text-on-surface-variant">{profile.pay.note}</p>
+              <div className="mt-3 border-t border-outline-variant/50 pt-3">
                 <NoStatsNote
                   status={profile.statsStatus ?? "unmatched"}
                   market={profile.pay.market}
@@ -269,18 +269,18 @@ export function CareerProfileStep({
           )}
 
           {profile.stats && profile.pay.note && (
-            <p className="-mt-4 text-sm text-ink-soft">{profile.pay.note}</p>
+            <p className="-mt-4 text-sm text-on-surface-variant">{profile.pay.note}</p>
           )}
 
           {profile.dayToDay.length > 0 && (
             <section>
-              <h2 className="text-lg font-bold text-ink">What the work looks like</h2>
+              <h2 className="text-lg font-bold text-primary">What the work looks like</h2>
               <ul className="mt-3 space-y-2">
                 {profile.dayToDay.map((item) => (
-                  <li key={item} className="flex gap-3 text-ink-soft">
+                  <li key={item} className="flex gap-3 text-on-surface-variant">
                     <span
                       aria-hidden="true"
-                      className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-ink"
+                      className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-primary"
                     />
                     <span>{item}</span>
                   </li>
@@ -294,18 +294,18 @@ export function CareerProfileStep({
 
           {profile.relatedCareers.length > 0 && (
             <section>
-              <h2 className="text-lg font-bold text-ink">If this isn&apos;t quite it</h2>
+              <h2 className="text-lg font-bold text-primary">If this isn&apos;t quite it</h2>
               <div className="mt-3 flex flex-wrap gap-2">
                 {profile.relatedCareers.map((related) => (
                   <span
                     key={related}
-                    className="rounded-full bg-white px-3 py-1.5 text-sm text-ink-soft ring-1 ring-black/10"
+                    className="rounded-full bg-surface-lowest px-3 py-1.5 text-sm text-on-surface-variant ring-1 ring-black/10"
                   >
                     {related}
                   </span>
                 ))}
               </div>
-              <p className="mt-2 text-xs text-ink-faint">
+              <p className="mt-2 text-xs text-outline">
                 Go back a step to plan for one of these instead.
               </p>
             </section>
@@ -331,30 +331,30 @@ function TypicalPath({ profile }: { profile: CareerProfile }) {
   return (
     <section>
       <div className="flex flex-wrap items-baseline justify-between gap-x-4">
-        <h2 className="text-lg font-bold text-ink">How people actually get in</h2>
-        <p className="text-sm text-ink-faint">{profile.timeToEntry} end to end</p>
+        <h2 className="text-lg font-bold text-primary">How people actually get in</h2>
+        <p className="text-sm text-outline">{profile.timeToEntry} end to end</p>
       </div>
 
       <ol className="mt-4 space-y-3">
         {profile.typicalPath.map((stage, index) => (
           <li
             key={`${stage.label}-${index}`}
-            className="flex gap-4 rounded-2xl border border-black/10 bg-white p-4"
+            className="flex gap-4 rounded-xl border border-outline-variant bg-surface-lowest p-4"
           >
             <span
               aria-hidden="true"
-              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-sand-deep text-sm font-bold text-ink"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-container text-sm font-bold text-primary"
             >
               {index + 1}
             </span>
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                <h3 className="font-semibold text-ink">{stage.label}</h3>
-                <span className="text-sm font-medium text-ink-faint">
+                <h3 className="font-semibold text-primary">{stage.label}</h3>
+                <span className="text-sm font-medium text-outline">
                   {stage.duration}
                 </span>
               </div>
-              <p className="mt-1 text-sm leading-relaxed text-ink-soft">
+              <p className="mt-1 text-sm leading-relaxed text-on-surface-variant">
                 {stage.detail}
               </p>
             </div>
@@ -363,7 +363,7 @@ function TypicalPath({ profile }: { profile: CareerProfile }) {
       </ol>
 
       {profile.entryRoute && (
-        <p className="mt-3 text-sm text-ink-soft">{profile.entryRoute}</p>
+        <p className="mt-3 text-sm text-on-surface-variant">{profile.entryRoute}</p>
       )}
     </section>
   );
@@ -382,8 +382,8 @@ function Voices({ profile }: { profile: CareerProfile }) {
 
   return (
     <section>
-      <h2 className="text-lg font-bold text-ink">What people in the job say</h2>
-      <p className="mt-1 text-sm text-ink-faint">
+      <h2 className="text-lg font-bold text-primary">What people in the job say</h2>
+      <p className="mt-1 text-sm text-outline">
         The themes that come up again and again when people who do this work
         talk about it — summarised, not quoted.
       </p>
@@ -397,9 +397,9 @@ function Voices({ profile }: { profile: CareerProfile }) {
       )}
 
       {profile.venues.length > 0 && (
-        <div className="mt-5 rounded-2xl bg-sand-deep p-5">
-          <h3 className="font-semibold text-ink">Go and read it first-hand</h3>
-          <p className="mt-1 text-sm leading-relaxed text-ink-soft">
+        <div className="mt-5 rounded-xl bg-surface-container p-5">
+          <h3 className="font-semibold text-primary">Go and read it first-hand</h3>
+          <p className="mt-1 text-sm leading-relaxed text-on-surface-variant">
             We won&apos;t republish other people&apos;s reviews, and a summary is
             no substitute for an hour spent reading what practitioners argue
             about. These open a search for this job on each site.
@@ -412,7 +412,7 @@ function Voices({ profile }: { profile: CareerProfile }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 title={venue.detail}
-                className="rounded-xl bg-white px-4 py-2 text-sm font-semibold text-ink ring-1 ring-black/10 transition-all hover:ring-ink/40"
+                className="rounded-full bg-surface-lowest px-4 py-2 text-sm font-semibold text-primary ring-1 ring-black/10 transition-all hover:ring-primary/40"
               >
                 {venue.label} →
               </a>
@@ -428,15 +428,15 @@ function VoiceCard({ voice }: { voice: CareerVoice }) {
   const style = VOICE_STYLES[voice.tone] ?? VOICE_STYLES.tradeoff;
 
   return (
-    <div className={`rounded-2xl bg-white p-4 ring-1 ${style.ring}`}>
+    <div className={`rounded-xl bg-surface-lowest p-4 ring-1 ${style.ring}`}>
       <div className="flex items-center gap-2">
         <span aria-hidden="true" className={`h-2 w-2 rounded-full ${style.dot}`} />
-        <span className="text-xs font-semibold uppercase tracking-wide text-ink-faint">
+        <span className="text-xs font-semibold uppercase tracking-wide text-outline">
           {style.label}
         </span>
       </div>
-      <h3 className="mt-1.5 font-semibold text-ink">{voice.theme}</h3>
-      <p className="mt-1 text-sm leading-relaxed text-ink-soft">{voice.detail}</p>
+      <h3 className="mt-1.5 font-semibold text-primary">{voice.theme}</h3>
+      <p className="mt-1 text-sm leading-relaxed text-on-surface-variant">{voice.detail}</p>
     </div>
   );
 }
@@ -466,7 +466,7 @@ function Photos({ profile }: { profile: CareerProfile }) {
             // rest can wait until they're scrolled to.
             loading={index === 0 ? "eager" : "lazy"}
             onError={() => setBroken((b) => ({ ...b, [photo.src]: true }))}
-            className={`w-full rounded-2xl bg-sand-deep object-cover ${
+            className={`w-full rounded-xl bg-surface-container object-cover ${
               usable.length === 1 ? "max-h-80" : "h-40"
             }`}
           />
@@ -474,7 +474,7 @@ function Photos({ profile }: { profile: CareerProfile }) {
       </div>
       {/* Attribution isn't optional — most of these are CC BY-SA, which
           requires crediting the author and naming the licence. */}
-      <figcaption className="mt-2 text-xs leading-relaxed text-ink-faint">
+      <figcaption className="mt-2 text-xs leading-relaxed text-outline">
         {usable.map((photo, index) => (
           <span key={photo.src}>
             {index > 0 && " · "}
@@ -482,7 +482,7 @@ function Photos({ profile }: { profile: CareerProfile }) {
               href={photo.descriptionUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-ink-soft hover:underline"
+              className="hover:text-on-surface-variant hover:underline"
             >
               {photo.title}
             </a>
@@ -498,7 +498,7 @@ function Photos({ profile }: { profile: CareerProfile }) {
 function Resources({ profile }: { profile: CareerProfile }) {
   if (!profile.resources.length) {
     return profile.droppedResources > 0 ? (
-      <p className="text-sm text-ink-faint">
+      <p className="text-sm text-outline">
         We couldn&apos;t confirm any of the links suggested for this career, so
         none are shown rather than sending you somewhere dead.
       </p>
@@ -507,8 +507,8 @@ function Resources({ profile }: { profile: CareerProfile }) {
 
   return (
     <section>
-      <h2 className="text-lg font-bold text-ink">Where to look next</h2>
-      <p className="mt-1 text-sm text-ink-faint">
+      <h2 className="text-lg font-bold text-primary">Where to look next</h2>
+      <p className="mt-1 text-sm text-outline">
         We opened each of these to check it loads.
         {profile.droppedResources > 0 &&
           (profile.droppedResources === 1
@@ -522,25 +522,25 @@ function Resources({ profile }: { profile: CareerProfile }) {
             href={resource.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="rounded-2xl border border-black/10 bg-white p-4 transition-all hover:border-ink/40 hover:shadow-md"
+            className="rounded-xl border border-outline-variant bg-surface-lowest p-4 transition-all hover:border-primary/40 hover:shadow-md"
           >
-            <span className="text-xs font-medium uppercase tracking-wide text-ink">
+            <span className="text-xs font-medium uppercase tracking-wide text-on-surface">
               {RESOURCE_KIND_LABELS[resource.kind] ?? "Resource"}
             </span>
-            <span className="mt-1 block font-semibold text-ink">{resource.label}</span>
-            <span className="mt-1 block text-sm text-ink-soft">{resource.detail}</span>
+            <span className="mt-1 block font-semibold text-primary">{resource.label}</span>
+            <span className="mt-1 block text-sm text-on-surface-variant">{resource.detail}</span>
           </a>
         ))}
       </div>
 
       {profile.article && (
-        <p className="mt-4 text-xs text-ink-faint">
+        <p className="mt-4 text-xs text-outline">
           Description and photos from{" "}
           <a
             href={profile.article.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="underline hover:text-ink-soft"
+            className="underline hover:text-on-surface-variant"
           >
             Wikipedia: {profile.article.title}
           </a>

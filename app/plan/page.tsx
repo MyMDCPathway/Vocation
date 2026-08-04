@@ -190,18 +190,18 @@ export default function PlanPage() {
   if (!answers) return null;
 
   return (
-    <div className="flex min-h-screen flex-col bg-sand">
+    <div className="flex min-h-screen flex-col bg-surface">
       {/* No border, no nav — the intake has no header either, and the plan
           shouldn't suddenly grow one. Just the wordmark and a way back. */}
       <header className="px-6 pt-8">
         <div className="mx-auto flex max-w-7xl items-center justify-between">
-          <Link href="/" className="display text-[22px] font-black tracking-[-0.045em] text-ink">
+          <Link href="/" className="text-lg font-bold tracking-tight text-primary">
             Vocation
           </Link>
           <button
             type="button"
             onClick={startOver}
-            className="text-sm text-ink-faint transition-colors hover:text-ink"
+            className="text-sm text-outline transition-colors hover:text-primary"
           >
             Start over
           </button>
@@ -209,11 +209,11 @@ export default function PlanPage() {
       </header>
 
       <main className="mx-auto w-full max-w-7xl flex-1 px-6 py-10">
-        <p className="text-sm font-medium uppercase tracking-wide text-ink-faint">Your plan</p>
-        <h1 className="mt-1 text-3xl font-bold text-ink md:text-4xl">
+        <p className="text-sm font-medium uppercase tracking-wide text-outline">Your plan</p>
+        <h1 className="mt-1 text-3xl font-bold text-primary md:text-4xl">
           Becoming {article(career)} {career}
         </h1>
-        <p className="mt-2 text-ink-soft">
+        <p className="mt-2 text-on-surface-variant">
           From {[answers.location?.city, answers.location?.subdivision].filter(Boolean).join(", ")}
         </p>
 
@@ -221,7 +221,7 @@ export default function PlanPage() {
           {summarize(answers).map((chip) => (
             <span
               key={chip}
-              className="rounded-full bg-white px-3 py-1 text-xs text-ink-soft ring-1 ring-black/10"
+              className="rounded-full bg-surface-lowest px-3 py-1 text-xs text-on-surface-variant ring-1 ring-black/10"
             >
               {chip}
             </span>
@@ -238,7 +238,7 @@ export default function PlanPage() {
         />
 
         {fatal && (
-          <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-6">
+          <div className="mt-8 rounded-xl border border-red-200 bg-red-50 p-6">
             <p className="font-semibold text-red-800">We couldn&apos;t build your plan.</p>
             <p className="mt-1 text-sm text-red-700">{fatal}</p>
             <button
@@ -261,8 +261,8 @@ export default function PlanPage() {
         ))}
 
         {!resolved && !fatal && (
-          <p className="mt-10 flex items-center gap-3 text-ink-faint">
-            <span className="h-4 w-4 animate-spin rounded-full border-2 border-ink border-t-transparent" />
+          <p className="mt-10 flex items-center gap-3 text-outline">
+            <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             Finding schools that could get you there…
           </p>
         )}
@@ -283,12 +283,12 @@ export default function PlanPage() {
 
         {activeTrack && (
           <section className="mt-12">
-            <h2 className="text-2xl font-bold text-ink">{activeTrack.school.name}</h2>
-            <p className="mt-2 max-w-3xl text-ink-soft">{activeTrack.why}</p>
+            <h2 className="text-2xl font-bold text-primary">{activeTrack.school.name}</h2>
+            <p className="mt-2 max-w-3xl text-on-surface-variant">{activeTrack.why}</p>
 
             {activeState?.status === "pending" && (
-              <div className="mt-8 flex items-center gap-3 text-ink-faint">
-                <span className="h-4 w-4 animate-spin rounded-full border-2 border-ink border-t-transparent" />
+              <div className="mt-8 flex items-center gap-3 text-outline">
+                <span className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
                 {isOpenSchool(activeTrack.school.id)
                   ? "Generating this route and checking its program pages…"
                   : "Generating this route…"}
@@ -296,7 +296,7 @@ export default function PlanPage() {
             )}
 
             {activeState?.status === "error" && (
-              <div className="mt-8 rounded-2xl border border-red-200 bg-red-50 p-6">
+              <div className="mt-8 rounded-xl border border-red-200 bg-red-50 p-6">
                 <p className="font-semibold text-red-800">
                   This route couldn&apos;t be generated.
                 </p>
@@ -313,7 +313,7 @@ export default function PlanPage() {
 
                 {activeState.data.pathways.length > 1 && (
                   <nav
-                    className="mt-6 flex gap-1 overflow-x-auto border-b border-black/10"
+                    className="mt-6 flex gap-1 overflow-x-auto border-b border-outline-variant"
                     aria-label="Alternative routes at this school"
                   >
                     {activeState.data.pathways.map((option, index) => (
@@ -323,12 +323,12 @@ export default function PlanPage() {
                         onClick={() => selectPathway(activeTrack.school.id, index)}
                         className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
                           activeState.selected === index
-                            ? "border-ink text-ink"
-                            : "border-transparent text-ink-faint hover:border-ink/20 hover:text-ink-soft"
+                            ? "border-primary text-on-surface"
+                            : "border-transparent text-outline hover:border-primary/20 hover:text-on-surface-variant"
                         }`}
                       >
                         {option.isPrimary && (
-                          <span className="mr-2 rounded bg-sand-deep px-2 py-0.5 text-xs text-ink">
+                          <span className="mr-2 rounded bg-surface-container px-2 py-0.5 text-xs text-on-surface">
                             Recommended
                           </span>
                         )}
@@ -360,20 +360,20 @@ export default function PlanPage() {
         )}
       </main>
 
-      <footer className="border-t border-black/10 bg-white">
+      <footer className="border-t border-outline-variant bg-surface-lowest">
         <div className="mx-auto max-w-7xl px-6 py-6">
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-ink-faint">
-            <Link href="/privacy" className="transition-colors hover:text-ink">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-outline">
+            <Link href="/privacy" className="transition-colors hover:text-primary">
               Privacy
             </Link>
-            <Link href="/terms" className="transition-colors hover:text-ink">
+            <Link href="/terms" className="transition-colors hover:text-primary">
               Terms
             </Link>
-            <Link href="/team" className="transition-colors hover:text-ink">
+            <Link href="/team" className="transition-colors hover:text-primary">
               Meet the team
             </Link>
           </div>
-          <p className="mt-4 text-xs leading-relaxed text-ink-faint">
+          <p className="mt-4 text-xs leading-relaxed text-outline">
             <strong>Disclaimer:</strong> pathways and costs are AI-generated
             estimates. Where we hold a school&apos;s program catalog the programs
             are real; elsewhere they are the model&apos;s best attempt with their
@@ -412,46 +412,46 @@ function TrackCard({
       type="button"
       onClick={onSelect}
       aria-pressed={active}
-      className={`rounded-2xl border p-5 text-left transition-all ${
+      className={`rounded-xl border p-5 text-left transition-all ${
         active
-          ? "border-ink bg-white ring-2 ring-ink"
-          : "border-black/10 bg-white hover:border-ink/40 hover:shadow-md"
+          ? "border-primary bg-surface-lowest ring-2 ring-primary"
+          : "border-outline-variant bg-surface-lowest hover:border-primary/40 hover:shadow-md"
       }`}
     >
       <div className="flex flex-wrap items-center gap-1.5">
-        <span className="rounded-full bg-sand-deep px-2.5 py-0.5 text-xs font-semibold text-ink">
+        <span className="rounded-full bg-surface-container px-2.5 py-0.5 text-xs font-semibold text-primary">
           {TRACK_BADGES[track.kind]}
         </span>
         {track.alsoCovers.map((kind) => (
           <span
             key={kind}
-            className="rounded-full bg-sand-deep px-2.5 py-0.5 text-xs font-medium text-ink-soft"
+            className="rounded-full bg-surface-container px-2.5 py-0.5 text-xs font-medium text-on-surface-variant"
           >
             {TRACK_BADGES[kind]}
           </span>
         ))}
       </div>
 
-      <p className="mt-3 font-bold text-ink">{track.school.name}</p>
-      <p className="mt-0.5 text-sm text-ink-faint">
+      <p className="mt-3 font-bold text-primary">{track.school.name}</p>
+      <p className="mt-0.5 text-sm text-outline">
         {typeof track.school.distanceMiles === "number"
           ? `${track.title} · ${Math.round(track.school.distanceMiles)} mi`
           : track.title}
       </p>
 
-      <div className="mt-4 border-t border-black/5 pt-4">
+      <div className="mt-4 border-t border-outline-variant/50 pt-4">
         {state?.status === "pending" && (
-          <span className="text-sm text-ink-faint">Generating…</span>
+          <span className="text-sm text-outline">Generating…</span>
         )}
         {state?.status === "error" && (
           <span className="text-sm text-red-600">Couldn&apos;t generate</span>
         )}
         {cost && (
           <>
-            <p className="text-2xl font-bold text-ink">
+            <p className="text-2xl font-bold text-primary">
               {formatCostRangeShort(cost.total)}
             </p>
-            <p className="text-xs text-ink-faint">
+            <p className="text-xs text-outline">
               tuition &amp; fees · ~{cost.years} yrs
             </p>
           </>

@@ -283,7 +283,7 @@ export default function IntakeWizard() {
         }
       >
         <div className="mx-auto max-w-2xl">
-          <div className="rounded-3xl bg-white p-2 shadow-[0_10px_40px_-12px_rgba(32,20,54,0.25)]">
+          <div className="rounded-xl bg-surface-lowest p-2 shadow-raised">
             <input
               ref={inputRef}
               type="text"
@@ -298,7 +298,7 @@ export default function IntakeWizard() {
               placeholder="electrician"
               aria-label="The career you want"
               disabled={busy}
-              className="w-full rounded-2xl border-0 bg-transparent px-6 py-5 text-center text-2xl font-bold text-ink placeholder:font-normal placeholder:text-ink-faint/50 focus:outline-none focus:ring-0 md:text-3xl"
+              className="w-full rounded-lg border-0 bg-transparent px-6 py-5 text-center text-2xl font-bold text-on-surface placeholder:font-normal placeholder:text-outline/60 focus:outline-none focus:ring-0 md:text-3xl"
             />
           </div>
 
@@ -312,7 +312,7 @@ export default function IntakeWizard() {
 
           {error && <p className="mt-5 text-sm font-medium text-red-600">{error}</p>}
 
-          <p className="mt-12 text-sm font-semibold uppercase tracking-widest text-ink-faint">
+          <p className="mt-12 text-sm font-semibold uppercase tracking-widest text-outline">
             Or try one of these
           </p>
           <div className="mt-4 flex flex-wrap justify-center gap-2.5">
@@ -322,7 +322,7 @@ export default function IntakeWizard() {
                 type="button"
                 onClick={() => setCareerInput(example)}
                 disabled={busy}
-                className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-ink-soft shadow-sm transition-all hover:-translate-y-0.5 hover:text-ink hover:shadow-md disabled:opacity-50"
+                className="rounded-full bg-surface-lowest px-5 py-2.5 text-sm font-semibold text-on-surface-variant shadow-card transition-all hover:-translate-y-0.5 hover:text-primary hover:shadow-lift disabled:opacity-50"
               >
                 {example}
               </button>
@@ -380,7 +380,7 @@ export default function IntakeWizard() {
             });
             goTo("profile");
           }}
-          className="mt-6 text-sm text-ink-faint underline hover:text-ink"
+          className="mt-6 text-sm text-outline underline hover:text-primary"
         >
           None of these â€” plan for &ldquo;{refinement.career}&rdquo; generally
         </button>
@@ -499,10 +499,10 @@ export default function IntakeWizard() {
 
         {situation && (
           <div className="mt-10">
-            <h2 className="text-lg font-semibold text-ink">
+            <h2 className="text-lg font-semibold text-primary">
               {situation.incomeLabel}
             </h2>
-            <p className="mt-1 text-sm text-ink-soft">
+            <p className="mt-1 text-sm text-on-surface-variant">
               A rough band is enough â€” we use it to estimate grant aid, not to
               verify anything.
             </p>
@@ -604,7 +604,7 @@ export default function IntakeWizard() {
         <button
           type="button"
           onClick={() => finish(NO_MOBILITY)}
-          className="mt-6 text-sm text-ink-faint underline hover:text-ink"
+          className="mt-6 text-sm text-outline underline hover:text-primary"
         >
           None of these â€” I want to stay where I am
         </button>

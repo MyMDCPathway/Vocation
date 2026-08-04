@@ -1,10 +1,16 @@
+/* Two faces, each with a job (DESIGN.md "The Two-Voice Rule"): Hanken Grotesk
+   carries every heading, Inter carries body copy and every data label — the
+   legibility that matters constantly here, in dense wage figures and program
+   names.
+
+   This MUST stay above the @tailwind directives: CSS requires @import to come
+   first, and a build that enforces that would drop the rule and silently fall
+   back to the system sans. */
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* 800/900 are new: the reference leans on very heavy, tightly-tracked
-   headings, and Inter at 700 reads noticeably lighter than that. */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 /* Selected school's palette, generated from its brand color.
    These defaults are Miami Dade College blue and are what renders on the
@@ -24,22 +30,56 @@
   --school-900: #002548;
 }
 
-/* Vocation's own brand palette.
-   Deliberately separate from --school-*: those are retinted at runtime from
-   whichever school is selected (HANDOFF §6) and must keep working on the
-   pathway pages. These are constant, and they're what the intake — which is
-   school-agnostic — is built from. */
+/* Vocation's own brand palette — "Empowered Clarity" / Professional Modernism
+   (see DESIGN.md). Deliberately separate from --school-*: those are retinted
+   at runtime from whichever school is selected (HANDOFF §6) and must keep
+   working on the pathway pages. These are constant, and they're what every
+   school-agnostic surface is built from. */
 :root {
-  --sand: #f5f3ef;        /* page background, warm off-white */
-  --sand-deep: #ebe7e0;   /* the curved divider and quiet fills */
-  --ink: #201436;         /* near-black with a purple cast, like the ref */
-  --ink-soft: #4a4058;    /* body copy */
-  --ink-faint: #7b7389;   /* captions */
+  /* Near-black: the only voice of authority. Headings, nav, primary buttons. */
+  --primary: #000000;
+  --primary-container: #131b2e;
+  --primary-fixed: #dae2fd;
+  --primary-fixed-dim: #bec6e0;
+  --on-primary: #ffffff;
 
-  --pop-orange: #e8994f;
-  --pop-blue: #a3c7d9;
-  --pop-purple: #c5a8eb;
-  --pop-mint: #cfe3dd;
+  /* Vibrant Teal: progress and action, full stop (DESIGN.md "The
+     Teal-Means-Progress Rule") — never decoration, always forward motion. */
+  --secondary: #006a61;
+  --secondary-container: #86f2e4;
+  --secondary-fixed: #89f5e7;
+  --on-secondary: #ffffff;
+
+  /* This system spends no third hue — tertiary shares primary's near-black,
+     with its own container step for a fill that sits behind it. */
+  --tertiary: #000000;
+  --tertiary-container: #0b1c30;
+  --tertiary-fixed: #d3e4fe;
+  --on-tertiary: #ffffff;
+
+  /* Soft multi-tier gray-blue scaffold, not pure white or neutral gray. */
+  --surface: #f7f9fb;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f2f4f6;
+  --surface-container: #eceef0;
+  --surface-container-high: #e6e8ea;
+  --surface-container-highest: #e0e3e5;
+  --surface-dim: #d8dadc;
+  --on-surface: #191c1e;
+  --on-surface-variant: #45464d;
+  --outline: #76777d;
+  --outline-variant: #c6c6cd;
+
+  --error: #ba1a1a;
+  --error-container: #ffdad6;
+  --on-error-container: #93000a;
+
+  /* Shadow is feedback, not a resting state (DESIGN.md "The
+     Shadow-Is-Feedback Rule") — soft and diffused, never a resting card. */
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04);
+  --shadow-raised: 0 4px 12px rgb(15 23 42 / 0.05);
+  --shadow-card-hover: 0 8px 20px rgb(15 23 42 / 0.08);
+  --shadow-overlay: 0 16px 32px rgb(15 23 42 / 0.12);
 }
 
 /* Color variables for flowchart steps */
@@ -60,50 +100,6 @@
   --info: #7c3aed; /* purple-600 */
 }
 
-/* Animated gradient for Vocation title */
-@keyframes gradient-flow {
-  0% {
-    background-position: 200% 50%;
-  }
-  100% {
-    background-position: -200% 50%;
-  }
-}
-
-.vocation-gradient-wrapper {
-  background: linear-gradient(
-    90deg,
-    #2563eb 0%,
-    #3b82f6 20%,
-    #10b981 40%,
-    #3b82f6 60%,
-    #2563eb 80%,
-    #2563eb 100%
-  );
-  background-size: 200% 100%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradient-flow 6s linear infinite;
-}
-
-.vocation-gradient {
-  background: linear-gradient(
-    90deg,
-    #2563eb 0%,
-    #3b82f6 20%,
-    #10b981 40%,
-    #3b82f6 60%,
-    #2563eb 80%,
-    #2563eb 100%
-  );
-  background-size: 200% 100%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradient-flow 6s linear infinite;
-}
-
 /* Letter fade-in animation - move up into frame */
 @keyframes letter-fade-in {
   0% {
@@ -122,94 +118,36 @@
   opacity: 0;
 }
 
-/* Use Inter as the default font */
+/* Two faces, one job each (DESIGN.md "The Two-Voice Rule"): Inter is the body
+   default; headings opt into Hanken Grotesk explicitly below. */
 body {
   font-family: 'Inter', sans-serif;
-  background-color: var(--sand);
-  color: var(--ink-soft);
+  background-color: var(--surface);
+  color: var(--on-surface-variant);
   min-height: 100vh;
 }
 
-/* Headings are the loudest part of this look: very heavy, tight tracking,
-   tight leading. Set once here so every screen inherits it rather than each
-   one re-deciding. */
-h1, h2, h3, .display {
-  color: var(--ink);
-  letter-spacing: -0.035em;
-  line-height: 1.05;
+h1, h2, h3, h4, .display {
+  font-family: 'Hanken Grotesk', sans-serif;
+  color: var(--primary);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
 }
 
-/* --- Decorative geometry -------------------------------------------------
-   The scattered confetti. Pure CSS rather than images: they're simple shapes,
-   they need to retint with the palette, and an <img> per blob would be a
-   dozen requests for decoration. All of it is aria-hidden and
-   pointer-events:none — it must never intercept a click meant for the form
-   underneath. */
-
-.shape-field {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  z-index: 0;
+h1, .display {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
-.shape {
-  position: absolute;
-  pointer-events: none;
-}
-
-/* A superellipse — rounder than a rounded square, flatter than a circle. */
-.shape-squircle { border-radius: 42%; }
-
-.shape-triangle { clip-path: polygon(50% 4%, 96% 92%, 4% 92%); border-radius: 12%; }
-
-.shape-hexagon {
-  clip-path: polygon(25% 3%, 75% 3%, 99% 50%, 75% 97%, 25% 97%, 1% 50%);
-}
-
-/* The quarter-round fan, like the lilac shape top-right of the reference. */
-.shape-fan { border-radius: 100% 12% 46% 12%; }
-
-.shape-pill { border-radius: 999px; }
-
-/* Gentle drift so the page feels alive without anything actually moving far.
-   Disabled wholesale under reduced-motion below. */
-@keyframes shape-drift {
-  0%, 100% { transform: translate3d(0, 0, 0) rotate(var(--shape-rot, 0deg)); }
-  50% { transform: translate3d(0, -14px, 0) rotate(calc(var(--shape-rot, 0deg) + 6deg)); }
-}
-
-.shape-drift { animation: shape-drift 9s ease-in-out infinite; }
-
-/* --- Curved section divider ---------------------------------------------
-   The big arc the reference uses to hand off between coloured bands. A
-   border-radius on an over-wide block, which stays smooth at any viewport
-   width — an SVG wave would need a viewBox that distorts. */
-.arc-top {
-  position: relative;
-  /* The ::before below is 160% wide so the curve stays shallow at any
-     viewport. Without clipping here that overhang is real layout width and
-     the whole page scrolls sideways — measured at 1645px inside a 1265px
-     window before this line existed. */
-  overflow: hidden;
-}
-
-.arc-top::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: -1px;
-  width: 160%;
-  height: 120px;
-  transform: translateX(-50%) translateY(-60%);
-  background: inherit;
-  border-radius: 50% 50% 0 0;
+/* Numbers a student compares must line up in columns — tuition against
+   tuition, wage against wage. */
+.tabular {
+  font-variant-numeric: tabular-nums;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shape-drift,
-  .letter-fade-in,
   .fade-in,
   .fade-in-delay-1,
   .fade-in-delay-2 {

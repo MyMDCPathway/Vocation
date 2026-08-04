@@ -95,7 +95,7 @@ export function CountryChip({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={`Country: ${country?.name ?? code}. Change`}
-        className="flex items-center gap-1.5 rounded-full bg-white/70 px-3 py-1.5 text-sm font-semibold text-ink-soft ring-1 ring-black/10 transition-all hover:text-ink hover:ring-ink/30"
+        className="flex items-center gap-1.5 rounded-full bg-surface-lowest/70 px-3 py-1.5 text-sm font-semibold text-on-surface-variant ring-1 ring-black/10 transition-all hover:text-primary hover:ring-primary/30"
       >
         <span aria-hidden="true">{flagEmoji(code)}</span>
         <span>{code}</span>
@@ -103,7 +103,7 @@ export function CountryChip({
           aria-hidden="true"
           viewBox="0 0 20 20"
           fill="currentColor"
-          className={`h-3.5 w-3.5 text-ink-faint transition-transform ${open ? "rotate-180" : ""}`}
+          className={`h-3.5 w-3.5 text-outline transition-transform ${open ? "rotate-180" : ""}`}
         >
           <path
             fillRule="evenodd"
@@ -114,8 +114,8 @@ export function CountryChip({
       </button>
 
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-72 overflow-hidden rounded-2xl bg-white text-left shadow-xl ring-1 ring-black/10">
-          <div className="border-b border-black/5 p-2">
+        <div className="absolute right-0 z-50 mt-2 w-72 overflow-hidden rounded-xl bg-surface-lowest text-left shadow-xl ring-1 ring-black/10">
+          <div className="border-b border-outline-variant/50 p-2">
             <input
               ref={searchRef}
               type="text"
@@ -123,13 +123,13 @@ export function CountryChip({
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search countries…"
               aria-label="Search countries"
-              className="w-full rounded-xl bg-sand px-3 py-2 text-sm text-ink placeholder:text-ink-faint focus:outline-none focus:ring-2 focus:ring-ink/20"
+              className="w-full rounded-full bg-surface px-3 py-2 text-sm text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
 
           <ul role="listbox" className="max-h-72 overflow-y-auto py-1">
             {results.length === 0 && (
-              <li className="px-4 py-3 text-sm text-ink-faint">
+              <li className="px-4 py-3 text-sm text-outline">
                 No countries match that.
               </li>
             )}
@@ -140,13 +140,13 @@ export function CountryChip({
                   role="option"
                   aria-selected={option.code === code}
                   onClick={() => choose(option.code)}
-                  className={`flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm transition-colors hover:bg-sand ${
-                    option.code === code ? "font-semibold text-ink" : "text-ink-soft"
+                  className={`flex w-full items-center gap-2.5 px-4 py-2 text-left text-sm transition-colors hover:bg-surface-container ${
+                    option.code === code ? "font-semibold text-primary" : "text-on-surface-variant"
                   }`}
                 >
                   <span aria-hidden="true">{flagEmoji(option.code)}</span>
                   <span className="min-w-0 flex-1 truncate">{option.name}</span>
-                  <span className="text-xs text-ink-faint">{option.code}</span>
+                  <span className="text-xs text-outline">{option.code}</span>
                 </button>
               </li>
             ))}

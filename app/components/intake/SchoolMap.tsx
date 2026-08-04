@@ -231,10 +231,10 @@ export function SchoolMap({ schools, selectedIds, focusedId, onToggle, origin }:
         ref={containerRef}
         role="application"
         aria-label="Map of schools near you"
-        className="h-[320px] w-full rounded-3xl bg-sand-deep lg:h-[560px]"
+        className="h-[320px] w-full rounded-xl bg-surface-container lg:h-[560px]"
       />
-      <p className="mt-2 text-xs text-ink-faint">
-        Scroll the page normally — hold <kbd className="rounded bg-sand-deep px-1">Ctrl</kbd>{" "}
+      <p className="mt-2 text-xs text-outline">
+        Scroll the page normally — hold <kbd className="rounded bg-surface-container px-1">Ctrl</kbd>{" "}
         to zoom, or drag to pan.
         {unplaceable > 0 &&
           ` ${unplaceable} school${unplaceable === 1 ? "" : "s"} couldn't be placed on the map, but ${unplaceable === 1 ? "it's" : "they're"} still listed.`}
@@ -261,11 +261,11 @@ function buildIcon(
   // estimated, so they read differently on the map too.
   // Catalog schools are the ones whose programs are real rather than
   // estimated, so they read differently on the map too.
-  const base = school.source === "catalog" ? "bg-ink" : "bg-pop-orange";
+  const base = school.source === "catalog" ? "bg-primary" : "bg-secondary-container";
   const ring = selected
-    ? "ring-4 ring-ink/25"
+    ? "ring-4 ring-primary/25"
     : focused
-      ? "ring-4 ring-ink/15"
+      ? "ring-4 ring-primary/15"
       : "ring-2 ring-white";
   const size = selected || focused ? 18 : 14;
 
@@ -290,5 +290,7 @@ function popupHtml(school: SchoolRef): string {
       ? ` · ${Math.round(school.distanceMiles)} mi`
       : "";
 
-  return `<strong>${esc(school.name)}</strong><br><span style="color:#6b7280">${esc(where)}${miles}</span>`;
+  // Inline style, not a Tailwind class: this string becomes a Leaflet popup's
+  // raw innerHTML, outside React's render tree entirely. #76777d is --outline.
+  return `<strong>${esc(school.name)}</strong><br><span style="color:#76777d">${esc(where)}${miles}</span>`;
 }

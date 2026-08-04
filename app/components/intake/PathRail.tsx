@@ -24,14 +24,16 @@ import { archetypeProfile } from "@/app/lib/routeArchetype";
 // programs and verified links — is still generated at the end.
 
 // Each kind of step gets its own accent so the shape of a route is legible
-// at a glance — a trade path reads as mostly orange, a degree path as mostly
-// blue, before you read a word of it.
+// at a glance — a trade path reads as mostly amber, a degree path as mostly
+// blue, before you read a word of it. Built from the three real accents this
+// system has (blue / amber / rose) plus two neutral steps, rather than the
+// four-color confetti palette an earlier world used.
 const KIND_DOT: Record<OutlineStepKind, string> = {
-  education: "bg-pop-blue",
-  training: "bg-pop-orange",
-  credential: "bg-pop-purple",
-  experience: "bg-pop-mint",
-  work: "bg-ink",
+  education: "bg-primary-fixed-dim",
+  training: "bg-secondary-container",
+  credential: "bg-tertiary-container",
+  experience: "bg-outline-variant",
+  work: "bg-primary",
 };
 
 export function PathRail({ answers }: { answers: IntakeAnswers }) {
@@ -48,10 +50,10 @@ export function PathRail({ answers }: { answers: IntakeAnswers }) {
   return (
     <aside
       aria-label="Your route so far"
-      className="rounded-3xl bg-white p-6 shadow-sm"
+      className="rounded-xl bg-surface-lowest p-6 shadow-sm"
     >
       <div className="flex items-baseline justify-between gap-2">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-ink-faint">
+        <h2 className="text-sm font-semibold uppercase tracking-wide text-outline">
           Your route
         </h2>
         {/* Mobile gets a collapsed rail: on a phone the path would otherwise
@@ -59,15 +61,15 @@ export function PathRail({ answers }: { answers: IntakeAnswers }) {
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
-          className="text-xs text-ink-faint underline hover:text-ink lg:hidden"
+          className="text-xs text-outline underline hover:text-primary lg:hidden"
         >
           {open ? "Hide" : "Show"}
         </button>
       </div>
 
-      <p className="mt-1 text-sm font-medium text-ink">{profile.label}</p>
+      <p className="mt-1 text-sm font-medium text-on-surface">{profile.label}</p>
       {answers.career?.routeReason && (
-        <p className="mt-1 text-xs leading-relaxed text-ink-faint">
+        <p className="mt-1 text-xs leading-relaxed text-outline">
           {answers.career.routeReason}
         </p>
       )}
@@ -83,19 +85,19 @@ export function PathRail({ answers }: { answers: IntakeAnswers }) {
             returns "about N years", and stacking the two hedges read as
             "Roughly about 9 years". */}
         {remaining && (
-          <p className="mt-5 border-t border-black/5 pt-4 text-xs text-ink-faint">
-            <strong className="text-ink-soft first-letter:uppercase">{remaining}</strong>{" "}
+          <p className="mt-5 border-t border-outline-variant/50 pt-4 text-xs text-outline">
+            <strong className="text-on-surface-variant first-letter:uppercase">{remaining}</strong>{" "}
             of this left from where you are now.
           </p>
         )}
 
         {done > 0 && (
-          <p className="mt-1 text-xs font-medium text-ink-soft">
+          <p className="mt-1 text-xs font-medium text-on-surface-variant">
             You&apos;ve already cleared {Math.round(done * 100)}% of it.
           </p>
         )}
 
-        <p className="mt-4 text-xs leading-relaxed text-ink-faint">
+        <p className="mt-4 text-xs leading-relaxed text-outline">
           A sketch, sharpening as you answer. The full plan at the end has real
           programs, costs, and checked links.
         </p>
@@ -115,38 +117,38 @@ function Step({ step, last }: { step: EnrichedStep; last: boolean }) {
       {!last && (
         <span
           aria-hidden="true"
-          className="absolute left-[5px] top-4 h-full w-px bg-sand-deep"
+          className="absolute left-[5px] top-4 h-full w-px bg-surface-container"
         />
       )}
 
       <span
         aria-hidden="true"
         className={`relative mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${
-          cleared ? "bg-sand-deep" : KIND_DOT[step.kind] ?? "bg-sand-deep"
-        } ${next ? "ring-4 ring-ink/10" : ""}`}
+          cleared ? "bg-surface-container" : KIND_DOT[step.kind] ?? "bg-surface-container"
+        } ${next ? "ring-4 ring-primary/10" : ""}`}
       />
 
       <div className="min-w-0 flex-1">
         <p
           className={`text-sm font-semibold ${
-            cleared ? "text-ink-faint line-through" : "text-ink"
+            cleared ? "text-outline line-through" : "text-on-surface"
           }`}
         >
           {step.label}
         </p>
 
         {step.duration && !cleared && (
-          <p className="text-xs text-ink-faint">{step.duration}</p>
+          <p className="text-xs text-outline">{step.duration}</p>
         )}
 
         {next && (
-          <p className="mt-1 text-xs leading-relaxed text-ink-soft">{step.detail}</p>
+          <p className="mt-1 text-xs leading-relaxed text-on-surface-variant">{step.detail}</p>
         )}
 
-        {cleared && <p className="text-xs text-ink-faint">Already done</p>}
+        {cleared && <p className="text-xs text-outline">Already done</p>}
 
         {step.notes.map((note) => (
-          <p key={note} className="mt-1 text-xs font-medium text-ink">
+          <p key={note} className="mt-1 text-xs font-medium text-on-surface">
             {note}
           </p>
         ))}

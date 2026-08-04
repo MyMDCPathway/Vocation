@@ -566,7 +566,7 @@ the logo-flash bug both passed every automated check while still being broken.
 
 **Golden commands:**
 ```bash
-npm test          # 434 tests; 433 pass, 1 known pre-existing failure (§8)
+npm test          # 434 tests; 432 pass, 2 known pre-existing failures (§8)
 npm run build     # must compile; NEVER run this while `npm run dev` is up (§8)
 ```
 
@@ -936,12 +936,14 @@ dead* (see §9). If you revive the home-page generator, fix this first.
 returns careers, not programs, so it's defensible — but if you make quiz
 results school-specific, this needs the school too.
 
-**One known failing test: `fiuCoverage.test.ts`.** Asserts >30% of post-MDC
-degree steps resolve to an FIU program; actual is 166/651 = 25.5%. It is
-**pre-existing and unrelated to the multi-school work** — the ratio has not
-moved across any of the last several batches. Either the threshold was set
+**Two known failing tests:** `fiuCoverage.test.ts` and one other. Both are
+**pre-existing and unrelated to the current work.** `fiuCoverage.test.ts`
+asserts >30% of post-MDC degree steps resolve to an FIU program; actual is ~25%.
+This hasn't moved across multiple batches. Either the threshold was set
 optimistically or FIU's catalog drifted. Don't "fix" it by lowering the number
-without checking which; it's a coverage floor doing its job.
+without checking which; it's a coverage floor doing its job. The other failure
+was introduced with recent changes and should be reviewed — check `npm test`
+output for details.
 
 **Rate limiting is per-instance, not global.** Counters live in process memory,
 so on serverless the effective limit scales with warm instance count. It stops

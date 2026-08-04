@@ -243,12 +243,12 @@ export function LocationStep({
           autoComplete="postal-code"
           inputMode="text"
           autoFocus
-          className="w-full max-w-xs rounded-xl border border-black/10 px-4 py-3 text-lg uppercase focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink"
+          className="w-full max-w-xs rounded-full border border-outline-variant px-4 py-3 text-lg uppercase focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary"
         />
 
         {postalState === "looking" && (
-          <p className="mt-3 flex items-center gap-2 text-sm text-ink-faint">
-            <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-ink border-t-transparent" />
+          <p className="mt-3 flex items-center gap-2 text-sm text-outline">
+            <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             Checking…
           </p>
         )}
@@ -269,7 +269,7 @@ export function LocationStep({
         <button
           type="button"
           onClick={() => setSubStep("region")}
-          className="mt-6 block text-sm text-ink-faint underline hover:text-ink"
+          className="mt-6 block text-sm text-outline underline hover:text-primary"
         >
           I&apos;d rather pick my area
         </button>
@@ -290,8 +290,8 @@ export function LocationStep({
         rail={rail}
       >
         {loading && (
-          <p className="flex items-center gap-2 text-sm text-ink-faint">
-            <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-ink border-t-transparent" />
+          <p className="flex items-center gap-2 text-sm text-outline">
+            <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
             Loading {subdivisionLabel(countryCode).toLowerCase()}s…
           </p>
         )}
@@ -310,7 +310,7 @@ export function LocationStep({
                 type="button"
                 onClick={() => selectRegion(entry.name)}
                 aria-pressed={subdivision === entry.name}
-                className="rounded-full border border-black/10 bg-white px-3.5 py-1.5 text-sm text-ink-soft transition-colors hover:border-ink/40"
+                className="rounded-full border border-outline-variant bg-surface-lowest px-3.5 py-1.5 text-sm text-on-surface-variant transition-colors hover:border-primary/40"
               >
                 {entry.name}
               </button>
@@ -322,7 +322,7 @@ export function LocationStep({
           <button
             type="button"
             onClick={() => setSubStep("city")}
-            className="mt-6 text-sm text-ink-faint underline hover:text-ink"
+            className="mt-6 text-sm text-outline underline hover:text-primary"
           >
             {subdivisions.length > 0
               ? "Not sure — skip this"
@@ -357,8 +357,8 @@ export function LocationStep({
               aria-pressed={city === name}
               className={`rounded-full border px-3.5 py-1.5 text-sm transition-colors ${
                 city === name
-                  ? "border-ink bg-ink text-white"
-                  : "border-black/10 bg-white text-ink-soft hover:border-ink/40"
+                  ? "border-primary bg-primary text-white"
+                  : "border-outline-variant bg-surface-lowest text-on-surface-variant hover:border-primary/40"
               }`}
             >
               {name}
@@ -382,7 +382,7 @@ export function LocationStep({
         placeholder={cities.length ? "…or type somewhere else" : "Where do you live?"}
         aria-label="Your city or town"
         autoFocus
-        className="w-full rounded-xl border border-black/10 px-4 py-3 focus:border-ink focus:outline-none focus:ring-2 focus:ring-ink"
+        className="w-full rounded-full border border-outline-variant px-4 py-3 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary"
       />
     </StepShell>
   );
