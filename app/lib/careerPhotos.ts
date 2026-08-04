@@ -99,12 +99,46 @@ function stripHtml(value: string | undefined): string | undefined {
 // articles carry these constantly and none of them show anyone doing a job.
 const NON_PHOTO = /(logo|icon|symbol|seal|coat.of.arms|flag|map|chart|graph|diagram|banner|stub|ambox|commons|wiki|edit|arrow|button|placeholder)/i;
 
+// Data graphics whose filenames name neither "map" nor "chart".
+//
+// The one that got through was "Top computer science colleges in North
+// America" — a shaded map of the United States, sitting in the hero slot of a
+// page about what a software engineer does all day. Nothing in its title says
+// map. What it does say is that it RANKS something across a PLACE, and that
+// is the shape of every infographic Wikipedia carries and of none of its
+// photographs.
+//
+// A heuristic, and it will miss some. It fails the right way: a career page
+// with one fewer picture is fine, a career page led by a statistics exhibit
+// is not.
+const NON_PHOTO_SUBJECT =
+  /(colleges?|universit|ranking|top[ _]\d|largest|distribution|density|per[ _]capita|percentage|share[ _]of|statistics|timeline|screenshot|infographic|poster|table|schematic|drawing|painting|portrait|statue|monument|stamp|coin|census)/i;
+
+// The other half: pictures of a CONCEPT rather than of the job.
+//
+// Second one through was "Evolutionary prototyping model" — a boxes-and-arrows
+// flowchart, hero-sized, on a page whose job is to show a student what the
+// work looks like. Occupational articles are full of these, because the
+// article is about the discipline and the page is about the person.
+const CONCEPT_GRAPHIC =
+  /(model|lifecycle|life[ _]cycle|workflow|process|method|paradigm|framework|uml|flow[ _]?chart|pyramid|venn|hierarchy|taxonomy|structure of|overview of)/i;
+
 // Vector and audio entries in a media list aren't photographs.
 const NON_PHOTO_EXTENSION = /\.(svg|ogg|oga|ogv|wav|mid|webm|pdf|djvu)$/i;
+
+/** Lower sorts first. See the sort in fetchPhotos for why the extension. */
+function photoRank(fileTitle: string): number {
+  if (/\.jpe?g$/i.test(fileTitle)) return 0;
+  if (/\.tiff?$/i.test(fileTitle)) return 1;
+  if (/\.webp$/i.test(fileTitle)) return 2;
+  return 3; // png, and whatever else got this far
+}
 
 function looksLikeAPhoto(fileTitle: string): boolean {
   if (NON_PHOTO_EXTENSION.test(fileTitle)) return false;
   if (NON_PHOTO.test(fileTitle)) return false;
+  if (NON_PHOTO_SUBJECT.test(fileTitle)) return false;
+  if (CONCEPT_GRAPHIC.test(fileTitle)) return false;
   return /\.(jpe?g|png|webp|tiff?)$/i.test(fileTitle);
 }
 
@@ -140,6 +174,15 @@ export async function fetchPhotos(title: string): Promise<CareerPhoto[]> {
     .filter((item: any) => item?.type === "image" && typeof item.title === "string")
     .map((item: any) => item.title as string)
     .filter(looksLikeAPhoto)
+    // Photographs first, and the file extension says which is which better
+    // than any list of banned words does. Cameras write JPEG; the things that
+    // kept reaching the hero slot — a shaded map, a flowchart, a spreadsheet
+    // screenshot, an IDE window — are what screenshot tools and drawing
+    // programs write, which is PNG. Two rounds of blacklisting title keywords
+    // caught one graphic each and missed the next; this one rule sorts the
+    // whole class. It ORDERS rather than excludes, so an article whose only
+    // picture is a PNG still gets it.
+    .sort((a: string, b: string) => photoRank(a) - photoRank(b))
     .slice(0, MAX_PHOTOS);
 
   if (!fileTitles.length) return [];
@@ -204,27 +247,41 @@ export async function fetchPhotos(title: string): Promise<CareerPhoto[]> {
 }
 
 /**
- * Article text and photos for a career, from the first candidate title that
- * yields an article.
+ * Article text and photos for a career.
  *
  * Candidates come from the model, which is good at "what is the Wikipedia
  * article for this job" and bad at "what is the URL of a photo of this job".
  * Playing to that split is the whole design.
+ *
+ * THE TEXT AND THE PICTURES CAN COME FROM DIFFERENT ARTICLES, and they have to
+ * be allowed to. "Software engineering" is the right article to describe the
+ * work and carries exactly two images: an icon and a map of American colleges.
+ * Stopping at the first article that resolved left that page with no
+ * photograph at all, while "Programmer" — the model's second candidate — has
+ * pictures of people doing the job. So the first article that resolves wins
+ * the description, and the search for photographs carries on without it.
  */
 export async function fetchCareerMedia(candidateTitles: string[]): Promise<{
   article: CareerArticle | null;
   photos: CareerPhoto[];
 }> {
+  let article: CareerArticle | null = null;
+  let photos: CareerPhoto[] = [];
+
   for (const title of candidateTitles.filter(Boolean).slice(0, 3)) {
-    const article = await fetchArticle(title);
-    if (!article) continue;
+    const resolved = await fetchArticle(title);
+    if (!resolved) continue;
+    if (!article) article = resolved;
 
     // Use the resolved title, not the candidate — Wikipedia redirects
     // "Marine biologist" to "Marine biology", and the media list is only
     // available under the real title.
-    const photos = await fetchPhotos(article.title);
-    return { article, photos };
+    photos = await fetchPhotos(resolved.title);
+    if (photos.length) break;
   }
 
-  return { article: null, photos: [] };
+  // Attribution follows the pictures, not the prose: PhotoCredit renders each
+  // photo's own Commons page and licence, so a photo borrowed from the second
+  // article is still credited to its own source.
+  return { article, photos };
 }

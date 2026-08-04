@@ -19,8 +19,11 @@ import { ContinueButton, StepShell } from "@/app/components/intake/StepShell";
 // four separate screens, which read right but meant three questions stood
 // between "what career do you want" and the first useful answer.
 //
-// Now the COUNTRY is a corner control on the opening screen (see CountryChip)
-// rather than a question, and this step leads with the postal code — because a
+// Now the COUNTRY isn't asked at all. It was briefly a chip in the corner of
+// the opening screen; that came out because a locale switcher on a page about
+// one job is a control almost nobody touches and everybody has to look past.
+// The country defaults (DEFAULT_COUNTRY) and this step leads with the postal
+// code — because a
 // postal code resolves to a town, a region AND coordinates in one lookup. For a
 // US student that's the whole location step: type a ZIP, done. The
 // region-then-city screens are still here, but only as the fallback for someone

@@ -7,8 +7,11 @@ import IntakeWizard from "@/app/components/IntakeWizard";
 // first question. The Accredited Pathway world puts a real landing page in
 // front of it (see DESIGN.md), so the flow needed its own route. The wizard
 // itself is unchanged: CareerSearch on the landing page seeds the stored
-// intake before routing here, and IntakeWizard prefills from that store on
-// mount, so arriving with a career already typed costs the student nothing.
+// intake before routing here, and IntakeWizard reads that store on mount. When
+// it finds a career there it skips its own career question and opens straight
+// on the job summary — the landing page already asked, so asking again was a
+// screen that only ever cost a click. Arriving from a bare "Plan your route"
+// link still gets the question, because then nobody has asked yet.
 
 export const metadata: Metadata = {
   title: "Plan your route | Vocation",

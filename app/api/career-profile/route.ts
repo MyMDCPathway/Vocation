@@ -63,14 +63,25 @@ const RESPONSE_SCHEMA = {
     },
     demandLevel: {
       type: "STRING",
-      enum: ["Growing fast", "Steady demand", "Competitive", "Shrinking"],
+      enum: ["Growing fast", "Steady demand", "Shrinking"],
       description:
-        "Honest assessment of hiring. Use 'Competitive' when there are more qualified applicants than posts, and 'Shrinking' when the occupation is genuinely contracting. Do not flatter the job.",
+        "Whether the WORK is growing. Use 'Shrinking' when the occupation is genuinely contracting. This is about employer need only — how hard it is to get hired is a separate field, so do not downgrade a growing field because it is crowded.",
     },
     demandDetail: {
       type: "STRING",
       description:
         "One or two sentences on WHY demand looks like that — what's driving it, and where the jobs actually are.",
+    },
+    competitionLevel: {
+      type: "STRING",
+      enum: ["Wide open", "Manageable", "Competitive", "Extremely competitive"],
+      description:
+        "How hard it is to actually GET one of those jobs. Use 'Extremely competitive' when qualified applicants vastly outnumber posts and people apply for months without an interview. A field can be growing and still extremely competitive to enter — say so when it is. Do not flatter the job.",
+    },
+    competitionDetail: {
+      type: "STRING",
+      description:
+        "One or two sentences on what the queue in front of this job actually looks like — who you are up against, and what gets people picked.",
     },
     payLow: { type: "NUMBER", description: "Typical starting salary, annual." },
     payMedian: { type: "NUMBER", description: "Median annual salary." },
@@ -164,6 +175,8 @@ const RESPONSE_SCHEMA = {
     "dayToDay",
     "demandLevel",
     "demandDetail",
+    "competitionLevel",
+    "competitionDetail",
     "payLow",
     "payMedian",
     "payHigh",
@@ -185,6 +198,8 @@ function systemPrompt(market: string): string {
 Write for a student who may be the first person in their family to consider this job. Assume no inside knowledge and no jargon.
 
 BE HONEST ABOUT THE UNGLAMOROUS PARTS. A career page that only lists upsides is worse than useless — the student finds out the truth after they've paid for two years of study. If a field is oversubscribed, say so. If the advertised salary only applies to a small senior minority, say so in payNote. If most entry-level work is in places people don't want to move to, that belongs in demandDetail.
+
+DEMAND AND COMPETITION ARE TWO DIFFERENT QUESTIONS and the student needs both answers. Demand is whether employers need this work done. Competition is whether they would pick this particular applicant out of the pile. Software engineering in a layoff year is steady demand and extremely competitive at entry; a rural nursing shortage is growing demand and wide open. Answer each on its own terms — collapsing them into one verdict is how a page ends up telling someone a crowded field is a safe bet.
 
 PAY: give figures for ${market}, in that market's own currency. Low is what someone actually starts on, not the theoretical floor. High is what an experienced practitioner makes, not the outlier. For US careers your figures may be replaced by the official Bureau of Labor Statistics survey — give your honest best estimate anyway, since it is what a student outside the US or in an unsurveyed occupation will see.
 
@@ -294,6 +309,15 @@ export async function POST(request: NextRequest) {
         level: data.demandLevel ?? "Steady demand",
         detail: data.demandDetail ?? "",
       },
+      // Left undefined rather than defaulted when the model didn't answer:
+      // "Competitive" is a claim about the job market, and a placeholder one
+      // is indistinguishable on screen from a real one.
+      competition: data.competitionLevel
+        ? {
+            level: data.competitionLevel,
+            detail: data.competitionDetail ?? "",
+          }
+        : undefined,
       pay: {
         low: Number(data.payLow) || 0,
         median: Number(data.payMedian) || 0,

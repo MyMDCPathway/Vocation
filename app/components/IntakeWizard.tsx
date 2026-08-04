@@ -26,7 +26,6 @@ import { LocationStep } from "@/app/components/intake/LocationStep";
 import { SchoolsStep } from "@/app/components/intake/SchoolsStep";
 import { CareerProfileStep } from "@/app/components/intake/CareerProfileStep";
 import { PathRail } from "@/app/components/intake/PathRail";
-import { CountryChip } from "@/app/components/intake/CountryChip";
 
 // The 2.0 intake, front to back.
 //
@@ -87,14 +86,32 @@ export default function IntakeWizard() {
   const [careerInput, setCareerInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // True when we arrived with a career already typed on the landing page, so
+  // the career question never renders. See the hydration effect below.
+  const [skipCareer, setSkipCareer] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  // StrictMode runs mount effects twice in development. Without this the
+  // skipped-career resolve fires /api/refine-career twice on every dev load.
+  const seedResolved = useRef(false);
 
   // Restore a half-finished intake so a refresh doesn't cost six answers. Runs
   // once, after mount â€” sessionStorage doesn't exist during the server render.
   useEffect(() => {
     const stored = loadIntake();
     setAnswers(stored);
-    if (stored.career?.raw) setCareerInput(stored.career.raw);
+    const seeded = stored.career?.raw;
+    if (seeded && !seedResolved.current) {
+      seedResolved.current = true;
+      setCareerInput(seeded);
+      // The landing page ALREADY asked for the career. Re-rendering the same
+      // question here with their answer pre-filled read as a bug: you type
+      // "software engineer", press go, and get a page asking what career you
+      // want. So resolve it immediately and open on the career summary. The
+      // question below still exists for anyone who reached /start from a bare
+      // "Plan your route" link with nothing stored.
+      setSkipCareer(true);
+      void resolveCareer(seeded);
+    }
     setHydrated(true);
   }, []);
 
@@ -107,7 +124,10 @@ export default function IntakeWizard() {
   }, [step]);
 
   const steps = useMemo<Step[]>(() => {
-    const list: Step[] = ["career"];
+    // Skipped when the landing page already collected the career — it isn't a
+    // step the student takes here, so it shouldn't inflate the step count
+    // either ("Step 1 of 7", not "Step 2 of 8").
+    const list: Step[] = skipCareer ? [] : ["career"];
     if (refinement?.needsSpecifics) list.push("specifics");
     // The profile sits immediately after the career — right after any
     // NARROWING, so it describes the specific job they settled on rather than
@@ -121,7 +141,7 @@ export default function IntakeWizard() {
     // labelled as theirs.
     list.push("profile", "location", "education", "finances", "schools", "priority", "mobility");
     return list;
-  }, [refinement]);
+  }, [refinement, skipCareer]);
 
   const stepNumber = Math.max(1, steps.indexOf(step) + 1);
 
@@ -139,7 +159,14 @@ export default function IntakeWizard() {
   const back = () => {
     const index = steps.indexOf(step);
     const previous = steps[index - 1];
-    if (previous) goTo(previous);
+    if (previous) {
+      goTo(previous);
+    } else {
+      // First screen of the wizard. When the career came from the landing
+      // page, that page IS the previous step — going back has to leave, or the
+      // button is dead on the very screen students most want to back out of.
+      router.push("/");
+    }
   };
 
   const patch = (changes: Partial<IntakeAnswers>) =>
@@ -147,8 +174,10 @@ export default function IntakeWizard() {
 
   // --- Career step ---------------------------------------------------------
 
-  const submitCareer = async () => {
-    const raw = careerInput.trim();
+  // Takes the career explicitly rather than reading careerInput: the hydration
+  // effect calls this with the stored answer, before that state has settled.
+  const resolveCareer = async (career: string) => {
+    const raw = career.trim();
     if (!raw) {
       setError("Type a career to get started.");
       return;
@@ -218,13 +247,18 @@ export default function IntakeWizard() {
     }
   };
 
+  const submitCareer = () => resolveCareer(careerInput);
+
   const restartCareer = () => {
     // Changing the career invalidates the follow-up question that was built
     // from the old one, so drop it rather than showing doctor specialties to
     // someone who now wants to be an electrician.
     setRefinement(null);
     patch({ career: undefined });
-    goTo("career");
+    // When the career question was skipped there's nothing to go back TO here
+    // — retyping it happens on the landing page.
+    if (skipCareer) router.push("/");
+    else goTo("career");
   };
 
   // --- Finishing -----------------------------------------------------------
@@ -252,6 +286,35 @@ export default function IntakeWizard() {
 
   // --- Steps ---------------------------------------------------------------
 
+  if (skipCareer && step === "career") {
+    // Mid-skip: /api/refine-career is still deciding whether this career needs
+    // narrowing, so we don't yet know which screen comes first. Hold the
+    // student on the summary they're expecting rather than flashing the
+    // question we just removed. Deliberately the same skeleton
+    // CareerProfileStep uses, under the career they typed, so the handover
+    // between the two is invisible.
+    return (
+      <StepShell
+        stepNumber={1}
+        stepCount={stepCount}
+        question={careerInput}
+        help="Pulling together what this job is really like…"
+        onBack={() => router.push("/")}
+        // Matches the label CareerProfileStep itself uses once it takes over,
+        // so the active tab doesn't visibly change the moment loading finishes.
+        navLabel="Insights"
+        hideSteps
+        wide
+      >
+        <div className="space-y-4" aria-live="polite">
+          <div className="h-48 animate-pulse rounded-xl bg-surface-container" />
+          <div className="h-4 w-3/4 animate-pulse rounded bg-surface-container" />
+          <div className="h-4 w-1/2 animate-pulse rounded bg-surface-container" />
+        </div>
+      </StepShell>
+    );
+  }
+
   if (step === "career") {
     return (
       <StepShell
@@ -260,27 +323,6 @@ export default function IntakeWizard() {
         question="What career do you want?"
         help="Anything from a job title to a rough idea. We'll work out the route together — and it isn't always a degree."
         hero
-        // Set before the first API call, which is the point: the career
-        // summary on the next screen quotes wages for this market rather than
-        // a default one.
-        corner={
-          <CountryChip
-            value={answers.location?.countryCode}
-            onChange={(countryCode) =>
-              patch({
-                // Switching country CLEARS the finer detail. A Florida and a
-                // "33132" carried over into France would survive as a
-                // subdivision that country doesn't have and a postcode that
-                // resolves somewhere else entirely. Re-picking the same
-                // country keeps what's there.
-                location:
-                  answers.location?.countryCode === countryCode
-                    ? { ...answers.location, countryCode }
-                    : { countryCode, subdivision: "", city: "" },
-              })
-            }
-          />
-        }
       >
         <div className="mx-auto max-w-2xl">
           <div className="rounded-xl bg-surface-lowest p-2 shadow-raised">
@@ -393,14 +435,11 @@ export default function IntakeWizard() {
       <CareerProfileStep
         rail={rail}
         career={answers.career.resolved}
-        // From the corner chip on the opening screen, so pay is quoted in
-        // this market's currency rather than defaulting to US dollars.
-        //
-        // Falls back to DEFAULT_COUNTRY rather than passing undefined: the
-        // chip DISPLAYS "US" before it's been touched, and a student who never
-        // touches it would otherwise get no country at all — which reads to
-        // resolveAreas as "not in the US" and drops the BLS figures the chip
-        // was showing them as available.
+        // DEFAULT_COUNTRY until the location step answers, which is the screen
+        // after this one. Passing undefined instead reads to resolveAreas as
+        // "not in the US" and drops the BLS figures entirely — so a student
+        // who hasn't reached the location question yet would get estimates on
+        // a page that could have shown them survey data.
         countryCode={answers.location?.countryCode || DEFAULT_COUNTRY}
         // Usually empty here — the metro is asked for on the NEXT screen, so
         // these figures are national until then, and the panel says so.

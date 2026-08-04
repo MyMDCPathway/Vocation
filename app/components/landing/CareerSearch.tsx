@@ -13,9 +13,10 @@ import { loadIntake, saveIntake } from "@/app/lib/intakeStorage";
  * asks for is the career, and every school question is derived from it later.
  *
  * On submit it seeds the stored intake and routes to /start. IntakeWizard
- * reads that store on mount and prefills its career field, so the student
- * lands on question one with what they typed already in the box rather than
- * typing it twice.
+ * reads that store on mount and, finding the career already answered, skips
+ * its own career question entirely — the student lands on the job summary.
+ * Asking again there, with their answer pre-filled, read as the app losing
+ * track of what it had just been told.
  */
 export function CareerSearch({ examples }: { examples: string[] }) {
   const [career, setCareer] = useState("");

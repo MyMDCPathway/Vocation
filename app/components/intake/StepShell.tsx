@@ -1,6 +1,205 @@
 "use client";
 
+import Link from "next/link";
 import type { ReactNode } from "react";
+
+/**
+ * The intake's top bar.
+ *
+ * Through 2.0 there was deliberately no nav here — the argument was that a row
+ * of links on a form is an invitation to leave. It's back because the intake
+ * stopped being a form you get through and became a place you read: the career
+ * summary is a page students land on, sit with, and want to leave without
+ * hitting the browser's back button six times.
+ *
+ * Only real destinations. An "Insights" tab that goes nowhere and a bell with
+ * no notifications behind it cost nothing to draw and cost a student their
+ * trust the first time they click one.
+ */
+const NAV = [
+  { label: "Pathways", href: "/pathway" },
+  { label: "Career quiz", href: "/career-discovery" },
+];
+
+function TopBar({ active }: { active?: string }) {
+  return (
+    <header className="border-b border-outline-variant/60 bg-surface-lowest">
+      <div className="mx-auto flex h-14 w-full max-w-6xl items-center gap-8 px-6">
+        <Link
+          href="/"
+          className="shrink-0 text-lg font-bold tracking-tight text-primary transition-colors hover:text-primary-container"
+        >
+          Vocation
+        </Link>
+
+        {/* Every item sits at the bar's own centred height, with its OWN
+            border-bottom a couple pixels under its own text — not the full
+            height of the bar. Stretching items to bar height put the border
+            at the bar's bottom edge, a visible gap below the label rather
+            than a tight underline. */}
+        <nav className="flex items-center gap-6">
+          {NAV.map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="border-b-2 border-transparent pb-1 text-sm font-medium text-on-surface-variant transition-colors hover:text-primary"
+            >
+              {item.label}
+            </Link>
+          ))}
+          {active && (
+            // The current screen, as a tab you can see you're on. Not a link:
+            // it goes where you already are. Secondary rather than primary —
+            // primary is black in this palette, and the active tab needs to
+            // read as "selected", which on this page means the same teal-green
+            // the rest of the intake already uses for a positive, active state.
+            <span
+              aria-current="page"
+              className="border-b-2 border-secondary pb-1 text-sm font-semibold text-secondary"
+            >
+              {active}
+            </span>
+          )}
+        </nav>
+
+        <div className="ml-auto flex items-center gap-1">
+          {/* The only one of the four that goes anywhere. The landing page IS
+              the career search, so this is a real destination rather than a
+              magnifying glass that opens nothing. */}
+          <Link
+            href="/"
+            aria-label="Search careers"
+            title="Search careers"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-on-surface-variant transition-colors hover:bg-surface-container hover:text-primary"
+          >
+            <SearchIcon />
+          </Link>
+
+          {/* Notifications, settings and the account menu are all downstream of
+              accounts, which don't exist yet. They ship visible but disabled
+              and say so on hover: a bell that silently does nothing reads as a
+              broken app, where a greyed one reads as a feature not built. */}
+          <BarStub label="Notifications" title="Notifications are coming soon">
+            <BellIcon />
+          </BarStub>
+          <BarStub label="Settings" title="Settings are coming soon">
+            <GearIcon />
+          </BarStub>
+          <BarStub label="Account" title="Accounts are coming soon">
+            <AvatarIcon />
+          </BarStub>
+        </div>
+      </div>
+    </header>
+  );
+}
+
+function BarStub({
+  label,
+  title,
+  children,
+}: {
+  label: string;
+  title: string;
+  children: ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      disabled
+      aria-label={label}
+      title={title}
+      className="flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-full text-outline/70"
+    >
+      {children}
+    </button>
+  );
+}
+
+function barIcon(children: ReactNode) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className="h-[18px] w-[18px]"
+    >
+      {children}
+    </svg>
+  );
+}
+
+function SearchIcon() {
+  return barIcon(
+    <>
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </>
+  );
+}
+
+function BellIcon() {
+  return barIcon(
+    <>
+      <path d="M18 8a6 6 0 1 0-12 0c0 6-2 7-2 7h16s-2-1-2-7" />
+      <path d="M10.5 20a2 2 0 0 0 3 0" />
+    </>
+  );
+}
+
+function GearIcon() {
+  return barIcon(
+    <>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7.5 19.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3 15a2 2 0 1 1 0-4 1.6 1.6 0 0 0 1.7-2.7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 11 4.6V4a2 2 0 1 1 4 0v.6a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.6 1.6 0 0 0 21 11a2 2 0 1 1 0 4h-.6a1.6 1.6 0 0 0-1 .9z" />
+    </>
+  );
+}
+
+function AvatarIcon() {
+  return barIcon(
+    <>
+      <circle cx="12" cy="9" r="3.5" />
+      <path d="M5 20a7 7 0 0 1 14 0" />
+      <circle cx="12" cy="12" r="9.5" />
+    </>
+  );
+}
+
+/**
+ * Discrete steps rather than a filling bar.
+ *
+ * A bar answers "how far along am I" with a smear. Segments answer it with a
+ * count, which is the question people actually ask on question four of seven.
+ */
+function Steps({ current, total }: { current: number; total: number }) {
+  return (
+    <div className="mx-auto mt-8 max-w-md">
+      <ol className="flex items-center gap-1.5" aria-hidden="true">
+        {Array.from({ length: total }, (_, index) => {
+          const step = index + 1;
+          const done = step < current;
+          const here = step === current;
+          return (
+            <li
+              key={step}
+              className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
+                done ? "bg-primary/40" : here ? "bg-primary" : "bg-surface-container"
+              }`}
+            />
+          );
+        })}
+      </ol>
+      <p className="mt-2 text-center text-xs font-medium text-outline">
+        Step {current} of {total}
+      </p>
+    </div>
+  );
+}
 
 /**
  * The frame every intake question renders inside.
@@ -28,8 +227,9 @@ export function StepShell({
   footer,
   wide,
   hero,
+  hideSteps,
   rail,
-  corner,
+  navLabel,
   children,
 }: {
   stepNumber: number;
@@ -55,6 +255,17 @@ export function StepShell({
    */
   hero?: boolean;
   /**
+   * Drop the step counter without going full hero.
+   *
+   * Only the career summary sets this. It's not a question with an N-of-M to
+   * report — it's the one screen in the intake a student is meant to read
+   * rather than answer, and "Step 2 of 8" over a page of prose says "you're
+   * behind schedule" about a page that isn't a form at all. The top bar's
+   * "Insights" tab already says where they are; the step count would be
+   * saying it twice, and saying it wrong.
+   */
+  hideSteps?: boolean;
+  /**
    * The evolving route, shown beside the question.
    *
    * Lives here rather than in each step so every question gets it without
@@ -62,60 +273,32 @@ export function StepShell({
    */
   rail?: ReactNode;
   /**
-   * A control pinned to the top-right, level with the wordmark.
+   * Names this screen as the active tab in the top bar.
    *
-   * Only the country switcher uses this, and only on the hero. It's a setting
-   * rather than a question, so it sits in the corner the way every storefront
-   * puts its locale picker — not as a screen the student has to get past.
+   * Only screens a student would think of as a destination set it. A question
+   * in the middle of a form isn't one, and tabbing it would suggest they can
+   * navigate back to question four.
    */
-  corner?: ReactNode;
+  navLabel?: string;
   children: ReactNode;
 }) {
-  const percent = Math.round((stepNumber / stepCount) * 100);
   // The rail needs room beside the reading column, so a step that has one is
   // widened even when it didn't ask to be.
   const column = wide || rail ? "max-w-6xl" : "max-w-3xl";
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-surface">
-      {/* Pinned to the PAGE corner, not the reading column — a locale switcher
-          that floats 280px in from the edge doesn't read as chrome, it reads
-          as part of the form. Outside the centred column entirely, so the
-          wordmark stays optically centred rather than being pushed left by
-          half the chip's width.
+    <div className="relative flex min-h-screen flex-col bg-surface">
+      <TopBar active={navLabel} />
 
-          z-30 clears the content below: the popover has to open over the
-          heading beneath it. */}
-      {corner && (
-        <div className="absolute right-5 top-8 z-30 md:right-8 md:top-11">
-          {corner}
+      {/* The hero has nothing to be N-of-M about — it's the first thing you
+          see, and a step counter there says "this is a form" before you've
+          typed anything. hideSteps drops it for the same reason on a
+          different screen; see its doc comment above. */}
+      {!hero && !hideSteps && (
+        <div className={`relative z-10 mx-auto w-full ${column} px-6 pt-2`}>
+          <Steps current={stepNumber} total={stepCount} />
         </div>
       )}
-
-      <div className={`relative z-10 mx-auto w-full ${column} px-6 pt-10 md:pt-14`}>
-        <p className="text-center">
-          <span className="text-lg font-bold tracking-tight text-primary">
-            Vocation
-          </span>
-        </p>
-
-        {/* The hero has nothing to be N-of-M about — it's the first thing you
-            see, and a progress bar there says "this is a form" before you've
-            typed anything. */}
-        {!hero && (
-          <div className="mx-auto mt-8 max-w-md">
-            <div className="h-1.5 w-full rounded-full bg-surface-container" aria-hidden="true">
-              <div
-                className="h-1.5 rounded-full bg-primary transition-all duration-500 ease-out"
-                style={{ width: `${percent}%` }}
-              />
-            </div>
-            <p className="mt-2 text-center text-xs font-medium text-outline">
-              Step {stepNumber} of {stepCount}
-            </p>
-          </div>
-        )}
-      </div>
 
       <div
         className={`relative z-10 mx-auto w-full flex-1 ${column} px-6 ${
@@ -130,15 +313,20 @@ export function StepShell({
           }
         >
           <div className={`min-w-0 ${hero ? "text-center" : ""}`}>
-            <h1
-              className={
-                hero
-                  ? "text-2xl font-extrabold leading-[1.15] tracking-[-0.02em] text-primary sm:text-5xl md:text-6xl"
-                  : "text-2xl font-bold leading-tight tracking-[-0.01em] text-primary md:text-[32px]"
-              }
-            >
-              {question}
-            </h1>
+            {/* Empty when a step draws its own title — an <h1> with nothing in
+                it still takes its line-height and pushes the content down by a
+                heading it never showed. */}
+            {question && (
+              <h1
+                className={
+                  hero
+                    ? "text-2xl font-extrabold leading-[1.15] tracking-[-0.02em] text-primary sm:text-5xl md:text-6xl"
+                    : "text-2xl font-bold leading-tight tracking-[-0.01em] text-primary md:text-[32px]"
+                }
+              >
+                {question}
+              </h1>
+            )}
             {help && (
               <p
                 className={`mt-4 text-on-surface-variant ${
@@ -149,7 +337,9 @@ export function StepShell({
               </p>
             )}
 
-            <div className={hero ? "mt-10" : "mt-8"}>{children}</div>
+            <div className={hero ? "mt-10" : question ? "mt-8" : ""}>
+              {children}
+            </div>
           </div>
 
           {/* Sticky so the path stays put while a long option list scrolls
