@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { CareerSearch } from "@/app/components/landing/CareerSearch";
-import { HeaderSearch } from "@/app/components/landing/HeaderSearch";
 
 // The landing page, in the Empowered Clarity world (see DESIGN.md).
 //
@@ -114,25 +113,8 @@ const FOOTER_LINKS = [
 
 function Wordmark() {
   return (
-    <span className="inline-flex items-center gap-2">
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        aria-hidden="true"
-        className="h-6 w-6 text-primary"
-      >
-        <circle cx="12" cy="12" r="10.5" stroke="currentColor" strokeWidth="1.6" />
-        <path
-          d="M7.5 8.25 12 16l4.5-7.75"
-          stroke="currentColor"
-          strokeWidth="1.9"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-      <span className="text-lg font-bold tracking-tight text-primary">
-        Vocation
-      </span>
+    <span className="text-lg font-bold tracking-tight text-primary">
+      Vocation
     </span>
   );
 }
@@ -238,43 +220,69 @@ export default function Home() {
   return (
     <div className="flex min-h-screen flex-col bg-surface">
       {/* Sticky, bordered, no shadow. Tint and shadow separate elsewhere, but a
-          top bar reads better with an explicit edge. A real search box here,
-          not the bell/gear/avatar cluster a reference comp used — this
-          product has no accounts or notifications to gate behind those. */}
-      <header className="sticky top-0 z-50 border-b border-outline-variant bg-surface">
-        <div className="mx-auto flex w-full max-w-[1200px] items-center gap-6 px-5 py-4 md:px-16">
-          <Link
-            href="/"
-            className="shrink-0 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
-          >
-            <Wordmark />
-          </Link>
+          top bar reads better with an explicit edge.
 
-          <div className="flex-1">
-            <HeaderSearch />
+          The bell / gear / avatar on the right are DECORATIVE ONLY — plain
+          spans, not links or buttons, and the avatar is a bare glyph rather
+          than a photo. This product has no accounts, no notifications, and no
+          settings page; a clickable control here would promise a capability
+          that doesn't exist. If auth ever ships, these are where it plugs in. */}
+      <header className="sticky top-0 z-50 border-b border-outline-variant bg-surface">
+        <div className="mx-auto flex w-full max-w-[1200px] items-center justify-between px-5 py-4 md:px-16">
+          <div className="flex items-center gap-6">
+            <Link
+              href="/"
+              className="shrink-0 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+            >
+              <Wordmark />
+            </Link>
+
+            <nav className="hidden items-center gap-5 sm:flex">
+              <Link
+                href="/start"
+                className="text-sm font-medium text-primary transition-colors hover:text-primary-container"
+              >
+                Pathways
+              </Link>
+              <Link
+                href="/pathway"
+                className="text-sm font-medium text-secondary transition-colors hover:text-secondary/80"
+              >
+                Schools
+              </Link>
+              <Link
+                href="/career-discovery"
+                className="text-sm font-medium text-primary transition-colors hover:text-primary-container"
+              >
+                Insights
+              </Link>
+            </nav>
           </div>
 
-          <nav className="hidden shrink-0 items-center gap-8 lg:flex">
-            <Link
-              href="/career-discovery"
-              className="text-sm font-medium tracking-[0.05em] text-on-surface-variant transition-colors hover:text-primary"
+          <div className="flex items-center gap-4 text-outline">
+            <span aria-hidden="true" title="Notifications (not yet available)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+                <path d="M6 8a6 6 0 1 1 12 0c0 4.5 1.5 6 1.5 6h-15S6 12.5 6 8Z" />
+                <path d="M10 20a2 2 0 0 0 4 0" />
+              </svg>
+            </span>
+            <span aria-hidden="true" title="Settings (not yet available)">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.36a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.64 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.64 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.64a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.36 9c.1.36.5 1 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z" />
+              </svg>
+            </span>
+            <span
+              aria-hidden="true"
+              title="Account (not yet available)"
+              className="flex h-7 w-7 items-center justify-center rounded-full bg-surface-container text-on-surface-variant"
             >
-              Career quiz
-            </Link>
-            <Link
-              href="/pathway"
-              className="text-sm font-medium tracking-[0.05em] text-on-surface-variant transition-colors hover:text-primary"
-            >
-              Browse by school
-            </Link>
-          </nav>
-
-          <Link
-            href="/start"
-            className="shrink-0 rounded-full bg-primary px-5 py-2.5 text-sm font-medium tracking-[0.05em] text-on-primary transition-colors hover:bg-primary-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-          >
-            Plan your route
-          </Link>
+              <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+                <circle cx="12" cy="8" r="3.6" />
+                <path d="M4.5 20.5c1.6-3.6 4.6-5.5 7.5-5.5s5.9 1.9 7.5 5.5" strokeLinecap="round" />
+              </svg>
+            </span>
+          </div>
         </div>
       </header>
 
@@ -346,11 +354,9 @@ export default function Home() {
                   <Link
                     key={point.id}
                     href="/start"
-                    className="group flex flex-col rounded-lg bg-gradient-to-br from-surface-container-low to-surface-lowest p-6 shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
+                    className="group flex flex-col rounded-lg border border-outline-variant bg-gradient-to-bl from-secondary-container/10 to-surface-lowest p-6 shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
                   >
-                    <span className="flex h-11 w-11 items-center justify-center rounded-md bg-secondary-container">
-                      <Icon />
-                    </span>
+                    <Icon />
                     <p className="mt-5 text-lg font-semibold text-on-surface">
                       {point.title}
                     </p>
@@ -380,36 +386,48 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Coverage — verifiable facts only. 53 is the count of catalogues
-            actually shipped in app/lib/schoolCatalogs.ts. */}
-        <section className="border-y border-outline-variant bg-surface-lowest px-5 py-14 md:px-16">
-          <dl className="mx-auto grid w-full max-w-[1200px] grid-cols-1 gap-8 sm:grid-cols-3">
-            {[
-              {
-                figure: "53",
-                label: "Florida institutions with fully scraped program catalogs",
-              },
-              {
-                figure: "Anywhere",
-                label:
-                  "Plan against any school worldwide, with links verified before you see them",
-              },
-              {
-                figure: "7",
-                label:
-                  "Ways in — degree, credential, apprenticeship, certification, enlistment, talent, direct entry",
-              },
-            ].map((stat) => (
-              <div key={stat.figure}>
-                <dt className="tabular text-3xl font-bold text-primary">
-                  {stat.figure}
-                </dt>
-                <dd className="mt-2 text-sm leading-relaxed text-on-surface-variant">
-                  {stat.label}
-                </dd>
-              </div>
-            ))}
-          </dl>
+        {/* How Vocation Works — an accurate description of the real flow:
+            search, generate, follow. Nothing here is aspirational. Step 1
+            gets the teal accent as the "you are here" step; 2 and 3 stay
+            neutral until reached. */}
+        <section className="bg-surface-container px-5 py-20 md:px-16 md:py-24">
+          <div className="mx-auto w-full max-w-[1200px] text-center">
+            <h2 className="text-2xl font-semibold tracking-[-0.01em] text-primary">
+              How Vocation Works
+            </h2>
+
+            <div className="mt-12 grid grid-cols-1 gap-6 text-left md:grid-cols-3">
+              {HOW_IT_WORKS.map((item, index) => {
+                const Icon = HOW_IT_WORKS_ICONS[index];
+                const active = index === 0;
+                return (
+                  <div
+                    key={item.step}
+                    className="rounded-lg border border-outline-variant bg-surface-lowest p-6"
+                  >
+                    <span
+                      className={`flex h-9 w-9 items-center justify-center rounded-md border ${
+                        active
+                          ? "border-secondary text-secondary"
+                          : "border-outline-variant text-outline"
+                      }`}
+                    >
+                      <Icon />
+                    </span>
+                    <p className="mt-5 text-xs font-semibold uppercase tracking-wider text-outline">
+                      {item.step}
+                    </p>
+                    <p className="mt-1 text-lg font-semibold text-on-surface">
+                      {item.title}
+                    </p>
+                    <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">
+                      {item.detail}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         </section>
 
         {/* Example routes — real programs, real credentials, no invented wages. */}
@@ -431,88 +449,82 @@ export default function Home() {
               {EXAMPLE_ROUTES.map((route) => (
                 <article
                   key={route.program}
-                  className="flex flex-col rounded-xl bg-surface-lowest p-8 shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
+                  className="flex flex-col overflow-hidden rounded-xl bg-surface-lowest shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
                 >
-                  <p className="text-xs font-semibold uppercase tracking-wider text-secondary">
-                    {route.field}
-                  </p>
+                  {/* Top accent bar — the same "marks a real thing" teal this
+                      system uses on completed roadmap nodes, not decoration. */}
+                  <span aria-hidden="true" className="block h-1 bg-secondary" />
 
-                  <ol className="relative mt-6 flex-1 pl-7">
-                    <span
-                      aria-hidden="true"
-                      className="absolute bottom-2 left-[5px] top-2 w-0.5 bg-outline-variant"
-                    />
+                  <div className="flex flex-1 flex-col p-6">
+                    <span className="inline-flex w-fit items-center rounded-md bg-primary px-2.5 py-1 text-xs font-semibold text-on-primary">
+                      {route.field}
+                    </span>
 
-                    <li className="relative mb-6">
-                      <span
-                        aria-hidden="true"
-                        className="absolute -left-[26px] top-1.5 h-3 w-3 rounded-full border-2 border-surface bg-primary"
-                      />
-                      <p className="text-xs font-semibold uppercase tracking-wider text-outline">
-                        Step 1
-                      </p>
-                      <a
-                        href={route.href}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-1 inline-block text-sm font-medium text-on-surface underline decoration-outline-variant underline-offset-4 transition-colors hover:text-primary hover:decoration-primary"
-                      >
-                        {route.program}
-                      </a>
-                      <p className="mt-0.5 text-xs text-on-surface-variant">
-                        A.S. · Miami Dade College
-                      </p>
-                    </li>
+                    <p className="mt-4 text-xl font-semibold text-on-surface">
+                      {route.goal}
+                    </p>
 
-                    <li className="relative mb-6">
-                      <span
-                        aria-hidden="true"
-                        className="absolute -left-[26px] top-1.5 h-3 w-3 rounded-full border-2 border-surface bg-primary"
-                      />
-                      <p className="text-xs font-semibold uppercase tracking-wider text-outline">
-                        Step 2
-                      </p>
-                      <p className="mt-1 text-sm font-medium text-on-surface">
-                        {route.credential}
-                      </p>
-                      <p className="mt-0.5 text-xs text-on-surface-variant">
-                        {route.credentialKind}
-                      </p>
-                    </li>
+                    <div className="mt-5 flex-1 space-y-4">
+                      <div className="flex items-start gap-3">
+                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-secondary text-on-secondary">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-3 w-3">
+                            <path d="m4 12 5 5L20 6" />
+                          </svg>
+                        </span>
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wider text-outline">
+                            Program
+                          </p>
+                          <a
+                            href={route.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-medium text-secondary underline decoration-secondary/30 underline-offset-2 transition-colors hover:text-secondary/80"
+                          >
+                            {route.program}
+                          </a>
+                        </div>
+                      </div>
 
-                    <li className="relative">
-                      <span
-                        aria-hidden="true"
-                        className="absolute -left-[26px] top-1.5 h-3 w-3 rounded-full border-2 border-surface bg-secondary"
-                      />
-                      <p className="text-xs font-semibold uppercase tracking-wider text-outline">
-                        Goal
-                      </p>
-                      <p className="mt-1 text-sm font-semibold text-primary">
-                        {route.goal}
-                      </p>
-                    </li>
-                  </ol>
+                      <div className="flex items-start gap-3">
+                        <span
+                          aria-hidden="true"
+                          className="mt-0.5 h-5 w-5 shrink-0 rounded-full border-2 border-outline-variant"
+                        />
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wider text-outline">
+                            Credential
+                          </p>
+                          <p className="text-sm font-medium text-secondary">
+                            {route.credential}
+                          </p>
+                          <p className="mt-0.5 text-xs text-on-surface-variant">
+                            {route.credentialKind}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
 
-                  <Link
-                    href="/start"
-                    className="mt-8 inline-flex items-center gap-2 text-sm font-medium tracking-[0.05em] text-primary transition-colors hover:text-primary-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                  >
-                    Plan this route
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.8"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      aria-hidden="true"
-                      className="h-4 w-4"
+                    <Link
+                      href="/start"
+                      className="mt-6 inline-flex items-center gap-2 border-t border-outline-variant pt-5 text-sm font-medium text-secondary transition-colors hover:text-secondary/80"
                     >
-                      <path d="M5 12h13" />
-                      <path d="m12 5 7 7-7 7" />
-                    </svg>
-                  </Link>
+                      View Full Roadmap
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                        className="h-4 w-4"
+                      >
+                        <path d="M5 12h13" />
+                        <path d="m12 5 7 7-7 7" />
+                      </svg>
+                    </Link>
+                  </div>
                 </article>
               ))}
             </div>
@@ -522,41 +534,6 @@ export default function Home() {
               catalog. Costs and wages appear on your plan, where they&apos;re
               priced per school and per metro.
             </p>
-          </div>
-        </section>
-
-        {/* How Vocation Works — an accurate description of the real flow:
-            search, generate, follow. Nothing here is aspirational. */}
-        <section className="bg-surface-container px-5 py-20 md:px-16 md:py-24">
-          <div className="mx-auto w-full max-w-[1200px] text-center">
-            <h2 className="text-2xl font-semibold tracking-[-0.01em] text-primary">
-              How Vocation Works
-            </h2>
-
-            <div className="mt-12 grid grid-cols-1 gap-6 text-left md:grid-cols-3">
-              {HOW_IT_WORKS.map((item, index) => {
-                const Icon = HOW_IT_WORKS_ICONS[index];
-                return (
-                  <div
-                    key={item.step}
-                    className="rounded-lg border border-outline-variant bg-surface-lowest p-6"
-                  >
-                    <span className="flex h-9 w-9 items-center justify-center rounded-md border border-secondary/40">
-                      <Icon />
-                    </span>
-                    <p className="mt-5 text-xs font-semibold uppercase tracking-wider text-outline">
-                      {item.step}
-                    </p>
-                    <p className="mt-1 text-lg font-semibold text-on-surface">
-                      {item.title}
-                    </p>
-                    <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">
-                      {item.detail}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
           </div>
         </section>
       </main>

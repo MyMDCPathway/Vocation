@@ -36,3 +36,11 @@ yarn-error.log*
 next-env.d.ts
 
 .env*
+.neon
+
+# Neon skill's own installed tooling — regenerable via the skills CLI, not
+# part of the shipped product.
+/.agents/
+/.claude/skills/
+/.claude/settings.local.json
+skills-lock.json

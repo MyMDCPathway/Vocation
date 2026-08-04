@@ -100,25 +100,48 @@ Supporting context the product reads or produces:
   country code so it is never shown to someone who cannot apply.
 - An interactive map of schools.
 - A "what fits me" career quiz (1.0 flow).
+- **Accounts.** Email/password signup and login, plus Google and LinkedIn
+  OAuth (the buttons render regardless, but only function once their app
+  credentials are configured — see `.env.example`). A visitor's in-progress
+  sessionStorage intake is carried into the account at signup rather than
+  discarded (`app/lib/intakeAdoption.ts`). Onboarding collects interests,
+  goals, and a privacy setting (Private / Mentors Only / Public). Settings
+  management (edit profile, password change, 2FA, notification prefs, data
+  export/deletion) is designed but not yet built — a named next milestone, not
+  an oversight.
 
 **Technical constraints**
 
 - Next.js 14 App Router, React 18, TypeScript, Tailwind, Vitest. Google Gemini
   (`gemini-flash-latest`, a floating alias on purpose) for generation.
-- **No database.** Persistence is a committed JSON seed file, an in-memory
-  layer, an optional Redis/KV durable layer, and a school cookie.
-- Runtime dependencies are deliberately few: next, react, react-dom, plus
-  leaflet (the one justified addition, for the map) and Vercel analytics.
+- **One real database, added deliberately and only for this.** Pathway data is
+  still a committed JSON seed file, an in-memory layer, an optional Redis/KV
+  durable layer, and a school cookie — none of that changed. User accounts are
+  Postgres (Neon, via Prisma — `prisma/schema.prisma`), because uniqueness and
+  relations (one user, many linked OAuth accounts) are exactly what a KV blob
+  store can't enforce on its own.
+- Auth is Auth.js v5. Middleware runs on the Edge Runtime and only checks for a
+  valid session JWT (`app/lib/auth.config.ts`) — it never loads bcrypt or the
+  Prisma adapter, both of which are Node-only and live in the separate full
+  config (`app/lib/auth.ts`) that routes and pages use instead.
+- Runtime dependencies are deliberately few: next, react, react-dom, leaflet
+  (the map), Vercel analytics, and now next-auth/@auth/prisma-adapter/prisma/
+  bcryptjs for accounts — the same "justified exception, not a small add" bar
+  as leaflet.
 - Rate limiting is per-process, so on serverless it is approximate. The hard
   spend guarantee has to be a billing cap at the provider.
-- Intake currently lives in sessionStorage and dies with the tab. There is no
-  sign-in.
+- **Signing up is optional, never a wall.** The intake, `/start`, and `/plan`
+  work exactly as before with zero account interaction. Middleware protects
+  only `/onboarding`. An in-progress intake is adopted into the account at
+  signup rather than lost, but nothing requires an account to plan a route.
 
 **Explicitly undecided**
 
-- **Accounts and stored personal data.** Not currently collected, but not
-  ruled out either. A real paid tier requires auth and moving plan itemization
-  to an authenticated server route — it cannot be gated in a client component.
+- **Settings management.** Profile edit, password change, two-factor auth,
+  notification preferences, and data export/deletion are designed (see the
+  Account & Settings PRD) but not built. A named next milestone.
+- **Password reset.** Not built. `/login` deliberately has no "forgot
+  password" link rather than one pointing at a page that doesn't exist yet.
 - **Pricing and whether the core plan stays free.** "Vocation Plus" exists today
   only as a labelled coming-soon panel that renders skeletons, not blurred real
   figures. Whether it becomes real, and what falls behind it, is open.

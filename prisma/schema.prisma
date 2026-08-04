@@ -1,0 +1,95 @@
+// The Account Creation data model.
+//
+// This is the first schema this project has ever needed — everything before
+// it was a committed JSON seed file, an in-memory cache, or sessionStorage
+// (see HANDOFF.md and app/lib/durableCache.ts). Accounts are the first
+// feature that genuinely requires uniqueness (email) and relations (a user
+// has many OAuth accounts), which a KV blob store can't enforce on its own.
+//
+// User/Account/Session/VerificationToken follow Auth.js's own required shape
+// verbatim (https://authjs.dev/getting-started/adapters/prisma) rather than a
+// project-specific reinterpretation — the adapter expects these exact models
+// and field names, and diverging from them is how "almost works" auth bugs
+// get introduced.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+
+  /// Null for an OAuth-only user who never set a password.
+  passwordHash String?
+
+  /// PRD §1: "account type selection (Student, Career Changer, Professional)".
+  /// A plain string, not an enum — matches the same "don't over-model a small
+  /// fixed set" call already made for RouteArchetype in app/lib/routeArchetype.ts.
+  accountType String?
+
+  /// PRD §2 onboarding: interests/goals are free-form tags, not a fixed
+  /// taxonomy, so they're stored as string arrays rather than a join table.
+  interests String[] @default([])
+  goals     String[] @default([])
+
+  /// PRD §2: "Private, Mentors Only, Public". Defaults to the least exposure.
+  privacyVisibility String @default("private")
+
+  /// The visitor's in-progress sessionStorage intake (app/lib/intake.ts's
+  /// IntakeAnswers), adopted into the account at signup so nothing already
+  /// answered is thrown away. Stored as opaque JSON — this is a snapshot of a
+  /// client-side type that already owns its own shape and versioning; the
+  /// database doesn't need to understand its internals, only to hold it.
+  savedIntake Json?
+
+  accounts Account[]
+  sessions Session[]
+}
+
+/// One row per linked OAuth provider (Google, LinkedIn) or per credentials
+/// login — Auth.js's standard shape.
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
