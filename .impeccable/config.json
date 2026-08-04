@@ -8,6 +8,13 @@
         "value": "inter",
         "createdAt": "2026-08-02T21:49:45.289Z",
         "reason": "User confirmed Inter is intentional"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "file": "app/components/intake/CareerProfileStep.tsx",
+        "createdAt": "2026-08-04T00:00:00.000Z",
+        "reason": "User confirmed: the practitioner-voice cards' coloured left border comes from the approved comp, and the colour encodes reward/tradeoff/warning"
       }
     ]
   }

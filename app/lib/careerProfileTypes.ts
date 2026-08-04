@@ -42,11 +42,32 @@ export interface PayEstimate {
   note: string;
 }
 
+/**
+ * Whether the field is HIRING — is the work growing, holding, or going away.
+ *
+ * "Competitive" is still listed because profiles cached before demand and
+ * competition were split still carry it. Nothing asks for it any more; the
+ * crowding half of that answer now lives in CompetitionLevel below.
+ */
 export type DemandLevel =
   | "Growing fast"
   | "Steady demand"
   | "Competitive"
   | "Shrinking";
+
+/**
+ * Whether you'd GET one of those jobs, which is a different question.
+ *
+ * A field can be growing and still brutal to break into — entry-level software
+ * is exactly that — and a page showing only one of the two tells a student the
+ * opposite of what they need to hear. Demand is about the work; this is about
+ * the queue in front of it.
+ */
+export type CompetitionLevel =
+  | "Wide open"
+  | "Manageable"
+  | "Competitive"
+  | "Extremely competitive";
 
 /**
  * Whether people in the job raise a theme as a reason to do it, a price they
@@ -101,6 +122,17 @@ export interface CareerProfile {
   dayToDay: string[];
   demand: {
     level: DemandLevel;
+    detail: string;
+  };
+  /**
+   * How hard it is to get in, as distinct from whether the work exists.
+   *
+   * Optional because profiles cached before the split don't have it. The page
+   * shows the chip when it's there and simply doesn't when it isn't, rather
+   * than inventing a level for a profile that was never asked the question.
+   */
+  competition?: {
+    level: CompetitionLevel;
     detail: string;
   };
   pay: PayEstimate;
