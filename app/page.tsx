@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CareerSearch } from "@/app/components/landing/CareerSearch";
+import { AuthControls } from "@/app/components/AuthControls";
 
 // The landing page, in the Empowered Clarity world (see DESIGN.md).
 //
@@ -259,30 +260,7 @@ export default function Home() {
             </nav>
           </div>
 
-          <div className="flex items-center gap-4 text-outline">
-            <span aria-hidden="true" title="Notifications (not yet available)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                <path d="M6 8a6 6 0 1 1 12 0c0 4.5 1.5 6 1.5 6h-15S6 12.5 6 8Z" />
-                <path d="M10 20a2 2 0 0 0 4 0" />
-              </svg>
-            </span>
-            <span aria-hidden="true" title="Settings (not yet available)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5">
-                <circle cx="12" cy="12" r="3" />
-                <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 9 19.36a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.64 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.64 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.64a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.36 9c.1.36.5 1 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z" />
-              </svg>
-            </span>
-            <span
-              aria-hidden="true"
-              title="Account (not yet available)"
-              className="flex h-7 w-7 items-center justify-center rounded-full bg-surface-container text-on-surface-variant"
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
-                <circle cx="12" cy="8" r="3.6" />
-                <path d="M4.5 20.5c1.6-3.6 4.6-5.5 7.5-5.5s5.9 1.9 7.5 5.5" strokeLinecap="round" />
-              </svg>
-            </span>
-          </div>
+          <AuthControls />
         </div>
       </header>
 

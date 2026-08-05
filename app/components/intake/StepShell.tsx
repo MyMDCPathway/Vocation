@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { AuthControls } from "@/app/components/AuthControls";
 
 /**
  * The intake's top bar.
@@ -75,44 +76,13 @@ function TopBar({ active }: { active?: string }) {
             <SearchIcon />
           </Link>
 
-          {/* Notifications, settings and the account menu are all downstream of
-              accounts, which don't exist yet. They ship visible but disabled
-              and say so on hover: a bell that silently does nothing reads as a
-              broken app, where a greyed one reads as a feature not built. */}
-          <BarStub label="Notifications" title="Notifications are coming soon">
-            <BellIcon />
-          </BarStub>
-          <BarStub label="Settings" title="Settings are coming soon">
-            <GearIcon />
-          </BarStub>
-          <BarStub label="Account" title="Accounts are coming soon">
-            <AvatarIcon />
-          </BarStub>
+          {/* Notifications/Settings/Account, and Log in vs Sign out — one
+              shared component so this header and the landing page's don't
+              drift into two different answers for "am I signed in". */}
+          <AuthControls />
         </div>
       </div>
     </header>
-  );
-}
-
-function BarStub({
-  label,
-  title,
-  children,
-}: {
-  label: string;
-  title: string;
-  children: ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      disabled
-      aria-label={label}
-      title={title}
-      className="flex h-9 w-9 cursor-not-allowed items-center justify-center rounded-full text-outline/70"
-    >
-      {children}
-    </button>
   );
 }
 
@@ -138,34 +108,6 @@ function SearchIcon() {
     <>
       <circle cx="11" cy="11" r="7" />
       <path d="m20 20-3.5-3.5" />
-    </>
-  );
-}
-
-function BellIcon() {
-  return barIcon(
-    <>
-      <path d="M18 8a6 6 0 1 0-12 0c0 6-2 7-2 7h16s-2-1-2-7" />
-      <path d="M10.5 20a2 2 0 0 0 3 0" />
-    </>
-  );
-}
-
-function GearIcon() {
-  return barIcon(
-    <>
-      <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-2.7 1.1V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 7.5 19.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.6 1.6 0 0 0 3 15a2 2 0 1 1 0-4 1.6 1.6 0 0 0 1.7-2.7l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.6 1.6 0 0 0 11 4.6V4a2 2 0 1 1 4 0v.6a1.6 1.6 0 0 0 2.7 1.1l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.6 1.6 0 0 0 21 11a2 2 0 1 1 0 4h-.6a1.6 1.6 0 0 0-1 .9z" />
-    </>
-  );
-}
-
-function AvatarIcon() {
-  return barIcon(
-    <>
-      <circle cx="12" cy="9" r="3.5" />
-      <path d="M5 20a7 7 0 0 1 14 0" />
-      <circle cx="12" cy="12" r="9.5" />
     </>
   );
 }
