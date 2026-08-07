@@ -1,0 +1,116 @@
+{
+  "Registered Nurse": {
+    "title": "Pathway 1: Direct Career Entry via A.S. in Nursing",
+    "steps": [
+      {
+        "type": "degree",
+        "level": "A.S. (MDC)",
+        "name": "Associate in Science in Nursing",
+        "description": "Provides hands-on clinical training and foundational nursing education required for direct entry into registered nursing practice."
+      },
+      {
+        "type": "exam",
+        "level": "Required Licensure",
+        "name": "NCLEX-RN (National Council Licensure Examination)",
+        "description": "Requirements: 1. Graduate from an accredited nursing program. 2. Apply for licensure with the Florida Board of Nursing. 3. Receive Authorization to Test (ATT). 4. Pass the NCLEX-RN exam."
+      },
+      {
+        "type": "internship",
+        "level": "Professional Experience",
+        "name": "Nurse Residency Program",
+        "description": "Complete a supervised clinical orientation and preceptorship program at a healthcare facility to transition safely into professional practice."
+      },
+      {
+        "type": "degree",
+        "level": "B.S. (MDC)",
+        "name": "Bachelor of Science in Nursing",
+        "description": "Complete MDC's RN-to-BSN post-licensure degree to advance career options, leadership skills, and eligibility for specialized roles."
+      },
+      {
+        "type": "degree",
+        "level": "M.S. (Optional)",
+        "name": "Master of Science in Nursing",
+        "description": "Optional advanced degree for specialized roles such as Nurse Practitioner, Clinical Nurse Specialist, or Nurse Administrator."
+      }
+    ],
+    "confidence": "catalog"
+  },
+  "Machine Learning Technician": {
+    "title": "Pathway 1: A.S. in Applied Artificial Intelligence (Primary Pathway)",
+    "steps": [
+      {
+        "type": "degree",
+        "level": "A.S. (MDC)",
+        "name": "Associate in Science in Applied Artificial Intelligence",
+        "description": "Gain fundamental skills in Python programming, machine learning concepts, data processing pipelines, and neural networks through specialized coursework at Miami Dade College."
+      },
+      {
+        "type": "transfer",
+        "level": "Transfer Step",
+        "name": "Transfer to a 4-Year University",
+        "description": "Transfer to an accredited university such as Florida International University (FIU) or University of Central Florida (UCF) under Florida articulation pathways, maintaining a competitive GPA of 2.5 or higher."
+      },
+      {
+        "type": "degree",
+        "level": "B.S.",
+        "name": "Bachelor of Science in Computer Science or Data Science",
+        "description": "Complete upper-division coursework in advanced algorithms, deep learning, software engineering, and database management systems."
+      },
+      {
+        "type": "internship",
+        "level": "Professional Experience",
+        "name": "Machine Learning & AI Technical Internship",
+        "description": "Participate in hands-on industry internships to gain experience in data cleaning, feature engineering, model training, and deploying AI solutions under the guidance of senior engineers."
+      },
+      {
+        "type": "exam",
+        "level": "Certification Exam",
+        "name": "Industry Machine Learning Certifications",
+        "description": "Requirements: Bachelor's degree or practical AI experience; Complete training modules; Pass a proctored exam such as the AWS Certified Machine Learning - Specialty or TensorFlow Developer Certificate."
+      },
+      {
+        "type": "degree",
+        "level": "M.S. (Optional)",
+        "name": "Master of Science in Artificial Intelligence or Data Science",
+        "description": "Optional advanced degree focusing on natural language processing, computer vision, reinforcement learning, and advanced MLOps architecture."
+      }
+    ],
+    "confidence": "catalog"
+  },
+  "Aircraft Maintenance Technician": {
+    "title": "Pathway 1: A.S. in Aviation Maintenance Management",
+    "steps": [
+      {
+        "type": "degree",
+        "level": "A.S. (MDC)",
+        "name": "Associate in Science in Aviation Maintenance Management",
+        "description": "Provides comprehensive technical training and foundational academic coursework required for aircraft servicing, maintenance, and FAA certification preparation."
+      },
+      {
+        "type": "exam",
+        "level": "Required Certification",
+        "name": "FAA Airframe and Powerplant (A&P) License Exams",
+        "description": "Requirements: Graduate from an FAA-certificated Part 147 Aviation Maintenance Technician School or complete 30 months of practical experience, Pass three FAA written knowledge tests (General, Airframe, Powerplant), Pass oral and practical evaluations conducted by an FAA Designated Mechanic Examiner (DME)."
+      },
+      {
+        "type": "internship",
+        "level": "Professional Experience",
+        "name": "Entry-Level Aircraft Line/Heavy Maintenance Internship",
+        "description": "Gain hands-on experience performing inspections, troubleshooting, and repairs on commercial or general aviation aircraft under supervision at a certified Part 145 repair facility."
+      },
+      {
+        "type": "transfer",
+        "level": "Transfer Step",
+        "name": "Transfer to 4-Year University",
+        "description": "Transfer academic credits to an accredited institution such as Embry-Riddle Aeronautical University or Florida International University for advanced study in aviation technology or management."
+      },
+      {
+        "type": "degree",
+        "level": "B.S. (Optional)",
+        "name": "Bachelor of Science in Aviation Maintenance Science",
+        "description": "Provides advanced training in avionics, safety management systems, aircraft systems integration, and maintenance operations leadership."
+      }
+    ],
+    "confidence": "catalog"
+  }
+}
