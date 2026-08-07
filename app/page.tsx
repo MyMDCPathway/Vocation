@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { CareerSearch } from "@/app/components/landing/CareerSearch";
 import { AuthControls } from "@/app/components/AuthControls";
+import { RevealSection } from "@/app/components/shared/RevealSection";
 
 // The landing page, in the Empowered Clarity world (see DESIGN.md).
 //
@@ -240,19 +241,19 @@ export default function Home() {
 
             <nav className="hidden items-center gap-5 sm:flex">
               <Link
-                href="/start"
+                href="/pathways"
                 className="text-sm font-medium text-primary transition-colors hover:text-primary-container"
               >
                 Pathways
               </Link>
               <Link
-                href="/pathway"
+                href="/schools"
                 className="text-sm font-medium text-secondary transition-colors hover:text-secondary/80"
               >
                 Schools
               </Link>
               <Link
-                href="/career-discovery"
+                href="/insights"
                 className="text-sm font-medium text-primary transition-colors hover:text-primary-container"
               >
                 Insights
@@ -320,7 +321,7 @@ export default function Home() {
             honest intake. No per-audience content is invented; each just
             frames the same /start flow for where the visitor actually is. */}
         <section id="starting-from" className="px-5 py-20 md:px-16">
-          <div className="mx-auto w-full max-w-[1200px]">
+          <RevealSection className="mx-auto w-full max-w-[1200px]">
             <h2 className="text-2xl font-semibold tracking-[-0.01em] text-primary">
               Where are you starting from?
             </h2>
@@ -361,7 +362,7 @@ export default function Home() {
                 );
               })}
             </div>
-          </div>
+          </RevealSection>
         </section>
 
         {/* How Vocation Works — an accurate description of the real flow:
@@ -369,7 +370,7 @@ export default function Home() {
             gets the teal accent as the "you are here" step; 2 and 3 stay
             neutral until reached. */}
         <section className="bg-surface-container px-5 py-20 md:px-16 md:py-24">
-          <div className="mx-auto w-full max-w-[1200px] text-center">
+          <RevealSection className="mx-auto w-full max-w-[1200px] text-center">
             <h2 className="text-2xl font-semibold tracking-[-0.01em] text-primary">
               How Vocation Works
             </h2>
@@ -405,12 +406,12 @@ export default function Home() {
                 );
               })}
             </div>
-          </div>
+          </RevealSection>
         </section>
 
         {/* Example routes — real programs, real credentials, no invented wages. */}
         <section className="px-5 py-20 md:px-16 md:py-24">
-          <div className="mx-auto w-full max-w-[1200px]">
+          <RevealSection className="mx-auto w-full max-w-[1200px]">
             <div className="mx-auto max-w-2xl text-center">
               <h2 className="text-2xl font-semibold leading-tight tracking-[-0.01em] text-primary sm:text-[32px]">
                 Three careers, three different ways in
@@ -484,7 +485,7 @@ export default function Home() {
                     </div>
 
                     <Link
-                      href="/start"
+                      href={`/roadmaps/${encodeURIComponent(route.goal)}`}
                       className="mt-6 inline-flex items-center gap-2 border-t border-outline-variant pt-5 text-sm font-medium text-secondary transition-colors hover:text-secondary/80"
                     >
                       View Full Roadmap
@@ -512,7 +513,7 @@ export default function Home() {
               catalog. Costs and wages appear on your plan, where they&apos;re
               priced per school and per metro.
             </p>
-          </div>
+          </RevealSection>
         </section>
       </main>
 
@@ -529,24 +530,6 @@ export default function Home() {
             </div>
 
             <nav className="flex flex-wrap gap-x-8 gap-y-3">
-              <a
-                href="#starting-from"
-                className="text-sm font-medium tracking-[0.05em] text-on-surface-variant transition-colors hover:text-primary"
-              >
-                Students
-              </a>
-              <a
-                href="#starting-from"
-                className="text-sm font-medium tracking-[0.05em] text-on-surface-variant transition-colors hover:text-primary"
-              >
-                Career Changers
-              </a>
-              <a
-                href="#starting-from"
-                className="text-sm font-medium tracking-[0.05em] text-on-surface-variant transition-colors hover:text-primary"
-              >
-                Graduates
-              </a>
               {FOOTER_LINKS.map((link) => (
                 <Link
                   key={link.href}

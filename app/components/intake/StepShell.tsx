@@ -18,7 +18,7 @@ import { AuthControls } from "@/app/components/AuthControls";
  * trust the first time they click one.
  */
 const NAV = [
-  { label: "Pathways", href: "/pathway" },
+  { label: "Pathways", href: "/pathways" },
   { label: "Career quiz", href: "/career-discovery" },
 ];
 
@@ -254,7 +254,17 @@ export function StepShell({
               : undefined
           }
         >
-          <div className={`min-w-0 ${hero ? "text-center" : ""}`}>
+          <div
+            key={`${stepNumber}-${question}`}
+            className={`reveal reveal-visible min-w-0 ${hero ? "text-center" : ""}`}
+          >
+            {/* key={stepNumber+question} remounts this block on every step
+                change, replaying the .reveal-visible entrance (globals.css)
+                fresh each time — the same keyframe scroll-reveal sections use
+                elsewhere, just always-played here instead of scroll-gated,
+                since a step's content is already on screen the moment it
+                appears. Gives every screen built on StepShell (the whole
+                intake, the career quiz) a step transition for free. */}
             {/* Empty when a step draws its own title — an <h1> with nothing in
                 it still takes its line-height and pushes the content down by a
                 heading it never showed. */}
