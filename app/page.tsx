@@ -60,33 +60,6 @@ const EXAMPLE_ROUTES = [
   },
 ];
 
-/**
- * "Where are you starting from?" — three real entry points into the same
- * intake, framed for where a visitor actually is rather than what degree they
- * already hold. All three lead to the identical, honest /start flow: there is
- * no separate per-audience logic to fake, just a different door in.
- */
-const STARTING_POINTS = [
-  {
-    id: "student",
-    title: "I am a Student",
-    detail: "Plan your academic path to line up with the career you actually want.",
-    cta: "Explore paths",
-  },
-  {
-    id: "career-changer",
-    title: "I am a Career Changer",
-    detail: "Find the transferable ground you already have and the bridge to the new field.",
-    cta: "Start the pivot",
-  },
-  {
-    id: "graduate",
-    title: "I am a Recent Graduate",
-    detail: "Work out the licences, certifications, or first role that gets you employed.",
-    cta: "Launch your career",
-  },
-] as const;
-
 /** How the product actually works, in the order a visitor experiences it. */
 const HOW_IT_WORKS = [
   {
@@ -121,32 +94,17 @@ function Wordmark() {
   );
 }
 
-function GraduationCapIcon() {
+function HealthcareIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-6 w-6 text-secondary">
       <path
-        d="M12 5 2 9.5 12 14l10-4.5L12 5Z"
+        d="M12 20.5s-7.5-4.6-9.5-9.3C1.2 8 2.8 4.8 5.9 4.2c1.9-.4 3.8.4 5 1.9l1.1 1.4 1.1-1.4c1.2-1.5 3.1-2.3 5-1.9 3.1.6 4.7 3.8 3.4 7-2 4.7-9.5 9.3-9.5 9.3Z"
         stroke="currentColor"
         strokeWidth="1.7"
         strokeLinejoin="round"
       />
       <path
-        d="M6.5 11.5V16c0 1.4 2.46 2.5 5.5 2.5s5.5-1.1 5.5-2.5v-4.5"
-        stroke="currentColor"
-        strokeWidth="1.7"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path d="M21 9.5V15" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function PivotIcon() {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-6 w-6 text-secondary">
-      <path
-        d="M4 8h13.5M17.5 8 14 4.5M20 16H6.5M6.5 16 10 19.5"
+        d="M6 12.5h2.6l1.4-2.8 2 5.6 1.4-2.8H16"
         stroke="currentColor"
         strokeWidth="1.7"
         strokeLinecap="round"
@@ -156,27 +114,46 @@ function PivotIcon() {
   );
 }
 
-function BriefcaseIcon() {
+function TechnologyIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-6 w-6 text-secondary">
-      <rect x="3" y="8" width="18" height="11" rx="1.7" stroke="currentColor" strokeWidth="1.7" />
+      <rect x="7" y="7" width="10" height="10" rx="1.3" stroke="currentColor" strokeWidth="1.7" />
       <path
-        d="M8.5 8V6.2c0-.7.6-1.2 1.3-1.2h4.4c.7 0 1.3.5 1.3 1.2V8"
+        d="M9.5 7V3.5M14.5 7V3.5M9.5 20.5V17M14.5 20.5V17M7 9.5H3.5M7 14.5H3.5M20.5 9.5H17M20.5 14.5H17"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function TradeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-6 w-6 text-secondary">
+      <path
+        d="M14.5 9.5 19 5c.9.4 1.7 1.1 2 2l-4.5 4.5M9.5 14.5 5 19c-.9-.4-1.7-1.1-2-2l4.5-4.5"
         stroke="currentColor"
         strokeWidth="1.7"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <path d="M3 13h18" stroke="currentColor" strokeWidth="1.7" />
+      <path
+        d="M12.5 6.5 6.5 12.5a2.8 2.8 0 0 0 4 4l6-6"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
     </svg>
   );
 }
 
-const STARTING_POINT_ICONS = {
-  student: GraduationCapIcon,
-  "career-changer": PivotIcon,
-  graduate: BriefcaseIcon,
-} as const;
+const FIELD_ICONS: Record<string, () => JSX.Element> = {
+  Healthcare: HealthcareIcon,
+  Technology: TechnologyIcon,
+  "Skilled trade": TradeIcon,
+};
 
 function SearchStepIcon() {
   return (
@@ -317,33 +294,41 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Where are you starting from — three real doors into the same,
-            honest intake. No per-audience content is invented; each just
-            frames the same /start flow for where the visitor actually is. */}
-        <section id="starting-from" className="px-5 py-20 md:px-16">
+        {/* Browse by field — three real doors, each into a specific example
+            roadmap rather than a generic /start with whatever career the
+            intake happens to still be holding from a prior visit. Same
+            EXAMPLE_ROUTES data the detailed comparison section below uses,
+            so there's one source of truth for which three careers this page
+            can actually back up with a real MDC program. */}
+        <section id="browse-by-field" className="px-5 py-20 md:px-16">
           <RevealSection className="mx-auto w-full max-w-[1200px]">
             <h2 className="text-2xl font-semibold tracking-[-0.01em] text-primary">
-              Where are you starting from?
+              Browse by field
             </h2>
+            <p className="mt-2 max-w-2xl text-on-surface-variant">
+              Not sure what to search? See a full example roadmap in a field
+              that interests you.
+            </p>
 
             <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
-              {STARTING_POINTS.map((point) => {
-                const Icon = STARTING_POINT_ICONS[point.id];
+              {EXAMPLE_ROUTES.map((route) => {
+                const Icon = FIELD_ICONS[route.field];
                 return (
                   <Link
-                    key={point.id}
-                    href="/start"
+                    key={route.field}
+                    href={`/roadmaps/${encodeURIComponent(route.goal)}`}
                     className="group flex flex-col rounded-lg border border-outline-variant bg-gradient-to-bl from-secondary-container/10 to-surface-lowest p-6 shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
                   >
                     <Icon />
                     <p className="mt-5 text-lg font-semibold text-on-surface">
-                      {point.title}
+                      {route.field}
                     </p>
                     <p className="mt-2 flex-1 text-sm leading-relaxed text-on-surface-variant">
-                      {point.detail}
+                      See how becoming {/^[aeiou]/i.test(route.goal) ? "an" : "a"}{" "}
+                      {route.goal.toLowerCase()} works, start to finish.
                     </p>
                     <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-secondary">
-                      {point.cta}
+                      View example roadmap
                       <svg
                         viewBox="0 0 24 24"
                         fill="none"
