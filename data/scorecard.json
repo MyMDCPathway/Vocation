@@ -1,0 +1,8 @@
+{
+  "fetchedAt": null,
+  "source": "US Dept. of Education College Scorecard API (collegescorecard.ed.gov)",
+  "scope": "none",
+  "count": 0,
+  "note": "Placeholder — no real fetch has completed yet. scripts/fetch-scorecard.mjs proved out end-to-end against the live API (a --dry-run pulled all 377 real Florida institutions cleanly), but api.data.gov's shared DEMO_KEY has too tight a rate limit to complete a real write in this environment — a second run hit HTTP 429 on page 1 after the dry run had already spent the shared quota. Get a free, instant key at https://api.data.gov/signup/, set SCORECARD_API_KEY, and run `npm run fetch:scorecard` (add --state=FL to scope it, or omit for the full national pull /schools needs) to replace this file with real data. Rule 1 (never invent school data) is why this stays empty rather than being filled with placeholder rows.",
+  "schools": []
+}

@@ -66,8 +66,9 @@ model User {
   /// database doesn't need to understand its internals, only to hold it.
   savedIntake Json?
 
-  accounts Account[]
-  sessions Session[]
+  accounts      Account[]
+  sessions      Session[]
+  savedPathways SavedPathway[]
 }
 
 /// One row per linked OAuth provider (Google, LinkedIn) or per credentials
@@ -106,4 +107,54 @@ model VerificationToken {
   expires    DateTime
 
   @@unique([identifier, token])
+}
+
+/// A pathway the student chose to keep, past the tab-scoped sessionStorage
+/// intake and the free-standing /plan screen. This is what makes the nav's
+/// "Pathways" link (repointed from /start, which is the intake wizard, not a
+/// saved-plan collection) mean something real.
+model SavedPathway {
+  id     String @id @default(cuid())
+  userId String
+
+  /// The canonical career title, matching careerCanonical.ts's output —
+  /// same value the generator itself keyed the pathway on.
+  career String
+
+  /// A floridaSchools.ts id ("mdc") for a catalog school, or an
+  /// "open:<slug>" id (see app/lib/schoolRef.ts) for an AI-discovered one.
+  /// Kept as a plain string rather than a foreign key: neither school kind
+  /// has a row in this database, so nothing to reference.
+  schoolId String
+
+  /// Denormalised on purpose. An AI-discovered school has no table row this
+  /// could join against, so the display name has to travel with the save —
+  /// same reasoning as SchoolRef.name being required rather than resolved.
+  schoolName String
+
+  /// The generated PathwayData exactly as /api/generate-pathway returned it.
+  /// Opaque JSON for the same reason User.savedIntake is: this is a snapshot
+  /// of a client-side type (app/lib/types.ts) that already owns its shape
+  /// and versioning, so the database only needs to hold it, not understand
+  /// it. Two committed route tests deep-equal PathwayData against fixtures
+  /// and 411 seed entries hold that exact shape (HANDOFF §14) — this column
+  /// must stay a byte-for-byte copy of what generation produced.
+  data Json
+
+  /// Student edits (reordered/added/removed steps, annotations), kept
+  /// separate from `data` rather than merged into it. Two things this makes
+  /// possible that merging would not: "reset to original" needs an original
+  /// to reset to, and an edit must never be mistaken for model output when
+  /// something downstream reads this row.
+  edits Json?
+
+  notes    String?
+  archived Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, archived])
 }
