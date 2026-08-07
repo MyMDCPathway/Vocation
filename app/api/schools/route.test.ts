@@ -73,7 +73,11 @@ describe("GET /api/schools", () => {
   it("reports scorecard availability honestly", async () => {
     const response = await GET(makeRequest(""));
     const body = await response.json();
-    // No real fetch has run in test — the placeholder file is empty.
-    expect(body.scorecard.available).toBe(false);
+    // data/scorecard.json now holds a real committed Florida pull, so a
+    // real request against it reports real availability — see
+    // scorecard.test.ts for the explicit true/false cases via
+    // _setSnapshotForTests, which don't depend on the committed file.
+    expect(body.scorecard.available).toBe(true);
+    expect(body.scorecard.count).toBeGreaterThan(0);
   });
 });

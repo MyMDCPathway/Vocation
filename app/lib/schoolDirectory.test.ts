@@ -23,8 +23,29 @@ describe("listDirectorySchools", () => {
   });
 
   it("leaves scorecard undefined when no snapshot is loaded (the honest placeholder state)", () => {
+    // data/scorecard.json now holds a real committed Florida pull, so the
+    // "nothing loaded" case is set explicitly here rather than assumed from
+    // the file's current content — see the "joins a real Scorecard row"
+    // test below for the now-real, non-empty case.
+    _setSnapshotForTests({
+      fetchedAt: null,
+      source: "test",
+      scope: "none",
+      count: 0,
+      schools: [],
+    });
     const schools = listDirectorySchools();
     expect(schools.every((s) => s.scorecard === undefined)).toBe(true);
+  });
+
+  it("joins real committed Scorecard data onto MDC", () => {
+    // Against the actual data/scorecard.json — no _setSnapshotForTests here.
+    // If this ever fails, either the committed file went back to empty or
+    // Miami Dade College's name stopped matching its Scorecard row exactly.
+    const schools = listDirectorySchools();
+    const mdc = schools.find((s) => s.id === "mdc")!;
+    expect(mdc.scorecard).toBeDefined();
+    expect(mdc.scorecard!.medianEarnings10yr).toBeGreaterThan(0);
   });
 
   it("leaves distanceMiles null without an origin", () => {

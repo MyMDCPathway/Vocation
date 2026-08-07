@@ -85,10 +85,22 @@ afterEach(() => {
   _setSnapshotForTests(null);
 });
 
+const EMPTY_SNAPSHOT = {
+  fetchedAt: null,
+  source: "US Dept. of Education College Scorecard API (collegescorecard.ed.gov)",
+  scope: "none",
+  count: 0,
+  schools: [],
+};
+
 describe("scorecardAvailable", () => {
-  it("is false against the committed placeholder (no key run yet)", () => {
-    // The real data/scorecard.json is the honest empty file until someone
-    // runs fetch-scorecard.mjs with a real key — see that file's own note.
+  it("is false against an empty snapshot (no key run yet)", () => {
+    // scripts/fetch-scorecard.mjs writes exactly this shape when nobody has
+    // run it with a real key. Set explicitly here rather than relying on
+    // data/scorecard.json's current content — that file now holds a real
+    // committed Florida pull (see the "against the real committed snapshot"
+    // test below), so this must not assume it's still empty.
+    _setSnapshotForTests(EMPTY_SNAPSHOT);
     expect(scorecardAvailable()).toBe(false);
   });
 
@@ -96,10 +108,18 @@ describe("scorecardAvailable", () => {
     _setSnapshotForTests(FIXTURE);
     expect(scorecardAvailable()).toBe(true);
   });
+
+  it("is true against the real committed snapshot", () => {
+    // data/scorecard.json holds a real Florida pull as of this test — see
+    // its own fetchedAt/scope. If this ever goes back to false, someone
+    // replaced real data with the empty placeholder by mistake.
+    expect(scorecardAvailable()).toBe(true);
+  });
 });
 
 describe("scorecardMeta", () => {
   it("always carries provenance, even when empty", () => {
+    _setSnapshotForTests(EMPTY_SNAPSHOT);
     const meta = scorecardMeta();
     expect(meta.source).toMatch(/College Scorecard/);
     expect(meta.count).toBe(0);
