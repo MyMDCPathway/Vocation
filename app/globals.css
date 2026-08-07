@@ -198,12 +198,12 @@ h1, .display {
   overflow-x: auto;
   overflow-y: hidden;
   padding: 1.5rem;
-  background-color: #f9fafb; /* Light gray bg for contrast */
+  background-color: var(--surface-container-low); /* Recessed panel, same scale as the rest of the app */
   border-radius: 0.75rem; /* rounded */
   margin-bottom: 1.5rem; /* Space */
   /* gap removed - connector element now provides spacing */
   scrollbar-width: thin; /* For Firefox */
-  scrollbar-color: #cbd5e1 #f9fafb; /* For Firefox */
+  scrollbar-color: var(--outline-variant) var(--surface-container-low); /* For Firefox */
 }
 
 /* Custom scrollbar for Chrome/Edge */
@@ -212,17 +212,17 @@ h1, .display {
 }
 
 .flowchart-container::-webkit-scrollbar-track {
-  background: #f9fafb;
+  background: var(--surface-container-low);
   border-radius: 4px;
 }
 
 .flowchart-container::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--outline-variant);
   border-radius: 4px;
 }
 
 .flowchart-container::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--outline);
 }
 
 /* Wrapper for step and connector to ensure proper stretching */
@@ -253,21 +253,20 @@ h1, .display {
   align-self: stretch; /* Stretch to match wrapper height */
   display: flex;
   flex-direction: column;
-  border: 1px solid #e5e7eb; /* gray-200 */
+  border: 1px solid var(--outline-variant);
   border-radius: 0.75rem; /* lg */
-  /* Soft top-to-bottom background like the reference cards */
-  background: linear-gradient(180deg, #f9fafb 0%, #ffffff 55%);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+  background: var(--surface-container-lowest); /* Same flat card surface as SchoolCard / result cards */
+  box-shadow: var(--shadow-card);
   overflow: hidden; /* For rounded corners on border-top */
   animation: slideInUp 0.6s ease-out forwards;
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(16px);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .flowchart-step:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
 }
 
 /* Staggered animation delays for sequential appearance */
@@ -311,7 +310,7 @@ h1, .display {
 @keyframes slideInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
@@ -322,8 +321,12 @@ h1, .display {
 .flowchart-step-header {
   display: flex;
   align-items: center;
+  gap: 0.75rem;
   padding: 1rem;
-  border-top-width: 4px;
+  /* Reserved and transparent by default so header height matches across
+     every step type; only .flowchart-step-degree fills it in below. */
+  border-top: 3px solid transparent;
+  border-bottom: 1px solid var(--outline-variant);
 }
 
 .flowchart-step-header-icon {
@@ -333,9 +336,14 @@ h1, .display {
   align-items: center;
   justify-content: center;
   border-radius: 9999px; /* full */
-  background-color: #e5e7eb; /* gray-200 */
-  margin-right: 0.75rem;
+  background-color: var(--surface-container);
+  color: var(--on-surface-variant);
   flex-shrink: 0;
+}
+
+.flowchart-step-header span {
+  color: var(--on-surface-variant);
+  font-weight: 600;
 }
 
 .flowchart-step-content {
@@ -361,73 +369,37 @@ h1, .display {
   left: 0; /* Start from the left edge of the connector */
   width: 100%; /* Span the full width of the connector */
   height: 3px;
-  background-color: #cbd5e1; /* gray-300 */
+  background-color: var(--outline-variant);
   transform: translateY(-50%);
 }
 
-/* Step-specific colors - School Themed */
+/* Step-type accents. Per HANDOFF's --school-* rule, only the degree step is
+   actually tied to the selected school, so it's the only one that gets the
+   school's own color — as a thin top border, not a saturated header fill.
+   The other three step types are generic regardless of school; they're told
+   apart by icon color alone, on an otherwise neutral card. */
 .flowchart-step-degree .flowchart-step-header {
-  border-color: var(--school-primary);
-  /* Solid light blue background (no gradient) */
-  background-color: rgba(var(--school-primary-rgb, 0, 51, 102), 0.10);
+  border-top-color: var(--school-primary);
 }
 
 .flowchart-step-degree .flowchart-step-header-icon {
-  background-color: var(--school-primary);
-  color: white;
-}
-
-.flowchart-step-degree .flowchart-step-header span {
+  background-color: rgba(var(--school-primary-rgb, 0, 51, 102), 0.12);
   color: var(--school-primary);
-  font-weight: 600;
-}
-
-.flowchart-step-transfer .flowchart-step-header {
-  border-color: var(--school-secondary);
-  /* Solid orange background (no gradient) */
-  background-color: rgba(var(--school-secondary-rgb, 249, 115, 22), 0.10);
 }
 
 .flowchart-step-transfer .flowchart-step-header-icon {
-  background-color: var(--school-secondary);
-  color: white;
-}
-
-.flowchart-step-transfer .flowchart-step-header span {
+  background-color: rgba(var(--school-secondary-rgb, 249, 115, 22), 0.12);
   color: var(--school-secondary-dark);
-  font-weight: 600;
-}
-
-.flowchart-step-internship .flowchart-step-header {
-  border-color: var(--success);
-  /* Solid green background (no gradient) */
-  background-color: rgba(22, 163, 74, 0.10);
 }
 
 .flowchart-step-internship .flowchart-step-header-icon {
-  background-color: var(--success);
-  color: white;
-}
-
-.flowchart-step-internship .flowchart-step-header span {
+  background-color: rgba(22, 163, 74, 0.12);
   color: var(--success);
-  font-weight: 600;
-}
-
-.flowchart-step-exam .flowchart-step-header {
-  border-color: var(--info);
-  /* Solid purple background (no gradient) */
-  background-color: rgba(124, 58, 237, 0.10);
 }
 
 .flowchart-step-exam .flowchart-step-header-icon {
-  background-color: var(--info);
-  color: white;
-}
-
-.flowchart-step-exam .flowchart-step-header span {
+  background-color: rgba(124, 58, 237, 0.12);
   color: var(--info);
-  font-weight: 600;
 }
 
 /* Loading Spinner */
