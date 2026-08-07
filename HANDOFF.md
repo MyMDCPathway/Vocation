@@ -19,7 +19,7 @@ production.
 > - **There ARE user accounts** — Auth.js v5, email/password plus optional
 >   OAuth. §5's "no user accounts, no sessions, no PII stored anywhere" is
 >   out of date.
-> - **The test count is 798**, not 434, and all of them pass.
+> - **The test count is 853**, not 434, and all of them pass.
 >
 > Everything else in §1–§13 still holds. §15 covers what changed.
 
@@ -584,10 +584,11 @@ silently unreachable catalog.
 scheme is deliberately different from every other school's. That's a documented
 decision, not debt — don't unify it without reading why.
 
-**Known-dead code:** `app/page.tsx` still contains a full pathway-generation
-code path (`handleGeneratePathway`, `callAPI`, a hidden
-`#pathway-display` div) that nothing renders, and it does not send `school` to
-the API. Don't build on it; either delete it or wire it up properly (§8, §9).
+**~~Known-dead code in `app/page.tsx`~~ — RESOLVED.** This warned about a
+dead `handleGeneratePathway` / `callAPI` / `#pathway-display` block that also
+failed to send `school` to the API. None of it survives: the 2.0 landing page
+replaced that file wholesale. Kept as a struck-through line rather than
+deleted because §8 and §9 still reference it.
 
 **Before claiming something is fixed, verify it in an actual running browser.**
 Typecheck-clean and test-clean is not proof — the retired-Gemini-model bug and
@@ -595,7 +596,7 @@ the logo-flash bug both passed every automated check while still being broken.
 
 **Golden commands:**
 ```bash
-npm test          # 798 tests, all passing
+npm test          # 853 tests, all passing
 npm run build     # must compile; NEVER run this while `npm run dev` is up (§8)
 ```
 
@@ -979,16 +980,17 @@ a button. A test asserts this holds for all 61 schools.
 
 ### Real bugs
 
-**`app/page.tsx` doesn't send the school to the API.** Line ~87 posts
-`{ career }` without `school`, so it would silently generate an MDC pathway
-regardless of selection. Currently harmless *only because that code path is
-dead* (see §9). If you revive the home-page generator, fix this first.
+**~~`app/page.tsx` doesn't send the school to the API~~ — GONE.** The dead
+home-page generator this described no longer exists; the 2.0 landing page
+replaced that file. Verified 2026-08-07: zero matches for
+`handleGeneratePathway`, `callAPI`, or `pathway-display` anywhere in
+`app/page.tsx`. Nothing to fix.
 
 **`career-discovery` is not school-aware.** The quiz posts only `answers`. It
 returns careers, not programs, so it's defensible — but if you make quiz
 results school-specific, this needs the school too.
 
-**No known failing tests, as of 2026-08-07** — all 798 pass. This paragraph
+**No known failing tests, as of 2026-08-07** — all 853 pass. This paragraph
 used to describe two failures, both since resolved.
 
 `app/lib/fiuCoverage.test.ts` still exists and still runs. What was removed
@@ -1032,12 +1034,11 @@ the test passes while testing nothing. Use `_setSeedForTests({})`.
 
 ## 9. Unfinished work
 
-**Dead code in `app/page.tsx`.** `handleGeneratePathway`,
-`callAPI`, the comparison logic, and a `<div id="pathway-display" className="hidden">`
-are all left over from when the home page generated pathways. `careerInput` is
-never bound to a rendered input. Deleting it is safe and would remove the
-school-param bug above along with it. Left in place because deleting live-looking
-code deserves an explicit decision.
+**~~Dead code in `app/page.tsx`~~ — RESOLVED.** The 2.0 landing page rewrote
+that file; `handleGeneratePathway`, `callAPI`, `careerInput` and the hidden
+`#pathway-display` div are all gone, and the school-param bug went with them.
+The decision this entry asked for was made by the rewrite rather than
+explicitly, which is why it stayed listed here long after it was true.
 
 **26 of 28 catalogued schools have no seeded pathways.** Only MDC and Broward.
 Every request for the other 26 is a live Gemini call. **Prefer
@@ -1116,7 +1117,7 @@ cp .env.example .env.local     # add GEMINI_API_KEY from aistudio.google.com
                                # accounts also need DATABASE_URL + AUTH_SECRET
 npx prisma generate            # only needed by hand; `npm run build` does it
 npm run dev                    # http://localhost:3000
-npm test                       # 798 tests, all passing
+npm test                       # 853 tests, all passing
 npm run build                  # production build (runs prisma generate first)
 ```
 
@@ -1155,7 +1156,7 @@ these figures.
 
 ---
 
-## 12. Test suite — 798 tests, 35 files
+## 12. Test suite — 853 tests, 41 files
 
 | Area | Files | Notable coverage |
 |---|---|---|
@@ -2738,3 +2739,122 @@ working on preview URLs.
   until their env vars exist (`auth.ts` adds the providers conditionally).
 - **A stale `MyMDCPathway-job-summary` worktree** may still exist on disk;
   `git worktree list` will say.
+- ~~`DemandMap` hardcodes `rgba(15, 118, 110, …)`~~ — fixed in §16.
+- ~~The two new `User` columns have no migration file~~ — fixed in §16.
+
+---
+
+## 16. The 2.1 surfaces — schools, saved pathways, insights, roadmaps
+
+Added 2026-08-07 on `Vocation-2.0`, in nine commits from `7405d13` to
+`c04fc29`. Everything in §1–§15 still holds; this section is what's new.
+
+The through-line: the top bar's four links all went somewhere wrong.
+"Schools" went to `/pathway` (the classic 1.0 search page), "Pathways" went to
+`/start` (the intake wizard — a door into asking the question again, not a
+collection), and "Insights" went to `/career-discovery`, duplicating the link
+the hero already carries. Each now goes where its label says.
+
+### New routes
+
+| Route | What it is |
+|---|---|
+| `/schools` | Every Florida school, on a map, sortable by real federal figures, searchable by program |
+| `/pathways` | The signed-in student's saved plans |
+| `/pathways/[id]` | Editor: reorder, remove, annotate, reset to original |
+| `/insights` | BLS labour-market lookup. No Gemini call anywhere on it |
+| `/roadmaps/[career]` | Fixed, committed example routes. SSG, prerendered |
+| `/account/settings` | Name, privacy visibility, location |
+| `/help` | FAQ. Every answer restates a fact already true elsewhere in this file |
+
+### New libs, and why they're server-only
+
+`app/lib/scorecard.ts` reads `data/scorecard.json`; `app/lib/schoolDirectory.ts`
+merges `floridaSchools.ts` (identity) + `geography.ts` (coordinates) +
+`scorecard.ts` (federal figures) into one list. **Neither is imported by a
+client component, and `/schools` talks to `/api/schools` rather than importing
+them.** That's deliberate: `/plan` ships 232 kB because `ProgramLink` imports
+`catalogFor`, and this doesn't repeat it. See the bundle note below for where
+it *was* repeated.
+
+### The Scorecard snapshot
+
+`data/scorecard.json` is 377 real Florida institutions from the US Dept. of
+Education College Scorecard API, committed for the same three reasons
+`seed-cache.json` is (§5). Regenerate with `npm run fetch:scorecard --
+--state=FL`; needs `SCORECARD_API_KEY` (free, instant, api.data.gov/signup).
+
+**It is Florida-only on purpose, and this is a deliberate narrowing of the
+original plan.** That plan called for a ~6,000-school national pull to back a
+national map. `schoolDirectory.ts` only ever matches against `FLORIDA_SCHOOLS`,
+so a national snapshot would commit ~16× more data than the app can read —
+the same bloat `School Logos/` is already regretted for (§9). The national map
+was never built; `/schools` is 61 Florida schools and its own copy says so.
+`--state` is a per-run flag, so widening this later is one command.
+
+**Two matching rules worth not loosening.** `findScorecardMatch` is exact
+after normalization and scoped to a state, and returns `undefined` when two
+schools in one state share a name rather than picking one. A wrong match puts
+one school's real earnings under another school's name, which is worse than
+showing nothing — the same call rule 7 makes for program links. And sorting
+never invents a value: a school with no figure for the chosen sort lands after
+every school that has one, and a distance sort with no origin is **refused**
+(400) rather than returning an order that looks ranked and isn't.
+
+### SavedPathway — and why edits live in their own column
+
+`prisma/schema.prisma` gains `SavedPathway`. `data` holds the generation
+verbatim; `edits` holds what the student changed. Merging them would break two
+things: "reset to original" needs an original, and something reading this row
+later must be able to tell a student's edit from model output. `edits` is
+cleared with `Prisma.JsonNull`, **not** a plain `null` — a plain null is a
+no-op to Prisma's query engine, so reset would silently do nothing while
+reporting success. A test asserts the sentinel.
+
+**Every `/api/pathways` query is scoped to `session.user.id` in the `where`
+clause**, not loaded by id and checked after, and a row owned by someone else
+returns **404, never 403** — a 403 would confirm the id exists.
+
+**The editor cannot add a step.** Reorder, remove, annotate, reset — yes. But
+a student typing a plausible program name is exactly the failure §2 exists to
+prevent, and removing or reordering only ever subtracts from what the
+generator already grounded. Don't "improve" this into a free-text field.
+
+**Saving works signed-out.** The click stashes to `sessionStorage`
+(`pendingSaveStorage.ts`) and `PendingSaveAdopter` in `Providers.tsx` posts it
+once a session appears — mounted at the root, not on `/plan`, because signup
+redirects to `/onboarding` and never returns to `/plan`. Same reasoning
+`intakeAdoption.ts` already applies to the intake.
+
+### Motion
+
+One keyframe pair (`reveal` / `reveal-visible`) added to the system
+`globals.css` already had, inside the `prefers-reduced-motion` guard that
+already existed. `useReveal.ts` is the IntersectionObserver half;
+`RevealSection.tsx` is the one client boundary so `app/page.tsx` stays a
+server component. `StepShell` keys its question block on the step number,
+which replays the entrance on every step change — that one line gives the
+whole intake *and* the career quiz a transition without touching either.
+
+### Known issues this section introduced
+
+- **`/roadmaps/[career]` is 237 kB first load.** It reuses `PathwayFlow` →
+  `ProgramLink` → `catalogFor`, so it inherits the catalog-in-browser problem
+  `/plan` (253 kB) and `/pathway` (238 kB) already have. Pre-existing pattern,
+  newly extended. The fix is the one §14 already names: resolve program links
+  server-side, which would fix all three at once.
+- **`data/example-pathways.json` has not been read by a human.** Governance
+  for `seed-cache.json` (§5.1) says review before an entry becomes the
+  permanent answer; these three went live without it. One known wrinkle: the
+  nurse pathway's first step reads "Associate in Science in Nursing," which is
+  a paraphrase — MDC's catalog says `Nursing - R.N. (Generic Full-Time)` and
+  variants. The other two match catalog text verbatim.
+- **No component or page tests.** All 853 cover libs and API routes. Every
+  route in the table above is verified only by browser walkthrough.
+- **Saved Careers is still a disabled stub** in the account menu. It needs its
+  own schema concept — a bookmarked career is not a saved pathway — so it was
+  left honest rather than wired to an empty page.
+- **`refine-career` was NOT moved to a cheaper model**, though an earlier plan
+  proposed it. That call also produces the outline and classifies
+  `routeArchetype`, which its own prompt calls the single worst thing to get
+  wrong. Needs a real eval before any model swap, not a guess.
