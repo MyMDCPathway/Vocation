@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { isComplete, summarize, type IntakeAnswers } from "@/app/lib/intake";
 import { clearIntake, loadIntake } from "@/app/lib/intakeStorage";
+import { savePending } from "@/app/lib/pendingSaveStorage";
 import { resolveTracks } from "@/app/lib/planTracks";
 import { TRACK_BADGES, type PlanTrack, type ResolvedTracks } from "@/app/lib/planTypes";
 import { isOpenSchool, type SchoolRef } from "@/app/lib/schoolRef";
@@ -14,6 +16,8 @@ import { PathwayFlow } from "@/app/components/plan/PathwayFlow";
 import { CostPanel } from "@/app/components/plan/CostPanel";
 import { ConfidenceBanner } from "@/app/components/plan/ConfidenceBanner";
 import { LocalPayPanel } from "@/app/components/plan/LocalPayPanel";
+
+type SaveState = "idle" | "saving" | "saved" | "error";
 
 // The payoff screen: the same career, planned up to three ways.
 //
@@ -35,12 +39,14 @@ type TrackState =
 
 export default function PlanPage() {
   const router = useRouter();
+  const { status: sessionStatus } = useSession();
 
   const [answers, setAnswers] = useState<IntakeAnswers | null>(null);
   const [schools, setSchools] = useState<SchoolRef[] | null>(null);
   const [states, setStates] = useState<Record<string, TrackState>>({});
   const [activeId, setActiveId] = useState<string | null>(null);
   const [fatal, setFatal] = useState<string | null>(null);
+  const [saveStates, setSaveStates] = useState<Record<string, SaveState>>({});
 
   useEffect(() => {
     const stored = loadIntake();
@@ -187,6 +193,43 @@ export default function PlanPage() {
     router.push("/");
   };
 
+  // Signed-in saves immediately. Signed-out stashes the exact same payload
+  // (pendingSaveStorage.ts) and sends the student to sign up rather than
+  // discarding the click — PendingSaveAdopter (Providers.tsx) posts it the
+  // moment a session exists, the same "don't throw away what they already
+  // did" call intakeAdoption.ts makes for the intake itself.
+  const saveTrack = async (track: PlanTrack) => {
+    const state = states[track.school.id];
+    if (state?.status !== "done" || !career) return;
+
+    const option = state.data.pathways[state.selected];
+    const payload = {
+      career,
+      schoolId: track.school.id,
+      schoolName: track.school.name,
+      data: { title: option.title, steps: option.steps, confidence: state.data.confidence },
+    };
+
+    if (sessionStatus !== "authenticated") {
+      savePending(payload);
+      router.push("/signup");
+      return;
+    }
+
+    setSaveStates((current) => ({ ...current, [track.school.id]: "saving" }));
+    try {
+      const response = await fetch("/api/pathways", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error();
+      setSaveStates((current) => ({ ...current, [track.school.id]: "saved" }));
+    } catch {
+      setSaveStates((current) => ({ ...current, [track.school.id]: "error" }));
+    }
+  };
+
   if (!answers) return null;
 
   return (
@@ -283,8 +326,19 @@ export default function PlanPage() {
 
         {activeTrack && (
           <section className="mt-12">
-            <h2 className="text-2xl font-bold text-primary">{activeTrack.school.name}</h2>
-            <p className="mt-2 max-w-3xl text-on-surface-variant">{activeTrack.why}</p>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-bold text-primary">{activeTrack.school.name}</h2>
+                <p className="mt-2 max-w-3xl text-on-surface-variant">{activeTrack.why}</p>
+              </div>
+
+              {activeState?.status === "done" && (
+                <SaveButton
+                  state={saveStates[activeTrack.school.id] ?? "idle"}
+                  onSave={() => void saveTrack(activeTrack)}
+                />
+              )}
+            </div>
 
             {activeState?.status === "pending" && (
               <div className="mt-8 flex items-center gap-3 text-outline">
@@ -390,6 +444,30 @@ export default function PlanPage() {
 
 function article(career: string): "a" | "an" {
   return /^[aeiou]/i.test(career.trim()) ? "an" : "a";
+}
+
+function SaveButton({ state, onSave }: { state: SaveState; onSave: () => void }) {
+  if (state === "saved") {
+    return (
+      <span className="inline-flex shrink-0 items-center gap-2 rounded-full bg-surface-container px-4 py-2 text-sm font-medium text-primary">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-4 w-4">
+          <path d="m4 12 5 5L20 6" />
+        </svg>
+        Saved to your pathways
+      </span>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onSave}
+      disabled={state === "saving"}
+      className="shrink-0 rounded-full bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition-colors hover:bg-primary/90 disabled:opacity-60"
+    >
+      {state === "saving" ? "Saving…" : state === "error" ? "Try saving again" : "Save this plan"}
+    </button>
+  );
 }
 
 function TrackCard({

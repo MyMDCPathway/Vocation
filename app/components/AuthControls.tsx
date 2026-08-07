@@ -101,22 +101,35 @@ function initials(name: string | null | undefined): string {
 function MenuItem({
   icon,
   label,
+  href,
   disabled,
+  onNavigate,
 }: {
   icon: React.ReactNode;
   label: string;
+  href?: string;
   disabled?: boolean;
+  onNavigate?: () => void;
 }) {
+  const className = `flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm font-medium transition-colors ${
+    disabled ? "cursor-not-allowed text-outline/70" : "text-on-surface hover:bg-surface-container"
+  }`;
+
+  if (href && !disabled) {
+    return (
+      <Link href={href} onClick={onNavigate} className={className}>
+        {icon}
+        {label}
+      </Link>
+    );
+  }
+
   return (
     <button
       type="button"
       disabled={disabled}
       title={disabled ? `${label} — coming soon` : undefined}
-      className={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm font-medium transition-colors ${
-        disabled
-          ? "cursor-not-allowed text-outline/70"
-          : "text-on-surface hover:bg-surface-container"
-      }`}
+      className={className}
     >
       {icon}
       {label}
@@ -170,10 +183,29 @@ function ProfileMenu({ name, email }: { name: string | null | undefined; email: 
           </div>
 
           <div className="py-1">
-            <MenuItem icon={<RoadmapIcon />} label="My Roadmap" disabled />
+            <MenuItem
+              icon={<RoadmapIcon />}
+              label="My Roadmap"
+              href="/pathways"
+              onNavigate={() => setOpen(false)}
+            />
+            {/* Saved Careers needs its own concept — a bookmarked career
+                profile, distinct from a saved pathway — that no schema here
+                models yet. Left disabled rather than wired to a page with
+                nothing real behind it. */}
             <MenuItem icon={<SavedIcon />} label="Saved Careers" disabled />
-            <MenuItem icon={<SettingsIcon />} label="Account Settings" disabled />
-            <MenuItem icon={<HelpIcon />} label="Help Center" disabled />
+            <MenuItem
+              icon={<SettingsIcon />}
+              label="Account Settings"
+              href="/account/settings"
+              onNavigate={() => setOpen(false)}
+            />
+            <MenuItem
+              icon={<HelpIcon />}
+              label="Help Center"
+              href="/help"
+              onNavigate={() => setOpen(false)}
+            />
           </div>
 
           <div className="border-t border-outline-variant py-1">

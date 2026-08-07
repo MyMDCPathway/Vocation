@@ -60,3 +60,20 @@ export interface CareerPathway {
   data: PathwayData;
   selectedPathwayIndex: number;
 }
+
+/**
+ * The one route a student chose to keep, saved to the database via
+ * SavedPathway.data (prisma/schema.prisma).
+ *
+ * Deliberately narrower than PathwayData: a generation returns several
+ * alternative routes at one school, but saving is a decision — which single
+ * route the student is actually planning around — not a bundle of options
+ * still open. `confidence` travels with it because the catalog-vs-AI
+ * distinction stays true (or false) regardless of which steps get edited
+ * later; it doesn't need re-deriving from the school id at read time.
+ */
+export interface SavedPathwayData {
+  title: string;
+  steps: PathwayStep[];
+  confidence?: "catalog" | "ai";
+}
