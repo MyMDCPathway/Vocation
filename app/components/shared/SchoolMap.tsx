@@ -11,6 +11,13 @@ import { hasUsableCoordinates, type SchoolRef } from "@/app/lib/schoolRef";
 
 // The schools, on a map.
 //
+// Moved here from app/components/intake/ (its only consumer was
+// SchoolsStep.tsx) because /schools (HANDOFF's "Schools browser" work) needs
+// the exact same map: it already fits bounds to whatever school list it's
+// given rather than assuming Florida, so nothing about it was actually
+// intake-specific — the same "genuinely shared, not intake-only" call
+// app/components/shared/DemandMap.tsx made.
+//
 // WHY A DEPENDENCY. HANDOFF rule 8 says don't add one "for something small",
 // and this is the exception rather than a breach of it: a pannable, zoomable
 // tile map is not small. Doing it by hand means implementing tile arithmetic,
@@ -257,8 +264,6 @@ function buildIcon(
   selected: boolean,
   focused: boolean
 ): LeafletNS.DivIcon {
-  // Catalog schools are the ones whose programs are real rather than
-  // estimated, so they read differently on the map too.
   // Catalog schools are the ones whose programs are real rather than
   // estimated, so they read differently on the map too.
   const base = school.source === "catalog" ? "bg-primary" : "bg-secondary-container";

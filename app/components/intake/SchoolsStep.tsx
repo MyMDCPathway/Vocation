@@ -5,7 +5,7 @@ import type { IntakeAnswers } from "@/app/lib/intake";
 import { distanceMiles } from "@/app/lib/geography";
 import { hasUsableCoordinates, type SchoolRef } from "@/app/lib/schoolRef";
 import { ContinueButton, StepShell } from "@/app/components/intake/StepShell";
-import { SchoolMap } from "@/app/components/intake/SchoolMap";
+import { SchoolMap } from "@/app/components/shared/SchoolMap";
 import { archetypeProfile } from "@/app/lib/routeArchetype";
 
 // Which of these schools do you already have in mind?
