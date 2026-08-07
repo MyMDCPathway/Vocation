@@ -58,7 +58,13 @@ export function SchoolCard({ school, programMatchCount }: Props) {
       </div>
 
       <div className="flex flex-1 flex-col p-5">
-        <p className="text-lg font-semibold text-on-surface">{school.name}</p>
+        {/* min-h reserves room for a two-line name so a one-line name doesn't
+            leave every other stat, and the footer link below, sitting higher
+            than its neighbors in the row — the same fix career-discovery's
+            result cards needed for the same reason. */}
+        <p className="min-h-[3.5rem] text-lg font-semibold leading-snug text-on-surface">
+          {school.name}
+        </p>
         <p className="mt-0.5 text-sm text-on-surface-variant">
           {school.city}, FL · {KIND_LABELS[school.kind]}
           {school.distanceMiles !== null && ` · ${formatMiles(school.distanceMiles)}`}
@@ -105,9 +111,12 @@ export function SchoolCard({ school, programMatchCount }: Props) {
           </div>
         </div>
 
+        {/* mt-auto, not mt-5: pushes this link (and only this link) to the
+            bottom of the card's remaining height, so every card's button
+            lines up across a row regardless of how much text sits above it. */}
         <Link
           href="/start"
-          className="mt-5 inline-flex items-center gap-2 border-t border-outline-variant pt-4 text-sm font-medium text-secondary transition-colors hover:text-secondary/80"
+          className="mt-auto inline-flex items-center gap-2 border-t border-outline-variant pt-4 text-sm font-medium text-secondary transition-colors hover:text-secondary/80"
         >
           Plan a pathway here
           <svg

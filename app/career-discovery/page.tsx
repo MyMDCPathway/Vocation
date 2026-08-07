@@ -255,13 +255,22 @@ export default function CareerDiscoveryPage() {
         {careers.length > 0 ? (
           <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {careers.map((career) => (
+              /* Grid items already stretch to equal height; the buttons used
+                 to land at different heights only because nothing claimed the
+                 leftover space, so a card with a short title and a two-line
+                 match reason simply ran out of content sooner. The title
+                 reserves two lines, the description absorbs the slack, and
+                 the footer is pinned with mt-auto — every button lands on one
+                 line across the row no matter how much text a card has. */
               <div
                 key={career.title}
                 className="flex flex-col rounded-xl bg-surface-lowest p-6 shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
               >
-                <h2 className="text-lg font-semibold text-on-surface">{career.title}</h2>
+                <h2 className="min-h-[3.5rem] text-lg font-semibold leading-snug text-on-surface">
+                  {career.title}
+                </h2>
                 {career.description && (
-                  <p className="mt-2 text-sm text-on-surface-variant">{career.description}</p>
+                  <p className="mt-2 flex-1 text-sm text-on-surface-variant">{career.description}</p>
                 )}
                 {career.matchReason && (
                   <div className="mt-3 rounded-lg bg-surface-container p-3">
@@ -269,18 +278,20 @@ export default function CareerDiscoveryPage() {
                     <p className="mt-0.5 text-xs text-on-surface-variant">{career.matchReason}</p>
                   </div>
                 )}
-                <div className="mt-4 space-y-1.5 border-t border-outline-variant pt-4 text-sm text-on-surface-variant">
-                  {career.salary && <p>{career.salary}</p>}
-                  {career.jobOutlook && <p>{career.jobOutlook}</p>}
-                  {career.competitiveness && <p>{career.competitiveness}</p>}
+                <div className="mt-auto pt-4">
+                  <div className="space-y-1.5 border-t border-outline-variant pt-4 text-sm text-on-surface-variant">
+                    {career.salary && <p>{career.salary}</p>}
+                    {career.jobOutlook && <p>{career.jobOutlook}</p>}
+                    {career.competitiveness && <p>{career.competitiveness}</p>}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => planPathway(career.title)}
+                    className="mt-5 w-full rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary/90"
+                  >
+                    Plan this pathway
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => planPathway(career.title)}
-                  className="mt-5 w-full rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary/90"
-                >
-                  Plan this pathway
-                </button>
               </div>
             ))}
           </div>
