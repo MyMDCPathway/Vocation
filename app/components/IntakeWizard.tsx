@@ -2,18 +2,23 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
   BUDGET_PRIORITIES,
+  DEPENDENCY_CRITERIA,
   EDUCATION_LEVELS,
+  HOUSEHOLD_SIZES,
   INCOME_BANDS,
   MOBILITY_OPTIONS,
   NO_MOBILITY,
-  SUPPORT_SITUATIONS,
+  householdQuestion,
+  incomeQuestion,
+  isIndependent,
   type BudgetPriority,
+  type DependencyFlag,
   type EducationLevel,
   type IncomeBand,
   type IntakeAnswers,
-  type SupportSituation,
   type WorkMobility,
 } from "@/app/lib/intake";
 import { DEFAULT_COUNTRY } from "@/app/lib/countries";
@@ -81,6 +86,14 @@ export default function IntakeWizard() {
 
   const [answers, setAnswers] = useState<IntakeAnswers>({});
   const [hydrated, setHydrated] = useState(false);
+  const { status } = useSession();
+  // The account's stored postal code, once fetched. Null covers signed-out,
+  // request-failed, and signed-in-but-never-saved-one alike, because the
+  // location step does the same thing in all three cases: ask.
+  const [savedLocation, setSavedLocation] = useState<{
+    postalCode: string | null;
+    countryCode: string | null;
+  } | null>(null);
   const [step, setStep] = useState<Step>("career");
   const [refinement, setRefinement] = useState<Refinement | null>(null);
   const [careerInput, setCareerInput] = useState("");
@@ -118,6 +131,32 @@ export default function IntakeWizard() {
   useEffect(() => {
     if (hydrated) saveIntake(answers);
   }, [answers, hydrated]);
+
+  // Pull the account's saved postal code, if there is an account and it has
+  // one. Fired at mount rather than when the location step opens, because it's
+  // the fourth question and this way it has three questions' worth of time to
+  // land before anyone can see it.
+  //
+  // Everything about this is best-effort. It seeds a field; it does not answer
+  // anything, and a signed-out visitor or a failed request simply gets the
+  // question as it has always been asked.
+  useEffect(() => {
+    if (status !== "authenticated") return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const response = await fetch("/api/profile/location");
+        if (!response.ok) return;
+        const body = await response.json();
+        if (!cancelled && body.postalCode) setSavedLocation(body);
+      } catch {
+        // Not worth surfacing: the fallback is the question itself.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [status]);
 
   useEffect(() => {
     if (step === "career") inputRef.current?.focus();
@@ -457,6 +496,10 @@ export default function IntakeWizard() {
             career: { ...answers.career!, socCode: profile.socCode },
           });
         }}
+        // A related-career chip is just another way of answering the career
+        // question, so it takes the same path a typed answer does: refine,
+        // then land back on this same step with the new career's summary.
+        onSelectRelated={resolveCareer}
       />
     );
   }
@@ -466,11 +509,26 @@ export default function IntakeWizard() {
       <LocationStep
         rail={rail}
         value={answers.location}
+        savedLocation={savedLocation ?? undefined}
         stepNumber={stepNumber}
         stepCount={stepCount}
         onBack={back}
         onDone={(location) => {
           patch({ location });
+          // Remember it on the account so the next visit starts from it.
+          // Fire-and-forget: the answer is already in `answers` either way,
+          // and a student shouldn't wait on a write whose only benefit lands
+          // next time.
+          if (status === "authenticated") {
+            void fetch("/api/profile/location", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                postalCode: location.postalCode ?? null,
+                countryCode: location.countryCode,
+              }),
+            }).catch(() => {});
+          }
           advance();
         }}
       />
@@ -506,44 +564,83 @@ export default function IntakeWizard() {
   }
 
   if (step === "finances") {
-    const situation = SUPPORT_SITUATIONS.find((s) => s.id === answers.support);
+    const flags = answers.dependencyFlags ?? [];
+    const independent = isIndependent(flags);
+    // Declining to give an income switches off the only thing household size
+    // feeds, so the question stops being asked rather than sitting there as a
+    // required field with nothing behind it.
+    const declinedIncome = answers.incomeBand === "prefer-not-to-say";
+
+    // Toggling any criterion is an answer; so is explicitly saying none apply.
+    // Both set `dependencyAnswered`, because an empty list is a real result
+    // here and can't be told from "hasn't looked at this yet" on its own.
+    const toggleFlag = (id: DependencyFlag) =>
+      patch({
+        dependencyFlags: flags.includes(id)
+          ? flags.filter((f) => f !== id)
+          : [...flags, id],
+        dependencyAnswered: true,
+      });
 
     return (
       <StepShell
         stepNumber={stepNumber}
         stepCount={stepCount}
-        question="How are you covering costs right now?"
+        question="Let's estimate your financial aid"
         rail={rail}
-        help="This only affects the aid estimate. Nothing you enter is stored on a server or attached to you."
+        help="Three quick questions. They only feed the estimate — this isn't a FAFSA, and nothing here is verified or checked against anything."
         onBack={back}
         footer={
-          situation && answers.incomeBand ? (
+          answers.dependencyAnswered &&
+          answers.incomeBand &&
+          (declinedIncome || answers.householdSize) ? (
             <ContinueButton onClick={advance} />
           ) : undefined
         }
       >
-        <div className="grid gap-3 sm:grid-cols-3">
-          {SUPPORT_SITUATIONS.map((option) => (
+        {/* Deriving dependency rather than asking for it. "Are you a dependent
+            or an independent student?" sounds like the simpler question and is
+            the one people get wrong — supporting yourself famously does NOT
+            make you independent, and a student who mis-picks it gets an
+            estimate wrong by thousands. See DEPENDENCY_CRITERIA. */}
+        <h2 className="text-lg font-semibold text-primary">
+          Do any of these describe you?
+        </h2>
+        <p className="mt-1 text-sm text-on-surface-variant">
+          Tick everything that applies. For most people still in or just out of
+          high school the answer is none of them, which is normal.
+        </p>
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {DEPENDENCY_CRITERIA.map((criterion) => (
             <OptionCard
-              key={option.id}
-              label={option.label}
-              detail={option.detail}
-              selected={answers.support === option.id}
-              onClick={() =>
-                patch({ support: option.id as SupportSituation })
-              }
+              key={criterion.id}
+              label={criterion.label}
+              detail={criterion.detail}
+              selected={flags.includes(criterion.id)}
+              onClick={() => toggleFlag(criterion.id)}
             />
           ))}
         </div>
+        <div className="mt-3">
+          <OptionCard
+            label="None of these apply to me"
+            detail="You'll be counted as a dependent student, like most people under 24"
+            selected={Boolean(answers.dependencyAnswered) && flags.length === 0}
+            onClick={() =>
+              patch({ dependencyFlags: [], dependencyAnswered: true })
+            }
+          />
+        </div>
 
-        {situation && (
+        {answers.dependencyAnswered && (
           <div className="mt-10">
             <h2 className="text-lg font-semibold text-primary">
-              {situation.incomeLabel}
+              {incomeQuestion(flags)}
             </h2>
             <p className="mt-1 text-sm text-on-surface-variant">
-              A rough band is enough â€” we use it to estimate grant aid, not to
-              verify anything.
+              {independent
+                ? "Your own income, before tax. A rough band is enough."
+                : "Your parents' or guardians' income, before tax — that's whose the formula counts for a dependent student. A rough band is enough."}
             </p>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {INCOME_BANDS.map((band) => (
@@ -552,6 +649,31 @@ export default function IntakeWizard() {
                   label={band.label}
                   selected={answers.incomeBand === band.id}
                   onClick={() => patch({ incomeBand: band.id as IncomeBand })}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Last, because it's what makes the income figure mean anything, and
+            it only reads as a sensible question once you've said whose income
+            it was. */}
+        {answers.dependencyAnswered && answers.incomeBand && !declinedIncome && (
+          <div className="mt-10">
+            <h2 className="text-lg font-semibold text-primary">
+              {householdQuestion(flags)}
+            </h2>
+            <p className="mt-1 text-sm text-on-surface-variant">
+              Aid is scored against the poverty line for a household your size,
+              so this moves the estimate about as much as the income does.
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+              {HOUSEHOLD_SIZES.map((size) => (
+                <OptionCard
+                  key={size.value}
+                  label={size.label}
+                  selected={answers.householdSize === size.value}
+                  onClick={() => patch({ householdSize: size.value })}
                 />
               ))}
             </div>

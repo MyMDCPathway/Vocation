@@ -45,6 +45,20 @@ model User {
   /// PRD §2: "Private, Mentors Only, Public". Defaults to the least exposure.
   privacyVisibility String @default("private")
 
+  /// Where the account holder lives, so a signed-in student is asked once
+  /// rather than on every visit. Stored as the two fields the intake's
+  /// location step actually needs in order to skip itself — a postal code
+  /// resolves to city, region AND coordinates in one lookup (see
+  /// app/lib/postalCode.ts), so storing those derived values here as well
+  /// would only be a cache that can go stale against the lookup service.
+  ///
+  /// Both nullable and both genuinely optional: roughly sixty countries have
+  /// no postal system at all, and a signed-out visitor never reaches this row.
+  /// The intake asks for this itself whenever the account hasn't got it, which
+  /// is what keeps career research working with no account at all.
+  postalCode  String?
+  countryCode String?
+
   /// The visitor's in-progress sessionStorage intake (app/lib/intake.ts's
   /// IntakeAnswers), adopted into the account at signup so nothing already
   /// answered is thrown away. Stored as opaque JSON — this is a snapshot of a

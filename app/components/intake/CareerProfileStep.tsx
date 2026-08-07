@@ -13,7 +13,8 @@ import {
 } from "@/app/lib/careerProfileTypes";
 import { ContinueButton, StepShell } from "@/app/components/intake/StepShell";
 import { LaborStatsPanel, NoStatsNote } from "@/app/components/LaborStatsPanel";
-import { leadWageArea } from "@/app/lib/blsStats";
+import { leadWageArea, type StateDemandMap } from "@/app/lib/blsStats";
+import { US_TILE_MAP, TILE_COLS } from "@/app/lib/usTileMap";
 
 // What the job actually is, before anyone commits years to it.
 //
@@ -131,6 +132,7 @@ export function CareerProfileStep({
   onBack,
   onNext,
   onLoaded,
+  onSelectRelated,
   rail,
 }: {
   career: string;
@@ -147,6 +149,13 @@ export function CareerProfileStep({
    * wage panel can ask about the same one rather than re-deriving it.
    */
   onLoaded?: (profile: CareerProfile) => void;
+  /**
+   * Re-runs the wizard's own career resolution for a related career, the same
+   * path a typed answer on the career question takes. Optional so a caller
+   * without a resolver just gets the chips as plain, honest labels rather
+   * than a broken click.
+   */
+  onSelectRelated?: (career: string) => void;
   rail?: ReactNode;
 }) {
   const [profile, setProfile] = useState<CareerProfile | null>(null);
@@ -263,7 +272,8 @@ export function CareerProfileStep({
               <Compensation profile={profile} />
               {rail}
               <Resources profile={profile} />
-              <RelatedPaths profile={profile} />
+              <RelatedPaths profile={profile} onSelect={onSelectRelated} />
+              <DemandMap profile={profile} />
               <Attribution profile={profile} />
             </div>
           </div>
@@ -870,13 +880,6 @@ function Resources({ profile }: { profile: CareerProfile }) {
   return (
     <section className={CARD}>
       <CardHeading>Where to look next</CardHeading>
-      <p className="mt-1 text-xs leading-relaxed text-outline">
-        We opened each of these to check it loads.
-        {profile.droppedResources > 0 &&
-          (profile.droppedResources === 1
-            ? " One more didn't load, so it was dropped."
-            : ` ${profile.droppedResources} more didn't load, so they were dropped.`)}
-      </p>
       <ul className="mt-4 space-y-2">
         {profile.resources.map((resource) => (
           <li key={resource.url}>
@@ -922,24 +925,43 @@ function ResourceRow({ resource }: { resource: CareerResource }) {
   );
 }
 
-function RelatedPaths({ profile }: { profile: CareerProfile }) {
+function RelatedPaths({
+  profile,
+  onSelect,
+}: {
+  profile: CareerProfile;
+  onSelect?: (career: string) => void;
+}) {
   if (!profile.relatedCareers.length) return null;
 
   return (
     <section className={CARD}>
       <CardHeading>If this isn&apos;t quite it</CardHeading>
       <div className="mt-4 flex flex-wrap gap-2">
-        {profile.relatedCareers.map((related) => (
-          <span
-            key={related}
-            className="rounded-full bg-surface px-3 py-1.5 text-sm text-on-surface-variant ring-1 ring-black/10"
-          >
-            {related}
-          </span>
-        ))}
+        {profile.relatedCareers.map((related) =>
+          onSelect ? (
+            <button
+              key={related}
+              type="button"
+              onClick={() => onSelect(related)}
+              className="rounded-full bg-surface px-3 py-1.5 text-sm text-on-surface-variant ring-1 ring-black/10 transition-colors hover:bg-surface-container hover:text-primary"
+            >
+              {related}
+            </button>
+          ) : (
+            <span
+              key={related}
+              className="rounded-full bg-surface px-3 py-1.5 text-sm text-on-surface-variant ring-1 ring-black/10"
+            >
+              {related}
+            </span>
+          )
+        )}
       </div>
       <p className="mt-3 text-xs text-outline">
-        Go back a step to plan for one of these instead.
+        {onSelect
+          ? "Pick one to see its job summary instead."
+          : "Go back a step to plan for one of these instead."}
       </p>
     </section>
   );
@@ -1020,6 +1042,148 @@ function Attribution({ profile }: { profile: CareerProfile }) {
       </a>
       .
     </p>
+  );
+}
+
+/**
+ * Where in the country this job actually is.
+ *
+ * Concentration, not headcount. Ranked by raw employment this would be a
+ * population map with California and Texas on top of almost every occupation,
+ * which tells a student nothing they didn't already know about California and
+ * Texas. The location quotient answers the question they're really asking:
+ * relative to everywhere else, is this a place where this work happens?
+ *
+ * Loaded separately from the profile because it's the most expensive BLS call
+ * in the app and most students scroll past it — see /api/career-demand. The
+ * panel simply isn't there until it arrives, and stays absent if it never
+ * does. A career page that renders without statistics is a supported state
+ * here, not a broken one.
+ */
+function DemandMap({ profile }: { profile: CareerProfile }) {
+  const [demand, setDemand] = useState<StateDemandMap | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    setDemand(null);
+    (async () => {
+      try {
+        const response = await fetch("/api/career-demand", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            career: profile.career,
+            socCode: profile.socCode,
+          }),
+        });
+        if (!response.ok) return;
+        const body = await response.json();
+        if (!cancelled && body.demand) setDemand(body.demand);
+      } catch {
+        // Silence is the right failure here: no panel rather than an error
+        // box for a figure nobody asked for by name.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [profile.career, profile.socCode]);
+
+  if (!demand) return null;
+
+  const byName = new Map(demand.states.map((state) => [state.name, state]));
+  const quotients = demand.states
+    .map((state) => state.locationQuotient)
+    .filter((q): q is number => q !== null);
+  if (!quotients.length) return null;
+
+  // Scaled against the busiest state rather than a fixed ceiling, because
+  // occupations differ wildly in how concentrated they get: petroleum
+  // engineers hit 20× in Texas while cashiers barely leave 1× anywhere. A
+  // fixed scale would render most careers as a uniformly cold map.
+  const hottest = Math.max(...quotients);
+
+  return (
+    <section className={CARD}>
+      <CardHeading>Where the jobs are</CardHeading>
+      <p className="mt-1 text-xs leading-relaxed text-outline">
+        How concentrated this job is in each state, against the national rate.
+        Darker means more of this work happens there per job overall — not
+        simply that the state is bigger.
+      </p>
+
+      <div
+        className="mt-4 grid gap-1"
+        style={{ gridTemplateColumns: `repeat(${TILE_COLS}, minmax(0, 1fr))` }}
+        role="img"
+        aria-label={`Map of the United States shading each state by how concentrated ${profile.career} work is there.`}
+      >
+        {US_TILE_MAP.map((tile) => {
+          const state = byName.get(tile.name);
+          const quotient = state?.locationQuotient ?? null;
+          // Absence is "BLS didn't publish this", NOT "no jobs here" — those
+          // are very different facts and must not share a colour. Unpublished
+          // states stay outlined and empty; see fetchStateDemand.
+          const share = quotient === null ? null : quotient / hottest;
+
+          return (
+            <div
+              key={tile.postal}
+              style={{
+                gridRow: tile.row + 1,
+                gridColumn: tile.col + 1,
+                // Floored so the faintest real reading is still visibly a
+                // reading, rather than fading into the "no data" tile.
+                backgroundColor:
+                  share === null
+                    ? undefined
+                    : `rgba(15, 118, 110, ${0.12 + share * 0.88})`,
+              }}
+              title={
+                quotient === null
+                  ? `${tile.name} — no published figure`
+                  : `${tile.name} — ${quotient.toFixed(2)}× the national rate${
+                      state?.employment
+                        ? `, about ${state.employment.toLocaleString()} jobs`
+                        : ""
+                    }`
+              }
+              className={`flex aspect-square items-center justify-center rounded text-xs font-semibold ${
+                share === null
+                  ? "border border-dashed border-outline-variant text-outline/50"
+                  : share > 0.55
+                    ? "text-white"
+                    : "text-on-surface"
+              }`}
+            >
+              {tile.postal}
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="mt-4 flex items-center gap-2 text-xs text-outline">
+        <span>Less</span>
+        <div className="flex h-2 flex-1 overflow-hidden rounded-full">
+          {[0.12, 0.34, 0.56, 0.78, 1].map((step) => (
+            <div
+              key={step}
+              className="flex-1"
+              style={{ backgroundColor: `rgba(15, 118, 110, ${step})` }}
+            />
+          ))}
+        </div>
+        <span>More</span>
+      </div>
+
+      <p className="mt-3 text-xs leading-relaxed text-outline">
+        {demand.states.length} states reported
+        {demand.year ? ` in ${demand.year}` : ""}. A dashed square means the
+        Bureau of Labor Statistics didn&apos;t publish a figure there, which
+        usually means too few workers to report safely — not that the job
+        doesn&apos;t exist.
+      </p>
+    </section>
   );
 }
 

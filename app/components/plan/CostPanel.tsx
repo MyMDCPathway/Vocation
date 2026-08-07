@@ -6,7 +6,7 @@ import {
   formatCostRange,
   formatCostRangeShort,
 } from "@/app/lib/planCost";
-import type { IncomeBand } from "@/app/lib/intake";
+import type { DependencyFlag, IncomeBand } from "@/app/lib/intake";
 import type { PathwayOption } from "@/app/lib/types";
 import type { SchoolRef } from "@/app/lib/schoolRef";
 
@@ -50,15 +50,24 @@ export function CostPanel({
   school,
   incomeBand,
   countryCode,
+  dependencyFlags,
+  householdSize,
 }: {
   pathway: PathwayOption;
   school: SchoolRef;
   incomeBand: IncomeBand | undefined;
   /** Where the STUDENT lives — aid eligibility follows them, not the school. */
   countryCode: string | undefined;
+  /** Decides whose income the band above describes. See estimateAid. */
+  dependencyFlags: DependencyFlag[] | undefined;
+  householdSize: number | undefined;
 }) {
   const cost = estimatePlanCost(pathway.steps, school.id, school.tuition);
-  const aid = estimateAid(incomeBand, countryCode);
+  const aid = estimateAid(incomeBand, {
+    countryCode,
+    dependencyFlags,
+    householdSize,
+  });
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">

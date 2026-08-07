@@ -228,7 +228,7 @@ describe("estimateAid", () => {
     // partial Pell Grant" — a US federal programme they cannot apply to — while
     // nothing was said about the SAAS funding that actually pays their fees.
     for (const country of ["GB", "CA", "JP", "NG"]) {
-      const aid = estimateAid("30-60k", country);
+      const aid = estimateAid("30-60k", { countryCode: country });
       expect(aid.estimated, country).toBe(false);
       expect(aid.headline.toLowerCase(), country).not.toContain("pell");
       expect(aid.detail.toLowerCase(), country).not.toContain("bright futures");
@@ -237,7 +237,7 @@ describe("estimateAid", () => {
   });
 
   it("still estimates for a US student", () => {
-    expect(estimateAid("under-30k", "US").estimated).toBe(true);
+    expect(estimateAid("under-30k", { countryCode: "US" }).estimated).toBe(true);
     // No country given at all keeps the old behavior, so existing callers and
     // restored intakes don't silently lose their estimate.
     expect(estimateAid("under-30k").estimated).toBe(true);
@@ -250,6 +250,55 @@ describe("estimateAid", () => {
       const poorer = estimateAid(bands[i - 1].id).annual.high;
       expect(richer, `${bands[i].id} vs ${bands[i - 1].id}`).toBeLessThanOrEqual(poorer);
     }
+  });
+
+  it("never awards more aid to a higher income at a fixed household size", () => {
+    const bands = INCOME_BANDS.filter((b) => b.midpoint !== null);
+    for (const householdSize of [1, 4, 6]) {
+      for (let i = 1; i < bands.length; i++) {
+        const richer = estimateAid(bands[i].id, { householdSize }).annual.high;
+        const poorer = estimateAid(bands[i - 1].id, { householdSize }).annual.high;
+        expect(
+          richer,
+          `${bands[i].id} vs ${bands[i - 1].id} at ${householdSize}`
+        ).toBeLessThanOrEqual(poorer);
+      }
+    }
+  });
+
+  it("treats the same income as more need when it supports more people", () => {
+    // The whole point of collecting household size: $60k across two people and
+    // $60k across six are not the same answer, and the old estimate said so in
+    // prose while scoring them identically.
+    const small = estimateAid("60-100k", { householdSize: 2 }).annual.high;
+    const large = estimateAid("60-100k", { householdSize: 6 }).annual.high;
+    expect(large).toBeGreaterThan(small);
+  });
+
+  it("scores a self-supporting student on their own income, not a family's", () => {
+    // A dependent student and an independent one can report the same band and
+    // qualify for very different amounts, because the band describes different
+    // money. Independent students supporting children get the most room.
+    const dependent = estimateAid("30-60k", { householdSize: 1 }).annual.high;
+    const independent = estimateAid("30-60k", {
+      householdSize: 1,
+      dependencyFlags: ["age-24"],
+    }).annual.high;
+    const withKids = estimateAid("30-60k", {
+      householdSize: 1,
+      dependencyFlags: ["age-24", "supporting-children"],
+    }).annual.high;
+
+    expect(independent).toBeGreaterThanOrEqual(dependent);
+    expect(withKids).toBeGreaterThan(independent);
+  });
+
+  it("falls back to the income-only estimate for intakes with no household size", () => {
+    // Intakes saved before household size was asked must still get an answer
+    // rather than a crash or a guessed size.
+    const restored = estimateAid("under-30k", { dependencyFlags: [] });
+    expect(restored.estimated).toBe(true);
+    expect(restored.annual.high).toBeGreaterThan(0);
   });
 });
 

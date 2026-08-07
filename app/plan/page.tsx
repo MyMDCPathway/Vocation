@@ -352,6 +352,8 @@ export default function PlanPage() {
                     school={activeTrack.school}
                     incomeBand={answers.incomeBand}
                     countryCode={answers.location?.countryCode}
+                    dependencyFlags={answers.dependencyFlags}
+                    householdSize={answers.householdSize}
                   />
                 </div>
               </>

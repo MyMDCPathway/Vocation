@@ -21,6 +21,14 @@ export async function adoptIntake(
 
   await db.user.update({
     where: { id: userId },
-    data: { savedIntake: intake as object },
+    data: {
+      savedIntake: intake as object,
+      // Lifted out of the snapshot into real columns as well, because this is
+      // the one part of the intake the account reads back on a later visit in
+      // order to skip a question. Everything else in `savedIntake` is a record
+      // of what they answered once; this is a setting.
+      postalCode: intake.location?.postalCode ?? undefined,
+      countryCode: intake.location?.countryCode ?? undefined,
+    },
   });
 }

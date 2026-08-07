@@ -221,6 +221,33 @@ export const COUNTRIES: Country[] = [
 ];
 
 /** Shown first in the picker — where the app already has real catalog data. */
+/**
+ * The fifty states and DC, shipped rather than fetched.
+ *
+ * /api/regions asks a language model for a country's subdivisions, which is a
+ * defensible trade for the other ~190 countries — see that route's comment.
+ * It is not a defensible trade for this one. The US is where nearly every
+ * visitor lives, so the most common path through the intake was paying a model
+ * call and a spinner for a list of fifty names that haven't changed since 1959.
+ *
+ * SPELLINGS MATTER HERE. These strings become StudentLocation.subdivision and
+ * are looked up against the BLS area table (findState in blsAreas.ts), which
+ * publishes "District of Columbia". The generated list called it "Washington,
+ * D.C.", which matched nothing — so a student in DC silently lost their state
+ * wage figures. Keep these exactly as BLS writes them.
+ */
+export const US_SUBDIVISIONS: string[] = [
+  "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
+  "Connecticut", "Delaware", "District of Columbia", "Florida", "Georgia",
+  "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky",
+  "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota",
+  "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire",
+  "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota",
+  "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island",
+  "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont",
+  "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming",
+];
+
 export const DEFAULT_COUNTRY = "US";
 
 // The subdivision Vocation holds scraped program catalogs for. Everything else

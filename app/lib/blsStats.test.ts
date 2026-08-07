@@ -1,16 +1,19 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import {
   fetchLaborStats,
+  fetchStateDemand,
   leadWageArea,
   seriesId,
   wageScale,
   type AreaStats,
 } from "@/app/lib/blsStats";
+import { US_TILE_MAP } from "@/app/lib/usTileMap";
 import type { BlsArea } from "@/app/lib/blsAreas";
 import type { OccupationMatch } from "@/app/lib/blsOccupations";
 
 const NATIONAL: BlsArea = { state: "00", code: "0000000", type: "N", name: "United States" };
 const FLORIDA: BlsArea = { state: "12", code: "1200000", type: "S", name: "Florida" };
+const CALIFORNIA: BlsArea = { state: "06", code: "0600000", type: "S", name: "California" };
 const MIAMI: BlsArea = {
   state: "12",
   code: "0033100",
@@ -395,5 +398,99 @@ describe("fetchLaborStats", () => {
     expect(stats).not.toBeNull();
     expect(stats!.metro).toBeNull();
     expect(stats!.national.wages.median).toBe(97550);
+  });
+});
+
+describe("fetchStateDemand", () => {
+  // The state map only runs for registered callers — see the gate in
+  // fetchStateDemand. Every test below except the gate's own needs a key.
+  const noKey = Symbol("no key");
+  let previous: string | undefined | typeof noKey = noKey;
+
+  beforeEach(() => {
+    previous = process.env.BLS_API_KEY;
+    process.env.BLS_API_KEY = "test-key";
+  });
+
+  afterEach(() => {
+    if (previous === undefined) delete process.env.BLS_API_KEY;
+    else if (previous !== noKey) process.env.BLS_API_KEY = previous as string;
+  });
+
+  it("spends no quota at all when no registration key is set", () => {
+    // Unregistered, BLS allows 25 queries a day for everything the app does.
+    // This one call would take five of them, so it must not fire — and it must
+    // not fire WITHOUT calling fetch, or the saving is imaginary.
+    delete process.env.BLS_API_KEY;
+    const fake = vi.fn();
+    return fetchStateDemand("15-1252", fake as any).then((result) => {
+      expect(result).toBeNull();
+      expect(fake).not.toHaveBeenCalled();
+    });
+  });
+
+  // Enough of the BLS envelope for the parser: it reads status, then
+  // Results.series[].data[0].
+  const reply = (series: { seriesID: string; value: string }[]) => ({
+    ok: true,
+    json: async () => ({
+      status: "REQUEST_SUCCEEDED",
+      Results: {
+        series: series.map((s) => ({
+          seriesID: s.seriesID,
+          data: [{ value: s.value, year: "2024" }],
+        })),
+      },
+    }),
+  });
+
+  const lq = (area: BlsArea) => seriesId(area, "15-1252", "locationQuotient");
+  const emp = (area: BlsArea) => seriesId(area, "15-1252", "employment");
+
+  it("reads a location quotient and headcount back for a state", async () => {
+    const fake = vi.fn().mockResolvedValue(
+      reply([
+        { seriesID: lq(CALIFORNIA), value: "1.9" },
+        { seriesID: emp(CALIFORNIA), value: "210000" },
+      ])
+    );
+
+    const demand = await fetchStateDemand("15-1252", fake as any);
+
+    expect(demand?.year).toBe("2024");
+    const california = demand?.states.find((s) => s.name === "California");
+    expect(california?.locationQuotient).toBe(1.9);
+    expect(california?.employment).toBe(210000);
+  });
+
+  it("omits states BLS suppressed rather than reporting them as zero", async () => {
+    // The distinction the map depends on: a withheld estimate is "not
+    // published", which is a different fact from "no jobs here" and must not
+    // be drawn the same way.
+    const fake = vi.fn().mockResolvedValue(
+      reply([{ seriesID: lq(CALIFORNIA), value: "1.9" }])
+    );
+
+    const demand = await fetchStateDemand("15-1252", fake as any);
+
+    expect(demand?.states.map((s) => s.name)).toEqual(["California"]);
+    expect(demand?.states.some((s) => s.locationQuotient === 0)).toBe(false);
+  });
+
+  it("returns null when BLS gives nothing back at all", async () => {
+    const fake = vi.fn().mockResolvedValue({ ok: false, json: async () => ({}) });
+    expect(await fetchStateDemand("15-1252", fake as any)).toBeNull();
+  });
+
+  it("asks for every state on the tile map", async () => {
+    const fake = vi.fn().mockResolvedValue(reply([]));
+    await fetchStateDemand("15-1252", fake as any);
+
+    const requested = fake.mock.calls.flatMap(
+      (call: any) => JSON.parse(call[1].body).seriesid
+    );
+    // Two measures per state, and no state silently dropped by batching.
+    expect(requested).toHaveLength(US_TILE_MAP.length * 2);
+    expect(requested).toContain(lq(CALIFORNIA));
   });
 });

@@ -79,34 +79,122 @@ export const EDUCATION_LEVELS: {
   { id: "graduate", label: "Graduate degree", detail: "Master's or higher" },
 ];
 
-export type SupportSituation = "dependent" | "independent" | "both";
+/**
+ * Dependency status, derived rather than asked.
+ *
+ * This used to be a three-way "who supports you" question, and it was the
+ * wrong question twice over. It fed nothing — estimateAid never received it —
+ * and the thing it stood in for isn't about support at all.
+ *
+ * For federal aid, "independent" is a fixed test, not a description of your
+ * living arrangement. Paying your own rent does not make you independent. A
+ * nineteen-year-old with a full-time job, their own apartment, and parents who
+ * give them nothing is still a DEPENDENT student who must report parent
+ * income. It's the most common misunderstanding in the whole aid process.
+ *
+ * Which is why this asks for the criteria and derives the answer, rather than
+ * asking students to classify themselves with a term of art. Asked plainly,
+ * that nineteen-year-old picks "independent", we estimate a full Pell Grant
+ * against their own $20k, and we've told them school is nearly free when it
+ * isn't — wrong in the direction that does the most damage.
+ *
+ * Checking nothing is the common and correct answer for a high schooler.
+ */
+export type DependencyFlag =
+  | "age-24"
+  | "married"
+  | "supporting-children"
+  | "military"
+  | "foster-or-ward"
+  | "unhoused"
+  | "graduate-school";
 
-export const SUPPORT_SITUATIONS: {
-  id: SupportSituation;
+export const DEPENDENCY_CRITERIA: {
+  id: DependencyFlag;
   label: string;
   detail: string;
-  /** Whose income the follow-up band is asking about. */
-  incomeLabel: string;
 }[] = [
   {
-    id: "dependent",
-    label: "My family supports me",
-    detail: "You live with parents or guardians who cover most costs",
-    incomeLabel: "Roughly what does your household make a year?",
+    id: "age-24",
+    label: "I'm 24 or older",
+    detail: "Age alone settles it, whatever else is true",
   },
   {
-    id: "independent",
-    label: "I support myself",
-    detail: "You cover your own rent, food, and bills",
-    incomeLabel: "Roughly what do you make a year?",
+    id: "married",
+    label: "I'm married",
+    detail: "Married now, not planning to be",
   },
   {
-    id: "both",
-    label: "A bit of both",
-    detail: "You work, and family helps with some costs",
-    incomeLabel: "Roughly what does your household make a year, including you?",
+    id: "supporting-children",
+    label: "I support a child or dependent",
+    detail: "You provide more than half of someone's support",
+  },
+  {
+    id: "military",
+    label: "I'm a veteran or on active duty",
+    detail: "Active duty for something other than training",
+  },
+  {
+    id: "foster-or-ward",
+    label: "I was in foster care or a ward of the court",
+    detail: "At any point since you turned 13, or both parents have died",
+  },
+  {
+    id: "unhoused",
+    label: "I've been unhoused or at risk of it",
+    detail: "Unaccompanied and without stable housing",
+  },
+  {
+    id: "graduate-school",
+    label: "I'm going for a master's or doctorate",
+    detail: "Graduate students are always independent",
   },
 ];
+
+/** Any single criterion is enough — the test is an OR, not a tally. */
+export function isIndependent(flags: DependencyFlag[] | undefined): boolean {
+  return Boolean(flags?.length);
+}
+
+/**
+ * Independent students supporting children are treated far more generously
+ * than independent students who aren't, so it's worth carrying through rather
+ * than flattening to one "independent" bit.
+ */
+export function supportsDependents(flags: DependencyFlag[] | undefined): boolean {
+  return Boolean(flags?.includes("supporting-children"));
+}
+
+/** Whose income the band is asking about — the answer moves with status. */
+export function incomeQuestion(flags: DependencyFlag[] | undefined): string {
+  return isIndependent(flags)
+    ? "Roughly what do you make a year?"
+    : "Roughly what does your household make a year?";
+}
+
+/**
+ * Household size, the input that decides what a given income MEANS.
+ *
+ * Eligibility is scored against the federal poverty line for a household of
+ * your size, so $60,000 across six people and $60,000 across two are not the
+ * same answer. The old estimate said as much in prose and then didn't model
+ * it.
+ */
+export const HOUSEHOLD_SIZES: { value: number; label: string; detail: string }[] = [
+  { value: 1, label: "Just me", detail: "You're the whole household" },
+  { value: 2, label: "2 people", detail: "You and one other" },
+  { value: 3, label: "3 people", detail: "" },
+  { value: 4, label: "4 people", detail: "" },
+  { value: 5, label: "5 people", detail: "" },
+  { value: 6, label: "6 or more", detail: "Counted as six for the estimate" },
+];
+
+/** What to call the household, given who the student is counting. */
+export function householdQuestion(flags: DependencyFlag[] | undefined): string {
+  return isIndependent(flags)
+    ? "How many people do you support, including yourself?"
+    : "How many people live in your household?";
+}
 
 export type IncomeBand =
   | "under-30k"
@@ -233,8 +321,18 @@ export interface IntakeAnswers {
   career?: CareerSpecifics;
   location?: StudentLocation;
   educationLevel?: EducationLevel;
-  support?: SupportSituation;
+  /**
+   * Which independence criteria the student ticked. Empty is a real, common
+   * answer — it's what a high schooler correctly reports — so it can't be
+   * told apart from "never asked" by emptiness alone; `dependencyAnswered`
+   * carries that, the same way `schoolsAnswered` does for an empty school
+   * list.
+   */
+  dependencyFlags?: DependencyFlag[];
+  dependencyAnswered?: boolean;
   incomeBand?: IncomeBand;
+  /** People in the household the income above covers. See HOUSEHOLD_SIZES. */
+  householdSize?: number;
   /**
    * The schools the student named, stored whole rather than by id.
    *
@@ -303,10 +401,19 @@ export function isComplete(answers: IntakeAnswers): boolean {
   return Boolean(
     answers.career?.resolved &&
       answers.location?.countryCode &&
-      answers.location?.city &&
+      // City OR state. The location step used to always end on a free-text
+      // city box, so city was a safe thing to require; it now ends on either a
+      // postal code (which resolves a city) or a state list (which doesn't).
+      // Requiring city after that change would have made every state-only
+      // answer look like an unfinished intake and bounced the student home.
+      (answers.location?.city || answers.location?.subdivision) &&
       answers.educationLevel &&
-      answers.support &&
+      answers.dependencyAnswered &&
       answers.incomeBand &&
+      // Household size deliberately isn't required. It sharpens the aid
+      // estimate and estimateAid falls back cleanly without it, so it's an
+      // improvement to a plan rather than a precondition for one — and
+      // intakes saved before it was asked still generate.
       answers.schoolsAnswered &&
       answers.budgetPriority &&
       answers.mobility

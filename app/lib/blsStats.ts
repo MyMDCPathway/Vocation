@@ -17,8 +17,9 @@
 // traffic. Setting BLS_API_KEY switches to v2 and raises that to 500 queries
 // of 50 series each. Same code path either way; see the const below.
 
-import type { BlsArea, ResolvedAreas } from "@/app/lib/blsAreas";
+import { findState, type BlsArea, type ResolvedAreas } from "@/app/lib/blsAreas";
 import type { OccupationMatch } from "@/app/lib/blsOccupations";
+import { US_TILE_MAP } from "@/app/lib/usTileMap";
 
 const apiKey = process.env.BLS_API_KEY;
 
@@ -300,6 +301,96 @@ function hasAnyData(stats: AreaStats): boolean {
  * Returns null when the occupation didn't match or nothing reported, which the
  * caller renders as "no official figures for this one" rather than as an error.
  */
+export interface StateDemand {
+  /** BLS area name, e.g. "California". */
+  name: string;
+  /**
+   * How concentrated the job is here versus the country as a whole. 1.0 means
+   * exactly the national rate; 2.0 means twice as many of these jobs per job
+   * as the average. This is the honest measure of "where is this work", because
+   * raw headcount only ever redraws a population map — California and Texas
+   * lead almost every occupation on employment alone.
+   */
+  locationQuotient: number | null;
+  /** Raw headcount, shown alongside so concentration has a size next to it. */
+  employment: number | null;
+}
+
+export interface StateDemandMap {
+  year: string;
+  /** Only states BLS actually published for. See the suppression note below. */
+  states: StateDemand[];
+}
+
+/**
+ * Concentration of one occupation across every US state.
+ *
+ * Two measures for fifty-one areas is 102 series, which packs into three
+ * requests with a registration key and eight without — so this is a feature
+ * that genuinely wants BLS_API_KEY set. It's also identical for every visitor
+ * looking at the same job, which makes it worth caching hard by SOC code
+ * rather than per-student.
+ *
+ * SUPPRESSION IS NOT ZERO. BLS withholds estimates for cells too small to
+ * publish safely, so a niche occupation comes back with real figures for a
+ * handful of states and nothing for the rest. A missing state must render as
+ * "not published", never as an empty or cold square — drawing "no data" the
+ * same way as "no jobs" would be inventing a fact about somewhere a student
+ * might be about to move.
+ */
+export async function fetchStateDemand(
+  occupationCode: string,
+  fetchImpl: typeof fetch = fetch
+): Promise<StateDemandMap | null> {
+  // Registered callers only, and not for want of politeness — this is the one
+  // call in the app expensive enough to crowd out the others. Unregistered,
+  // BLS allows 25 queries a day per IP for everything; a single uncached map
+  // spends five of them, so three careers would exhaust the budget the WAGE
+  // figures depend on. Those are load-bearing and this panel is a bonus, so
+  // without a key the bonus simply doesn't run and the page is unchanged.
+  // Read live rather than from the module-level `apiKey` above: this is a
+  // runtime policy about whether to spend quota, not startup configuration,
+  // and reading it here is what lets the gate be tested from both sides.
+  if (!process.env.BLS_API_KEY) return null;
+
+  const areas = US_TILE_MAP.map((tile) => findState(tile.name)).filter(
+    (area): area is BlsArea => area !== null
+  );
+  if (!areas.length) return null;
+
+  // One group per state so a request boundary never splits a state's two
+  // measures apart — see packGroups.
+  const groups = areas.map((area) => [
+    seriesId(area, occupationCode, "locationQuotient"),
+    seriesId(area, occupationCode, "employment"),
+  ]);
+
+  const values = await fetchSeries(groups, fetchImpl);
+  if (!values.size) return null;
+
+  let year = "";
+  const states: StateDemand[] = [];
+
+  for (const area of areas) {
+    const lq = values.get(seriesId(area, occupationCode, "locationQuotient"));
+    const employment = values.get(seriesId(area, occupationCode, "employment"));
+    if (!year) year = lq?.year || employment?.year || "";
+
+    // A state with neither figure is omitted rather than carried as a row of
+    // nulls; the map treats absence as "not published" and says so.
+    if (lq?.value == null && employment?.value == null) continue;
+
+    states.push({
+      name: area.name,
+      locationQuotient: lq?.value ?? null,
+      employment: employment?.value ?? null,
+    });
+  }
+
+  if (!states.length) return null;
+  return { year, states };
+}
+
 export async function fetchLaborStats(
   occupation: OccupationMatch,
   areas: ResolvedAreas,

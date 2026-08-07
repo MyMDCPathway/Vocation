@@ -31,7 +31,13 @@ import { PathwayStep } from "@/app/lib/types";
 import { FLORIDA_SCHOOLS, getSchoolById } from "@/app/lib/floridaSchools";
 import { FLORIDA_UNIVERSITIES } from "@/app/lib/universities";
 import { requestedLevel, type ProgramLevel } from "@/app/lib/programCatalog";
-import { incomeMidpoint, type IncomeBand } from "@/app/lib/intake";
+import {
+  incomeMidpoint,
+  isIndependent,
+  supportsDependents,
+  type DependencyFlag,
+  type IncomeBand,
+} from "@/app/lib/intake";
 
 export interface CostRange {
   low: number;
@@ -391,18 +397,38 @@ export interface AidEstimate {
   estimated: boolean;
 }
 
+// The federal poverty guidelines, which are what Pell eligibility is actually
+// scored against since the FAFSA Simplification Act took effect for 2024-25.
+// Figures are the HHS guidelines for the 48 contiguous states and DC.
+//
+// These are reissued every January. When they move, these two numbers move,
+// and nothing else in here has to change.
+const FPL_BASE = 15650;
+const FPL_PER_EXTRA_PERSON = 5500;
+
+/** HOUSEHOLD_SIZES tops out at "6 or more", so the curve does too. */
+const HOUSEHOLD_CAP = 6;
+
+function povertyLine(householdSize: number): number {
+  const people = Math.min(Math.max(1, Math.round(householdSize)), HOUSEHOLD_CAP);
+  return FPL_BASE + FPL_PER_EXTRA_PERSON * (people - 1);
+}
+
 /**
- * A rough grant-aid estimate from the income band alone.
+ * Income ceilings, as multiples of the poverty line for the household.
  *
- * This is not a financial aid determination and the UI must not present it as
- * one. Real eligibility runs off the FAFSA's Student Aid Index, which weighs
- * household size, assets, and how many siblings are enrolled — none of which
- * we ask for. What this does capture is the part that dominates the answer:
- * income. A student under $30k is nearly always Pell-eligible; one over $100k
- * nearly never is.
+ * Under the simplified FAFSA these brackets are close to mechanical: below the
+ * `max` multiple a student receives the maximum Pell Grant, above `min` they
+ * receive none, and in between it tapers. Independent students supporting
+ * children are treated most generously of the three.
  */
-export function estimateAid(
-  band: IncomeBand | undefined,
+function pellCeilings(independent: boolean, hasDependents: boolean) {
+  if (hasDependents) return { max: 2.25, min: 4.0 };
+  if (independent) return { max: 1.75, min: 3.25 };
+  return { max: 1.75, min: 2.75 };
+}
+
+export interface AidInputs {
   /**
    * Where the student lives. Everything this function models — Pell, FAFSA,
    * Bright Futures — is United States federal or Florida state aid. Told a
@@ -411,8 +437,42 @@ export function estimateAid(
    * while saying nothing about the SAAS funding that actually pays their fees.
    * Silence is the honest answer outside the system we model.
    */
-  countryCode?: string
+  countryCode?: string;
+  /**
+   * Which independence criteria the student met, if any. This decides WHOSE
+   * income the band describes, which routinely matters more than the band
+   * itself: a dependent student earning $20k against parents earning $150k
+   * and an independent student earning $20k report the same personal income
+   * and qualify for opposite amounts.
+   */
+  dependencyFlags?: DependencyFlag[];
+  /**
+   * People the income supports. Absent on an intake restored from before this
+   * was asked, which drops the estimate back to the old income-only brackets
+   * rather than guessing a size.
+   */
+  householdSize?: number;
+}
+
+/**
+ * A rough grant-aid estimate.
+ *
+ * This is not a financial aid determination and the UI must not present it as
+ * one — real eligibility runs off the FAFSA's Student Aid Index, which also
+ * weighs assets and a handful of case-by-case adjustments we never ask about.
+ * What it does model is the part that dominates the answer: income, measured
+ * against the poverty line for a household that size, with the thresholds
+ * moved by dependency status.
+ *
+ * Note for anyone updating this: the number of family members in college used
+ * to be a major term and was REMOVED from the formula in 2024-25. Copy here
+ * used to cite it. It no longer should.
+ */
+export function estimateAid(
+  band: IncomeBand | undefined,
+  inputs: AidInputs = {}
 ): AidEstimate {
+  const { countryCode, dependencyFlags, householdSize } = inputs;
   const midpoint = incomeMidpoint(band);
 
   if (countryCode && countryCode.toUpperCase() !== "US") {
@@ -430,11 +490,59 @@ export function estimateAid(
       annual: ZERO,
       headline: "Not estimated",
       detail:
-        "Fill in an income range to see what grant aid you'd likely qualify for. Nothing you enter is stored or sent anywhere.",
+        "Fill in an income range to see what grant aid you'd likely qualify for.",
       estimated: false,
     };
   }
 
+  if (!householdSize) return estimateFromIncomeAlone(midpoint);
+
+  const independent = isIndependent(dependencyFlags);
+  const hasDependents = supportsDependents(dependencyFlags);
+  const { max, min } = pellCeilings(independent, hasDependents);
+  const ratio = midpoint / povertyLine(householdSize);
+  const whose = independent ? "your income" : "your household's income";
+  const people =
+    householdSize >= HOUSEHOLD_CAP ? `${HOUSEHOLD_CAP} or more` : `${householdSize}`;
+
+  if (ratio <= max) {
+    return {
+      annual: { low: PELL_MAX_ANNUAL * 0.85, high: PELL_MAX_ANNUAL },
+      headline: "Likely full or near-full Pell Grant",
+      detail: `For a household of ${people}, ${whose} falls low enough that most students receive the maximum Pell Grant, which is never repaid. Florida student assistance grants often stack on top.`,
+      estimated: true,
+    };
+  }
+
+  if (ratio <= min) {
+    // Linear taper across the band, then widened into a range — the input was
+    // a band midpoint, so a single figure would imply precision we don't have.
+    const share = (min - ratio) / (min - max);
+    const clamp = (n: number) => Math.min(1, Math.max(0, n));
+    return {
+      annual: {
+        low: PELL_MAX_ANNUAL * clamp(share - 0.15),
+        high: PELL_MAX_ANNUAL * clamp(share + 0.15),
+      },
+      headline: "Likely partial Pell Grant",
+      detail: `A household of ${people} at this income usually lands in the partial Pell range. Where exactly depends on details the FAFSA asks for and we don't — assets especially.`,
+      estimated: true,
+    };
+  }
+
+  return {
+    annual: ZERO,
+    headline: "Little to no need-based aid",
+    detail: `For a household of ${people}, ${whose} is above where need-based grants taper out. Merit aid is the bigger lever here — Bright Futures and most institutional scholarships don't consider income at all.`,
+    estimated: true,
+  };
+}
+
+/**
+ * The older estimate, kept for intakes saved before household size was asked.
+ * Coarser, because income alone is genuinely all it knows.
+ */
+function estimateFromIncomeAlone(midpoint: number): AidEstimate {
   if (midpoint < 30000) {
     return {
       annual: { low: PELL_MAX_ANNUAL * 0.75, high: PELL_MAX_ANNUAL },
@@ -450,7 +558,7 @@ export function estimateAid(
       annual: { low: PELL_MAX_ANNUAL * 0.3, high: PELL_MAX_ANNUAL * 0.7 },
       headline: "Likely partial Pell Grant",
       detail:
-        "Partial Pell is common in this range. The exact amount depends on household size and how many family members are in college at once.",
+        "Partial Pell is common in this range. How much depends heavily on household size, which this estimate doesn't have.",
       estimated: true,
     };
   }
