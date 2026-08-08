@@ -1,12 +1,16 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AuthControls } from "@/app/components/AuthControls";
 import { LaborStatsPanel, NoStatsNote } from "@/app/components/LaborStatsPanel";
 import { DemandMap } from "@/app/components/shared/DemandMap";
 import type { LaborStats } from "@/app/lib/blsStats";
 import type { StatsStatus } from "@/app/lib/careerProfileTypes";
+import type {
+  FastestGrowingOccupation,
+  MostNewJobsOccupation,
+} from "@/app/lib/projections";
 
 // The real destination for "Insights" — a labour-market lookup, not a link
 // to the career quiz duplicating the hero's own quiz link.
@@ -31,6 +35,31 @@ type ResultState =
   | { status: "ok"; stats: LaborStats }
   | { status: Exclude<StatsStatus, "ok">; market: string };
 
+interface ProjectionsMeta {
+  source: string;
+  sourceUrls: string[];
+  projectionPeriod: string;
+  blsLastModified: string;
+}
+
+type ProjectionsState =
+  | { status: "loading" }
+  | { status: "unavailable" }
+  | {
+      status: "ok";
+      fastestGrowing: FastestGrowingOccupation[];
+      mostNewJobs: MostNewJobsOccupation[];
+      meta: ProjectionsMeta;
+    };
+
+const money = new Intl.NumberFormat("en-US", {
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 0,
+});
+
+const count = new Intl.NumberFormat("en-US");
+
 function Wordmark() {
   return <span className="text-lg font-bold tracking-tight text-primary">Vocation</span>;
 }
@@ -39,6 +68,31 @@ export default function InsightsPage() {
   const [career, setCareer] = useState("");
   const [submittedCareer, setSubmittedCareer] = useState<string | null>(null);
   const [result, setResult] = useState<ResultState>({ status: "idle" });
+  const [projections, setProjections] = useState<ProjectionsState>({ status: "loading" });
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/projections")
+      .then((response) => {
+        if (!response.ok) throw new Error();
+        return response.json();
+      })
+      .then((body) => {
+        if (cancelled) return;
+        setProjections({
+          status: "ok",
+          fastestGrowing: body.fastestGrowing ?? [],
+          mostNewJobs: body.mostNewJobs ?? [],
+          meta: body.meta,
+        });
+      })
+      .catch(() => {
+        if (!cancelled) setProjections({ status: "unavailable" });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   async function search(value: string) {
     const trimmed = value.trim();
@@ -137,6 +191,91 @@ export default function InsightsPage() {
                 {example}
               </button>
             ))}
+          </div>
+        )}
+
+        {result.status === "idle" && projections.status === "ok" && (
+          <div className="mt-14 space-y-10">
+            <div>
+              <h2 className="text-lg font-semibold text-primary">
+                Fastest growing careers, {projections.meta.projectionPeriod}
+              </h2>
+              <p className="mt-1 text-sm text-on-surface-variant">
+                By projected percent change in employment. Tap one to look up
+                its full wage picture.
+              </p>
+              <ol className="mt-4 divide-y divide-outline-variant rounded-xl border border-outline-variant bg-surface-lowest">
+                {projections.fastestGrowing.slice(0, 10).map((row, index) => (
+                  <li key={row.occupation}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCareer(row.occupation);
+                        void search(row.occupation);
+                      }}
+                      className="flex w-full items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-surface-container"
+                    >
+                      <span className="w-5 shrink-0 text-sm font-semibold text-outline">
+                        {index + 1}
+                      </span>
+                      <span className="flex-1 text-sm font-medium text-on-surface">
+                        {row.occupation}
+                      </span>
+                      <span className="shrink-0 text-sm font-semibold text-secondary">
+                        +{row.growthRatePercent}%
+                      </span>
+                      <span className="hidden w-28 shrink-0 text-right text-sm text-on-surface-variant sm:inline">
+                        {money.format(row.medianPay2024)}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <div>
+              <h2 className="text-lg font-semibold text-primary">
+                Careers adding the most jobs, {projections.meta.projectionPeriod}
+              </h2>
+              <p className="mt-1 text-sm text-on-surface-variant">
+                By projected number of new positions — the biggest sources of
+                real hiring, not just the fastest-growing rates.
+              </p>
+              <ol className="mt-4 divide-y divide-outline-variant rounded-xl border border-outline-variant bg-surface-lowest">
+                {projections.mostNewJobs.slice(0, 10).map((row, index) => (
+                  <li key={row.occupation}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCareer(row.occupation);
+                        void search(row.occupation);
+                      }}
+                      className="flex w-full items-center gap-4 px-4 py-3 text-left transition-colors hover:bg-surface-container"
+                    >
+                      <span className="w-5 shrink-0 text-sm font-semibold text-outline">
+                        {index + 1}
+                      </span>
+                      <span className="flex-1 text-sm font-medium text-on-surface">
+                        {row.occupation}
+                      </span>
+                      <span className="shrink-0 text-sm font-semibold text-secondary">
+                        +{count.format(row.newJobs)} jobs
+                      </span>
+                      <span className="hidden w-28 shrink-0 text-right text-sm text-on-surface-variant sm:inline">
+                        {money.format(row.medianPay2024)}
+                      </span>
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            </div>
+
+            <p className="text-xs text-on-surface-variant">
+              Source: {projections.meta.source}, projections{" "}
+              {projections.meta.projectionPeriod} (published{" "}
+              {projections.meta.blsLastModified}). Median pay is the national
+              2024 figure BLS reports alongside each projection.
+            </p>
           </div>
         )}
 
