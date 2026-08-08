@@ -128,7 +128,6 @@ export function CareerProfileStep({
   subdivision,
   city,
   stepNumber,
-  stepCount,
   onBack,
   onNext,
   onLoaded,
@@ -141,7 +140,6 @@ export function CareerProfileStep({
   subdivision?: string;
   city?: string;
   stepNumber: number;
-  stepCount: number;
   onBack: () => void;
   onNext: () => void;
   /**
@@ -207,14 +205,12 @@ export function CareerProfileStep({
   return (
     <StepShell
       stepNumber={stepNumber}
-      stepCount={stepCount}
       // Blank once loaded: the hero below owns the job title at full size, and
       // printing it twice put a small copy of the heading a card above the big
       // one. While loading it's the only title there is, so it stays.
       question={loading ? career : ""}
       help={loading ? "Pulling together what this job is really like…" : undefined}
       navLabel="Insights"
-      hideSteps
       onBack={onBack}
       // Deliberately NOT passed to the shell. Every other step lets StepShell
       // place the route sketch; this one has a reference column of its own, and

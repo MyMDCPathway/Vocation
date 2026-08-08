@@ -325,8 +325,7 @@ export interface IntakeAnswers {
    * Which independence criteria the student ticked. Empty is a real, common
    * answer — it's what a high schooler correctly reports — so it can't be
    * told apart from "never asked" by emptiness alone; `dependencyAnswered`
-   * carries that, the same way `schoolsAnswered` does for an empty school
-   * list.
+   * carries that.
    */
   dependencyFlags?: DependencyFlag[];
   dependencyAnswered?: boolean;
@@ -341,21 +340,20 @@ export interface IntakeAnswers {
    * again later. Keeping the record means a plan can still be generated for
    * it after a refresh.
    *
-   * Empty is a real answer ("no preference"), which is why `schoolsAnswered`
-   * tracks whether they were asked separately.
+   * No longer set by the intake itself (the dedicated schools step was
+   * removed — /plan's own Closest/Cheapest/named tracks already do this
+   * ranking). Populated by the school-first flow instead: picking a school
+   * before picking a career.
    */
   desiredSchools?: SchoolRef[];
   /**
-   * Everything the schools step found, not just what was picked.
+   * Everything a school discovery call found, not just what was picked.
    *
-   * Carried forward so /plan doesn't repeat the discovery call it already
-   * paid for — that was doubling the Gemini cost of every plan and adding a
-   * few seconds to a screen the student is already waiting on. /plan still
-   * fetches if this is missing, so an intake restored from an older session
-   * degrades rather than breaks.
+   * Carried forward so /plan doesn't repeat a discovery call it already paid
+   * for. /plan fetches its own schools when this is empty, so it's optional
+   * rather than something every intake needs to populate.
    */
   discoveredSchools?: SchoolRef[];
-  schoolsAnswered?: boolean;
   budgetPriority?: BudgetPriority;
   mobility?: WorkMobility;
 }
@@ -389,7 +387,6 @@ export const INTAKE_STEPS = [
   "location",
   "education",
   "finances",
-  "schools",
   "priority",
   "mobility",
 ] as const;
@@ -414,7 +411,6 @@ export function isComplete(answers: IntakeAnswers): boolean {
       // estimate and estimateAid falls back cleanly without it, so it's an
       // improvement to a plan rather than a precondition for one — and
       // intakes saved before it was asked still generate.
-      answers.schoolsAnswered &&
       answers.budgetPriority &&
       answers.mobility
   );

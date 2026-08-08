@@ -223,7 +223,7 @@ export default function CareerDiscoveryPage() {
 
   if (loading) {
     return (
-      <StepShell stepNumber={1} stepCount={1} question="" hideSteps>
+      <StepShell stepNumber={1} question="">
         <div className="flex flex-col items-center py-16 text-center">
           <span className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
           <p className="mt-4 text-lg font-medium text-primary">Analyzing your answers…</p>
@@ -237,7 +237,7 @@ export default function CareerDiscoveryPage() {
 
   if (showResults) {
     return (
-      <StepShell stepNumber={1} stepCount={1} question="" hideSteps>
+      <StepShell stepNumber={1} question="">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-primary md:text-4xl">Your Career Matches</h1>
           <p className="mt-3 text-on-surface-variant">
@@ -314,7 +314,6 @@ export default function CareerDiscoveryPage() {
   return (
     <StepShell
       stepNumber={currentStep + 1}
-      stepCount={QUESTIONS.length}
       question={currentQuestion.question}
       help={currentQuestion.type === "multiple" ? "Select all that apply." : undefined}
       onBack={currentStep > 0 ? handleBack : undefined}

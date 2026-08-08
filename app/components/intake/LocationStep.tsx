@@ -57,7 +57,6 @@ export function LocationStep({
   value,
   savedLocation,
   stepNumber,
-  stepCount,
   onBack,
   onDone,
   rail,
@@ -74,7 +73,6 @@ export function LocationStep({
    */
   savedLocation?: { postalCode: string | null; countryCode: string | null };
   stepNumber: number;
-  stepCount: number;
   onBack: () => void;
   onDone: (location: StudentLocation) => void;
   rail?: ReactNode;
@@ -269,7 +267,6 @@ export function LocationStep({
     return (
       <StepShell
         stepNumber={stepNumber}
-        stepCount={stepCount}
         question={`What's your ${label.toLowerCase()}?`}
         help="It's the only location question we need — it gets us your town and your exact distance to each school."
         onBack={onBack}
@@ -340,7 +337,6 @@ export function LocationStep({
   return (
     <StepShell
       stepNumber={stepNumber}
-      stepCount={stepCount}
       question={`Which ${subdivisionLabel(countryCode).toLowerCase()} are you in?`}
       help="Pick the one closest to where you live."
       onBack={back}

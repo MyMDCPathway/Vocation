@@ -113,37 +113,6 @@ function SearchIcon() {
 }
 
 /**
- * Discrete steps rather than a filling bar.
- *
- * A bar answers "how far along am I" with a smear. Segments answer it with a
- * count, which is the question people actually ask on question four of seven.
- */
-function Steps({ current, total }: { current: number; total: number }) {
-  return (
-    <div className="mx-auto mt-8 max-w-md">
-      <ol className="flex items-center gap-1.5" aria-hidden="true">
-        {Array.from({ length: total }, (_, index) => {
-          const step = index + 1;
-          const done = step < current;
-          const here = step === current;
-          return (
-            <li
-              key={step}
-              className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
-                done ? "bg-primary/40" : here ? "bg-primary" : "bg-surface-container"
-              }`}
-            />
-          );
-        })}
-      </ol>
-      <p className="mt-2 text-center text-xs font-medium text-outline">
-        Step {current} of {total}
-      </p>
-    </div>
-  );
-}
-
-/**
  * The frame every intake question renders inside.
  *
  * One question per screen, with the wordmark, progress and back control in
@@ -162,20 +131,20 @@ function Steps({ current, total }: { current: number; total: number }) {
  */
 export function StepShell({
   stepNumber,
-  stepCount,
   question,
   help,
   onBack,
   footer,
   wide,
   hero,
-  hideSteps,
   rail,
   navLabel,
   children,
 }: {
+  /** Also the remount key (with `question`) that replays the step-transition
+   *  reveal animation on every step change — kept even though the step
+   *  indicator itself is gone. */
   stepNumber: number;
-  stepCount: number;
   question: string;
   help?: string;
   onBack?: () => void;
@@ -183,30 +152,18 @@ export function StepShell({
   /**
    * Widen the column for a step that genuinely needs it.
    *
-   * Only the schools step sets this: a map beside a list doesn't fit in the
-   * reading-width column the questions use. The chrome — progress bar,
-   * heading, back button — widens with it so the step still reads as the same
-   * frame rather than a different page.
+   * A map beside a list doesn't fit in the reading-width column the
+   * questions use. The chrome — heading, back button — widens with it so
+   * the step still reads as the same frame rather than a different page.
    */
   wide?: boolean;
   /**
-   * The opening screen. Centres everything, drops the progress bar, and turns
-   * the confetti up — this is the only screen a first-time visitor sees
+   * The opening screen. Centres everything and turns the confetti up — this
+   * is the only screen a first-time visitor sees
    * before deciding whether to bother, so it gets to be a hero rather than
    * question one of eight.
    */
   hero?: boolean;
-  /**
-   * Drop the step counter without going full hero.
-   *
-   * Only the career summary sets this. It's not a question with an N-of-M to
-   * report — it's the one screen in the intake a student is meant to read
-   * rather than answer, and "Step 2 of 8" over a page of prose says "you're
-   * behind schedule" about a page that isn't a form at all. The top bar's
-   * "Insights" tab already says where they are; the step count would be
-   * saying it twice, and saying it wrong.
-   */
-  hideSteps?: boolean;
   /**
    * The evolving route, shown beside the question.
    *
@@ -231,16 +188,6 @@ export function StepShell({
   return (
     <div className="relative flex min-h-screen flex-col bg-surface">
       <TopBar active={navLabel} />
-
-      {/* The hero has nothing to be N-of-M about — it's the first thing you
-          see, and a step counter there says "this is a form" before you've
-          typed anything. hideSteps drops it for the same reason on a
-          different screen; see its doc comment above. */}
-      {!hero && !hideSteps && (
-        <div className={`relative z-10 mx-auto w-full ${column} px-6 pt-2`}>
-          <Steps current={stepNumber} total={stepCount} />
-        </div>
-      )}
 
       <div
         className={`relative z-10 mx-auto w-full flex-1 ${column} px-6 ${

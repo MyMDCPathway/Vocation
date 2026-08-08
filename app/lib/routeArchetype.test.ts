@@ -69,23 +69,12 @@ describe("every profile is complete enough to render", () => {
       if (typeof value !== "string") continue;
       expect(value.trim().length, `${id}.${field}`).toBeGreaterThan(0);
     }
-    expect(profile.providerQuestion.endsWith("?"), `${id} question`).toBe(true);
   });
 
   it("keys each profile under its own id", () => {
     for (const id of ROUTE_ARCHETYPES) {
       expect(ARCHETYPE_PROFILES[id].id).toBe(id);
     }
-  });
-
-  it("gives each route its own vocabulary", () => {
-    // If two routes shared a provider noun, the step would ask a welder and a
-    // medical student the same question — which is the thing being fixed.
-    const nouns = ROUTE_ARCHETYPES.map((id) => ARCHETYPE_PROFILES[id].providerNoun);
-    expect(new Set(nouns).size).toBeGreaterThan(4);
-    expect(ARCHETYPE_PROFILES.apprenticeship.providerNoun).not.toBe(
-      ARCHETYPE_PROFILES.degree.providerNoun
-    );
   });
 
   it("tells the model something route-specific to look for", () => {

@@ -13,7 +13,6 @@ const intake = (over: Partial<IntakeAnswers> = {}): IntakeAnswers => ({
   incomeBand: "30-60k",
   householdSize: 4,
   desiredSchools: [],
-  schoolsAnswered: true,
   budgetPriority: "balanced",
   mobility: NO_MOBILITY,
   ...over,

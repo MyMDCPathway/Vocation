@@ -22,13 +22,11 @@ import {
   type WorkMobility,
 } from "@/app/lib/intake";
 import { DEFAULT_COUNTRY } from "@/app/lib/countries";
-import type { SchoolRef } from "@/app/lib/schoolRef";
 import type { RouteArchetype } from "@/app/lib/routeArchetype";
 import type { OutlineStep } from "@/app/lib/pathOutline";
 import { loadIntake, saveIntake } from "@/app/lib/intakeStorage";
 import { ContinueButton, OptionCard, StepShell } from "@/app/components/intake/StepShell";
 import { LocationStep } from "@/app/components/intake/LocationStep";
-import { SchoolsStep } from "@/app/components/intake/SchoolsStep";
 import { CareerProfileStep } from "@/app/components/intake/CareerProfileStep";
 import { PathRail } from "@/app/components/intake/PathRail";
 
@@ -65,7 +63,6 @@ type Step =
   | "profile"
   | "education"
   | "finances"
-  | "schools"
   | "priority"
   | "mobility";
 
@@ -178,7 +175,7 @@ export default function IntakeWizard() {
     // know where they live, so its wage figures are national. See
     // resolveAreas — no location means national-only, never a metro figure
     // labelled as theirs.
-    list.push("profile", "location", "education", "finances", "schools", "priority", "mobility");
+    list.push("profile", "location", "education", "finances", "priority", "mobility");
     return list;
   }, [refinement, skipCareer]);
 
@@ -315,8 +312,6 @@ export default function IntakeWizard() {
     return <div className="min-h-[calc(100vh-73px)]" />;
   }
 
-  const stepCount = steps.length;
-
   // The route sketch, from the career question onward. Passed to every step
   // that renders its own StepShell; the steps that own their shell get it as
   // a prop instead. Absent on the career screen itself, since there is no
@@ -335,14 +330,12 @@ export default function IntakeWizard() {
     return (
       <StepShell
         stepNumber={1}
-        stepCount={stepCount}
         question={careerInput}
         help="Pulling together what this job is really like…"
         onBack={() => router.push("/")}
         // Matches the label CareerProfileStep itself uses once it takes over,
         // so the active tab doesn't visibly change the moment loading finishes.
         navLabel="Insights"
-        hideSteps
         wide
       >
         <div className="space-y-4" aria-live="polite">
@@ -358,7 +351,6 @@ export default function IntakeWizard() {
     return (
       <StepShell
         stepNumber={1}
-        stepCount={stepCount}
         question="What career do you want?"
         help="Anything from a job title to a rough idea. We'll work out the route together — and it isn't always a degree."
         hero
@@ -418,7 +410,6 @@ export default function IntakeWizard() {
     return (
       <StepShell
         stepNumber={stepNumber}
-        stepCount={stepCount}
         question={refinement.question}
         rail={rail}
         help={refinement.helpText}
@@ -485,7 +476,6 @@ export default function IntakeWizard() {
         subdivision={answers.location?.subdivision}
         city={answers.location?.city}
         stepNumber={stepNumber}
-        stepCount={stepCount}
         onBack={back}
         onNext={advance}
         // Remember which BLS occupation this career resolved to, so the plan
@@ -511,7 +501,6 @@ export default function IntakeWizard() {
         value={answers.location}
         savedLocation={savedLocation ?? undefined}
         stepNumber={stepNumber}
-        stepCount={stepCount}
         onBack={back}
         onDone={(location) => {
           patch({ location });
@@ -539,7 +528,6 @@ export default function IntakeWizard() {
     return (
       <StepShell
         stepNumber={stepNumber}
-        stepCount={stepCount}
         question="Where are you in school right now?"
         rail={rail}
         help="There's no point planning an associate degree for someone who already has one."
@@ -585,7 +573,6 @@ export default function IntakeWizard() {
     return (
       <StepShell
         stepNumber={stepNumber}
-        stepCount={stepCount}
         question="Let's estimate your financial aid"
         rail={rail}
         help="Three quick questions. They only feed the estimate — this isn't a FAFSA, and nothing here is verified or checked against anything."
@@ -683,31 +670,10 @@ export default function IntakeWizard() {
     );
   }
 
-  if (step === "schools") {
-    return (
-      <SchoolsStep
-        rail={rail}
-        answers={answers}
-        stepNumber={stepNumber}
-        stepCount={stepCount}
-        onBack={back}
-        onDone={(picked: SchoolRef[], discovered: SchoolRef[]) => {
-          patch({
-            desiredSchools: picked,
-            discoveredSchools: discovered,
-            schoolsAnswered: true,
-          });
-          advance();
-        }}
-      />
-    );
-  }
-
   if (step === "priority") {
     return (
       <StepShell
         stepNumber={stepNumber}
-        stepCount={stepCount}
         question="What matters most to you?"
         rail={rail}
         help="We'll still show you every route â€” this just decides which one leads."
@@ -740,7 +706,6 @@ export default function IntakeWizard() {
     return (
       <StepShell
         stepNumber={stepNumber}
-        stepCount={stepCount}
         question={`Once you're qualified, where would you work as a ${career.toLowerCase()}?`}
         rail={rail}
         help={
