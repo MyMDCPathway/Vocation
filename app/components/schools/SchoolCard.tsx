@@ -115,7 +115,7 @@ export function SchoolCard({ school, programMatchCount }: Props) {
             bottom of the card's remaining height, so every card's button
             lines up across a row regardless of how much text sits above it. */}
         <Link
-          href="/start"
+          href={`/schools/${school.id}`}
           className="mt-auto inline-flex items-center gap-2 border-t border-outline-variant pt-4 text-sm font-medium text-secondary transition-colors hover:text-secondary/80"
         >
           Plan a pathway here
