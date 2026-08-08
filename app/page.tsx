@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CareerSearch } from "@/app/components/landing/CareerSearch";
 import { AuthControls } from "@/app/components/AuthControls";
 import { RevealSection } from "@/app/components/shared/RevealSection";
+import { listCuratedInterests } from "@/app/lib/interests";
 
 // The landing page, in the Empowered Clarity world (see DESIGN.md).
 //
@@ -149,10 +150,59 @@ function TradeIcon() {
   );
 }
 
-const FIELD_ICONS: Record<string, () => JSX.Element> = {
-  Healthcare: HealthcareIcon,
-  Technology: TechnologyIcon,
-  "Skilled trade": TradeIcon,
+function BusinessIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-6 w-6 text-secondary">
+      <rect x="3.5" y="8" width="17" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.7" />
+      <path
+        d="M8.5 8V6a1.7 1.7 0 0 1 1.7-1.7h3.6A1.7 1.7 0 0 1 15.5 6v2"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M3.5 13h17" stroke="currentColor" strokeWidth="1.7" />
+    </svg>
+  );
+}
+
+function CreativeArtsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-6 w-6 text-secondary">
+      <path
+        d="M12 3.5c-4.7 0-8.5 3.5-8.5 7.8 0 3.4 2.7 4.2 4.3 3.6 1.3-.5 2.4.4 2.4 1.7 0 1 .8 2.4 2.5 2.4 4.7 0 8.3-3.9 7.7-8.9-.5-4.1-4.2-6.6-8.4-6.6Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+      <circle cx="8.5" cy="10" r="1" fill="currentColor" />
+      <circle cx="12" cy="7.5" r="1" fill="currentColor" />
+      <circle cx="15.5" cy="10" r="1" fill="currentColor" />
+    </svg>
+  );
+}
+
+function EducationIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-6 w-6 text-secondary">
+      <path
+        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.747 0-3.332.477-4.5 1.253"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+const INTEREST_ICONS: Record<string, () => JSX.Element> = {
+  stem: TechnologyIcon,
+  healthcare: HealthcareIcon,
+  "skilled-trades": TradeIcon,
+  business: BusinessIcon,
+  "creative-arts": CreativeArtsIcon,
+  education: EducationIcon,
 };
 
 function SearchStepIcon() {
@@ -195,6 +245,10 @@ const HOW_IT_WORKS_ICONS = [SearchStepIcon, RoadmapStepIcon, FlagStepIcon];
 
 export default function Home() {
   const year = new Date().getFullYear();
+  // Server Component — safe to read the committed BLS occupation table
+  // directly rather than through /api/interests, since this never ships to
+  // the browser bundle (see interests.ts's own header on that discipline).
+  const interests = listCuratedInterests();
 
   return (
     <div className="flex min-h-screen flex-col bg-surface">
@@ -294,41 +348,62 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Browse by field — three real doors, each into a specific example
-            roadmap rather than a generic /start with whatever career the
-            intake happens to still be holding from a prior visit. Same
-            EXAMPLE_ROUTES data the detailed comparison section below uses,
-            so there's one source of truth for which three careers this page
-            can actually back up with a real MDC program. */}
-        <section id="browse-by-field" className="px-5 py-20 md:px-16">
+        {/* Browse by Interest — six real doors into the actual BLS
+            occupation taxonomy (see interests.ts). Picking a tile opens that
+            interest's real job pool, not a single fixed example — the tile
+            itself makes no claim beyond "these are real jobs in this area",
+            which is exactly what jobCount (computed from the same table,
+            never hardcoded) backs up. */}
+        <section id="browse-by-interest" className="px-5 py-20 md:px-16">
           <RevealSection className="mx-auto w-full max-w-[1200px]">
-            <h2 className="text-2xl font-semibold tracking-[-0.01em] text-primary">
-              Browse by field
-            </h2>
-            <p className="mt-2 max-w-2xl text-on-surface-variant">
-              Not sure what to search? See a full example roadmap in a field
-              that interests you.
-            </p>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-semibold tracking-[-0.01em] text-primary">
+                  Browse by Interest
+                </h2>
+                <p className="mt-2 max-w-2xl text-on-surface-variant">
+                  Not sure what to search? Pick an area and see the real jobs in it.
+                </p>
+              </div>
+              <Link
+                href="/interests"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-secondary hover:text-secondary/80"
+              >
+                Browse all industries
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                  className="h-4 w-4"
+                >
+                  <path d="M5 12h13" />
+                  <path d="m12 5 7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
 
             <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
-              {EXAMPLE_ROUTES.map((route) => {
-                const Icon = FIELD_ICONS[route.field];
+              {interests.map((interest) => {
+                const Icon = INTEREST_ICONS[interest.slug];
                 return (
                   <Link
-                    key={route.field}
-                    href={`/roadmaps/${encodeURIComponent(route.goal)}`}
+                    key={interest.slug}
+                    href={`/interests/${interest.slug}`}
                     className="group flex flex-col rounded-lg border border-outline-variant bg-gradient-to-bl from-secondary-container/10 to-surface-lowest p-6 shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
                   >
                     <Icon />
                     <p className="mt-5 text-lg font-semibold text-on-surface">
-                      {route.field}
+                      {interest.label}
                     </p>
                     <p className="mt-2 flex-1 text-sm leading-relaxed text-on-surface-variant">
-                      See how becoming {/^[aeiou]/i.test(route.goal) ? "an" : "a"}{" "}
-                      {route.goal.toLowerCase()} works, start to finish.
+                      {interest.description}
                     </p>
                     <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-secondary">
-                      View example roadmap
+                      {interest.jobCount} real jobs
                       <svg
                         viewBox="0 0 24 24"
                         fill="none"
