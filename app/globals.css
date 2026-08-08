@@ -402,6 +402,28 @@ h1, .display {
   color: var(--info);
 }
 
+/* Vertical pathway timeline (Phase B restyle). A separate namespace from
+   .flowchart-* above rather than a rewrite of it — classic /pathway (1.0)
+   still inlines .flowchart-* directly and deliberately keeps its current
+   look; this is a new component, not a shared-class change. Consumed by
+   PathwayFlow.tsx (used on /plan and /roadmaps/[career]).
+
+   The rail is colored in the selected school's own color throughout — per
+   HANDOFF's --school-* rule, this literally IS that school's route. Node
+   markers stay neutral numbered circles: no check/current/future states,
+   because nothing here tracks real step completion (a fabricated progress
+   state would be worse than no state at all). Step TYPE is conveyed by the
+   badge chip inside each card, not by node or rail color. */
+.pathway-timeline-rail {
+  background-color: var(--school-primary);
+}
+
+.pathway-timeline-node {
+  border-color: var(--outline-variant);
+  background-color: var(--surface-container-lowest);
+  color: var(--on-surface-variant);
+}
+
 /* Loading Spinner */
 .loader {
   border: 4px solid #f3f3f3; /* Light grey */

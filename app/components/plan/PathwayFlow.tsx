@@ -9,14 +9,19 @@ import type { PathwayOption, PathwayStep } from "@/app/lib/types";
 import { estimatePlanCost, formatCostRange } from "@/app/lib/planCost";
 import type { SchoolRef } from "@/app/lib/schoolRef";
 import { StepVerificationBadge } from "@/app/components/plan/ConfidenceBanner";
+import { getSchoolInfo, hasSchoolInfo } from "@/app/lib/schoolInfo";
 
 /**
- * One pathway rendered as the horizontal step flow.
+ * One pathway rendered as a vertical timeline: a rail in the school's own
+ * color connecting neutral numbered step markers, each with a card beside
+ * it. Replaces the old horizontal .flowchart-* card row (still used by
+ * classic /pathway 1.0, deliberately left alone — see globals.css's
+ * .pathway-timeline-* header).
  *
- * Same `.flowchart-*` classes the 1.0 pathway page uses, so a step looks
- * identical wherever it appears — the difference here is that each card also
- * carries its own share of the cost, which is what makes the three tracks
- * comparable step by step rather than only at the total.
+ * Nodes are plain numbers, not check/current/future states: nothing in this
+ * app tracks which step a student has actually completed, and a progress
+ * indicator that isn't real would be worse than none. Step TYPE (degree,
+ * transfer, internship, exam) is conveyed by each card's own badge chip.
  */
 export function PathwayFlow({
   pathway,
@@ -34,27 +39,39 @@ export function PathwayFlow({
 
   const schoolId = school.id;
   const costs = estimatePlanCost(pathway.steps, schoolId, school.tuition);
+  const info = hasSchoolInfo(schoolId) ? getSchoolInfo(schoolId) : null;
 
   return (
     <>
-      <div className="flowchart-container">
-        {pathway.steps.map((step: PathwayStep, index: number) => {
-          const stepCost = costs.steps[index];
-          const isFree = stepCost.range.high === 0;
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-[1fr_320px]">
+        <div>
+          {pathway.steps.map((step: PathwayStep, index: number) => {
+            const stepCost = costs.steps[index];
+            const isFree = stepCost.range.high === 0;
+            const isLast = index === pathway.steps.length - 1;
 
-          return (
-            <div key={index}>
-              {index > 0 && <div className="flowchart-connector" />}
-              <div className={`flowchart-step flowchart-step-${step.type}`}>
-                <div className="flowchart-step-header">
-                  <div className="flowchart-step-header-icon">{icons[step.type]}</div>
-                  <span className="text-xs font-semibold uppercase tracking-wider">
-                    {step.level || step.type}
-                  </span>
+            return (
+              <div key={index} className="flex gap-4">
+                {/* Rail: numbered node + connecting line down to the next step. */}
+                <div className="flex flex-col items-center">
+                  <div className="pathway-timeline-node flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2 text-sm font-semibold">
+                    {index + 1}
+                  </div>
+                  {!isLast && <div className="pathway-timeline-rail w-0.5 flex-1" />}
                 </div>
-                <div className="flowchart-step-content">
-                  <h3 className="text-lg font-semibold text-primary">{step.name}</h3>
-                  <p className="mt-2 text-on-surface-variant">{step.description}</p>
+
+                <div className={`min-w-0 flex-1 rounded-xl border border-outline-variant bg-surface-lowest p-5 shadow-card ${isLast ? "mb-0" : "mb-6"}`}>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-container text-on-surface-variant">
+                      {icons[step.type]}
+                    </span>
+                    <span className="inline-flex items-center rounded-full bg-surface-container px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wider text-on-surface-variant">
+                      {step.level || step.type}
+                    </span>
+                  </div>
+
+                  <h3 className="mt-3 text-lg font-semibold text-primary">{step.name}</h3>
+                  <p className="mt-1 text-on-surface-variant">{step.description}</p>
 
                   {showStepCosts && (
                     <div className="mt-4 rounded-lg bg-surface px-3 py-2">
@@ -111,9 +128,56 @@ export function PathwayFlow({
                   )}
                 </div>
               </div>
+            );
+          })}
+        </div>
+
+        {/* Real advising links only — never a fabricated advisor or a
+            "Continue Learning" action nothing here can back up. When we hold
+            no curated info for this school (an AI-discovered "open" school),
+            this drops to a generic advisor note rather than showing
+            another school's contacts under this one's name. */}
+        <aside className="h-fit rounded-xl border border-outline-variant bg-surface-lowest p-5 lg:sticky lg:top-20">
+          <p className="text-sm font-semibold text-on-surface">Need advising?</p>
+          {info ? (
+            <div className="mt-3 space-y-3">
+              {info.contacts.map((contact) => (
+                <a
+                  key={contact.email}
+                  href={`mailto:${contact.email}`}
+                  className="block text-sm text-secondary hover:text-secondary/80"
+                >
+                  {contact.label}: {contact.email}
+                </a>
+              ))}
+              {info.resources.map((resource) => (
+                <a
+                  key={resource.url}
+                  href={resource.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-sm text-secondary hover:text-secondary/80"
+                >
+                  {resource.label} ↗
+                </a>
+              ))}
+              {info.transferAgreementsUrl && (
+                <a
+                  href={info.transferAgreementsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block text-sm text-secondary hover:text-secondary/80"
+                >
+                  Transfer agreements ↗
+                </a>
+              )}
             </div>
-          );
-        })}
+          ) : (
+            <p className="mt-2 text-sm text-on-surface-variant">
+              Confirm this route with an academic advisor at {school.name} before acting on it.
+            </p>
+          )}
+        </aside>
       </div>
 
       {requirements && (
