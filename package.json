@@ -28,6 +28,7 @@
     "scrape:barry": "node scripts/scrape-barry-programs.mjs",
     "export-cache": "node scripts/export-cache.mjs",
     "fetch:scorecard": "node scripts/fetch-scorecard.mjs",
+    "fetch:cip-soc": "node scripts/fetch-cip-soc.mjs",
     "seed-examples": "node scripts/seed-examples.mjs"
   },
   "dependencies": {
