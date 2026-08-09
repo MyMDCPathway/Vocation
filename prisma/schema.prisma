@@ -71,8 +71,8 @@ model User {
   savedPathways SavedPathway[]
 }
 
-/// One row per linked OAuth provider (Google, LinkedIn) or per credentials
-/// login — Auth.js's standard shape.
+/// One row per linked OAuth provider (Google) or per credentials login —
+/// Auth.js's standard shape.
 model Account {
   id                String  @id @default(cuid())
   userId            String

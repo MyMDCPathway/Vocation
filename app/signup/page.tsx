@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { loadIntake } from "@/app/lib/intakeStorage";
+import { GoogleSignInButton } from "@/app/components/auth/GoogleSignInButton";
+import { useGoogleAvailable } from "@/app/lib/useGoogleAvailable";
 
 // PRD §1: "Create Account — two-step initial sign-up. Basic info (Name,
 // Email, Password) followed by account type selection (Student, Career
@@ -31,6 +33,7 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
+  const googleAvailable = useGoogleAvailable();
 
   function goToStepTwo(event: React.FormEvent) {
     event.preventDefault();
@@ -198,28 +201,19 @@ export default function SignupPage() {
             </div>
           )}
 
-          <div className="mt-6 flex items-center gap-3">
-            <span className="h-px flex-1 bg-outline-variant" />
-            <span className="text-xs font-semibold uppercase tracking-wider text-outline">or</span>
-            <span className="h-px flex-1 bg-outline-variant" />
-          </div>
+          {googleAvailable && (
+            <>
+              <div className="mt-6 flex items-center gap-3">
+                <span className="h-px flex-1 bg-outline-variant" />
+                <span className="text-xs font-semibold uppercase tracking-wider text-outline">or</span>
+                <span className="h-px flex-1 bg-outline-variant" />
+              </div>
 
-          <div className="mt-6 space-y-3">
-            <button
-              type="button"
-              onClick={() => signIn("google")}
-              className="w-full rounded-md border border-outline-variant py-2.5 text-sm font-medium text-on-surface transition-colors hover:bg-surface-container"
-            >
-              Sign up with Google
-            </button>
-            <button
-              type="button"
-              onClick={() => signIn("linkedin")}
-              className="w-full rounded-md border border-outline-variant py-2.5 text-sm font-medium text-on-surface transition-colors hover:bg-surface-container"
-            >
-              Sign up with LinkedIn
-            </button>
-          </div>
+              <div className="mt-6 space-y-3">
+                <GoogleSignInButton label="Sign up with Google" />
+              </div>
+            </>
+          )}
 
           <p className="mt-6 text-center text-sm text-on-surface-variant">
             Already have an account?{" "}

@@ -1,7 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
-import LinkedIn from "next-auth/providers/linkedin";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/app/lib/db";
 import { verifyPassword } from "@/app/lib/password";
@@ -9,23 +8,17 @@ import { authConfig } from "@/app/lib/auth.config";
 
 // Auth.js configuration — the one place login actually happens.
 //
-// Google and LinkedIn only activate when their client id/secret are present.
-// Without that, Auth.js throws at startup for a misconfigured provider, which
-// would take down email/password login too just because nobody has registered
-// an OAuth app yet. Filtering the provider list keeps signup working with
-// nothing configured at all — the same "degrade instead of crash when an env
-// var is absent" rule as app/lib/durableCache.ts.
+// Google only activates when its client id/secret are present. Without that,
+// Auth.js throws at startup for a misconfigured provider, which would take
+// down email/password login too just because nobody has registered an OAuth
+// app yet. Filtering the provider list keeps signup working with nothing
+// configured at all — the same "degrade instead of crash when an env var is
+// absent" rule as app/lib/durableCache.ts.
 const oauthProviders = [
   process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
     ? Google({
         clientId: process.env.GOOGLE_CLIENT_ID,
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      })
-    : null,
-  process.env.LINKEDIN_CLIENT_ID && process.env.LINKEDIN_CLIENT_SECRET
-    ? LinkedIn({
-        clientId: process.env.LINKEDIN_CLIENT_ID,
-        clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
       })
     : null,
 ].filter((provider): provider is NonNullable<typeof provider> => provider !== null);

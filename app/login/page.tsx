@@ -4,9 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { GoogleSignInButton } from "@/app/components/auth/GoogleSignInButton";
+import { useGoogleAvailable } from "@/app/lib/useGoogleAvailable";
 
 // PRD §1: "Login Screen — simple, focused layout. Email/password fields,
-// social login options (LinkedIn, Google)."
+// social login options (LinkedIn, Google)." LinkedIn was removed; Google
+// renders only when actually configured — see GoogleSignInButton.
 //
 // "Forgot password" is named in the PRD but deliberately absent here: this
 // plan's scope is account creation, not a reset flow, and a link to a page
@@ -19,6 +22,7 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
+  const googleAvailable = useGoogleAvailable();
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -89,28 +93,19 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div className="mt-6 flex items-center gap-3">
-          <span className="h-px flex-1 bg-outline-variant" />
-          <span className="text-xs font-semibold uppercase tracking-wider text-outline">or</span>
-          <span className="h-px flex-1 bg-outline-variant" />
-        </div>
+        {googleAvailable && (
+          <>
+            <div className="mt-6 flex items-center gap-3">
+              <span className="h-px flex-1 bg-outline-variant" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-outline">or</span>
+              <span className="h-px flex-1 bg-outline-variant" />
+            </div>
 
-        <div className="mt-6 space-y-3">
-          <button
-            type="button"
-            onClick={() => signIn("google")}
-            className="w-full rounded-md border border-outline-variant py-2.5 text-sm font-medium text-on-surface transition-colors hover:bg-surface-container"
-          >
-            Continue with Google
-          </button>
-          <button
-            type="button"
-            onClick={() => signIn("linkedin")}
-            className="w-full rounded-md border border-outline-variant py-2.5 text-sm font-medium text-on-surface transition-colors hover:bg-surface-container"
-          >
-            Continue with LinkedIn
-          </button>
-        </div>
+            <div className="mt-6 space-y-3">
+              <GoogleSignInButton label="Continue with Google" />
+            </div>
+          </>
+        )}
 
         <p className="mt-6 text-center text-sm text-on-surface-variant">
           New here?{" "}

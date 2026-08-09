@@ -5,8 +5,8 @@ import { adoptIntake } from "@/app/lib/intakeAdoption";
 import type { IntakeAnswers } from "@/app/lib/intake";
 
 // Creates the account itself — PRD §1's "Create Account" step. OAuth signup
-// (Google/LinkedIn) never touches this route; Auth.js's own callback creates
-// those users directly via the Prisma adapter. This route exists only for the
+// (Google) never touches this route; Auth.js's own callback creates those
+// users directly via the Prisma adapter. This route exists only for the
 // email/password path, where nothing else will hash the password or check
 // for an existing email first.
 export async function POST(request: NextRequest) {

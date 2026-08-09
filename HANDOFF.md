@@ -2633,8 +2633,7 @@ two configs:
   **This is the one `middleware.ts` imports**, and it builds its own
   `NextAuth(authConfig).auth` from it.
 - `app/lib/auth.ts` — the real config. Prisma adapter, Credentials provider,
-  conditionally-added Google/LinkedIn. Used by everything that isn't
-  middleware.
+  conditionally-added Google. Used by everything that isn't middleware.
 
 Merging these back into one file re-breaks the build. Bundle went 140 kB →
 78.1 kB on the split.
@@ -2735,8 +2734,11 @@ working on preview URLs.
   no migration file recording `postalCode`/`countryCode`.
 - **`DemandMap` hardcodes `rgba(15, 118, 110, …)`** instead of reading
   `--secondary`.
-- **Google/LinkedIn OAuth apps are unregistered**, so those buttons are hidden
-  until their env vars exist (`auth.ts` adds the providers conditionally).
+- **The Google OAuth app is unregistered**, so that button is hidden until its
+  env vars exist — `auth.ts` adds the provider conditionally, and (as of a
+  later fix) the button itself checks live via `useGoogleAvailable`/
+  `getProviders()` rather than rendering unconditionally, which it used to do
+  despite this note. LinkedIn was removed entirely rather than fixed.
 - **A stale `MyMDCPathway-job-summary` worktree** may still exist on disk;
   `git worktree list` will say.
 - ~~`DemandMap` hardcodes `rgba(15, 118, 110, …)`~~ — fixed in §16.
