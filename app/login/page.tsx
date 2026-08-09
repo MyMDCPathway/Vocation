@@ -5,6 +5,7 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { GoogleSignInButton } from "@/app/components/auth/GoogleSignInButton";
+import { PasswordField } from "@/app/components/auth/PasswordField";
 import { useGoogleAvailable } from "@/app/lib/useGoogleAvailable";
 
 // PRD §1: "Login Screen — simple, focused layout. Email/password fields,
@@ -68,19 +69,13 @@ export default function LoginPage() {
             />
           </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-on-surface-variant">
-              Password
-            </label>
-            <input
-              id="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 w-full rounded border border-outline-variant bg-surface-lowest px-3 py-2 text-on-surface focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-          </div>
+          <PasswordField
+            id="password"
+            label="Password"
+            value={password}
+            onChange={setPassword}
+            autoComplete="current-password"
+          />
 
           {error && <p className="text-sm text-error">{error}</p>}
 

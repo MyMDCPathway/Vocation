@@ -6,7 +6,9 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { loadIntake } from "@/app/lib/intakeStorage";
 import { GoogleSignInButton } from "@/app/components/auth/GoogleSignInButton";
+import { PasswordField } from "@/app/components/auth/PasswordField";
 import { useGoogleAvailable } from "@/app/lib/useGoogleAvailable";
+import { passwordStrength } from "@/app/lib/passwordStrength";
 
 // PRD §1: "Create Account — two-step initial sign-up. Basic info (Name,
 // Email, Password) followed by account type selection (Student, Career
@@ -30,6 +32,7 @@ export default function SignupPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [accountType, setAccountType] = useState<(typeof ACCOUNT_TYPES)[number]["id"] | null>(null);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
@@ -38,8 +41,11 @@ export default function SignupPage() {
   function goToStepTwo(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters.");
+    // Mirrors the server's own check in /api/signup/route.ts — this is a
+    // convenience that saves a round trip, never the actual enforcement.
+    const strength = passwordStrength(password);
+    if (strength.blocked) {
+      setError(strength.feedback);
       return;
     }
     setStep(2);
@@ -48,6 +54,10 @@ export default function SignupPage() {
   async function createAccount() {
     if (!accountType) {
       setError("Pick the option closest to where you are right now.");
+      return;
+    }
+    if (!agreedToTerms) {
+      setError("You'll need to agree to the Terms and Privacy Policy to continue.");
       return;
     }
     setError(null);
@@ -128,23 +138,16 @@ export default function SignupPage() {
                 />
               </div>
 
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-on-surface-variant">
-                  Password
-                </label>
-                <input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Create a secure password"
-                  className="mt-1 w-full rounded border border-outline-variant bg-surface-lowest px-3 py-2 text-on-surface focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-                <p className="mt-1 text-xs text-on-surface-variant">
-                  Must be at least 8 characters long.
-                </p>
-              </div>
+              <PasswordField
+                id="password"
+                label="Password"
+                value={password}
+                onChange={setPassword}
+                placeholder="Create a secure password"
+                autoComplete="new-password"
+                helpText="Must be at least 8 characters long."
+                showStrength
+              />
 
               {error && <p className="text-sm text-error">{error}</p>}
 
@@ -180,12 +183,32 @@ export default function SignupPage() {
                 ))}
               </div>
 
+              <label className="flex items-start gap-2 text-sm text-on-surface-variant">
+                <input
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-outline-variant"
+                />
+                <span>
+                  I agree to the{" "}
+                  <Link href="/terms" target="_blank" className="font-medium text-secondary hover:text-secondary/80">
+                    Terms
+                  </Link>{" "}
+                  and{" "}
+                  <Link href="/privacy" target="_blank" className="font-medium text-secondary hover:text-secondary/80">
+                    Privacy Policy
+                  </Link>
+                  .
+                </span>
+              </label>
+
               {error && <p className="text-sm text-error">{error}</p>}
 
               <button
                 type="button"
                 onClick={createAccount}
-                disabled={submitting}
+                disabled={submitting || !agreedToTerms}
                 className="w-full rounded-md bg-primary py-2.5 text-sm font-medium text-on-primary transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {submitting ? "Creating account…" : "Create Account"}
