@@ -1,28 +1,11 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
-import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/app/lib/db";
 import { verifyPassword } from "@/app/lib/password";
 import { authConfig } from "@/app/lib/auth.config";
 
 // Auth.js configuration — the one place login actually happens.
-//
-// Google only activates when its client id/secret are present. Without that,
-// Auth.js throws at startup for a misconfigured provider, which would take
-// down email/password login too just because nobody has registered an OAuth
-// app yet. Filtering the provider list keeps signup working with nothing
-// configured at all — the same "degrade instead of crash when an env var is
-// absent" rule as app/lib/durableCache.ts.
-const oauthProviders = [
-  process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET
-    ? Google({
-        clientId: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      })
-    : null,
-].filter((provider): provider is NonNullable<typeof provider> => provider !== null);
-
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(db),
@@ -44,10 +27,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         const user = await db.user.findUnique({ where: { email } });
-        // No user, or an OAuth-only account with no password set: refuse
-        // rather than compare against nothing. Same message either way — a
-        // different error for "no such email" vs "wrong password" hands an
-        // attacker a working email-enumeration oracle for free.
+        // No user, or a row somehow missing a hash: refuse rather than
+        // compare against nothing. Same message either way — a different
+        // error for "no such email" vs "wrong password" hands an attacker a
+        // working email-enumeration oracle for free.
         if (!user?.passwordHash) return null;
 
         const valid = await verifyPassword(password, user.passwordHash);
@@ -56,7 +39,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return { id: user.id, name: user.name, email: user.email, image: user.image };
       },
     }),
-    ...oauthProviders,
   ],
   callbacks: {
     // The account type and onboarding state ride on the JWT so pages can gate
