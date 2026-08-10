@@ -234,6 +234,24 @@ export default function IntakeWizard() {
 
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
+
+        // A refusal is NOT a failed lookup, so it must not fall through to the
+        // catch below — that path proceeds with whatever the student typed,
+        // which is exactly what we've just declined to do. Send them back to
+        // the career question instead, with the refusal above the input and
+        // the example careers under it as the way forward.
+        if (body.blocked) {
+          setRefinement(null);
+          patch({ career: undefined });
+          setError(body.error || "We can't build a plan for that.");
+          // The career question is normally skipped when the landing page
+          // already collected an answer. Un-skip it here, or a refused student
+          // is left on a loading screen with nowhere to retype.
+          setSkipCareer(false);
+          setStep("career");
+          return;
+        }
+
         throw new Error(body.error || `Request failed (${response.status})`);
       }
 

@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCached, setCached, cacheKey } from "@/app/lib/apiCache";
 import { getDurable, setDurable } from "@/app/lib/durableCache";
 import { resolveCareer } from "@/app/lib/careerCanonical";
+import {
+  BLOCKED_CAREER_MESSAGE,
+  MAX_CAREER_INPUT,
+  TOO_LONG_MESSAGE,
+} from "@/app/lib/careerPolicy";
 import { matchOccupation } from "@/app/lib/blsOccupations";
 import { resolveAreas } from "@/app/lib/blsAreas";
 import { fetchLaborStats, type LaborStats } from "@/app/lib/blsStats";
@@ -38,7 +43,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "A career is required." }, { status: 400 });
     }
 
-    const canonicalCareer = resolveCareer(career).canonical;
+    if (career.length > MAX_CAREER_INPUT) {
+      return NextResponse.json({ error: TOO_LONG_MESSAGE }, { status: 400 });
+    }
+
+    const resolved = resolveCareer(career);
+
+    // No Gemini call behind this one, but the same refusal: a career we won't
+    // plan a route to shouldn't get a wage table either.
+    if (resolved.blocked) {
+      return NextResponse.json(
+        { error: BLOCKED_CAREER_MESSAGE, blocked: true },
+        { status: 400 }
+      );
+    }
+
+    const canonicalCareer = resolved.canonical;
 
     const areas = resolveAreas({
       countryCode: typeof countryCode === "string" ? countryCode : "",

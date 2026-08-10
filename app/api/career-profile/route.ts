@@ -5,6 +5,11 @@ import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
 import { generateJson } from "@/app/lib/geminiJson";
 import { logCacheMiss } from "@/app/lib/missLog";
 import { resolveCareer } from "@/app/lib/careerCanonical";
+import {
+  BLOCKED_CAREER_MESSAGE,
+  MAX_CAREER_INPUT,
+  TOO_LONG_MESSAGE,
+} from "@/app/lib/careerPolicy";
 import { countryName, getCountry } from "@/app/lib/countries";
 import { fetchCareerMedia } from "@/app/lib/careerPhotos";
 import { probeUrl } from "@/app/lib/urlVerify";
@@ -229,7 +234,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const canonicalCareer = resolveCareer(career).canonical;
+    if (career.length > MAX_CAREER_INPUT) {
+      return NextResponse.json({ error: TOO_LONG_MESSAGE }, { status: 400 });
+    }
+
+    const resolved = resolveCareer(career);
+
+    // Ahead of the cache, the rate limiter, and the model call: a refused
+    // search must cost nothing and must not spend the visitor's allowance.
+    if (resolved.blocked) {
+      return NextResponse.json(
+        { error: BLOCKED_CAREER_MESSAGE, blocked: true },
+        { status: 400 }
+      );
+    }
+
+    const canonicalCareer = resolved.canonical;
 
     // The location step runs before this one, so the country is normally
     // known. The market is named on the page either way, so a student in

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/app/lib/auth";
 import { db } from "@/app/lib/db";
+import { resolveCareer } from "@/app/lib/careerCanonical";
+import { BLOCKED_CAREER_MESSAGE, MAX_CAREER_INPUT } from "@/app/lib/careerPolicy";
 
 // The saved-plan collection /pathways reads and writes to.
 //
@@ -59,6 +61,22 @@ export async function POST(request: NextRequest) {
       { error: "career, schoolId, schoolName, and data{title,steps} are required." },
       { status: 400 }
     );
+  }
+
+  if (career.length > MAX_CAREER_INPUT) {
+    return NextResponse.json(
+      { error: "That's too long to be a career." },
+      { status: 400 }
+    );
+  }
+
+  // The generating routes all refuse a blocked career, but this is the write,
+  // and nothing stops a client POSTing straight here with a body it composed
+  // itself. Without this check a refused career is still persistable — and a
+  // saved pathway is the one artefact that outlives the session and reappears
+  // on the account's /pathways page.
+  if (resolveCareer(career).blocked) {
+    return NextResponse.json({ error: BLOCKED_CAREER_MESSAGE }, { status: 400 });
   }
 
   const pathway = await db.savedPathway.create({

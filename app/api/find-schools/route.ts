@@ -5,6 +5,11 @@ import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
 import { generateJson } from "@/app/lib/geminiJson";
 import { logCacheMiss } from "@/app/lib/missLog";
 import { resolveCareer } from "@/app/lib/careerCanonical";
+import {
+  BLOCKED_CAREER_MESSAGE,
+  MAX_CAREER_INPUT,
+  TOO_LONG_MESSAGE,
+} from "@/app/lib/careerPolicy";
 import { countryName, hasLocalCatalogs } from "@/app/lib/countries";
 import { FLORIDA_SCHOOLS, getSchoolById } from "@/app/lib/floridaSchools";
 import { SCHOOLS_WITH_CATALOG } from "@/app/lib/schoolCatalogs";
@@ -310,7 +315,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "A country is required." }, { status: 400 });
     }
 
-    const canonicalCareer = resolveCareer(career).canonical;
+    if (career.length > MAX_CAREER_INPUT) {
+      return NextResponse.json({ error: TOO_LONG_MESSAGE }, { status: 400 });
+    }
+
+    const resolved = resolveCareer(career);
+
+    // Ahead of the cache, the rate limiter, and the model call: a refused
+    // search must cost nothing and must not spend the visitor's allowance.
+    if (resolved.blocked) {
+      return NextResponse.json(
+        { error: BLOCKED_CAREER_MESSAGE, blocked: true },
+        { status: 400 }
+      );
+    }
+
+    const canonicalCareer = resolved.canonical;
     const place = [city, subdivision].filter(Boolean).join(", ");
     const profile = archetypeProfile(routeArchetype);
 

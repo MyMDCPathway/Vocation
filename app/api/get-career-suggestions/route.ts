@@ -5,6 +5,11 @@ import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
 import { geminiUrl } from "@/app/lib/geminiModel";
 import { logCacheMiss } from "@/app/lib/missLog";
 import { resolveCareer } from "@/app/lib/careerCanonical";
+import {
+  BLOCKED_CAREER_MESSAGE,
+  MAX_CAREER_INPUT,
+  TOO_LONG_MESSAGE,
+} from "@/app/lib/careerPolicy";
 
 // Server-side only - never exposed to the browser
 const apiKey = process.env.GEMINI_API_KEY;
@@ -32,9 +37,24 @@ export async function POST(request: NextRequest) {
     // Collapse spellings the same way pathway generation does, so "RN",
     // "nurse", and "I want to be a nurse" share one cached suggestion list
     // instead of spending three Gemini calls on near-identical answers. The
+    if (input.length > MAX_CAREER_INPUT) {
+      return NextResponse.json({ error: TOO_LONG_MESSAGE }, { status: 400 });
+    }
+
     // canonical form is also what gets prompted, so the suggestions a student
     // sees line up with the pathway they get after picking one.
-    const canonicalInput = resolveCareer(input).canonical;
+    const resolved = resolveCareer(input);
+
+    // Ahead of the cache, the rate limiter, and the model call: a refused
+    // search must cost nothing and must not spend the visitor's allowance.
+    if (resolved.blocked) {
+      return NextResponse.json(
+        { error: BLOCKED_CAREER_MESSAGE, blocked: true },
+        { status: 400 }
+      );
+    }
+
+    const canonicalInput = resolved.canonical;
 
     // Serve identical searches from cache to avoid the Gemini rate limit.
     const key = cacheKey("suggestions", canonicalInput);
