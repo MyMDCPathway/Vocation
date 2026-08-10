@@ -9,6 +9,7 @@ import {
 } from "@/app/lib/careerPolicy";
 import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
 import { geminiUrl, GEMINI_TIMEOUT_MS } from "@/app/lib/geminiModel";
+import { recordLegitimacy } from "@/app/lib/careerLegitimacy";
 import { logCacheMiss } from "@/app/lib/missLog";
 import { archetypeProfile } from "@/app/lib/routeArchetype";
 
@@ -357,11 +358,19 @@ export async function POST(request: NextRequest) {
       const refusal = { blocked: true as const };
       setCached(key, refusal);
       await setDurable(key, refusal);
+      // Publish the verdict where the other four Gemini routes can read it.
+      // They enforce the same policy but have no free answer of their own, so
+      // this is what stops them paying for a question already answered here.
+      await recordLegitimacy(canonicalCareer, false);
       return NextResponse.json(
         { error: BLOCKED_CAREER_MESSAGE, blocked: true },
         { status: 400 }
       );
     }
+
+    // The allow verdict is worth publishing too — without it, a route reached
+    // outside the wizard would pay for a check on a career already cleared.
+    await recordLegitimacy(canonicalCareer, true);
 
     // A "needs specifics" answer with no options is unusable — the wizard
     // would render an empty question. Downgrade it to "already specific"

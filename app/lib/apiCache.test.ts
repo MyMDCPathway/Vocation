@@ -80,6 +80,12 @@ describe("generate-pathway route uses the cache", () => {
     cache._clearCache();
     cache._setSeedForTests({});
 
+    // Publish the career-policy verdict the way refine-career does, so this
+    // test measures the pathway cache rather than the legitimacy check that
+    // now runs ahead of it.
+    const { recordLegitimacy } = await import("@/app/lib/careerLegitimacy");
+    await recordLegitimacy("Registered Nurse", true);
+
     const pathwayData = { title: "Nurse", pathways: [] };
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,

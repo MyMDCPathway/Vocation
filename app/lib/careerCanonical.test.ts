@@ -88,6 +88,13 @@ describe("generate-pathway shares one generation across spellings", () => {
     // to generate and the "only one Gemini call" assertion means something.
     _setSeedForTests({});
 
+    // Publish the career-policy verdict the way refine-career does. All three
+    // spellings below canonicalise to the same career, so one entry covers
+    // them — and without it the first request would spend a Gemini call on the
+    // legitimacy check, breaking the "only one call" assertion this test is for.
+    const { recordLegitimacy } = await import("@/app/lib/careerLegitimacy");
+    await recordLegitimacy("Registered Nurse", true);
+
     const pathwayData = { title: "Registered Nurse", pathways: [] };
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,

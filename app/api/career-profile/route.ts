@@ -5,6 +5,7 @@ import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
 import { generateJson } from "@/app/lib/geminiJson";
 import { logCacheMiss } from "@/app/lib/missLog";
 import { resolveCareer } from "@/app/lib/careerCanonical";
+import { careerIsLegitimate } from "@/app/lib/careerLegitimacy";
 import {
   BLOCKED_CAREER_MESSAGE,
   MAX_CAREER_INPUT,
@@ -250,6 +251,16 @@ export async function POST(request: NextRequest) {
     }
 
     const canonicalCareer = resolved.canonical;
+
+    // Layer two of the career policy — see careerLegitimacy.ts. Reads the
+    // verdict refine-career already published for this career, and only asks
+    // the model itself when this route was reached without the wizard.
+    if (!(await careerIsLegitimate(canonicalCareer, apiKey))) {
+      return NextResponse.json(
+        { error: BLOCKED_CAREER_MESSAGE, blocked: true },
+        { status: 400 }
+      );
+    }
 
     // The location step runs before this one, so the country is normally
     // known. The market is named on the page either way, so a student in

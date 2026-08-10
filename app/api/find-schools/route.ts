@@ -5,6 +5,7 @@ import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
 import { generateJson } from "@/app/lib/geminiJson";
 import { logCacheMiss } from "@/app/lib/missLog";
 import { resolveCareer } from "@/app/lib/careerCanonical";
+import { careerIsLegitimate } from "@/app/lib/careerLegitimacy";
 import {
   BLOCKED_CAREER_MESSAGE,
   MAX_CAREER_INPUT,
@@ -331,6 +332,18 @@ export async function POST(request: NextRequest) {
     }
 
     const canonicalCareer = resolved.canonical;
+
+    // Layer two of the career policy. The static list above catches the plain
+    // spellings; this catches the phrasings nobody wrote down. Normally free —
+    // refine-career publishes a verdict for every career the wizard sees, and
+    // this reads it. Only a caller reaching this route directly pays.
+    if (!(await careerIsLegitimate(canonicalCareer, apiKey))) {
+      return NextResponse.json(
+        { error: BLOCKED_CAREER_MESSAGE, blocked: true },
+        { status: 400 }
+      );
+    }
+
     const place = [city, subdivision].filter(Boolean).join(", ");
     const profile = archetypeProfile(routeArchetype);
 

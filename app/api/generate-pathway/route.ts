@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCached, setCached, cacheKey } from "@/app/lib/apiCache";
 import { getDurable, setDurable } from "@/app/lib/durableCache";
 import { resolveCareer } from "@/app/lib/careerCanonical";
+import { careerIsLegitimate } from "@/app/lib/careerLegitimacy";
 import {
   BLOCKED_CAREER_MESSAGE,
   MAX_CAREER_INPUT,
@@ -99,6 +100,19 @@ export async function POST(request: NextRequest) {
     }
 
     const canonicalCareer = resolved.canonical;
+
+    // Layer two of the career policy, and deliberately in the same position
+    // as layer one — ahead of the cache, for the reason given above: an entry
+    // generated before this check existed must not be served now. Usually
+    // free, because the wizard's refine-career call already published a
+    // verdict for this career; a caller who skipped the wizard pays for one
+    // cheap classification, once, and it is cached for everyone after.
+    if (!(await careerIsLegitimate(canonicalCareer, apiKey))) {
+      return NextResponse.json(
+        { error: BLOCKED_CAREER_MESSAGE, blocked: true },
+        { status: 400 }
+      );
+    }
 
     // Return a previously generated pathway for the same career without
     // spending a Gemini request (avoids the free-tier rate limit on repeats).
