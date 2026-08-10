@@ -1,102 +1,45 @@
 "use client";
 
-import { findFIUProgram } from "@/app/lib/fiu-programs";
-import { catalogFor } from "@/app/lib/programCatalogs";
-import { getMDCProgramUrl, hasMDCProgramPage } from "@/app/lib/mdc-programs";
+import { resolveProgramLink } from "@/app/lib/resolveProgramLink";
 import type { PathwayStep } from "@/app/lib/types";
 
-// Resolves a pathway's degree step to the right school's program page.
-//
-// What "right" means depends on which school the pathway was generated for:
-//
-//   FIU pathway — every degree step IS an FIU program (the prompt only permits
-//   names from FIU's catalog), so the link is primary and reads "View Program
-//   Page", exactly like MDC's does on an MDC pathway.
-//
-//   MDC pathway — steps taken at MDC link to MDC. Steps AFTER MDC (the
-//   bachelor's a student transfers into) have no school attached, because the
-//   generator says "Transfer to a 4-Year University" without naming one. FIU is
-//   offered there as a labelled EXAMPLE, styled secondary, because claiming it
-//   as the destination would assert something the pathway never said.
+// Thin rendering wrapper — all resolution logic (which school a step's
+// program page belongs to, and whether it's the school's own program or its
+// transfer partner's) lives in resolveProgramLink.ts, where it can be unit
+// tested without a component-rendering setup.
 
 interface Props {
   step: PathwayStep;
   schoolId: string;
+  /**
+   * Whether a transfer step precedes this one in the SAME pathway. Several
+   * state colleges grant a bachelor's under the same bare name their
+   * transfer partner also uses (e.g. "Nursing", "Accounting") — this is the
+   * structural signal that disambiguates "this school's own bachelor's" from
+   * "the partner's bachelor's after transferring," since the component only
+   * sees one step at a time. See resolveProgramLink.ts.
+   */
+  afterTransfer?: boolean;
 }
 
-function LinkButton({
-  href,
-  label,
-  title,
-  variant,
-}: {
-  href: string;
-  label: string;
-  title?: string;
-  variant: "primary" | "secondary";
-}) {
+export function ProgramLink({ step, schoolId, afterTransfer }: Props) {
+  const resolved = resolveProgramLink(step, schoolId, { afterTransfer });
+  if (!resolved) return null;
+
   const styles =
-    variant === "primary"
+    resolved.variant === "primary"
       ? "border-transparent shadow-sm text-white bg-school-600 hover:bg-school-700"
       : "border-school-600 text-school-700 bg-white hover:bg-school-50";
 
   return (
     <a
-      href={href}
+      href={resolved.href}
       target="_blank"
       rel="noopener noreferrer"
-      title={title}
+      title={resolved.title}
       className={`mt-4 inline-flex items-center px-4 py-2 border text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-school-500 transition duration-150 ${styles}`}
     >
-      <i className="fas fa-external-link-alt mr-2" /> {label}
+      <i className="fas fa-external-link-alt mr-2" /> {resolved.label}
     </a>
-  );
-}
-
-export function ProgramLink({ step, schoolId }: Props) {
-  if (step.type !== "degree") return null;
-
-  // Schools with a scraped catalog resolve their own steps directly. Every
-  // degree step in such a pathway is one of that school's programs, because the
-  // prompt only permits names from its catalog.
-  const catalog = catalogFor(schoolId);
-  if (catalog) {
-    const program = catalog.find(step.name, step.level);
-    if (!program) return null;
-    return (
-      <LinkButton
-        href={program.url}
-        label="View Program Page"
-        title={program.area ? `${program.name} — ${program.area}` : program.name}
-        variant="primary"
-      />
-    );
-  }
-
-  // MDC pathway.
-  if (hasMDCProgramPage(step.name, step.level)) {
-    return (
-      <LinkButton
-        href={getMDCProgramUrl(step.name)}
-        label="View Program Page"
-        variant="primary"
-      />
-    );
-  }
-
-  // Steps taken at MDC without a catalog page get nothing rather than being
-  // sent to another school's site.
-  if (step.level?.includes("MDC")) return null;
-
-  const program = findFIUProgram(step.name, step.level);
-  if (!program) return null;
-
-  return (
-    <LinkButton
-      href={program.url}
-      label={`Offered at FIU: ${program.name}`}
-      title={`${program.name} — ${program.college}, Florida International University`}
-      variant="secondary"
-    />
   );
 }

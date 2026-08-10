@@ -14,7 +14,10 @@ describe("catalog registry", () => {
   });
 
   it("returns null for a school we hold no data for", () => {
-    expect(catalogFor("cookman")).toBeNull();
+    // Every one of the 61 Florida schools now has a real catalog (Edward
+    // Waters, the last one, closed this gap), so there's no real school id
+    // left to exercise this with — any id not in the registry still works.
+    expect(catalogFor("not-a-real-school")).toBeNull();
     expect(catalogFor("")).toBeNull();
   });
 

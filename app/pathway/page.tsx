@@ -1026,9 +1026,12 @@ function PathwayPageContent() {
             {/* Selected Pathway Display */}
             <div className="flowchart-container">
               {pathwayData.pathways[selectedPathwayIndex].steps.map(
-                (step, stepIndex) => {
+                (step, stepIndex, steps) => {
                   const stepTypeClass = `flowchart-step-${step.type}`;
                   const IconComponent = icons[step.type];
+                  const afterTransfer = steps
+                    .slice(0, stepIndex)
+                    .some((s) => s.type === "transfer");
 
                   return (
                     <div key={stepIndex}>
@@ -1085,10 +1088,10 @@ function PathwayPageContent() {
                               )}
                             </div>
                           )}
-                          <ProgramLink step={step} schoolId={schoolId} />
+                          <ProgramLink step={step} schoolId={schoolId} afterTransfer={afterTransfer} />
                           {step.type === "exam" && (
-                            <ExamStepComponent 
-                              examName={step.name} 
+                            <ExamStepComponent
+                              examName={step.name}
                               examDescription={step.description}
                               onShowRequirements={(name, info) => setCertificationPopup({ name, info })}
                             />
@@ -1216,9 +1219,12 @@ function PathwayPageContent() {
                 {/* Pathway Flowchart */}
                 <div className="flowchart-container">
                   {careerPathway.data.pathways[careerPathway.selectedPathwayIndex].steps.map(
-                    (step, stepIndex) => {
+                    (step, stepIndex, steps) => {
                       const stepTypeClass = `flowchart-step-${step.type}`;
                       const IconComponent = icons[step.type];
+                      const afterTransfer = steps
+                        .slice(0, stepIndex)
+                        .some((s) => s.type === "transfer");
 
                       return (
                         <div key={stepIndex}>
@@ -1275,11 +1281,11 @@ function PathwayPageContent() {
                                   )}
                                 </div>
                               )}
-                              <ProgramLink step={step} schoolId={schoolId} />
+                              <ProgramLink step={step} schoolId={schoolId} afterTransfer={afterTransfer} />
                               {step.type === "exam" && (
-                                <ExamStepComponent 
-                                  examName={step.name} 
-                                  examDescription={step.description} 
+                                <ExamStepComponent
+                                  examName={step.name}
+                                  examDescription={step.description}
                                   careerIndex={careerIndex}
                                   onShowRequirements={(name, info, idx) => setCertificationPopup({ name, info, careerIndex: idx })}
                                 />
