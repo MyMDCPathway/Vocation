@@ -46,7 +46,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface px-5 py-16">
+    <main className="flex min-h-screen items-center justify-center bg-surface px-5 py-16">
       <div className="w-full max-w-md rounded-lg border border-outline-variant bg-surface-lowest p-8 shadow-card">
         <h1 className="text-2xl font-semibold text-primary">Log in</h1>
         <p className="mt-2 text-sm text-on-surface-variant">
@@ -100,6 +100,6 @@ export default function LoginPage() {
           </Link>
         </p>
       </div>
-    </div>
+    </main>
   );
 }

@@ -146,11 +146,11 @@ function ResetPasswordForm() {
 
 function Card({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface px-5 py-16">
+    <main className="flex min-h-screen items-center justify-center bg-surface px-5 py-16">
       <div className="w-full max-w-md rounded-lg border border-outline-variant bg-surface-lowest p-8 shadow-card">
         {children}
       </div>
-    </div>
+    </main>
   );
 }
 

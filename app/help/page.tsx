@@ -48,7 +48,7 @@ const FAQS: { question: string; answer: string }[] = [
 
 export default function HelpPage() {
   return (
-    <div className="min-h-screen bg-surface">
+    <main className="min-h-screen bg-surface">
       <div className="mx-auto w-full max-w-2xl px-6 py-12">
         <h1 className="text-3xl font-bold text-primary">Help</h1>
         <p className="mt-2 text-on-surface-variant">
@@ -70,6 +70,6 @@ export default function HelpPage() {
           </Link>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

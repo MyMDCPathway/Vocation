@@ -207,6 +207,7 @@ export default function OnboardingPage() {
   if (step === "interests") {
     return (
       <StepShell
+        landmark
         stepNumber={1}
         question="What are you interested in?"
         help="Pick as many as fit — we'll suggest real career goals from these next. Skip it and we'll show what's growing fastest instead."
@@ -246,6 +247,7 @@ export default function OnboardingPage() {
 
   return (
     <StepShell
+      landmark
       stepNumber={2}
       question="Any career goals in mind?"
       help={

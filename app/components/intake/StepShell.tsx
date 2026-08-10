@@ -139,6 +139,7 @@ export function StepShell({
   hero,
   rail,
   navLabel,
+  landmark,
   children,
 }: {
   /** Also the remount key (with `question`) that replays the step-transition
@@ -179,17 +180,29 @@ export function StepShell({
    * navigate back to question four.
    */
   navLabel?: string;
+  /**
+   * Renders the content column as `<main>` instead of `<div>`.
+   *
+   * Off by default because StepShell is used in two different structural
+   * roles: as an intake step nested inside /start, which already wraps
+   * IntakeWizard in its own `<main>` (a second one would nest illegally);
+   * and as a page's entire content on /career-discovery and /onboarding,
+   * neither of which has a `<main>` anywhere else. Only those two pages pass
+   * `landmark`.
+   */
+  landmark?: boolean;
   children: ReactNode;
 }) {
   // The rail needs room beside the reading column, so a step that has one is
   // widened even when it didn't ask to be.
   const column = wide || rail ? "max-w-6xl" : "max-w-3xl";
+  const ContentTag = landmark ? "main" : "div";
 
   return (
     <div className="relative flex min-h-screen flex-col bg-surface">
       <TopBar active={navLabel} />
 
-      <div
+      <ContentTag
         className={`relative z-10 mx-auto w-full flex-1 ${column} px-6 ${
           hero ? "pb-16 pt-10 md:pt-16" : "py-10 md:py-14"
         }`}
@@ -252,7 +265,7 @@ export function StepShell({
         {/* A wide step (the map) has no room for a side rail, so it goes
             underneath rather than being dropped. */}
         {rail && wide && <div className="mt-10 max-w-md">{rail}</div>}
-      </div>
+      </ContentTag>
 
       {(onBack || footer) && (
         <div

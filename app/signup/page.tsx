@@ -79,7 +79,7 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
+    <main className="grid min-h-screen grid-cols-1 lg:grid-cols-2">
       {/* Real product copy, not a stock photo or an invented quote. */}
       <div className="hidden flex-col justify-center bg-primary px-12 py-16 text-on-primary lg:flex">
         <p className="text-3xl font-semibold leading-snug">
@@ -189,6 +189,6 @@ export default function SignupPage() {
           </p>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

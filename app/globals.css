@@ -67,7 +67,13 @@
   --surface-dim: #d8dadc;
   --on-surface: #191c1e;
   --on-surface-variant: #45464d;
-  --outline: #76777d;
+  /* #76777d measured 4.22:1 against --surface (needs 4.5:1 for normal text,
+     WCAG 1.4.3) — Lighthouse caught it on every text-xs label using this
+     token. Darkened to keep >=4.5:1 even against --surface-dim, the darkest
+     background this token is used on; it's ~6.5:1 against the lighter
+     surfaces most usages actually sit on. outline-variant is unchanged: it's
+     a border/UI-component color (3:1 requirement), not text. */
+  --outline: #5a5b61;
   --outline-variant: #c6c6cd;
 
   --error: #ba1a1a;

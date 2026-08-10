@@ -141,7 +141,11 @@ function ProfileMenu({ name, email }: { name: string | null | undefined; email: 
         onClick={() => setOpen((v) => !v)}
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label="Account menu"
+        // The accessible name must contain the visible text (WCAG 2.5.3,
+        // "Label in Name") — a voice-control user targeting the initials
+        // shown on the button needs the initials in what gets announced,
+        // not just "Account menu" standing in for them entirely.
+        aria-label={`${initials(name)}, Account menu`}
         className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-on-primary transition-opacity hover:opacity-90"
       >
         {initials(name)}

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function TermsOfService() {
   return (
-    <div className="min-h-screen bg-surface">
+    <main className="min-h-screen bg-surface">
       <div className="max-w-4xl mx-auto px-6 py-12">
         <h1 className="text-4xl font-bold text-on-surface mb-8">Terms of Service</h1>
 
@@ -15,7 +15,7 @@ export default function TermsOfService() {
           <p className="text-sm text-outline">Last updated: August 10, 2026</p>
 
           <section>
-            <p className="bg-surface-variant border border-outline rounded-lg p-4 text-sm">
+            <p className="bg-surface-container border border-outline-variant rounded-lg p-4 text-sm">
               <strong>Independent project notice:</strong> Vocation is an independent project and
               is not affiliated with, endorsed by, or sponsored by Miami Dade College or any other
               educational institution. Program, transfer, and earnings data referenced by the
@@ -200,6 +200,6 @@ export default function TermsOfService() {
           </a>
         </div>
       </div>
-    </div>
+    </main>
   )
 }

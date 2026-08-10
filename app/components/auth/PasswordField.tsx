@@ -66,7 +66,10 @@ export function PasswordField({
           type="button"
           onClick={() => setVisible((v) => !v)}
           aria-label={visible ? "Hide password" : "Show password"}
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 text-outline transition-colors hover:text-on-surface"
+          // h-8 w-8 (32px) meets the 24x24 CSS px minimum target size (WCAG
+          // 2.5.8) the bare icon alone didn't — the icon itself stays the
+          // same visual size, centered inside the larger hit area.
+          className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center text-outline transition-colors hover:text-on-surface"
         >
           {visible ? <EyeOffIcon /> : <EyeIcon />}
         </button>
