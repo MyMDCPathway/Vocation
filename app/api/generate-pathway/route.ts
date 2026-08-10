@@ -17,7 +17,12 @@ import {
 import { DEFAULT_SCHOOL_ID } from "@/app/lib/floridaSchools";
 import { buildOpenPathwayRequest } from "@/app/lib/openSchoolPrompt";
 import { attachVerifiedLinks } from "@/app/lib/verifyPathway";
-import { isOpenSchool, type SchoolRef } from "@/app/lib/schoolRef";
+import { type SchoolRef } from "@/app/lib/schoolRef";
+import {
+  validateOpenSchoolRef,
+  schoolRefFingerprint,
+} from "@/app/lib/openSchoolValidation";
+import { archetypeProfile } from "@/app/lib/routeArchetype";
 
 // Server-side only - never exposed to the browser
 const apiKey = process.env.GEMINI_API_KEY;
@@ -55,8 +60,16 @@ export async function POST(request: NextRequest) {
     // A bare id we hold no catalog for is still rejected. Falling back to MDC
     // would show a student an MDC plan under another school's name.
     const schoolId = typeof school === "string" && school ? school : DEFAULT_SCHOOL_ID;
-    const openSchool: SchoolRef | undefined =
-      isOpenSchool(schoolId) && schoolRef?.name ? (schoolRef as SchoolRef) : undefined;
+    // Validated, not cast. An "open:" id is by definition a deterministic slug
+    // of the school's own name, so a ref whose name doesn't slug back to the
+    // id it arrived with was never produced by a real lookup — that falls
+    // through to the same 400 an uncatalogued school gets, below.
+    const openSchool: SchoolRef | null = validateOpenSchoolRef(schoolId, schoolRef);
+    // Normalized here rather than deep in the prompt builder, because the raw
+    // string used to reach the cache key: an unbounded, unvalidated field in
+    // a shared key is an unlimited supply of guaranteed cache misses, and
+    // every miss is a Gemini generation someone else pays for.
+    const archetype = archetypeProfile(routeArchetype).id;
 
     if (!openSchool && !hasCatalog(schoolId)) {
       return NextResponse.json(
@@ -95,7 +108,14 @@ export async function POST(request: NextRequest) {
     const key = cacheKey(
       // The archetype changes the SHAPE of the plan, so two routes through the
       // same school are different answers and cannot share an entry.
-      `pathway:${schoolId}${openSchool ? `:${routeArchetype ?? "degree"}` : ""}`,
+      //
+      // The fingerprint is what keeps this key safe to share. An open school's
+      // details are supplied by the client and can't be checked against a
+      // catalog, so without it one request carrying fabricated details for a
+      // real school's name would overwrite the durable entry every later
+      // visitor asking about that school gets served. Keyed by content, a
+      // forged request can only ever read back its own answer.
+      `pathway:${schoolId}${openSchool ? `:${archetype}:${schoolRefFingerprint(openSchool)}` : ""}`,
       canonicalCareer
     );
     const cached = getCached(key);
@@ -128,7 +148,7 @@ export async function POST(request: NextRequest) {
     // school has no catalog to embed, so it gets the URL-claiming prompt whose
     // output is checked below instead.
     const prompt = openSchool
-      ? buildOpenPathwayRequest(openSchool, canonicalCareer, routeArchetype)
+      ? buildOpenPathwayRequest(openSchool, canonicalCareer, archetype)
       : buildPathwayRequest(schoolId, canonicalCareer)!;
     const { systemPrompt, userQuery, responseSchema } = prompt;
     const apiUrl = geminiUrl(apiKey);
