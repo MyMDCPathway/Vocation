@@ -53,6 +53,25 @@ describe("withDbErrors", () => {
     expect(body.error).toMatch(/database/i);
   });
 
+  it.each([
+    ["DYNAMIC_SERVER_USAGE", "a build-time dynamic-route probe"],
+    ["NEXT_REDIRECT;replace;/login;307;", "redirect()"],
+    ["NEXT_NOT_FOUND", "notFound()"],
+  ])("re-throws %s rather than answering it", async (digest) => {
+    // Next signals by throwing. Catching these breaks the framework: the
+    // first version of this wrapper turned /api/account/export's
+    // DynamicServerError into a 500 during `next build`, logging a fake
+    // failure and swallowing the signal Next needed to mark the route
+    // dynamic.
+    const signal = Object.assign(new Error("next internal"), { digest });
+
+    await expect(
+      withDbErrors(async () => {
+        throw signal;
+      })()
+    ).rejects.toBe(signal);
+  });
+
   it("turns any other thrown error into a JSON 500", async () => {
     const res = await withDbErrors(async () => {
       throw new TypeError("undefined is not a function");

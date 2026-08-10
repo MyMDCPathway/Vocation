@@ -30,6 +30,25 @@ function isDatabaseError(error: unknown): boolean {
 }
 
 /**
+ * Next throws to signal, not only to fail.
+ *
+ * `redirect()` and `notFound()` work by throwing, and during a build Next
+ * throws DynamicServerError the first time a handler touches `headers()` or
+ * `cookies()` — that throw is how it discovers the route can't be
+ * prerendered. All of them are tagged with a string `digest`.
+ *
+ * Catching these breaks the framework: the first version of this wrapper
+ * turned /api/account/export's DynamicServerError into a 500 during `next
+ * build`, which both logged a fake failure and swallowed the signal Next
+ * needed. Anything carrying a digest belongs to Next and gets re-thrown
+ * untouched.
+ */
+function isFrameworkSignal(error: unknown): boolean {
+  const digest = (error as { digest?: unknown } | null)?.digest;
+  return typeof digest === "string";
+}
+
+/**
  * Wraps a route handler so a thrown database error becomes JSON instead of
  * Next's HTML error page.
  *
@@ -50,6 +69,9 @@ export function withDbErrors<A extends unknown[], R extends Response>(
     try {
       return await handler(...args);
     } catch (error) {
+      // Before anything else: hand Next's own throws straight back.
+      if (isFrameworkSignal(error)) throw error;
+
       if (isDatabaseError(error)) {
         console.error(
           "[db] request failed:",
