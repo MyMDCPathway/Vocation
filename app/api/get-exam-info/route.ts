@@ -2,9 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCached, setCached, cacheKey } from "@/app/lib/apiCache";
 import { getDurable, setDurable } from "@/app/lib/durableCache";
 import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
-import { geminiUrl } from "@/app/lib/geminiModel";
+import { geminiUrl, GEMINI_TIMEOUT_MS } from "@/app/lib/geminiModel";
 import { logCacheMiss } from "@/app/lib/missLog";
 import { normalizeCareer } from "@/app/lib/careerCanonical";
+import { isPubliclyRoutable } from "@/app/lib/urlVerify";
 import {
   blockedCareer,
   BLOCKED_CAREER_MESSAGE,
@@ -133,6 +134,7 @@ Respond ONLY with valid JSON, no additional text.`;
           maxOutputTokens: 1024,
         },
       }),
+      signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
     });
 
     if (!response.ok) {
@@ -180,8 +182,24 @@ Respond ONLY with valid JSON, no additional text.`;
       };
     }
 
-    // Validate the response structure
-    if (!examInfo.url || !examInfo.requirements || !Array.isArray(examInfo.requirements)) {
+    // Validate the response structure.
+    //
+    // The url check is a security boundary, not a tidiness one: this value is
+    // model-authored, it gets cached under the exam name and served to every
+    // later visitor asking about that certification, and it lands in an href
+    // the student is invited to click ("View Certification Website"). Without
+    // a scheme check a javascript:/data: URL would execute in our own origin.
+    // isPubliclyRoutable accepts only http(s) on a real public host — the same
+    // guard the model-authored program links already go through. A rejected
+    // url falls through to the Google-search fallback, which the cache write
+    // below deliberately skips, so a bad answer is never persisted.
+    if (
+      !examInfo.url ||
+      typeof examInfo.url !== "string" ||
+      !isPubliclyRoutable(examInfo.url) ||
+      !examInfo.requirements ||
+      !Array.isArray(examInfo.requirements)
+    ) {
       examInfo = {
         url: `https://www.google.com/search?q=${encodeURIComponent(examName + " official website")}`,
         requirements: [

@@ -8,7 +8,7 @@ import {
   TOO_LONG_MESSAGE,
 } from "@/app/lib/careerPolicy";
 import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
-import { geminiUrl } from "@/app/lib/geminiModel";
+import { geminiUrl, GEMINI_TIMEOUT_MS } from "@/app/lib/geminiModel";
 import { logCacheMiss } from "@/app/lib/missLog";
 import {
   buildPathwayRequest,
@@ -166,6 +166,7 @@ export async function POST(request: NextRequest) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
     });
 
     if (!response.ok) {

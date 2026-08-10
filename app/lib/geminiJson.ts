@@ -11,7 +11,7 @@
 // Uses responseSchema (structured output), so the model returns parseable JSON
 // by construction rather than by instruction.
 
-import { geminiUrl } from "@/app/lib/geminiModel";
+import { geminiUrl, GEMINI_TIMEOUT_MS } from "@/app/lib/geminiModel";
 
 export type GeminiResult<T> =
   | { ok: true; data: T }
@@ -40,6 +40,7 @@ export async function generateJson<T>(options: {
           ...(temperature === undefined ? {} : { temperature }),
         },
       }),
+      signal: AbortSignal.timeout(GEMINI_TIMEOUT_MS),
     });
 
     if (!response.ok) {
