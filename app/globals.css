@@ -147,16 +147,12 @@ h1, .display {
   font-variant-numeric: tabular-nums;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .fade-in,
-  .fade-in-delay-1,
-  .fade-in-delay-2,
-  .reveal {
-    animation: none;
-    opacity: 1;
-    transform: none;
-  }
-}
+/* The prefers-reduced-motion block that used to sit here has moved to the
+   bottom of this file. It has to come after every rule it overrides: as
+   written here it was a no-op, because .fade-in (line ~538), .reveal (~178)
+   and friends all re-declare `animation` and `opacity: 0` further down at the
+   same specificity, and the later declaration wins. A media query adds no
+   specificity of its own. See the block at the end of the file. */
 
 /* Scroll-triggered reveal — see app/lib/useReveal.ts. Distinct from .fade-in
    above: that one plays on a fixed delay (the classic page's typewriter
@@ -182,6 +178,35 @@ h1, .display {
 
 .reveal-visible {
   animation: reveal 0.6s ease-out forwards;
+}
+
+/* Site entry. One fade for the whole document, played once when a visitor
+   actually arrives — this is polish on landing, not a splash screen, and not
+   a transition that re-plays on every link click.
+ *
+ * It lives on a wrapper in the root layout (app/layout.tsx), which is the
+ * reason it fires exactly once: the App Router keeps the root layout's DOM
+ * mounted across client-side navigations, so the element is never remounted
+ * and the animation never restarts. Moving this onto a page would re-fade the
+ * whole screen on every internal link, which reads as a page reload.
+ *
+ * Deliberately reuses @keyframes reveal above rather than adding a fourth
+ * near-identical opacity+rise keyframe (reveal / slideInUp are already
+ * duplicates of each other). Same 16px rise, same ease-out; 0.5s rather than
+ * reveal's 0.6s because this one gates every pixel on the page, so it should
+ * clear faster than a single section easing itself in.
+ *
+ * NOTE the missing animation-fill-mode, and the missing `opacity: 0`. Both
+ * are the safety property, not an oversight: the animation's final frame
+ * (opacity 1, no translate) is *identical to this element's default computed
+ * style*. Nothing but the animation itself ever hides this element, so every
+ * way the animation can fail to run — CSS blocked, keyframes unsupported,
+ * JS off, a crawler that renders no animation, prefers-reduced-motion below —
+ * lands on fully visible content rather than a blank page. An entry animation
+ * that starts from a static `opacity: 0` and relies on `forwards` to undo it
+ * has a blank-page failure mode; this one has none. */
+.site-enter {
+  animation: reveal 0.5s ease-out;
 }
 
 /* New Flowchart Styles */
@@ -604,5 +629,48 @@ h1, .display {
 .transition-all {
   transition-property: all;
   transition-timing-function: ease-in-out;
+}
+
+/* ---------------------------------------------------------------------------
+   Motion opt-outs. Everything below MUST stay at the bottom of this file.
+
+   These rules override `animation` and `opacity` declarations made earlier at
+   the same specificity (a class selector wrapped in a media query is still
+   just 0-1-0), so they only win on source order. This block used to sit near
+   the top, where every selector in it was re-declared further down and the
+   opt-out silently did nothing.
+   ------------------------------------------------------------------------- */
+
+/* WCAG 2.2 SC 2.3.3. Every one of these entrance animations pairs its motion
+   with `opacity: 0`, so switching them off is not enough — the opt-out has to
+   put opacity back or it strands the content it was meant to make calmer. */
+@media (prefers-reduced-motion: reduce) {
+  .site-enter,
+  .fade-in,
+  .fade-in-delay-1,
+  .fade-in-delay-2,
+  .fade-in-flowchart,
+  .letter-fade-in,
+  .flowchart-step,
+  .reveal,
+  .reveal-visible {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* .reveal is the one class here whose visible state is applied by JavaScript
+   (app/lib/useReveal.ts adds .reveal-visible from an IntersectionObserver).
+   With scripting unavailable that never happens and the section stays at
+   `opacity: 0` forever, which on the landing page is most of the page body.
+   Hand those visitors — and any renderer that parses CSS but runs no JS —
+   the content instead of an empty column. CSS-only, because the CSP in
+   next.config.js rules out doing this with an inline <script>. */
+@media (scripting: none) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
 }
 

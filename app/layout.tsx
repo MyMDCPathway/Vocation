@@ -44,9 +44,33 @@ export default function RootLayout({
         <style dangerouslySetInnerHTML={{ __html: `:root{${paletteCss}}` }} />
       </head>
       <body className="min-h-screen">
-        <Providers>
-          <SchoolProvider schoolId={schoolId}>{children}</SchoolProvider>
-        </Providers>
+        {/* Site entry fade (`.site-enter` in globals.css). One wrapper here
+            rather than a per-page animation, for two reasons:
+
+            - The App Router never unmounts the root layout on a client-side
+              navigation, so this element is created once per real page load.
+              The fade plays on arrival and then never again while the visitor
+              moves around the site. Put the same class on a page and every
+              internal link would re-fade the whole screen, which reads as a
+              full reload rather than as polish.
+            - It wraps the content, not <body>. body owns the page background
+              (--surface); fading the body would fade the canvas itself and
+              flash white underneath before settling.
+
+            The wrapper is layout-neutral: a plain block box in normal flow.
+            Pages that size themselves with min-h-screen are unaffected —
+            100vh is viewport-relative, not parent-relative.
+
+            It does hold a transform for the first 500ms, which makes it the
+            containing block for `position: fixed` descendants for that long.
+            Every fixed overlay in the app (the pathway modals and the
+            generation spinner) only mounts after a user action, so none of
+            them can be on screen inside that window. */}
+        <div className="site-enter">
+          <Providers>
+            <SchoolProvider schoolId={schoolId}>{children}</SchoolProvider>
+          </Providers>
+        </div>
         <Analytics />
       </body>
     </html>
