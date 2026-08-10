@@ -86,6 +86,53 @@ describe("POST /api/signup", () => {
     expect(db.user.create).toHaveBeenCalledTimes(10);
   });
 
+  it("accepts a plain-object intake and passes it to adoptIntake", async () => {
+    vi.mocked(db.user.findUnique).mockResolvedValue(null);
+    vi.mocked(db.user.create).mockResolvedValue({ id: "user-1", email: VALID_BODY.email } as any);
+
+    const intake = { educationLevel: "bachelor" };
+    const response = await POST(makeRequest({ ...VALID_BODY, intake }));
+
+    expect(response.status).toBe(200);
+    expect(adoptIntake).toHaveBeenCalledWith("user-1", intake);
+  });
+
+  // The intake is the one field a visitor can shape freely, and this route
+  // needs no session — so it gets checked like everything else on the body.
+  it.each([
+    ["a string", "not an intake"],
+    ["an array", [1, 2, 3]],
+    ["a number", 42],
+    ["a boolean", true],
+  ])("rejects an intake that is %s", async (_label, intake) => {
+    const response = await POST(makeRequest({ ...VALID_BODY, intake }));
+
+    expect(response.status).toBe(400);
+    expect(db.user.findUnique).not.toHaveBeenCalled();
+    expect(adoptIntake).not.toHaveBeenCalled();
+  });
+
+  it("rejects an oversized intake before hashing or touching the database", async () => {
+    // Well past MAX_INTAKE_CHARS (32k) — an unauthenticated write of arbitrary
+    // size into a JSONB column is exactly what the ceiling exists to stop.
+    const oversized = { career: { raw: "x".repeat(40_000), resolved: "x" } };
+
+    const response = await POST(makeRequest({ ...VALID_BODY, intake: oversized }));
+
+    expect(response.status).toBe(400);
+    expect(db.user.findUnique).not.toHaveBeenCalled();
+    expect(adoptIntake).not.toHaveBeenCalled();
+  });
+
+  it("still accepts a signup with no intake at all", async () => {
+    vi.mocked(db.user.findUnique).mockResolvedValue(null);
+    vi.mocked(db.user.create).mockResolvedValue({ id: "user-1", email: VALID_BODY.email } as any);
+
+    const response = await POST(makeRequest({ ...VALID_BODY, intake: null }));
+
+    expect(response.status).toBe(200);
+  });
+
   it("does not rate-limit a different IP", async () => {
     vi.mocked(db.user.findUnique).mockResolvedValue(null);
     vi.mocked(db.user.create).mockResolvedValue({ id: "user-2", email: "other@example.com" } as any);
