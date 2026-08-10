@@ -66,9 +66,10 @@ model User {
   /// database doesn't need to understand its internals, only to hold it.
   savedIntake Json?
 
-  accounts      Account[]
-  sessions      Session[]
-  savedPathways SavedPathway[]
+  accounts            Account[]
+  sessions            Session[]
+  savedPathways       SavedPathway[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 /// One row per linked OAuth provider (Google) or per credentials login —
@@ -157,4 +158,58 @@ model SavedPathway {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, archived])
+}
+
+/// One outstanding "I forgot my password" request. Without this table a
+/// forgotten password is a permanently dead account: the only credential is
+/// User.passwordHash, and bcrypt is one-way by design, so there is nothing to
+/// recover — only something to replace.
+///
+/// Deliberately NOT reusing Auth.js's VerificationToken, even though its
+/// shape (identifier/token/expires) looks close enough. That model belongs to
+/// the adapter, which creates and deletes rows in it on its own schedule for
+/// email sign-in links; sharing it would mean a password reset and an adapter
+/// flow silently consuming each other's rows. This is a different credential
+/// with different rules (single-use, invalidated in bulk after a reset), so it
+/// gets its own table.
+model PasswordResetToken {
+  id     String @id @default(cuid())
+  userId String
+
+  /// A SHA-256 hash of the token, never the token itself — the raw value
+  /// exists only in the email that carried it. A leaked database dump must not
+  /// be a set of working reset links, which is exactly what storing the raw
+  /// token would make it.
+  ///
+  /// SHA-256 rather than the bcrypt in app/lib/password.ts, and the reason is
+  /// the input, not laziness. bcrypt's cost factor buys resistance to guessing
+  /// a low-entropy human-chosen secret; this token is 32 CSPRNG bytes, which
+  /// is not guessable at any cost factor, so the stretching buys nothing.
+  /// What it would cost is real: bcrypt salts per row, so the hash of a
+  /// presented token can't be computed and looked up — verification would mean
+  /// scanning every outstanding row and running a deliberately slow compare
+  /// against each. A SHA-256 digest is a plain indexed equality lookup.
+  ///
+  /// Unique so a lookup is an index hit, and so a (vanishingly improbable)
+  /// collision surfaces as a write error rather than as two accounts sharing
+  /// one reset link.
+  tokenHash String @unique
+
+  /// Short by design (see RESET_TOKEN_TTL_MS in app/lib/passwordReset.ts). A
+  /// reset link sits in an inbox, which is exactly the place a stale one is
+  /// most likely to be found by someone who shouldn't have it.
+  expiresAt DateTime
+
+  /// Set the moment the token is spent. Single-use: a link that still works
+  /// after the password has been changed is a second, unattended key to the
+  /// account. Null means outstanding.
+  consumedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Every query here is "this user's outstanding tokens" — issuing a new one
+  /// invalidates the rest, and a successful reset invalidates all of them.
+  @@index([userId])
 }
