@@ -100,6 +100,42 @@ export async function setDurable(key: string, value: unknown): Promise<void> {
   await command(["SET", PREFIX + key, JSON.stringify(value), "EX", TTL_SECONDS]);
 }
 
+// Counters live under their own prefix, deliberately NOT under `vocation:`.
+// listDurable and scripts/export-cache.mjs both sweep `vocation:*` and merge
+// whatever they find into data/seed-cache.json; a rate-limit tally is not a
+// generated pathway and must never end up in that file. The hyphen keeps it
+// outside that glob while still namespacing the store to this app.
+const COUNTER_PREFIX = "vocation-counter:";
+
+/**
+ * Adds one to a shared counter and returns its new value, or undefined when
+ * no store is configured or the call failed.
+ *
+ * The TTL is only set on the increment that creates the key (INCR returns 1),
+ * which keeps the steady-state cost at a single round trip. If that one EXPIRE
+ * is lost the key simply outlives its usefulness — counters are day-scoped, so
+ * a stale one is never read again, and it costs a few bytes rather than
+ * correctness.
+ */
+export async function incrementCounter(
+  key: string,
+  ttlSeconds: number
+): Promise<number | undefined> {
+  const value = await command(["INCR", COUNTER_PREFIX + key]);
+  if (typeof value !== "number") return undefined;
+  if (value === 1) await command(["EXPIRE", COUNTER_PREFIX + key, ttlSeconds]);
+  return value;
+}
+
+/** Current value of a shared counter. Undefined when unset or unreachable. */
+export async function readCounter(key: string): Promise<number | undefined> {
+  const value = await command(["GET", COUNTER_PREFIX + key]);
+  if (typeof value === "number") return value;
+  if (typeof value !== "string") return undefined;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
 /**
  * Every stored entry, keyed the same way as the seed file.
  *
