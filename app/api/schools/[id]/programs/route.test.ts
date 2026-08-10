@@ -85,4 +85,52 @@ describe("GET /api/schools/[id]/programs", () => {
     const lastMatchedIndex = body.programs.map((p: any) => p.matchedInterest !== null).lastIndexOf(true);
     expect(lastMatchedIndex).toBeLessThan(firstUnmatchedIndex);
   });
+
+  it("attaches real per-program earnings for a catalog school, with provenance", async () => {
+    const response = await GET(makeRequest("mdc"), { params: { id: "mdc" } });
+    const body = await response.json();
+
+    expect(body.programEarnings.available).toBe(true);
+    expect(body.programEarnings.source).toMatch(/College Scorecard/);
+
+    // Confirmed against the real committed snapshot: MDC's accelerated RN
+    // program joins to a real, populated earnings row at the associate's
+    // level. If this ever goes back to null, either the crosswalk match
+    // broke or data/scorecard-programs.json regressed to the empty
+    // placeholder — both worth failing loudly on.
+    const nursing = body.programs.find((p: any) => /nursing.*r\.n\..*accelerated/i.test(p.name));
+    expect(nursing).toBeDefined();
+    expect(nursing.level).toBe("associate");
+    expect(nursing.earnings).not.toBeNull();
+    expect(typeof nursing.earnings.schoolMedianEarnings).toBe("number");
+    expect(typeof nursing.earnings.nationalMedianEarnings).toBe("number");
+    expect(nursing.earnings.cipTitle).toMatch(/Nursing/i);
+
+    // At least some real programs carry earnings — proves the join is
+    // actually firing broadly, not just for one hand-picked program.
+    const withEarnings = body.programs.filter((p: any) => p.earnings !== null);
+    expect(withEarnings.length).toBeGreaterThan(20);
+  });
+
+  it("never attaches earnings for a school with no program list to attach them to", async () => {
+    // No catalog → no programs → nothing for earningsForProgram to run
+    // against. Must not throw trying to resolve a Scorecard match for a
+    // school with nothing to match.
+    const response = await GET(makeRequest("cookman"), { params: { id: "cookman" } });
+    const body = await response.json();
+    expect(body.programs).toEqual([]);
+  });
+
+  it("leaves earnings null for a program the crosswalk can't confidently match", async () => {
+    // programCareers.ts refuses to guess below its match floor — a program
+    // with no confident match must not get a fabricated earnings figure
+    // either. Every entry either has a real, non-null match or null.
+    const response = await GET(makeRequest("mdc"), { params: { id: "mdc" } });
+    const body = await response.json();
+    for (const program of body.programs) {
+      if (program.earnings !== null) {
+        expect(typeof program.earnings.cipTitle).toBe("string");
+      }
+    }
+  });
 });

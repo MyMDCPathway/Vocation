@@ -10,6 +10,12 @@ import { getSchoolInfo, hasSchoolInfo } from "@/app/lib/schoolInfo";
 import type { ProgramLevel } from "@/app/lib/programCatalog";
 import { careersForProgram } from "@/app/lib/programCareers";
 import { matchedInterestLabel } from "@/app/lib/interests";
+import { findScorecardMatch } from "@/app/lib/scorecard";
+import {
+  earningsForProgram,
+  scorecardProgramsAvailable,
+  scorecardProgramsMeta,
+} from "@/app/lib/scorecardPrograms";
 
 // One school's real program list — the school-first flow's second screen:
 // "What do you want to study at Miami Dade College?" with the school's own
@@ -31,11 +37,28 @@ import { matchedInterestLabel } from "@/app/lib/interests";
 // badge here is the same program that would show no career list there —
 // there's no separate, weaker matching path invented just for sorting.
 
+interface ProgramEarnings {
+  /** USD. Null when Scorecard suppressed this school's figure for a small
+   *  cohort — the far more common case (~65% of rows, confirmed live). */
+  schoolMedianEarnings: number | null;
+  /** USD. Same program family and credential level, aggregated nationally —
+   *  populated far more often than the school-specific figure. Which one to
+   *  show, and how to label it, is the client's call (see
+   *  SchoolProgramBrowser.tsx), not this route's. */
+  nationalMedianEarnings: number | null;
+  /** Scorecard's own title for the (coarser) program family this earnings
+   *  figure actually describes — see scorecardPrograms.ts's header for why
+   *  it can span several of the crosswalk's finer-grained programs. */
+  cipTitle: string | null;
+  credentialTitle: string | null;
+}
+
 interface ProgramEntry {
   name: string;
   url: string;
   level: ProgramLevel | null;
   matchedInterest: string | null;
+  earnings: ProgramEarnings | null;
 }
 
 function mdcPrograms(): ProgramEntry[] {
@@ -54,7 +77,7 @@ function mdcPrograms(): ProgramEntry[] {
       // point at /bsn/) — dedupe by URL so one real program isn't listed twice.
       if (seenUrls.has(url)) continue;
       seenUrls.add(url);
-      entries.push({ name, url, level, matchedInterest: null });
+      entries.push({ name, url, level, matchedInterest: null, earnings: null });
     }
   }
   return entries;
@@ -97,6 +120,7 @@ export async function GET(
         url: p.url,
         level: p.level,
         matchedInterest: null,
+        earnings: null,
       }));
     }
   }
@@ -111,10 +135,37 @@ export async function GET(
     .map((slug) => slug.trim())
     .filter(Boolean);
 
-  if (interestSlugs.length) {
-    for (const program of programs) {
-      const result = careersForProgram(program.name);
-      if (!result) continue;
+  // Same real-name-to-real-row join toDirectorySchool() uses to attach
+  // institution-level Scorecard stats — resolved once per request, not per
+  // program. Only attempted for a school we actually show a program list
+  // for; a school with no catalog never renders a program to attach
+  // earnings to, so there's nothing to look up.
+  const scorecardRow = hasCatalog
+    ? findScorecardMatch(school.name, school.state ?? "FL")
+    : undefined;
+
+  // One pass per program, always — not just when `interests` is present.
+  // careersForProgram() is what supplies BOTH the interest badge and the
+  // crosswalk's CIP code that earningsForProgram() needs, so both features
+  // share the one real (and possibly null) match rather than each running
+  // its own weaker lookup.
+  for (const program of programs) {
+    const result = careersForProgram(program.name);
+    if (!result) continue;
+
+    if (scorecardRow && program.level) {
+      const earningsRow = earningsForProgram(scorecardRow.unitId, result.match.cipCode, program.level);
+      if (earningsRow) {
+        program.earnings = {
+          schoolMedianEarnings: earningsRow.schoolMedianEarnings,
+          nationalMedianEarnings: earningsRow.nationalMedianEarnings,
+          cipTitle: earningsRow.cipTitle,
+          credentialTitle: earningsRow.credentialTitle,
+        };
+      }
+    }
+
+    if (interestSlugs.length) {
       for (const career of result.careers) {
         const label = matchedInterestLabel(career.code, interestSlugs);
         if (label) {
@@ -123,6 +174,9 @@ export async function GET(
         }
       }
     }
+  }
+
+  if (interestSlugs.length) {
     // Stable sort: preserves the alphabetical order already applied within
     // both the matched and unmatched groups.
     programs.sort((a, b) => (a.matchedInterest ? 0 : 1) - (b.matchedInterest ? 0 : 1));
@@ -133,6 +187,13 @@ export async function GET(
     schoolName: school.name,
     hasCatalog,
     programs,
+    // Provenance for any earnings figure above — never show a number
+    // without also showing when and where it came from (scorecard.ts's own
+    // rule, carried over verbatim for its program-level sibling).
+    programEarnings: {
+      available: scorecardProgramsAvailable(),
+      ...scorecardProgramsMeta(),
+    },
     // Real site links for a school we hold no catalog for — never a
     // fabricated program list standing in for one we don't have.
     resources: hasCatalog ? [] : fallbackResources(schoolId, school),

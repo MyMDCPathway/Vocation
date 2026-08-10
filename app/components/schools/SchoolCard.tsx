@@ -88,7 +88,9 @@ export function SchoolCard({ school, programMatchCount }: Props) {
               Median earnings
             </p>
             <p className="mt-0.5 font-medium text-on-surface">
-              {sc?.medianEarnings10yr ? `${formatMoney(sc.medianEarnings10yr)}/yr` : "Not available yet"}
+              {/* != null, not truthy — a real $0 or 0% is a reported figure,
+                  not a missing one, and must not read as "Not available yet". */}
+              {sc?.medianEarnings10yr != null ? `${formatMoney(sc.medianEarnings10yr)}/yr` : "Not available yet"}
             </p>
           </div>
           <div>
@@ -96,7 +98,7 @@ export function SchoolCard({ school, programMatchCount }: Props) {
               Completion rate
             </p>
             <p className="mt-0.5 font-medium text-on-surface">
-              {sc?.completionRate ? formatPercent(sc.completionRate) : "Not available yet"}
+              {sc?.completionRate != null ? formatPercent(sc.completionRate) : "Not available yet"}
             </p>
           </div>
           <div>
@@ -104,7 +106,7 @@ export function SchoolCard({ school, programMatchCount }: Props) {
               Avg. net price
             </p>
             <p className="mt-0.5 font-medium text-on-surface">
-              {sc?.netPrice ? `${formatMoney(sc.netPrice)}/yr` : "Not available yet"}
+              {sc?.netPrice != null ? `${formatMoney(sc.netPrice)}/yr` : "Not available yet"}
             </p>
           </div>
           <div>
@@ -112,7 +114,7 @@ export function SchoolCard({ school, programMatchCount }: Props) {
               Admission rate
             </p>
             <p className="mt-0.5 font-medium text-on-surface">
-              {sc?.admissionRate ? formatPercent(sc.admissionRate) : "Not available yet"}
+              {sc?.admissionRate != null ? formatPercent(sc.admissionRate) : "Not available yet"}
             </p>
           </div>
         </div>
