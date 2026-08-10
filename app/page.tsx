@@ -1,1073 +1,656 @@
-"use client";
-
-import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { icons } from "@/app/lib/icons";
-import { PathwayOption, PathwayData, CareerPathway } from "@/app/lib/types";
-import { CertificationInfo } from "@/app/lib/certifications";
-import {
-  isMDCBachelorsProgram,
-  isMDCAssociateInArtsProgram,
-  isMDCAssociateInScienceProgram,
-  getMDCProgramUrl,
-} from "@/app/lib/mdc-programs";
-import { FLORIDA_UNIVERSITIES } from "@/app/lib/universities";
-import { ExamStepComponent } from "@/app/components/ExamStep";
-import SchoolSelector from "@/app/components/SchoolSelector";
-import { useSelectedSchoolId } from "@/app/lib/useSelectedSchool";
-import { getSchoolInfo } from "@/app/lib/schoolInfo";
-import { DEFAULT_SCHOOL_ID } from "@/app/lib/floridaSchools";
+import { CareerSearch } from "@/app/components/landing/CareerSearch";
+import { AuthControls } from "@/app/components/AuthControls";
+import { RevealSection } from "@/app/components/shared/RevealSection";
+import { listCuratedInterests } from "@/app/lib/interests";
+import { auth } from "@/app/lib/auth";
+import { db } from "@/app/lib/db";
 
-export default function Home() {
-  const [schoolId] = useSelectedSchoolId();
-  const schoolInfo = getSchoolInfo(schoolId);
-  const [careerInput, setCareerInput] = useState("");
-  const [showClearBtn, setShowClearBtn] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState("Loading...");
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalTitle, setModalTitle] = useState("MDC Details");
-  const [modalContent, setModalContent] = useState<string>("");
-  const [pathwayData, setPathwayData] = useState<PathwayData | null>(null);
-  const [comparisonPathways, setComparisonPathways] = useState<CareerPathway[]>([]);
-  const [showAddCareerInput, setShowAddCareerInput] = useState<boolean>(false);
-  const [addCareerInput, setAddCareerInput] = useState<string>("");
-  const [certificationPopup, setCertificationPopup] = useState<{
-    name: string;
-    info: CertificationInfo;
-    careerIndex?: number;
-  } | null>(null);
-  const [transferRecommendationsPopup, setTransferRecommendationsPopup] =
-    useState<boolean>(false);
-  const [selectedPathwayIndex, setSelectedPathwayIndex] = useState<number>(0);
-  const abortControllerRef = useRef<AbortController | null>(null);
+// The landing page, in the Empowered Clarity world (see DESIGN.md).
+//
+// Everything factual on this page is checked. Three rules governed what could
+// go on it, all from PRODUCT.md:
+//
+//   - No invented outcome figures. There is no usage data, no ROI benchmark,
+//     and no evidence any student has acted on a plan, so none is implied. The
+//     example routes below name real MDC programs and their real credentials;
+//     wage figures appear on the plan itself, where they come from a live BLS
+//     series and are labelled as estimates.
+//   - No control for a capability that doesn't exist. No sign-in, no
+//     notifications, no settings, no "saved pathways" — there is no auth and
+//     no persistence beyond the tab. The header has a real search box, not a
+//     bell/gear/avatar cluster implying an account system.
+//   - The AI disclaimer appears on every view that leads to a pathway. This is
+//     one of them.
 
-  useEffect(() => {
-    setShowClearBtn(careerInput.length > 0);
-  }, [careerInput]);
+/** Careers that already resolve to a canonical pathway, so the chips can't dead-end. */
+const EXAMPLE_CAREERS = ["Registered Nurse", "Electrician", "Welder", "Software Engineer"];
 
-  useEffect(() => {
-    if (modalOpen) {
-      document.body.classList.add("modal-open");
-    } else {
-      document.body.classList.remove("modal-open");
-    }
-    return () => {
-      document.body.classList.remove("modal-open");
-    };
-  }, [modalOpen]);
+/**
+ * Three real MDC Associate in Science programs, each with a genuinely
+ * different way into the job — a state licence, an industry certification,
+ * and a federal certificate. That contrast is the product's actual thesis
+ * (not every career runs through a degree ladder), which is why these three
+ * rather than three lookalike degrees.
+ *
+ * Program names and URLs come from app/lib/mdc-programs.ts, which was scraped
+ * and hand-verified against MDC's own catalog. Nothing here is generated.
+ */
+const EXAMPLE_ROUTES = [
+  {
+    field: "Healthcare",
+    program: "Nursing — R.N.",
+    href: "https://www.mdc.edu/nursingrn/",
+    credential: "NCLEX-RN",
+    credentialKind: "State licence",
+    goal: "Registered Nurse",
+  },
+  {
+    field: "Technology",
+    program: "Applied Artificial Intelligence",
+    href: "https://www.mdc.edu/appliedai/",
+    credential: "Industry certification",
+    credentialKind: "No licence required",
+    goal: "Machine Learning Technician",
+  },
+  {
+    field: "Skilled trade",
+    program: "Aviation Maintenance Management",
+    href: "https://www.mdc.edu/aviationmaintenance/",
+    credential: "FAA Airframe & Powerplant",
+    credentialKind: "Federal certificate",
+    goal: "Aircraft Maintenance Technician",
+  },
+];
 
-  const showLoading = (message: string) => {
-    setLoadingMessage(message || "Loading...");
-    setLoading(true);
-  };
+/** How the product actually works, in the order a visitor experiences it. */
+const HOW_IT_WORKS = [
+  {
+    step: "Step 1",
+    title: "Search",
+    detail: "Enter the career or role you want — a title is enough to start.",
+  },
+  {
+    step: "Step 2",
+    title: "Generate your route",
+    detail: "Get a real, step-by-step path: programs, transfers, licences, and cost.",
+  },
+  {
+    step: "Step 3",
+    title: "Follow the path",
+    detail: "Compare schools, see what it costs where you live, and act on it.",
+  },
+] as const;
 
-  const hideLoading = () => {
-    setLoading(false);
-  };
+const FOOTER_LINKS = [
+  { href: "/privacy", label: "Privacy" },
+  { href: "/terms", label: "Terms" },
+  { href: "/team", label: "Meet the team" },
+  { href: "/pathway", label: "Classic search" },
+];
 
-  const showModal = (title: string, content: string) => {
-    setModalTitle(title);
-    setModalContent(content);
-    setModalOpen(true);
-  };
+function Wordmark() {
+  return (
+    <span className="text-lg font-bold tracking-tight text-primary">
+      Vocation
+    </span>
+  );
+}
 
-  const hideModal = () => {
-    setModalOpen(false);
-  };
+function HealthcareIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-6 w-6 text-secondary">
+      <path
+        d="M12 20.5s-7.5-4.6-9.5-9.3C1.2 8 2.8 4.8 5.9 4.2c1.9-.4 3.8.4 5 1.9l1.1 1.4 1.1-1.4c1.2-1.5 3.1-2.3 5-1.9 3.1.6 4.7 3.8 3.4 7-2 4.7-9.5 9.3-9.5 9.3Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M6 12.5h2.6l1.4-2.8 2 5.6 1.4-2.8H16"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
-  const callAPI = async (career: string, retries = 3, delay = 1000) => {
-    const abortController = new AbortController();
-    abortControllerRef.current = abortController;
+function TechnologyIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-6 w-6 text-secondary">
+      <rect x="7" y="7" width="10" height="10" rx="1.3" stroke="currentColor" strokeWidth="1.7" />
+      <path
+        d="M9.5 7V3.5M14.5 7V3.5M9.5 20.5V17M14.5 20.5V17M7 9.5H3.5M7 14.5H3.5M20.5 9.5H17M20.5 14.5H17"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
 
-    for (let i = 0; i < retries; i++) {
-      try {
-        const response = await fetch("/api/generate-pathway", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ career }),
-          signal: abortController.signal,
-        });
+function TradeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-6 w-6 text-secondary">
+      <path
+        d="M14.5 9.5 19 5c.9.4 1.7 1.1 2 2l-4.5 4.5M9.5 14.5 5 19c-.9-.4-1.7-1.1-2-2l4.5-4.5"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M12.5 6.5 6.5 12.5a2.8 2.8 0 0 0 4 4l6-6"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(
-            errorData.error || `HTTP error! status: ${response.status}`
-          );
-        }
+function BusinessIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-6 w-6 text-secondary">
+      <rect x="3.5" y="8" width="17" height="11" rx="1.5" stroke="currentColor" strokeWidth="1.7" />
+      <path
+        d="M8.5 8V6a1.7 1.7 0 0 1 1.7-1.7h3.6A1.7 1.7 0 0 1 15.5 6v2"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <path d="M3.5 13h17" stroke="currentColor" strokeWidth="1.7" />
+    </svg>
+  );
+}
 
-        const result = await response.json();
-        return result;
-      } catch (error: any) {
-        if (error.name === "AbortError") {
-          console.log("Fetch aborted by user.");
-          throw error;
-        }
-        console.error(`API call attempt ${i + 1} failed:`, error);
-        if (i === retries - 1) {
-          throw error;
-        }
-        await new Promise((res) => setTimeout(res, delay * Math.pow(2, i)));
-      } finally {
-        if (i === retries - 1) {
-          abortControllerRef.current = null;
-        }
-      }
-    }
-  };
+function CreativeArtsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-6 w-6 text-secondary">
+      <path
+        d="M12 3.5c-4.7 0-8.5 3.5-8.5 7.8 0 3.4 2.7 4.2 4.3 3.6 1.3-.5 2.4.4 2.4 1.7 0 1 .8 2.4 2.5 2.4 4.7 0 8.3-3.9 7.7-8.9-.5-4.1-4.2-6.6-8.4-6.6Z"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinejoin="round"
+      />
+      <circle cx="8.5" cy="10" r="1" fill="currentColor" />
+      <circle cx="12" cy="7.5" r="1" fill="currentColor" />
+      <circle cx="15.5" cy="10" r="1" fill="currentColor" />
+    </svg>
+  );
+}
 
-  const handleGeneratePathway = async () => {
-    const career = careerInput.trim();
-    if (!career) {
-      showModal(
-        "Error",
-        '<p class="text-red-600">Please enter a career title.</p>'
-      );
-      return;
-    }
+function EducationIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-6 w-6 text-secondary">
+      <path
+        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.747 0-3.332.477-4.5 1.253"
+        stroke="currentColor"
+        strokeWidth="1.7"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
-    showLoading(`Generating pathway for ${career}...`);
+const INTEREST_ICONS: Record<string, () => JSX.Element> = {
+  stem: TechnologyIcon,
+  healthcare: HealthcareIcon,
+  "skilled-trades": TradeIcon,
+  business: BusinessIcon,
+  "creative-arts": CreativeArtsIcon,
+  education: EducationIcon,
+};
 
-    try {
-      const generatedData = await callAPI(career);
+function SearchStepIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5 text-secondary">
+      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="1.8" />
+      <path d="m20 20-3.5-3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+    </svg>
+  );
+}
 
-      // Handle backward compatibility: if old format (with "steps"), convert to new format
-      let pathwayDataToSet: PathwayData;
-      if ("steps" in generatedData && !("pathways" in generatedData)) {
-        // Old format - convert to new format
-        pathwayDataToSet = {
-          title: generatedData.title,
-          pathways: [
-            {
-              title: generatedData.title,
-              isPrimary: true,
-              steps: generatedData.steps,
-            },
-          ],
-        };
-      } else {
-        // New format
-        pathwayDataToSet = generatedData as PathwayData;
-      }
-      
-      // First/main pathway (always set when using main search)
-      setPathwayData(pathwayDataToSet);
-      // Set selected pathway to primary (or first if no primary)
-      if (pathwayDataToSet.pathways && pathwayDataToSet.pathways.length > 0) {
-        const primaryIndex = pathwayDataToSet.pathways.findIndex(
-          (p: PathwayOption) => p.isPrimary
-        );
-        setSelectedPathwayIndex(primaryIndex >= 0 ? primaryIndex : 0);
-      }
-      // Clear any previous comparisons when starting a new main search
-      setComparisonPathways([]);
-      setShowAddCareerInput(false);
-      setAddCareerInput("");
-      setCertificationPopup(null); // Close popup when new pathway is generated
-      setTransferRecommendationsPopup(false); // Close transfer popup when new pathway is generated
-    } catch (error: any) {
-      if (error.name !== "AbortError") {
-        console.error("Error generating custom pathway:", error);
-        showModal(
-          "Generation Failed",
-          `<p class="text-red-600">Sorry, I couldn't generate a pathway for that career. Please try a different prompt.<br><br><small>Error: ${error.message}</small></p>`
-        );
-      }
-    } finally {
-      hideLoading();
-    }
-  };
+/** The same connector-and-nodes motif used on the route cards below — three
+ *  points on a line, because generating a route IS the roadmap motif. */
+function RoadmapStepIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5 text-secondary">
+      <path d="M5 18 10 7l4 7 5-9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+      <circle cx="5" cy="18" r="1.4" fill="currentColor" />
+      <circle cx="19" cy="5" r="1.4" fill="currentColor" />
+    </svg>
+  );
+}
 
-  const handleCancelLoad = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-      console.log("Fetch request cancelled.");
-    }
-    hideLoading();
-  };
+function FlagStepIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-5 w-5 text-secondary">
+      <path d="M6 3v18" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+      <path
+        d="M6 4.5h9.5c1 0 1.5.9.9 1.6l-2 2.4 2 2.4c.6.7.1 1.6-.9 1.6H6"
+        stroke="currentColor"
+        strokeWidth="1.8"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 
-  const handleHelp = () => {
-    showModal(
-      "How to use MyMDC Pathway?",
-      `
-      <div class="space-y-4 text-gray-700">
-        <p><strong>Generate a Pathway:</strong></p>
-        <p>1. Type your desired career (e.g., "Software Engineer" or "Nurse") into the text box.</p>
-        <p>2. Press <kbd class="px-2 py-1 bg-gray-200 rounded-md text-sm">Enter</kbd> or click the arrow button to generate a personalized educational pathway.</p>
-        <p>3. The pathway will show you recommended degrees from MDC, potential transfer steps to universities, and other milestones like internships and exams.</p>
-        <p class="mt-4"><strong>Compare Careers:</strong></p>
-        <p>1. After generating a pathway, click the "+ Compare Another Career" button below the flowchart.</p>
-        <p>2. Enter another career (e.g., "Electrical Engineer") in the search bar that appears.</p>
-        <p>3. The new pathway will appear below the first one, allowing you to compare them side by side.</p>
-        <p>4. You can add up to 4 careers total (1 main + 3 additional).</p>
-        <p>5. Click the X button on any additional career to remove it from comparison.</p>
-      </div>
-    `
-    );
-  };
+const HOW_IT_WORKS_ICONS = [SearchStepIcon, RoadmapStepIcon, FlagStepIcon];
 
-  const handleClearInput = () => {
-    setCareerInput("");
-    setShowClearBtn(false);
-  };
+/** "STEM", "STEM and Healthcare", "STEM, Healthcare, and Business" — never a
+ *  dangling Oxford comma on a two-item list. */
+function formatList(items: string[]): string {
+  if (items.length === 1) return items[0];
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
+}
 
-  const handleClearPathway = () => {
-    setPathwayData(null);
-    // Don't clear comparison pathways - only clear the main pathway
-    setShowAddCareerInput(false);
-    setAddCareerInput("");
-    setCertificationPopup(null); // Close popup when pathway is cleared
-    setTransferRecommendationsPopup(false); // Close transfer popup when pathway is cleared
-  };
+export default async function Home() {
+  const year = new Date().getFullYear();
+  // Server Component — safe to read the committed BLS occupation table
+  // directly rather than through /api/interests, since this never ships to
+  // the browser bundle (see interests.ts's own header on that discipline).
+  const interests = listCuratedInterests();
 
-  const handleRemoveFromComparison = (index: number) => {
-    setComparisonPathways(comparisonPathways.filter((_, i) => i !== index));
-  };
+  // Same discipline, extended to auth: a Server Component can read the
+  // session and the DB directly without a round trip through an API route,
+  // and neither ships to the client bundle either. onboarding's interests
+  // picker (app/onboarding/page.tsx) is the only writer of this column.
+  const session = await auth();
+  const savedInterests = session?.user?.id
+    ? ((await db.user.findUnique({
+        where: { id: session.user.id },
+        select: { interests: true },
+      }))?.interests ?? [])
+    : [];
 
-  const handlePathwaySelectInComparison = (careerIndex: number, pathwayIndex: number) => {
-    const updated = [...comparisonPathways];
-    updated[careerIndex].selectedPathwayIndex = pathwayIndex;
-    setComparisonPathways(updated);
-  };
-
-  const handleAddCareerClick = () => {
-    setShowAddCareerInput(true);
-  };
-
-  const handleAddCareerGenerate = async () => {
-    if (!addCareerInput.trim()) {
-      return;
-    }
-    const career = addCareerInput.trim();
-    await handleGeneratePathwayForCareer(career);
-  };
-
-  const handleGeneratePathwayForCareer = async (career: string) => {
-    showLoading(`Generating pathway for ${career}...`);
-    try {
-      const generatedData = await callAPI(career);
-      
-      let pathwayDataToSet: PathwayData;
-      
-      // Handle backward compatibility
-      if ((generatedData as any).steps) {
-        // Old format - convert to new format
-        pathwayDataToSet = {
-          title: (generatedData as any).title || `Pathway to becoming a ${career}`,
-          pathways: [
-            {
-              title: "Primary Pathway",
-              isPrimary: true,
-              steps: (generatedData as any).steps,
-            },
-          ],
-        };
-      } else {
-        // New format
-        pathwayDataToSet = generatedData as PathwayData;
-      }
-      
-      // Adding a career to comparison
-      const primaryIndex = pathwayDataToSet.pathways.findIndex(
-        (p: PathwayOption) => p.isPrimary
-      );
-      const selectedIndex = primaryIndex >= 0 ? primaryIndex : 0;
-      
-      if (comparisonPathways.length < 3) { // Max 4 total (1 main + 3 additional)
-        setComparisonPathways([
-          ...comparisonPathways,
-          {
-            career: career,
-            data: pathwayDataToSet,
-            selectedPathwayIndex: selectedIndex,
-          },
-        ]);
-        setAddCareerInput(""); // Clear input
-        setShowAddCareerInput(false); // Hide input
-      } else {
-        showModal(
-          "Maximum Reached",
-          '<p class="text-red-600">You can compare up to 4 careers at a time. Please remove one before adding another.</p>'
-        );
-      }
-      
-      setCertificationPopup(null);
-      setTransferRecommendationsPopup(false);
-    } catch (error: any) {
-      if (error.name !== "AbortError") {
-        console.error("Error generating pathway:", error);
-        showModal(
-          "Generation Failed",
-          `<p class="text-red-600">Failed to generate pathway. Please try again.</p>`
-        );
-      }
-    } finally {
-      hideLoading();
-    }
-  };
-
-  const handleAddCareerKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleAddCareerGenerate();
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleGeneratePathway();
-    }
-  };
+  // Array.prototype.sort is stable, so ties (two matched, or two unmatched
+  // tiles) keep their original relative order rather than shuffling.
+  const orderedInterests = savedInterests.length
+    ? [...interests].sort((a, b) => {
+        const aMatched = savedInterests.includes(a.slug) ? 0 : 1;
+        const bMatched = savedInterests.includes(b.slug) ? 0 : 1;
+        return aMatched - bMatched;
+      })
+    : interests;
+  const matchedLabels = interests
+    .filter((interest) => savedInterests.includes(interest.slug))
+    .map((interest) => interest.label);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header Bar - Centered school selector (click the logo to change school) */}
-      <header className="bg-white border-b border-gray-200 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-center">
-          <SchoolSelector />
+    <div className="flex min-h-screen flex-col bg-surface">
+      {/* Sticky, bordered, no shadow. Tint and shadow separate elsewhere, but a
+          top bar reads better with an explicit edge.
+
+          The bell / gear / avatar on the right are DECORATIVE ONLY — plain
+          spans, not links or buttons, and the avatar is a bare glyph rather
+          than a photo. This product has no accounts, no notifications, and no
+          settings page; a clickable control here would promise a capability
+          that doesn't exist. If auth ever ships, these are where it plugs in. */}
+      <header className="sticky top-0 z-50 border-b border-outline-variant bg-surface">
+        <div className="mx-auto flex w-full max-w-[1200px] items-center justify-between px-5 py-4 md:px-16">
+          <div className="flex items-center gap-6">
+            <Link
+              href="/"
+              className="shrink-0 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-primary"
+            >
+              <Wordmark />
+            </Link>
+
+            <nav className="hidden items-center gap-5 sm:flex">
+              <Link
+                href="/pathways"
+                className="text-sm font-medium text-primary transition-colors hover:text-primary-container"
+              >
+                Pathways
+              </Link>
+              <Link
+                href="/schools"
+                className="text-sm font-medium text-secondary transition-colors hover:text-secondary/80"
+              >
+                Schools
+              </Link>
+              <Link
+                href="/insights"
+                className="text-sm font-medium text-primary transition-colors hover:text-primary-container"
+              >
+                Insights
+              </Link>
+            </nav>
+          </div>
+
+          <AuthControls />
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="px-6 md:px-8 pt-16 md:pt-24 pb-12 md:pb-16 text-center">
-        <div className="max-w-4xl mx-auto">
-          {/* Main Title - Vocation */}
-          <h1 className="text-7xl md:text-9xl font-bold mb-2 select-none">
-            <span className="inline-flex text-school-600">
-              {"Vocation".split("").map((letter, index) => (
-                <span
-                  key={index}
-                  className="letter-fade-in"
-                  style={{ animationDelay: `${index * 0.15}s` }}
-                >
-                  {letter === " " ? "\u00A0" : letter}
-                </span>
-              ))}
-            </span>
-          </h1>
-          
-          {/* Subtitle */}
-          <p className="text-base md:text-lg text-gray-700 mb-6">
-            A powerful way to explore career pathways with AI
-          </p>
+      <main className="flex-1">
+        {/* Hero — single centred column. No eyebrow above the heading: the
+            heading carries its own weight. */}
+        <section className="px-5 pb-20 pt-16 text-center md:px-16 md:pb-28 md:pt-24">
+          <div className="mx-auto max-w-3xl">
+            <h1 className="text-2xl font-bold leading-[1.15] tracking-[-0.02em] text-primary sm:text-5xl">
+              Your Path to the Career You Want,
+              <br />
+              <span className="text-secondary">Simplified.</span>
+            </h1>
 
-          {/* Start Button - disabled until a real school is picked, since
-              /pathway has nothing to generate against otherwise. */}
-          <div className="flex flex-col items-center gap-2">
-            {schoolId === DEFAULT_SCHOOL_ID ? (
-              <>
-                <button
-                  type="button"
-                  disabled
-                  aria-disabled="true"
-                  title="Choose your school above to get started"
-                  className="px-12 py-4 bg-gray-300 text-gray-500 font-semibold rounded-lg shadow-md text-lg inline-block cursor-not-allowed"
-                >
-                  Start
-                </button>
-                <p className="text-sm text-gray-500">
-                  Choose your school above to get started.
-                </p>
-              </>
-            ) : (
-              <Link
-                href="/pathway"
-                className="px-12 py-4 bg-school-600 hover:bg-school-700 text-white font-semibold rounded-lg shadow-md transition duration-200 text-lg inline-block"
-              >
-                Start
-              </Link>
-            )}
-          </div>
-        </div>
-      </section>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-on-surface-variant">
+              Discover tailored roadmaps, required certifications, and the real
+              programs that get you there — from where you are to where you
+              want to be. Grounded clarity, step by step.
+            </p>
 
-      {/* Pathway display moved to /pathway page */}
-      {/* Infographic Display Area - Hidden on home page */}
-      <div id="pathway-display" className="p-6 md:p-8 hidden">
-        {/* Main Pathway */}
-        {pathwayData && pathwayData.pathways && pathwayData.pathways.length > 0 && (
-          <>
-            <div className="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
-              <h2 className="text-2xl font-bold text-gray-800">
-                {pathwayData.title.replace(/^(Educational\s+)?Pathway\s+to\s+becoming\s+(a\s+|an\s+)?/i, '')}
-              </h2>
-              <button
-                onClick={handleClearPathway}
-                className="text-gray-400 hover:text-gray-600"
-                title="Clear Pathway"
-              >
-                <i className="fas fa-times text-xl" />
-              </button>
+            <div className="mx-auto mt-8 max-w-2xl text-left">
+              <CareerSearch examples={EXAMPLE_CAREERS} />
             </div>
 
-            {/* Pathway Tabs */}
-            {pathwayData.pathways.length > 1 && (
-              <div className="mb-6 border-b border-gray-200">
-                <nav className="flex space-x-1 overflow-x-auto" aria-label="Pathway Tabs">
-                  {pathwayData.pathways.map((pathway, index) => (
-                    <button
-                      key={index}
-                      onClick={() => setSelectedPathwayIndex(index)}
-                      className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                        selectedPathwayIndex === index
-                          ? "border-school-500 text-school-600"
-                          : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            <div className="mx-auto mt-6 flex max-w-2xl items-center gap-4">
+              <span className="h-px flex-1 bg-outline-variant" />
+              <span className="text-xs font-semibold uppercase tracking-wider text-outline">
+                or
+              </span>
+              <span className="h-px flex-1 bg-outline-variant" />
+            </div>
+
+            <Link
+              href="/career-discovery"
+              className="mx-auto mt-6 flex max-w-2xl items-center justify-center gap-2 rounded-full border border-outline-variant bg-surface-low px-6 py-3 text-sm font-medium tracking-[0.05em] text-primary transition-colors hover:bg-surface-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+                className="h-4 w-4"
+              >
+                <circle cx="12" cy="12" r="9.5" />
+                <path d="M9.5 9a2.5 2.5 0 1 1 3.2 2.4c-.7.2-1.2.9-1.2 1.6v.5" />
+                <path d="M11.5 17h.01" />
+              </svg>
+              Not sure yet? Take the career quiz
+            </Link>
+          </div>
+        </section>
+
+        {/* Browse by Interest — six real doors into the actual BLS
+            occupation taxonomy (see interests.ts). Picking a tile opens that
+            interest's real job pool, not a single fixed example — the tile
+            itself makes no claim beyond "these are real jobs in this area",
+            which is exactly what jobCount (computed from the same table,
+            never hardcoded) backs up. */}
+        <section id="browse-by-interest" className="px-5 py-20 md:px-16">
+          <RevealSection className="mx-auto w-full max-w-[1200px]">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <h2 className="text-2xl font-semibold tracking-[-0.01em] text-primary">
+                  Browse by Interest
+                </h2>
+                <p className="mt-2 max-w-2xl text-on-surface-variant">
+                  {matchedLabels.length > 0
+                    ? `Because you're interested in ${formatList(matchedLabels)} — pick up where you left off, or explore something new.`
+                    : "Not sure what to search? Pick an area and see the real jobs in it."}
+                </p>
+              </div>
+              <Link
+                href="/interests"
+                className="inline-flex items-center gap-1.5 text-sm font-semibold text-secondary hover:text-secondary/80"
+              >
+                Browse all industries
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
+                  className="h-4 w-4"
+                >
+                  <path d="M5 12h13" />
+                  <path d="m12 5 7 7-7 7" />
+                </svg>
+              </Link>
+            </div>
+
+            <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
+              {orderedInterests.map((interest) => {
+                const Icon = INTEREST_ICONS[interest.slug];
+                return (
+                  <Link
+                    key={interest.slug}
+                    href={`/interests/${interest.slug}`}
+                    className="group flex flex-col rounded-lg border border-outline-variant bg-gradient-to-bl from-secondary-container/10 to-surface-lowest p-6 shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
+                  >
+                    <Icon />
+                    <p className="mt-5 text-lg font-semibold text-on-surface">
+                      {interest.label}
+                    </p>
+                    <p className="mt-2 flex-1 text-sm leading-relaxed text-on-surface-variant">
+                      {interest.description}
+                    </p>
+                    <span className="mt-5 inline-flex items-center gap-1.5 text-sm font-semibold text-secondary">
+                      {interest.jobCount} real jobs
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                        className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                      >
+                        <path d="M5 12h13" />
+                        <path d="m12 5 7 7-7 7" />
+                      </svg>
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          </RevealSection>
+        </section>
+
+        {/* How Vocation Works — an accurate description of the real flow:
+            search, generate, follow. Nothing here is aspirational. Step 1
+            gets the teal accent as the "you are here" step; 2 and 3 stay
+            neutral until reached. */}
+        <section className="bg-surface-container px-5 py-20 md:px-16 md:py-24">
+          <RevealSection className="mx-auto w-full max-w-[1200px] text-center">
+            <h2 className="text-2xl font-semibold tracking-[-0.01em] text-primary">
+              How Vocation Works
+            </h2>
+
+            <div className="mt-12 grid grid-cols-1 gap-6 text-left md:grid-cols-3">
+              {HOW_IT_WORKS.map((item, index) => {
+                const Icon = HOW_IT_WORKS_ICONS[index];
+                const active = index === 0;
+                return (
+                  <div
+                    key={item.step}
+                    className="rounded-lg border border-outline-variant bg-surface-lowest p-6"
+                  >
+                    <span
+                      className={`flex h-9 w-9 items-center justify-center rounded-md border ${
+                        active
+                          ? "border-secondary text-secondary"
+                          : "border-outline-variant text-outline"
                       }`}
                     >
-                      {pathway.isPrimary && (
-                        <span className="mr-2 text-xs bg-school-100 text-school-700 px-2 py-0.5 rounded">
-                          Recommended
+                      <Icon />
+                    </span>
+                    <p className="mt-5 text-xs font-semibold uppercase tracking-wider text-outline">
+                      {item.step}
+                    </p>
+                    <p className="mt-1 text-lg font-semibold text-on-surface">
+                      {item.title}
+                    </p>
+                    <p className="mt-2 text-sm leading-relaxed text-on-surface-variant">
+                      {item.detail}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </RevealSection>
+        </section>
+
+        {/* Example routes — real programs, real credentials, no invented wages. */}
+        <section className="px-5 py-20 md:px-16 md:py-24">
+          <RevealSection className="mx-auto w-full max-w-[1200px]">
+            <div className="mx-auto max-w-2xl text-center">
+              <h2 className="text-2xl font-semibold leading-tight tracking-[-0.01em] text-primary sm:text-[32px]">
+                Three careers, three different ways in
+              </h2>
+              <p className="mt-4 text-lg leading-relaxed text-on-surface-variant">
+                Same college, same starting point — but a licence, a
+                certification, and a federal certificate are not the same
+                journey. Vocation works out which one applies before it shows
+                you a single school.
+              </p>
+            </div>
+
+            <div className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-3">
+              {EXAMPLE_ROUTES.map((route) => (
+                <article
+                  key={route.program}
+                  className="flex flex-col overflow-hidden rounded-xl bg-surface-lowest shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
+                >
+                  {/* Top accent bar — the same "marks a real thing" teal this
+                      system uses on completed roadmap nodes, not decoration. */}
+                  <span aria-hidden="true" className="block h-1 bg-secondary" />
+
+                  <div className="flex flex-1 flex-col p-6">
+                    <span className="inline-flex w-fit items-center rounded-md bg-primary px-2.5 py-1 text-xs font-semibold text-on-primary">
+                      {route.field}
+                    </span>
+
+                    <p className="mt-4 text-xl font-semibold text-on-surface">
+                      {route.goal}
+                    </p>
+
+                    <div className="mt-5 flex-1 space-y-4">
+                      <div className="flex items-start gap-3">
+                        <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-secondary text-on-secondary">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-3 w-3">
+                            <path d="m4 12 5 5L20 6" />
+                          </svg>
                         </span>
-                      )}
-                      {pathway.title}
-                    </button>
-                  ))}
-                </nav>
-              </div>
-            )}
-
-            {/* Selected Pathway Display */}
-            <div className="flowchart-container">
-              {pathwayData.pathways[selectedPathwayIndex].steps.map(
-                (step, stepIndex) => {
-                  const stepTypeClass = `flowchart-step-${step.type}`;
-                  const IconComponent = icons[step.type];
-
-                  return (
-                    <div key={stepIndex}>
-                      {stepIndex > 0 && <div className="flowchart-connector" />}
-                      <div className={`flowchart-step ${stepTypeClass}`}>
-                        <div className="flowchart-step-header">
-                          <div className="flowchart-step-header-icon">
-                            {IconComponent}
-                          </div>
-                          <span className="text-xs font-semibold uppercase tracking-wider">
-                            {step.level || step.type}
-                          </span>
-                        </div>
-                        <div className="flowchart-step-content">
-                          <h3 className="text-lg font-semibold text-gray-900">
-                            {step.name}
-                          </h3>
-                          <p className="text-gray-600 mt-2">{step.description}</p>
-                          {step.type === "transfer" && (
-                            <div className="mt-4 space-y-2">
-                              <button
-                                onClick={() => setTransferRecommendationsPopup(true)}
-                                className="w-full text-left text-sm font-semibold text-orange-700 hover:text-orange-800 focus:outline-none focus:underline flex items-center"
-                              >
-                                <i className="fas fa-info-circle mr-2" />
-                                Recommendations
-                              </button>
-                              <a
-                                href="https://www.mdc.edu/transfer-information/transfer-agreements/"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-150"
-                              >
-                                <i className="fas fa-external-link-alt mr-2" /> View
-                                Transfer Agreements
-                              </a>
-                            </div>
-                          )}
-                          {step.type === "degree" &&
-                            ((step.level.includes("MDC") &&
-                              !step.name.toLowerCase().includes("bachelor") &&
-                              (isMDCAssociateInScienceProgram(step.name) ||
-                                isMDCAssociateInArtsProgram(step.name))) ||
-                              step.name.toLowerCase().includes("certificate") ||
-                              (step.name.toLowerCase().includes("bachelor") &&
-                                isMDCBachelorsProgram(step.name))) && (
-                              <a
-                                href={getMDCProgramUrl(step.name)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-school-600 hover:bg-school-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-school-500 transition duration-150"
-                              >
-                                <i className="fas fa-external-link-alt mr-2" />{" "}
-                                View Program Page
-                              </a>
-                            )}
-                          {step.type === "exam" && (
-                            <ExamStepComponent 
-                              examName={step.name} 
-                              examDescription={step.description}
-                              onShowRequirements={(name, info) => setCertificationPopup({ name, info })}
-                            />
-                          )}
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wider text-outline">
+                            Program
+                          </p>
+                          <a
+                            href={route.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm font-medium text-secondary underline decoration-secondary/30 underline-offset-2 transition-colors hover:text-secondary/80"
+                          >
+                            {route.program}
+                          </a>
                         </div>
                       </div>
-                    </div>
-                  );
-                }
-              )}
-            </div>
 
-            {/* Add Career Button - Only show if no additional careers have been added yet */}
-            {comparisonPathways.length === 0 && !showAddCareerInput && (
-              <div className="mt-8 flex justify-center">
-                <button
-                  onClick={handleAddCareerClick}
-                  className="flex items-center justify-center px-6 py-3 bg-school-600 hover:bg-school-700 text-white font-medium rounded-full shadow-md transition-colors"
-                >
-                  <i className="fas fa-plus mr-2" />
-                  Compare Another Career
-                </button>
-              </div>
-            )}
-
-            {/* Add Career Input - Only show if no comparison pathways exist yet */}
-            {showAddCareerInput && comparisonPathways.length === 0 && (
-              <div className="mt-8 flex justify-center">
-                <div className="w-full max-w-md">
-                  <div className="flex items-center space-x-2">
-                    <input
-                      type="text"
-                      value={addCareerInput}
-                      onChange={(e) => setAddCareerInput(e.target.value)}
-                      onKeyDown={handleAddCareerKeyDown}
-                      placeholder="Enter another career (e.g., Electrical Engineer)"
-                      className="flex-1 py-2 pl-4 pr-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-school-500 text-sm"
-                      autoFocus
-                    />
-                    <button
-                      onClick={handleAddCareerGenerate}
-                      disabled={!addCareerInput.trim()}
-                      className="px-4 py-2 bg-school-600 hover:bg-school-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-full transition-colors"
-                    >
-                      <i className="fas fa-arrow-right" />
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowAddCareerInput(false);
-                        setAddCareerInput("");
-                      }}
-                      className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full transition-colors"
-                    >
-                      <i className="fas fa-times" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Additional Career Pathways - Render independently of main pathway */}
-        {comparisonPathways.length > 0 && (
-          <div className={pathwayData ? "mt-12 space-y-12" : "space-y-12"}>
-            {comparisonPathways.map((careerPathway, careerIndex) => (
-              <div key={careerIndex} className={pathwayData ? "border-t border-gray-300 pt-8" : ""}>
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-2xl font-bold text-gray-800">
-                    {careerPathway.career}
-                  </h2>
-                  <button
-                    onClick={() => handleRemoveFromComparison(careerIndex)}
-                    className="text-gray-400 hover:text-gray-600"
-                    title="Remove from comparison"
-                  >
-                    <i className="fas fa-times text-xl" />
-                  </button>
-                </div>
-
-                {/* Pathway Tabs for this career */}
-                {careerPathway.data.pathways.length > 1 && (
-                  <div className="mb-6 border-b border-gray-200">
-                    <nav className="flex space-x-1 overflow-x-auto" aria-label="Pathway Tabs">
-                      {careerPathway.data.pathways.map((pathway, pathwayIndex) => (
-                        <button
-                          key={pathwayIndex}
-                          onClick={() => handlePathwaySelectInComparison(careerIndex, pathwayIndex)}
-                          className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
-                            careerPathway.selectedPathwayIndex === pathwayIndex
-                              ? "border-school-500 text-school-600"
-                              : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-                          }`}
-                        >
-                          {pathway.isPrimary && (
-                            <span className="mr-2 text-xs bg-school-100 text-school-700 px-2 py-0.5 rounded">
-                              Recommended
-                            </span>
-                          )}
-                          {pathway.title}
-                        </button>
-                      ))}
-                    </nav>
-                  </div>
-                )}
-
-                {/* Pathway Flowchart */}
-                <div className="flowchart-container">
-                  {careerPathway.data.pathways[careerPathway.selectedPathwayIndex].steps.map(
-                    (step, stepIndex) => {
-                      const stepTypeClass = `flowchart-step-${step.type}`;
-                      const IconComponent = icons[step.type];
-
-                      return (
-                        <div key={stepIndex}>
-                          {stepIndex > 0 && <div className="flowchart-connector" />}
-                          <div className={`flowchart-step ${stepTypeClass}`}>
-                            <div className="flowchart-step-header">
-                              <div className="flowchart-step-header-icon">
-                                {IconComponent}
-                              </div>
-                              <span className="text-xs font-semibold uppercase tracking-wider">
-                                {step.level || step.type}
-                              </span>
-                            </div>
-                            <div className="flowchart-step-content">
-                              <h3 className="text-lg font-semibold text-gray-900">
-                                {step.name}
-                              </h3>
-                              <p className="text-gray-600 mt-2">{step.description}</p>
-                              {step.type === "transfer" && (
-                                <div className="mt-4 space-y-2">
-                                  <button
-                                    onClick={() => setTransferRecommendationsPopup(true)}
-                                    className="w-full text-left text-sm font-semibold text-orange-700 hover:text-orange-800 focus:outline-none focus:underline flex items-center"
-                                  >
-                                    <i className="fas fa-info-circle mr-2" />
-                                    Recommendations
-                                  </button>
-                                  <a
-                                    href="https://www.mdc.edu/transfer-information/transfer-agreements/"
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-150"
-                                  >
-                                    <i className="fas fa-external-link-alt mr-2" /> View
-                                    Transfer Agreements
-                                  </a>
-                                </div>
-                              )}
-                              {step.type === "degree" &&
-                                ((step.level.includes("MDC") &&
-                                  !step.name.toLowerCase().includes("bachelor") &&
-                                  (isMDCAssociateInScienceProgram(step.name) ||
-                                    isMDCAssociateInArtsProgram(step.name))) ||
-                                  step.name.toLowerCase().includes("certificate") ||
-                                  (step.name.toLowerCase().includes("bachelor") &&
-                                    isMDCBachelorsProgram(step.name))) && (
-                                  <a
-                                    href={getMDCProgramUrl(step.name)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-school-600 hover:bg-school-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-school-500 transition duration-150"
-                                  >
-                                    <i className="fas fa-external-link-alt mr-2" />{" "}
-                                    View Program Page
-                                  </a>
-                                )}
-                              {step.type === "exam" && (
-                                <ExamStepComponent 
-                                  examName={step.name} 
-                                  examDescription={step.description} 
-                                  careerIndex={careerIndex}
-                                  onShowRequirements={(name, info, idx) => setCertificationPopup({ name, info, careerIndex: idx })}
-                                />
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    }
-                  )}
-                </div>
-
-                {/* Add Career Button after last additional pathway - Only show if under limit */}
-                {careerIndex === comparisonPathways.length - 1 && comparisonPathways.length < 3 && !showAddCareerInput && (
-                  <div className="mt-8 flex justify-center">
-                    <button
-                      onClick={handleAddCareerClick}
-                      className="flex items-center justify-center px-6 py-3 bg-school-600 hover:bg-school-700 text-white font-medium rounded-full shadow-md transition-colors"
-                    >
-                      <i className="fas fa-plus mr-2" />
-                      Compare Another Career
-                    </button>
-                  </div>
-                )}
-
-                {/* Add Career Input after last pathway */}
-                {careerIndex === comparisonPathways.length - 1 && showAddCareerInput && (
-                  <div className="mt-8 flex justify-center">
-                    <div className="w-full max-w-md">
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="text"
-                          value={addCareerInput}
-                          onChange={(e) => setAddCareerInput(e.target.value)}
-                          onKeyDown={handleAddCareerKeyDown}
-                          placeholder="Enter another career (e.g., Electrical Engineer)"
-                          className="flex-1 py-2 pl-4 pr-10 border border-gray-300 rounded-full shadow-sm focus:outline-none focus:ring-2 focus:ring-school-500 text-sm"
-                          autoFocus
+                      <div className="flex items-start gap-3">
+                        <span
+                          aria-hidden="true"
+                          className="mt-0.5 h-5 w-5 shrink-0 rounded-full border-2 border-outline-variant"
                         />
-                        <button
-                          onClick={handleAddCareerGenerate}
-                          disabled={!addCareerInput.trim()}
-                          className="px-4 py-2 bg-school-600 hover:bg-school-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-full transition-colors"
-                        >
-                          <i className="fas fa-arrow-right" />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setShowAddCareerInput(false);
-                            setAddCareerInput("");
-                          }}
-                          className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-full transition-colors"
-                        >
-                          <i className="fas fa-times" />
-                        </button>
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wider text-outline">
+                            Credential
+                          </p>
+                          <p className="text-sm font-medium text-secondary">
+                            {route.credential}
+                          </p>
+                          <p className="mt-0.5 text-xs text-on-surface-variant">
+                            {route.credentialKind}
+                          </p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
 
-      {/* How Vocation Works Section.
-          The landing-page top padding is deliberately modest: with the hero's
-          own pb-16 above it, a larger gap pushed the three cards past the fold
-          on ~850-950px viewports (a very common laptop/desktop size), where
-          they were clipped just enough to look broken rather than clearly
-          "scroll for more". Keep the combined hero-bottom + section-top gap
-          under ~120px. */}
-      <div className={`px-6 md:px-8 pb-12 ${pathwayData ? 'pt-16' : 'pt-12 md:pt-16'}`}>
-        <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
-            How Vocation Works
-          </h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {/* Step 1 */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-center w-12 h-12 bg-school-100 rounded-full mb-4">
-                <span className="text-2xl font-bold text-school-600">1</span>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Enter Your Career
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Type in the career you're interested in pursuing, such as "Mechanical Engineer" or "Registered Nurse".
-              </p>
-            </div>
-
-            {/* Step 2 */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-center w-12 h-12 bg-school-100 rounded-full mb-4">
-                <span className="text-2xl font-bold text-school-600">2</span>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Get Your Pathway
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Vocation generates a personalized educational pathway showing all the steps needed, from degree programs to licensure exams.
-              </p>
-            </div>
-
-            {/* Step 3 */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-center w-12 h-12 bg-school-100 rounded-full mb-4">
-                <span className="text-2xl font-bold text-school-600">3</span>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                Explore & Compare
-              </h3>
-              <p className="text-gray-600 text-sm">
-                Click on program links, view exam requirements, explore transfer options, and compare multiple career paths side-by-side.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Loading Overlay */}
-      {loading && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
-          <div className="bg-white p-6 rounded-lg shadow-xl flex flex-col items-center space-y-4">
-            <div className="flex items-center space-x-4">
-              <div className="loader" />
-              <span className="text-gray-700 font-medium">
-                {loadingMessage}
-              </span>
-            </div>
-            <button
-              onClick={handleCancelLoad}
-              className="mt-2 px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 text-sm font-medium rounded-lg"
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Transfer Recommendations Popup */}
-      {transferRecommendationsPopup && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
-          onClick={() => setTransferRecommendationsPopup(false)}
-        >
-          <div
-            className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <header className="p-5 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-lg font-bold text-gray-800">
-                Florida (In-State) University Transfer Recommendations
-              </h2>
-              <button
-                onClick={() => setTransferRecommendationsPopup(false)}
-                className="text-gray-400 hover:text-gray-600 transition"
-              >
-                <i className="fas fa-times text-xl" />
-              </button>
-            </header>
-            <main className="p-6 overflow-y-auto">
-              <p className="text-sm text-gray-600 mb-4">
-                MDC has strong articulation agreements with these Florida
-                universities. Consider these options for your transfer:
-              </p>
-              <div className="space-y-4">
-                {FLORIDA_UNIVERSITIES.map((university, idx) => (
-                  <div
-                    key={idx}
-                    className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <h3 className="font-semibold text-gray-900">
-                          {university.name}
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          {university.location} • {university.type}
-                        </p>
-                      </div>
-                      <a
-                        href={university.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-orange-600 hover:text-orange-700 text-sm font-medium flex items-center"
+                    <Link
+                      href={`/roadmaps/${encodeURIComponent(route.goal)}`}
+                      className="mt-6 inline-flex items-center gap-2 border-t border-outline-variant pt-5 text-sm font-medium text-secondary transition-colors hover:text-secondary/80"
+                    >
+                      View Full Roadmap
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.8"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                        className="h-4 w-4"
                       >
-                        Visit{" "}
-                        <i className="fas fa-external-link-alt ml-1 text-xs" />
-                      </a>
-                    </div>
-                    {university.notes && (
-                      <p className="text-sm text-gray-600 mt-2">
-                        {university.notes}
-                      </p>
-                    )}
+                        <path d="M5 12h13" />
+                        <path d="m12 5 7 7-7 7" />
+                      </svg>
+                    </Link>
                   </div>
-                ))}
-              </div>
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <a
-                  href="https://www.mdc.edu/transfer-information/transfer-agreements/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-150"
-                >
-                  <i className="fas fa-external-link-alt mr-2" /> View MDC
-                  Transfer Agreements
-                </a>
-              </div>
-            </main>
-          </div>
-        </div>
-      )}
-
-      {/* Certification Requirements Popup */}
-      {certificationPopup && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
-          onClick={() => setCertificationPopup(null)}
-        >
-          <div
-            className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[80vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <header className="p-5 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-lg font-bold text-gray-800">
-                {certificationPopup.name} - Requirements
-              </h2>
-              <button
-                onClick={() => setCertificationPopup(null)}
-                className="text-gray-400 hover:text-gray-600 transition"
-              >
-                <i className="fas fa-times text-xl" />
-              </button>
-            </header>
-            <main className="p-6 overflow-y-auto">
-              <ul className="space-y-2 text-sm text-gray-700 pl-5">
-                {certificationPopup.info.requirements.map((req, idx) => (
-                  <li
-                    key={idx}
-                    className="leading-relaxed list-disc list-outside"
-                  >
-                    {req}
-                  </li>
-                ))}
-              </ul>
-              <div className="mt-6 pt-6 border-t border-gray-200">
-                <a
-                  href={certificationPopup.info.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition duration-150"
-                >
-                  <i className="fas fa-external-link-alt mr-2" /> Visit Official
-                  Website
-                </a>
-              </div>
-            </main>
-          </div>
-        </div>
-      )}
-
-      {/* Message Modal for AI Content */}
-      {modalOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              hideModal();
-            }
-          }}
-        >
-          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
-            <header className="p-5 border-b border-gray-200 flex justify-between items-center">
-              <h2 className="text-xl font-bold text-gray-800">{modalTitle}</h2>
-              <button
-                onClick={hideModal}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                </svg>
-              </button>
-            </header>
-            <main
-              className="p-6 overflow-y-auto"
-              dangerouslySetInnerHTML={{ __html: modalContent }}
-            />
-          </div>
-        </div>
-      )}
-
-      {/* Footer */}
-      <footer className="bg-gray-50 border-t border-gray-200 mt-16">
-        <div className="max-w-7xl mx-auto px-6 py-8">
-          <div className="grid md:grid-cols-3 gap-8 text-sm text-gray-600">
-            {/* Resources Column */}
-            <div>
-              <h3 className="font-semibold text-gray-800 mb-3">Resources</h3>
-              <ul className="space-y-2">
-                {schoolInfo.resources.map((resource) => (
-                  <li key={resource.url}>
-                    <a
-                      href={resource.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-school-600 transition-colors"
-                    >
-                      {resource.label}
-                    </a>
-                  </li>
-                ))}
-                <li>
-                  <a
-                    href="/team"
-                    className="hover:text-school-600 transition-colors"
-                  >
-                    Meet the Team
-                  </a>
-                </li>
-              </ul>
+                </article>
+              ))}
             </div>
 
-            {/* Legal Column */}
-            <div>
-              <h3 className="font-semibold text-gray-800 mb-3">Legal</h3>
-              <ul className="space-y-2">
-                <li>
-                  <a 
-                    href="/privacy" 
-                    className="hover:text-school-600 transition-colors"
-                  >
-                    Privacy Policy
-                  </a>
-                </li>
-                <li>
-                  <a 
-                    href="/terms" 
-                    className="hover:text-school-600 transition-colors"
-                  >
-                    Terms of Service
-                  </a>
-                </li>
-                {schoolInfo.accessibilityUrl && (
-                  <li>
-                    <a
-                      href={schoolInfo.accessibilityUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="hover:text-school-600 transition-colors"
-                    >
-                      Accessibility
-                    </a>
-                  </li>
-                )}
-              </ul>
-            </div>
+            <p className="mt-10 text-center text-sm text-on-surface-variant">
+              Programs and links above come from Miami Dade College&apos;s own
+              catalog. Costs and wages appear on your plan, where they&apos;re
+              priced per school and per metro.
+            </p>
+          </RevealSection>
+        </section>
+      </main>
 
-            {/* Contact & Disclaimer Column. Some schools publish no central
-                advising address at all, so the heading is dropped rather than
-                left standing over an empty list. */}
+      <footer className="border-t border-outline-variant bg-surface-lowest px-5 py-12 md:px-16">
+        <div className="mx-auto w-full max-w-[1200px]">
+          <div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
             <div>
-              {schoolInfo.contacts.length > 0 && (
-                <>
-                  <h3 className="font-semibold text-gray-800 mb-3">Contact</h3>
-                  <ul className="mb-4 space-y-1">
-                    {schoolInfo.contacts.map((contact) => (
-                      <li key={contact.email}>
-                        {schoolInfo.contacts.length > 1 && (
-                          <span className="text-gray-500">{contact.label}: </span>
-                        )}
-                        <a
-                          href={`mailto:${contact.email}`}
-                          className="hover:text-school-600 transition-colors"
-                        >
-                          {contact.email}
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
-                </>
-              )}
-              <p className="text-xs text-gray-500 leading-relaxed">
-                <strong>Disclaimer:</strong> Pathways are AI-generated suggestions and should be verified with academic advisors. Content may contain inaccuracies.
+              <Wordmark />
+              <p className="mt-3 max-w-sm text-sm leading-relaxed text-on-surface-variant">
+                Built at Miami Dade College. Plans against 53 Florida
+                institutions in depth, and any school in the world with
+                verification.
               </p>
             </div>
+
+            <nav className="flex flex-wrap gap-x-8 gap-y-3">
+              {FOOTER_LINKS.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm font-medium tracking-[0.05em] text-on-surface-variant transition-colors hover:text-primary"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
           </div>
 
-          {/* Bottom Bar */}
-          <div className="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
-            <p>© {new Date().getFullYear()} Vocation. All rights reserved.</p>
-            <p className="mt-1">Powered by Google Gemini AI</p>
+          <div className="mt-10 flex flex-col gap-3 border-t border-outline-variant pt-6 md:flex-row md:items-start md:justify-between">
+            {/* Standing rule: every view that leads to a pathway says the
+                pathways are AI-generated. This is the first one. */}
+            <p className="text-xs leading-relaxed text-on-surface-variant md:max-w-2xl">
+              <strong className="font-semibold text-on-surface">Heads up:</strong>{" "}
+              pathways and costs are AI-generated estimates built from real
+              program catalogs. They&apos;re a starting point — confirm the
+              details with an academic advisor before you act on them.
+            </p>
+            <p className="whitespace-nowrap text-xs text-outline">
+              © {year} Vocation. Grounded clarity for every career stage.
+            </p>
           </div>
         </div>
       </footer>

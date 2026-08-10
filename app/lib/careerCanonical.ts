@@ -12,6 +12,7 @@
 // more expensive than generating a near-duplicate pathway.
 
 import { CAREER_ALIASES } from "./careerAliases";
+import { blockedCareer, type BlockReason } from "./careerPolicy";
 
 // Everything except letters, numbers, whitespace, and the two symbols that
 // carry meaning in job titles ("C++ Developer", "C# Developer"). Replaced with
@@ -31,6 +32,14 @@ export interface ResolvedCareer {
   normalized: string;
   /** Whether an alias table entry matched. */
   matched: boolean;
+  /**
+   * Why we won't plan a route to this, or null to proceed.
+   *
+   * A flag rather than a thrown error, following `matched` above: resolution
+   * stays a pure function every caller can run without a try/catch, and the
+   * routes decide what a refusal looks like. See careerPolicy.ts.
+   */
+  blocked: BlockReason | null;
 }
 
 export function normalizeCareer(input: string): string {
@@ -62,17 +71,21 @@ function titleCase(value: string): string {
 
 export function resolveCareer(input: string): ResolvedCareer {
   const normalized = normalizeCareer(input);
+  // Judged on what the student actually typed, before any alias rewrite: the
+  // alias table maps synonyms onto canonical titles, and nothing in it should
+  // ever be able to launder a refused phrase into an accepted one.
+  const blocked = blockedCareer(normalized);
 
   const direct = CAREER_ALIASES[normalized];
   if (direct) {
-    return { canonical: direct, normalized, matched: true };
+    return { canonical: direct, normalized, matched: true, blocked };
   }
 
   const singular = depluralize(normalized);
   if (singular) {
     const viaSingular = CAREER_ALIASES[singular];
     if (viaSingular) {
-      return { canonical: viaSingular, normalized, matched: true };
+      return { canonical: viaSingular, normalized, matched: true, blocked };
     }
   }
 
@@ -80,7 +93,7 @@ export function resolveCareer(input: string): ResolvedCareer {
   // guessing at a singular form for a word we don't recognize. Case and
   // spacing still collapse, so "MECHANICAL  ENGINEER" and "mechanical engineer"
   // remain one entry.
-  return { canonical: titleCase(normalized), normalized, matched: false };
+  return { canonical: titleCase(normalized), normalized, matched: false, blocked };
 }
 
 /** Every distinct canonical title, for the seed script to pre-generate. */

@@ -1,0 +1,38 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "inter",
+        "createdAt": "2026-08-02T21:49:45.289Z",
+        "reason": "User confirmed Inter is intentional"
+      },
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "app/components/intake/CareerProfileStep.tsx"
+        ],
+        "createdAt": "2026-08-04T00:00:00.000Z",
+        "reason": "User confirmed: the practitioner-voice cards' coloured left border comes from the approved comp, and the colour encodes reward/tradeoff/warning"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "1.25rem",
+        "createdAt": "2026-08-10T02:26:23.904Z",
+        "reason": "User confirmed intentional: icon glyph size on #clear-input-btn, sits between the 18px body and 24px title steps"
+      },
+      {
+        "rule": "border-accent-on-rounded",
+        "value": "*",
+        "files": [
+          "app/globals.css"
+        ],
+        "createdAt": "2026-08-10T02:26:38.240Z",
+        "reason": "User confirmed intentional: the .loader spinner's border-radius 50% plus contrasting border-top IS the component; removing either leaves a static square or a circle with no visible motion"
+      }
+    ]
+  }
+}

@@ -2,15 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCached, setCached, cacheKey } from "@/app/lib/apiCache";
 import { getDurable, setDurable } from "@/app/lib/durableCache";
 import { resolveCareer } from "@/app/lib/careerCanonical";
+import {
+  BLOCKED_CAREER_MESSAGE,
+  MAX_CAREER_INPUT,
+  TOO_LONG_MESSAGE,
+} from "@/app/lib/careerPolicy";
 import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
 import { geminiUrl } from "@/app/lib/geminiModel";
 import { logCacheMiss } from "@/app/lib/missLog";
 import {
   buildPathwayRequest,
   hasCatalog,
-  SCHOOLS_WITH_CATALOG,
 } from "@/app/lib/pathwayPrompts";
 import { DEFAULT_SCHOOL_ID } from "@/app/lib/floridaSchools";
+import { buildOpenPathwayRequest } from "@/app/lib/openSchoolPrompt";
+import { attachVerifiedLinks } from "@/app/lib/verifyPathway";
+import { isOpenSchool, type SchoolRef } from "@/app/lib/schoolRef";
 
 // Server-side only - never exposed to the browser
 const apiKey = process.env.GEMINI_API_KEY;
@@ -24,7 +31,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { career, school } = await request.json();
+    const { career, school, schoolRef, routeArchetype } = await request.json();
 
     if (!career || typeof career !== "string" || career.trim() === "") {
       return NextResponse.json(
@@ -35,17 +42,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // The school decides the whole shape of the pathway, so it must be one we
-    // hold a real program catalog for. Anything else is rejected rather than
-    // silently falling back to MDC, which would show a student an MDC plan
-    // under another school's name.
-    const schoolId = typeof school === "string" && school ? school : DEFAULT_SCHOOL_ID;
+    if (career.length > MAX_CAREER_INPUT) {
+      return NextResponse.json({ error: TOO_LONG_MESSAGE }, { status: 400 });
+    }
 
-    if (!hasCatalog(schoolId)) {
+    // Two kinds of school now reach this route, and the difference decides
+    // which prompt runs and whether the result gets URL-checked:
+    //
+    //   a floridaSchools.ts id ("mdc")  → scraped catalog, grounded prompt
+    //   an "open:" id + a schoolRef     → no catalog, open prompt + verify
+    //
+    // A bare id we hold no catalog for is still rejected. Falling back to MDC
+    // would show a student an MDC plan under another school's name.
+    const schoolId = typeof school === "string" && school ? school : DEFAULT_SCHOOL_ID;
+    const openSchool: SchoolRef | undefined =
+      isOpenSchool(schoolId) && schoolRef?.name ? (schoolRef as SchoolRef) : undefined;
+
+    if (!openSchool && !hasCatalog(schoolId)) {
       return NextResponse.json(
         {
           error:
-            `Pathways aren't available for that school yet. Supported: ${SCHOOLS_WITH_CATALOG.join(", ")}.`,
+            "We don't have enough information about that school to plan against it. Pick it again from the school list so we can look it up.",
           unsupportedSchool: schoolId,
         },
         { status: 400 }
@@ -55,14 +72,32 @@ export async function POST(request: NextRequest) {
     // Collapse the many ways a student might spell the same job ("RN",
     // "nurse", "Registered Nurse") onto one title, so they share a single
     // generated pathway instead of one per spelling.
-    const canonicalCareer = resolveCareer(career).canonical;
+    const resolved = resolveCareer(career);
+
+    // Ahead of the cache, the rate limiter, and the model call, in that order
+    // of importance: a refused search must cost nothing, must not spend the
+    // visitor's allowance, and must not be served from an entry generated
+    // before this check existed.
+    if (resolved.blocked) {
+      return NextResponse.json(
+        { error: BLOCKED_CAREER_MESSAGE, blocked: true },
+        { status: 400 }
+      );
+    }
+
+    const canonicalCareer = resolved.canonical;
 
     // Return a previously generated pathway for the same career without
     // spending a Gemini request (avoids the free-tier rate limit on repeats).
     // The school is part of the key: "Accountant" at MDC and at FIU are
     // different pathways, and sharing one entry would serve whichever was
     // generated first to both.
-    const key = cacheKey(`pathway:${schoolId}`, canonicalCareer);
+    const key = cacheKey(
+      // The archetype changes the SHAPE of the plan, so two routes through the
+      // same school are different answers and cannot share an entry.
+      `pathway:${schoolId}${openSchool ? `:${routeArchetype ?? "degree"}` : ""}`,
+      canonicalCareer
+    );
     const cached = getCached(key);
     if (cached) {
       return NextResponse.json(cached);
@@ -89,9 +124,12 @@ export async function POST(request: NextRequest) {
 
 
     // Prompt, schema, and pathway shape all differ per school: MDC starts at
-    // an associate and transfers out; FIU starts at the bachelor's. Returns
-    // null for the 59 schools with no catalog, which the guard above rejects.
-    const prompt = buildPathwayRequest(schoolId, canonicalCareer)!;
+    // an associate and transfers out; FIU starts at the bachelor's. An open
+    // school has no catalog to embed, so it gets the URL-claiming prompt whose
+    // output is checked below instead.
+    const prompt = openSchool
+      ? buildOpenPathwayRequest(openSchool, canonicalCareer, routeArchetype)
+      : buildPathwayRequest(schoolId, canonicalCareer)!;
     const { systemPrompt, userQuery, responseSchema } = prompt;
     const apiUrl = geminiUrl(apiKey);
 
@@ -134,7 +172,23 @@ export async function POST(request: NextRequest) {
 
     if (result.candidates && result.candidates.length > 0) {
       const text = result.candidates[0].content.parts[0].text;
-      const generatedData = JSON.parse(text);
+      let generatedData = JSON.parse(text);
+
+      // The grounding step for open schools. Every program page the model
+      // claimed gets fetched; anything that 404s, soft-404s, or bounces to a
+      // homepage falls back to the school's program index or loses its link
+      // entirely. Done BEFORE caching so the check is paid for once, not on
+      // every read — and so a cached pathway carries its own provenance.
+      //
+      // Catalog pathways are deliberately NOT touched here. Their shape is
+      // what 411 committed seed entries already hold and what two route tests
+      // assert exactly, and the plan page reads provenance from the school
+      // record rather than the payload — so stamping a redundant field on them
+      // would change a stable contract to say something nothing reads.
+      if (openSchool) {
+        generatedData = await attachVerifiedLinks(generatedData, openSchool);
+      }
+
       setCached(key, generatedData);
       // Awaited rather than fired-and-forgotten: serverless can freeze the
       // instance the moment the response is sent, which would drop the write

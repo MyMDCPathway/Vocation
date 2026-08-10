@@ -1,0 +1,335 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-02T00:00:00.000Z",
+  "title": "Design System: Vocation",
+  "extensions": {
+    "colorMeta": {
+      "sand": {
+        "role": "neutral",
+        "displayName": "Warm Sand",
+        "canonical": "#f5f3ef",
+        "tonalRamp": ["#1d1b17", "#38342d", "#545046", "#706b60", "#8d877b", "#aaa398", "#ccc5b9", "#f5f3ef"]
+      },
+      "sand-deep": {
+        "role": "neutral",
+        "displayName": "Deep Sand",
+        "canonical": "#ebe7e0",
+        "tonalRamp": ["#1a1815", "#33302a", "#4d493f", "#676155", "#827b6c", "#a49d8e", "#c8c1b5", "#ebe7e0"]
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Deep Ink Violet",
+        "canonical": "#201436",
+        "tonalRamp": ["#0d0817", "#150d24", "#201436", "#33214f", "#4a3370", "#6b4f97", "#9a86bd", "#d9cfe8"]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Soft Ink",
+        "canonical": "#4a4058",
+        "tonalRamp": ["#0f0d13", "#1b1722", "#282232", "#362f43", "#4a4058", "#6b5f7e", "#9a8fae", "#cfc8db"]
+      },
+      "ink-faint": {
+        "role": "neutral",
+        "displayName": "Faint Ink",
+        "canonical": "#7b7389",
+        "tonalRamp": ["#131118", "#211d28", "#302b3a", "#40394d", "#524a61", "#665d77", "#7b7389", "#b8b2c2"]
+      },
+      "pop-orange": {
+        "role": "secondary",
+        "displayName": "Warm Amber",
+        "canonical": "#e8994f",
+        "tonalRamp": ["#3d2410", "#5c3719", "#7c4a22", "#9c5e2b", "#bd7238", "#e8994f", "#f2bd8b", "#fae3cd"]
+      },
+      "pop-blue": {
+        "role": "secondary",
+        "displayName": "Powder Sky",
+        "canonical": "#a3c7d9",
+        "tonalRamp": ["#16262e", "#223a46", "#2f4f5e", "#3d6577", "#4f7f93", "#6d9db1", "#a3c7d9", "#dceaf1"]
+      },
+      "pop-purple": {
+        "role": "secondary",
+        "displayName": "Soft Lilac",
+        "canonical": "#c5a8eb",
+        "tonalRamp": ["#231a33", "#35284d", "#483768", "#5d4785", "#7a5fa8", "#9c81c9", "#c5a8eb", "#e6d9f7"]
+      },
+      "pop-mint": {
+        "role": "secondary",
+        "displayName": "Pale Eucalyptus",
+        "canonical": "#cfe3dd",
+        "tonalRamp": ["#18251f", "#253830", "#344b42", "#446055", "#5c7d70", "#85a598", "#cfe3dd", "#eaf4f1"]
+      },
+      "school-primary": {
+        "role": "tertiary",
+        "displayName": "School Primary (runtime-retinted)",
+        "canonical": "#0053a0",
+        "tonalRamp": ["#002548", "#00325f", "#00437f", "#0053a0", "#0c62b4", "#3585d0", "#6fabdf", "#d8e9f7"]
+      },
+      "step-transfer": {
+        "role": "tertiary",
+        "displayName": "Transfer Orange",
+        "canonical": "#f97316",
+        "tonalRamp": ["#3d1c05", "#5c2a08", "#7c390b", "#9c470e", "#c05621", "#f97316", "#fdaa6b", "#fed7aa"]
+      },
+      "step-experience": {
+        "role": "tertiary",
+        "displayName": "Experience Green",
+        "canonical": "#16a34a",
+        "tonalRamp": ["#052e14", "#08421d", "#0b5726", "#0e6c30", "#12883c", "#16a34a", "#57c97f", "#bbf7d0"]
+      },
+      "step-exam": {
+        "role": "tertiary",
+        "displayName": "Exam Violet",
+        "canonical": "#7c3aed",
+        "tonalRamp": ["#1e0b3d", "#2e115c", "#3f177c", "#511e9c", "#672ac5", "#7c3aed", "#a883f4", "#ddd6fe"]
+      }
+    },
+    "typographyMeta": {
+      "wordmark": {
+        "displayName": "Wordmark",
+        "purpose": "The centred \"Vocation\" mark at the top of every intake screen. The only branding in the flow. Tracked tighter (-0.045em) than anything else in the system."
+      },
+      "display": {
+        "displayName": "Display",
+        "purpose": "The hero question only — the first screen a visitor sees. Centred, 900 weight, leading pulled to 1.02."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Every intake question after the hero. Left aligned, 800 weight. The largest thing on its screen."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Option card labels and bolded lead-ins. Full ink."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Help text under a question and card detail copy. Sits in Soft Ink, held to a 768px reading column."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Step counters, meta pills, captions, footer links. Sits in Faint Ink."
+      }
+    },
+    "shadows": [
+      {
+        "name": "resting",
+        "value": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        "purpose": "Option cards and panels at rest. Barely there — the card should read as sitting on the sand, not floating above it."
+      },
+      {
+        "name": "hover",
+        "value": "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+        "purpose": "Available surfaces on hover, always paired with a -2px translate. Soft blur means available."
+      },
+      {
+        "name": "committed",
+        "value": "0 6px 0 0 var(--ink)",
+        "purpose": "Selected option cards ONLY. Zero blur, zero spread, full-opacity ink. The signature of the system: hard shadow means chosen. Never use at rest, never use for decoration."
+      },
+      {
+        "name": "lifted",
+        "value": "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04)",
+        "purpose": "Flowchart step cards on hover, paired with a -6px translate and 1.02 scale."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-fast",
+        "value": "150ms ease",
+        "purpose": "Option card selection and hover lift. Fast enough to feel like a press."
+      },
+      {
+        "name": "state-standard",
+        "value": "300ms ease",
+        "purpose": "Button hover, flowchart card transform and shadow."
+      },
+      {
+        "name": "progress",
+        "value": "500ms cubic-bezier(0, 0, 0.2, 1)",
+        "purpose": "Progress bar fill width between steps. Ease-out so advancement decelerates into place."
+      },
+      {
+        "name": "shape-drift",
+        "value": "9s ease-in-out infinite",
+        "purpose": "Confetti blobs drift 14px vertically and rotate 6deg. Disabled entirely under prefers-reduced-motion."
+      },
+      {
+        "name": "step-stagger",
+        "value": "0.1s per card, capped at 0.9s",
+        "purpose": "Flowchart cards cascade in on slideInUp. The cap stops a long pathway from taking three seconds to appear."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" }
+    ],
+    "containers": [
+      { "name": "reading", "value": "768px", "purpose": "Default intake column (max-w-3xl)." },
+      { "name": "wide", "value": "1152px", "purpose": "Steps carrying the route rail or the map (max-w-6xl). Chrome widens with it." },
+      { "name": "rail", "value": "300px", "purpose": "The evolving route rail beside the question, sticky at 32px." },
+      { "name": "progress", "value": "448px", "purpose": "Progress bar max width, centred." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single high-emphasis action on a screen. Solid ink, generous radius, lifts on hover with no colour change.",
+      "html": "<button class=\"ds-btn-primary\">Continue</button>",
+      "css": ".ds-btn-primary { background: #201436; color: #ffffff; font-family: Inter, sans-serif; font-size: 16px; font-weight: 700; padding: 16px 32px; border: none; border-radius: 12px; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; } .ds-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); } .ds-btn-primary:focus-visible { outline: 3px solid #c5a8eb; outline-offset: 3px; } .ds-btn-primary:disabled { background: rgba(123, 115, 137, 0.4); transform: none; box-shadow: none; cursor: not-allowed; }"
+    },
+    {
+      "name": "Option Card",
+      "kind": "card",
+      "refersTo": "option-card",
+      "description": "A selectable answer at rest. Transparent 2px border so selecting it never changes its size.",
+      "html": "<button class=\"ds-option-card\" aria-pressed=\"false\"><span class=\"ds-option-card__label\">I support myself</span><span class=\"ds-option-card__detail\">You cover your own rent, food, and bills</span></button>",
+      "css": ".ds-option-card { display: block; width: 100%; text-align: left; background: #ffffff; border: 2px solid transparent; border-radius: 16px; padding: 20px; cursor: pointer; font-family: Inter, sans-serif; box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05); transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease; } .ds-option-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1); } .ds-option-card:focus-visible { outline: 3px solid #c5a8eb; outline-offset: 3px; } .ds-option-card__label { display: block; font-size: 16px; font-weight: 700; color: #201436; } .ds-option-card__detail { display: block; margin-top: 4px; font-size: 14px; line-height: 1.6; color: #4a4058; }"
+    },
+    {
+      "name": "Option Card — Selected",
+      "kind": "card",
+      "refersTo": "option-card-selected",
+      "description": "The same card once chosen. Solid ink border and the blur-less committed shadow; it does NOT lift. The hard shadow is the signature of this system.",
+      "html": "<button class=\"ds-option-card-selected\" aria-pressed=\"true\"><span class=\"ds-option-card-selected__label\">I support myself</span><span class=\"ds-option-card-selected__detail\">You cover your own rent, food, and bills</span><span class=\"ds-option-card-selected__meta\">Affects aid estimate</span></button>",
+      "css": ".ds-option-card-selected { display: block; width: 100%; text-align: left; background: #ffffff; border: 2px solid #201436; border-radius: 16px; padding: 20px; cursor: pointer; font-family: Inter, sans-serif; box-shadow: 0 6px 0 0 #201436; transition: transform 0.15s ease, box-shadow 0.15s ease; } .ds-option-card-selected:focus-visible { outline: 3px solid #c5a8eb; outline-offset: 3px; } .ds-option-card-selected__label { display: block; font-size: 16px; font-weight: 700; color: #201436; } .ds-option-card-selected__detail { display: block; margin-top: 4px; font-size: 14px; line-height: 1.6; color: #4a4058; } .ds-option-card-selected__meta { display: inline-block; margin-top: 12px; background: #ebe7e0; color: #4a4058; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 999px; }"
+    },
+    {
+      "name": "Meta Pill",
+      "kind": "chip",
+      "refersTo": "meta-pill",
+      "description": "Read-only metadata inside a card. Fully round, deep sand fill. Never interactive.",
+      "html": "<span class=\"ds-meta-pill\">Bachelor's · 4 years</span>",
+      "css": ".ds-meta-pill { display: inline-block; background: #ebe7e0; color: #4a4058; font-family: Inter, sans-serif; font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 999px; }"
+    },
+    {
+      "name": "Progress Bar",
+      "kind": "custom",
+      "refersTo": "progress-track",
+      "description": "Step position, centred and capped at 448px. Absent on the hero by design — a progress bar on the first screen says \"this is a form\" before the visitor has typed anything.",
+      "html": "<div class=\"ds-progress\"><div class=\"ds-progress__track\" aria-hidden=\"true\"><div class=\"ds-progress__fill\"></div></div><p class=\"ds-progress__caption\">Step 3 of 9</p></div>",
+      "css": ".ds-progress { max-width: 448px; margin: 0 auto; font-family: Inter, sans-serif; } .ds-progress__track { height: 6px; width: 100%; background: #ebe7e0; border-radius: 999px; } .ds-progress__fill { height: 6px; width: 33%; background: #201436; border-radius: 999px; transition: width 500ms cubic-bezier(0, 0, 0.2, 1); } .ds-progress__caption { margin-top: 8px; text-align: center; font-size: 12px; font-weight: 500; color: #7b7389; }"
+    },
+    {
+      "name": "Back Link",
+      "kind": "nav",
+      "refersTo": "button-primary",
+      "description": "The only navigation in the intake. Text-only, faint ink, darkening to full ink on hover. No border, no fill.",
+      "html": "<button class=\"ds-back\">← Back</button>",
+      "css": ".ds-back { background: none; border: none; padding: 0; cursor: pointer; font-family: Inter, sans-serif; font-size: 14px; font-weight: 500; color: #7b7389; transition: color 0.2s ease; } .ds-back:hover { color: #201436; } .ds-back:focus-visible { outline: 3px solid #c5a8eb; outline-offset: 3px; border-radius: 4px; }"
+    },
+    {
+      "name": "Flowchart Step",
+      "kind": "custom",
+      "refersTo": "option-card",
+      "description": "The pathway visualization card. Belongs to the school-themed surfaces and uses --school-*; the clearest example of the Two-Palette Rule in practice. Shown here in its degree variant.",
+      "html": "<div class=\"ds-flow-step\"><div class=\"ds-flow-step__header\"><span class=\"ds-flow-step__icon\">1</span><span class=\"ds-flow-step__kind\">Degree</span></div><div class=\"ds-flow-step__content\"><p class=\"ds-flow-step__name\">Nursing (A.S.)</p><p class=\"ds-flow-step__desc\">Two-year associate degree at Miami Dade College.</p></div></div>",
+      "css": ".ds-flow-step { width: 380px; display: flex; flex-direction: column; font-family: Inter, sans-serif; border: 1px solid #e5e7eb; border-radius: 12px; background: linear-gradient(180deg, #f9fafb 0%, #ffffff 55%); box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -1px rgb(0 0 0 / 0.06); overflow: hidden; transition: transform 0.3s ease, box-shadow 0.3s ease; } .ds-flow-step:hover { transform: translateY(-6px) scale(1.02); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 10px 10px -5px rgb(0 0 0 / 0.04); } .ds-flow-step__header { display: flex; align-items: center; padding: 16px; border-top: 4px solid var(--school-primary, #0053a0); background-color: rgba(0, 84, 166, 0.1); } .ds-flow-step__icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 9999px; background: var(--school-primary, #0053a0); color: #ffffff; font-size: 14px; font-weight: 700; margin-right: 12px; flex-shrink: 0; } .ds-flow-step__kind { color: var(--school-primary, #0053a0); font-weight: 600; font-size: 14px; } .ds-flow-step__content { padding: 16px; flex-grow: 1; } .ds-flow-step__name { margin: 0; font-size: 16px; font-weight: 700; color: #201436; } .ds-flow-step__desc { margin: 4px 0 0; font-size: 14px; line-height: 1.6; color: #4a4058; }"
+    },
+    {
+      "name": "Confetti Shapes",
+      "kind": "custom",
+      "refersTo": "option-card",
+      "description": "The decorative geometry vocabulary. Pure CSS so the shapes retint with the palette and cost no requests. Always aria-hidden, always pointer-events:none, always beneath the content layer.",
+      "html": "<div class=\"ds-confetti\" aria-hidden=\"true\"><span class=\"ds-shape ds-shape--squircle\"></span><span class=\"ds-shape ds-shape--fan\"></span><span class=\"ds-shape ds-shape--hexagon\"></span><span class=\"ds-shape ds-shape--triangle\"></span><span class=\"ds-shape ds-shape--pill\"></span></div>",
+      "css": ".ds-confetti { display: flex; align-items: center; gap: 20px; padding: 24px; pointer-events: none; } .ds-shape { display: block; width: 56px; height: 56px; pointer-events: none; } .ds-shape--squircle { border-radius: 42%; background: #e8994f; } .ds-shape--fan { border-radius: 100% 12% 46% 12%; background: #c5a8eb; } .ds-shape--hexagon { clip-path: polygon(25% 3%, 75% 3%, 99% 50%, 75% 97%, 25% 97%, 1% 50%); background: #a3c7d9; } .ds-shape--triangle { clip-path: polygon(50% 4%, 96% 92%, 4% 92%); border-radius: 12%; background: #cfe3dd; } .ds-shape--pill { width: 84px; height: 32px; border-radius: 999px; background: #ebe7e0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Encouraging Guidance Office",
+    "overview": "Warm, plain-spoken, and on your side. This is the counselor's office you actually wanted — sand-colored walls instead of fluorescent light, someone who asks one real question at a time and waits for the answer, rather than a pamphlet rack and a form with thirty fields. The visitor is often a sixteen-year-old who does not know what they want to be, and sometimes a forty-year-old asking the same question with more at stake. Both deserve a surface that feels calm and unhurried while still being certain about what to do next.\n\nThe system's tension is warmth against weight. The palette is soft — a warm off-white that is never pure white, muted pastel accents, a near-black that is secretly purple — while the typography is the loudest thing on screen: Inter at 800 and 900, tracked tight to -0.035em, leading pulled to 1.05. Nothing whispers and nothing shouts; the type carries all the confidence, so the color never has to. Depth is physical rather than atmospheric: a chosen card sits on a hard 6px ink shadow with no blur at all, like a key that has been pressed and stayed down.\n\nDecoration is deliberate and always subordinate. Scattered geometric confetti — squircles, fans, hexagons, pills — drifts gently in the margins in the four pop colors, and a wide curved arc hands off between color bands. All of it is inert: aria-hidden, pointer-events: none, and pinned beneath the content layer. It is there to make a page about tuition and licensing exams feel like somewhere a person can breathe.",
+    "keyCharacteristics": [
+      "Warm sand ground, never pure white",
+      "Very heavy, very tight headings doing all the expressive work",
+      "Muted pastel accents used as punctuation, never as surface",
+      "Blur-less offset shadows for commitment; soft blur for availability",
+      "Generous radii everywhere; no sharp corners",
+      "Inert decorative geometry, always beneath the content layer",
+      "One question per screen, no nav bar"
+    ],
+    "antiReferences": [
+      "A cold AI product — purple-black gradients, glow, sparkle icons, \"powered by AI\" chrome. The model is infrastructure here, not the pitch.",
+      "A growth-hacked funnel — urgency badges, countdowns, fake scarcity, testimonial carousels. People act on this advice, and manufactured pressure on that decision is a harm, not a conversion tactic."
+    ],
+    "rules": [
+      {
+        "name": "The Two-Palette Rule",
+        "body": "There are two palettes and they never mix. --school-* retints at runtime from whichever school is selected and belongs to the pathway and plan surfaces. --sand / --ink / --pop-* are constant and own the school-agnostic intake. Reaching for school-* on an intake screen is the single easiest way to break this system.",
+        "section": "colors"
+      },
+      {
+        "name": "The Pop-Is-Punctuation Rule",
+        "body": "The four pop colors are decoration and category coding. They never become a page background, a button fill, or body text. If a screen reads as an orange screen or a lilac screen, it is wrong.",
+        "section": "colors"
+      },
+      {
+        "name": "The Never-White Rule",
+        "body": "The page ground is warm sand. Pure white appears only on cards and never edge to edge — the warmth of the ground is what separates this from every institutional form the visitor has already filled in.",
+        "section": "colors"
+      },
+      {
+        "name": "The Heavy-and-Tight Rule",
+        "body": "A heading is 800 or 900, tracked -0.035em, with leading at or below 1.05. A 600-weight heading is off-brand — Inter at 700 and below reads noticeably lighter than this system expects, which is exactly why the 800 and 900 weights were added to the font import.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Question Rule",
+        "body": "One question per screen, and the question is the largest thing on it. If a screen has two headings competing at heading weight, it is two screens.",
+        "section": "typography"
+      },
+      {
+        "name": "The No-Nav Rule",
+        "body": "The intake has no nav bar, on any screen, at any width. The centred wordmark is the only branding. A row of links on a screen with one job is an invitation to leave, and adding a header re-opens every exit door this flow deliberately closed.",
+        "section": "layout"
+      },
+      {
+        "name": "The Corner-Setting Rule",
+        "body": "A control that is a setting rather than a question (currently only the country switcher) pins to the page corner outside the centred column entirely, so the wordmark stays optically centred. It sits above the content layer so its popover can open over the heading.",
+        "section": "layout"
+      },
+      {
+        "name": "The Hard-Shadow-Means-Chosen Rule",
+        "body": "A blur-less offset shadow is reserved for a surface the visitor has actively selected. Never use it for decoration, never use it at rest, and never soften a selected card into a blurred shadow — the whole depth language collapses if \"chosen\" and \"hoverable\" look alike.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Ground-Is-Flat Rule",
+        "body": "The sand ground itself never carries a shadow. Separation between bands is done with tone (sand to deep sand) and the curved arc, not with elevation.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Arc Rule",
+        "body": "Color bands hand off with a wide shallow arc, built as a 160%-wide pseudo-element with a 50% top radius rather than an SVG wave, so the curve stays shallow at any viewport width. The .arc-top container must keep overflow: hidden — without it the 160% overhang becomes real layout width and the document scrolls sideways (measured at 1645px inside a 1265px window).",
+        "section": "shapes"
+      },
+      {
+        "name": "The Inert Decoration Rule",
+        "body": "The confetti field is aria-hidden, carries pointer-events: none on both the field and every shape, and sits beneath the content layer. A decorative blob that eats a click meant for the career input is the failure mode this rule exists to prevent. All drift, fade, and letter animations are disabled wholesale under prefers-reduced-motion: reduce.",
+        "section": "components"
+      }
+    ],
+    "dos": [
+      "Do put the page on warm sand and reserve white for cards.",
+      "Do set headings at 800 or 900 with -0.035em tracking and <=1.05 leading.",
+      "Do use the hard 0 6px 0 0 var(--ink) shadow to mean chosen, and a soft blurred shadow to mean available.",
+      "Do keep a transparent 2px border on unselected cards so selecting one never changes its size.",
+      "Do give every new decorative element aria-hidden, pointer-events: none, and a z-0 position beneath z-10 content.",
+      "Do keep overflow: hidden on any .arc-top container.",
+      "Do respect the click-to-advance split: single-pick lists advance on click; anything with a free-text field fills the field and waits for an explicit Continue.",
+      "Do widen the chrome along with the column when a step needs the wide layout, so it reads as the same frame.",
+      "Do disable every animation under prefers-reduced-motion: reduce."
+    ],
+    "donts": [
+      "Don't use school-* colors on an intake screen, or the constant palette on a school-themed pathway surface. The two palettes never mix.",
+      "Don't let a pop color become a page background, a button fill, or body text. They are punctuation.",
+      "Don't add a nav bar, a header, or a link row to any intake screen.",
+      "Don't put a progress bar on the hero.",
+      "Don't soften a selected card's hard shadow, or apply a hard shadow to anything the visitor has not chosen.",
+      "Don't ship a pure-white full-page background.",
+      "Don't reach for glow, gradient-on-dark, sparkle icons, or \"powered by AI\" chrome. The model is infrastructure, not the pitch.",
+      "Don't add urgency badges, countdowns, scarcity language, or testimonial carousels. People act on this advice; manufactured pressure is a harm here.",
+      "Don't let a heading drop below 800 weight."
+    ]
+  }
+}

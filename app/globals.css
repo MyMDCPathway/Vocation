@@ -1,8 +1,16 @@
+/* Two faces, each with a job (DESIGN.md "The Two-Voice Rule"): Hanken Grotesk
+   carries every heading, Inter carries body copy and every data label — the
+   legibility that matters constantly here, in dense wage figures and program
+   names.
+
+   This MUST stay above the @tailwind directives: CSS requires @import to come
+   first, and a build that enforces that would drop the rule and silently fall
+   back to the system sans. */
+@import url('https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@600;700&family=Inter:wght@400;500;600&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 /* Selected school's palette, generated from its brand color.
    These defaults are Miami Dade College blue and are what renders on the
@@ -20,6 +28,58 @@
   --school-700: #00437f;
   --school-800: #00325f;
   --school-900: #002548;
+}
+
+/* Vocation's own brand palette — "Empowered Clarity" / Professional Modernism
+   (see DESIGN.md). Deliberately separate from --school-*: those are retinted
+   at runtime from whichever school is selected (HANDOFF §6) and must keep
+   working on the pathway pages. These are constant, and they're what every
+   school-agnostic surface is built from. */
+:root {
+  /* Near-black: the only voice of authority. Headings, nav, primary buttons. */
+  --primary: #000000;
+  --primary-container: #131b2e;
+  --primary-fixed: #dae2fd;
+  --primary-fixed-dim: #bec6e0;
+  --on-primary: #ffffff;
+
+  /* Vibrant Teal: progress and action, full stop (DESIGN.md "The
+     Teal-Means-Progress Rule") — never decoration, always forward motion. */
+  --secondary: #006a61;
+  --secondary-container: #86f2e4;
+  --secondary-fixed: #89f5e7;
+  --on-secondary: #ffffff;
+
+  /* This system spends no third hue — tertiary shares primary's near-black,
+     with its own container step for a fill that sits behind it. */
+  --tertiary: #000000;
+  --tertiary-container: #0b1c30;
+  --tertiary-fixed: #d3e4fe;
+  --on-tertiary: #ffffff;
+
+  /* Soft multi-tier gray-blue scaffold, not pure white or neutral gray. */
+  --surface: #f7f9fb;
+  --surface-container-lowest: #ffffff;
+  --surface-container-low: #f2f4f6;
+  --surface-container: #eceef0;
+  --surface-container-high: #e6e8ea;
+  --surface-container-highest: #e0e3e5;
+  --surface-dim: #d8dadc;
+  --on-surface: #191c1e;
+  --on-surface-variant: #45464d;
+  --outline: #76777d;
+  --outline-variant: #c6c6cd;
+
+  --error: #ba1a1a;
+  --error-container: #ffdad6;
+  --on-error-container: #93000a;
+
+  /* Shadow is feedback, not a resting state (DESIGN.md "The
+     Shadow-Is-Feedback Rule") — soft and diffused, never a resting card. */
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04);
+  --shadow-raised: 0 4px 12px rgb(15 23 42 / 0.05);
+  --shadow-card-hover: 0 8px 20px rgb(15 23 42 / 0.08);
+  --shadow-overlay: 0 16px 32px rgb(15 23 42 / 0.12);
 }
 
 /* Color variables for flowchart steps */
@@ -40,50 +100,6 @@
   --info: #7c3aed; /* purple-600 */
 }
 
-/* Animated gradient for Vocation title */
-@keyframes gradient-flow {
-  0% {
-    background-position: 200% 50%;
-  }
-  100% {
-    background-position: -200% 50%;
-  }
-}
-
-.vocation-gradient-wrapper {
-  background: linear-gradient(
-    90deg,
-    #2563eb 0%,
-    #3b82f6 20%,
-    #10b981 40%,
-    #3b82f6 60%,
-    #2563eb 80%,
-    #2563eb 100%
-  );
-  background-size: 200% 100%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradient-flow 6s linear infinite;
-}
-
-.vocation-gradient {
-  background: linear-gradient(
-    90deg,
-    #2563eb 0%,
-    #3b82f6 20%,
-    #10b981 40%,
-    #3b82f6 60%,
-    #2563eb 80%,
-    #2563eb 100%
-  );
-  background-size: 200% 100%;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: gradient-flow 6s linear infinite;
-}
-
 /* Letter fade-in animation - move up into frame */
 @keyframes letter-fade-in {
   0% {
@@ -102,12 +118,70 @@
   opacity: 0;
 }
 
-/* Use Inter as the default font */
+/* Two faces, one job each (DESIGN.md "The Two-Voice Rule"): Inter is the body
+   default; headings opt into Hanken Grotesk explicitly below. */
 body {
   font-family: 'Inter', sans-serif;
-  /* Soft app background to match Canvas-style cards */
-  background-color: #f7fafc; /* tailwind gray-50 */
+  background-color: var(--surface);
+  color: var(--on-surface-variant);
   min-height: 100vh;
+}
+
+h1, h2, h3, h4, .display {
+  font-family: 'Hanken Grotesk', sans-serif;
+  color: var(--primary);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+
+h1, .display {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+/* Numbers a student compares must line up in columns — tuition against
+   tuition, wage against wage. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fade-in,
+  .fade-in-delay-1,
+  .fade-in-delay-2,
+  .reveal {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Scroll-triggered reveal — see app/lib/useReveal.ts. Distinct from .fade-in
+   above: that one plays on a fixed delay (the classic page's typewriter
+   sequence), this one plays once when a section actually enters the
+   viewport, via IntersectionObserver, and includes the rise .fade-in never
+   needed. Both stay in this one keyframe system rather than starting a
+   second one. */
+@keyframes reveal {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.reveal-visible {
+  animation: reveal 0.6s ease-out forwards;
 }
 
 /* New Flowchart Styles */
@@ -124,12 +198,12 @@ body {
   overflow-x: auto;
   overflow-y: hidden;
   padding: 1.5rem;
-  background-color: #f9fafb; /* Light gray bg for contrast */
+  background-color: var(--surface-container-low); /* Recessed panel, same scale as the rest of the app */
   border-radius: 0.75rem; /* rounded */
   margin-bottom: 1.5rem; /* Space */
   /* gap removed - connector element now provides spacing */
   scrollbar-width: thin; /* For Firefox */
-  scrollbar-color: #cbd5e1 #f9fafb; /* For Firefox */
+  scrollbar-color: var(--outline-variant) var(--surface-container-low); /* For Firefox */
 }
 
 /* Custom scrollbar for Chrome/Edge */
@@ -138,17 +212,17 @@ body {
 }
 
 .flowchart-container::-webkit-scrollbar-track {
-  background: #f9fafb;
+  background: var(--surface-container-low);
   border-radius: 4px;
 }
 
 .flowchart-container::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: var(--outline-variant);
   border-radius: 4px;
 }
 
 .flowchart-container::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: var(--outline);
 }
 
 /* Wrapper for step and connector to ensure proper stretching */
@@ -179,21 +253,20 @@ body {
   align-self: stretch; /* Stretch to match wrapper height */
   display: flex;
   flex-direction: column;
-  border: 1px solid #e5e7eb; /* gray-200 */
+  border: 1px solid var(--outline-variant);
   border-radius: 0.75rem; /* lg */
-  /* Soft top-to-bottom background like the reference cards */
-  background: linear-gradient(180deg, #f9fafb 0%, #ffffff 55%);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+  background: var(--surface-container-lowest); /* Same flat card surface as SchoolCard / result cards */
+  box-shadow: var(--shadow-card);
   overflow: hidden; /* For rounded corners on border-top */
   animation: slideInUp 0.6s ease-out forwards;
   opacity: 0;
-  transform: translateY(30px);
+  transform: translateY(16px);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .flowchart-step:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-card-hover);
 }
 
 /* Staggered animation delays for sequential appearance */
@@ -237,7 +310,7 @@ body {
 @keyframes slideInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(16px);
   }
   to {
     opacity: 1;
@@ -248,8 +321,12 @@ body {
 .flowchart-step-header {
   display: flex;
   align-items: center;
+  gap: 0.75rem;
   padding: 1rem;
-  border-top-width: 4px;
+  /* Reserved and transparent by default so header height matches across
+     every step type; only .flowchart-step-degree fills it in below. */
+  border-top: 3px solid transparent;
+  border-bottom: 1px solid var(--outline-variant);
 }
 
 .flowchart-step-header-icon {
@@ -259,9 +336,14 @@ body {
   align-items: center;
   justify-content: center;
   border-radius: 9999px; /* full */
-  background-color: #e5e7eb; /* gray-200 */
-  margin-right: 0.75rem;
+  background-color: var(--surface-container);
+  color: var(--on-surface-variant);
   flex-shrink: 0;
+}
+
+.flowchart-step-header span {
+  color: var(--on-surface-variant);
+  font-weight: 600;
 }
 
 .flowchart-step-content {
@@ -287,79 +369,76 @@ body {
   left: 0; /* Start from the left edge of the connector */
   width: 100%; /* Span the full width of the connector */
   height: 3px;
-  background-color: #cbd5e1; /* gray-300 */
+  background-color: var(--outline-variant);
   transform: translateY(-50%);
 }
 
-/* Step-specific colors - School Themed */
+/* Step-type accents. Per HANDOFF's --school-* rule, only the degree step is
+   actually tied to the selected school, so it's the only one that gets the
+   school's own color — as a thin top border, not a saturated header fill.
+   The other three step types are generic regardless of school; they're told
+   apart by icon color alone, on an otherwise neutral card. */
 .flowchart-step-degree .flowchart-step-header {
-  border-color: var(--school-primary);
-  /* Solid light blue background (no gradient) */
-  background-color: rgba(var(--school-primary-rgb, 0, 51, 102), 0.10);
+  border-top-color: var(--school-primary);
 }
 
 .flowchart-step-degree .flowchart-step-header-icon {
-  background-color: var(--school-primary);
-  color: white;
-}
-
-.flowchart-step-degree .flowchart-step-header span {
+  background-color: rgba(var(--school-primary-rgb, 0, 51, 102), 0.12);
   color: var(--school-primary);
-  font-weight: 600;
-}
-
-.flowchart-step-transfer .flowchart-step-header {
-  border-color: var(--school-secondary);
-  /* Solid orange background (no gradient) */
-  background-color: rgba(var(--school-secondary-rgb, 249, 115, 22), 0.10);
 }
 
 .flowchart-step-transfer .flowchart-step-header-icon {
-  background-color: var(--school-secondary);
-  color: white;
-}
-
-.flowchart-step-transfer .flowchart-step-header span {
+  background-color: rgba(var(--school-secondary-rgb, 249, 115, 22), 0.12);
   color: var(--school-secondary-dark);
-  font-weight: 600;
-}
-
-.flowchart-step-internship .flowchart-step-header {
-  border-color: var(--success);
-  /* Solid green background (no gradient) */
-  background-color: rgba(22, 163, 74, 0.10);
 }
 
 .flowchart-step-internship .flowchart-step-header-icon {
-  background-color: var(--success);
-  color: white;
-}
-
-.flowchart-step-internship .flowchart-step-header span {
+  background-color: rgba(22, 163, 74, 0.12);
   color: var(--success);
-  font-weight: 600;
-}
-
-.flowchart-step-exam .flowchart-step-header {
-  border-color: var(--info);
-  /* Solid purple background (no gradient) */
-  background-color: rgba(124, 58, 237, 0.10);
 }
 
 .flowchart-step-exam .flowchart-step-header-icon {
-  background-color: var(--info);
-  color: white;
-}
-
-.flowchart-step-exam .flowchart-step-header span {
+  background-color: rgba(124, 58, 237, 0.12);
   color: var(--info);
-  font-weight: 600;
 }
 
-/* Loading Spinner */
+/* Vertical pathway timeline (Phase B restyle). A separate namespace from
+   .flowchart-* above rather than a rewrite of it — classic /pathway (1.0)
+   still inlines .flowchart-* directly and deliberately keeps its current
+   look; this is a new component, not a shared-class change. Consumed by
+   PathwayFlow.tsx (used on /plan and /roadmaps/[career]).
+
+   The rail is colored in the selected school's own color throughout — per
+   HANDOFF's --school-* rule, this literally IS that school's route. Node
+   markers stay neutral numbered circles: no check/current/future states,
+   because nothing here tracks real step completion (a fabricated progress
+   state would be worse than no state at all). Step TYPE is conveyed by the
+   badge chip inside each card, not by node or rail color. */
+.pathway-timeline-rail {
+  background-color: var(--school-primary);
+}
+
+.pathway-timeline-node {
+  border-color: var(--outline-variant);
+  background-color: var(--surface-container-lowest);
+  color: var(--on-surface-variant);
+}
+
+/* Loading Spinner.
+
+   The 4px border and the 50% radius ARE the component: the radius makes the
+   circle and the contrasting border-top is the segment that sweeps. Lint rules
+   that flag "thick accent border on a rounded element" and suggest dropping one
+   of the two are wrong here — removing either leaves no spinner. Only the
+   colors below are up for debate.
+
+   Teal, not the blue this shipped with: a spinner means "this is moving
+   forward," and per DESIGN.md's Teal-Means-Progress Rule teal is the only color
+   allowed to say that. Not --school-* either — school color belongs to pathway
+   and plan surfaces, and this spinner is global. */
 .loader {
-  border: 4px solid #f3f3f3; /* Light grey */
-  border-top: 4px solid #3b82f6; /* Blue */
+  border: 4px solid var(--surface-container-low); /* recessed track */
+  border-top: 4px solid var(--secondary); /* the sweeping segment */
   border-radius: 50%;
   width: 40px;
   height: 40px;
@@ -393,14 +472,19 @@ body {
   right: 1.5rem;
   transform: translateY(-50%);
   cursor: pointer;
-  color: #9ca3af; /* gray-400 */
+  color: var(--outline);
   display: none; /* Hidden by default */
+  /* Deliberately off the type scale: the scale steps 18px (Body) to 24px
+     (Title), and 20px sits between them. This is a glyph — a "×" affordance
+     sized to the input, not text — so it takes an icon size, not a type step.
+     It is off-scale on purpose; don't round it to the nearest step. */
   font-size: 1.25rem;
   z-index: 10;
 }
 
+/* --outline → --on-surface-variant is the system's resting → hover pair. */
 #clear-input-btn:hover {
-  color: #6b7280; /* gray-500 */
+  color: var(--on-surface-variant);
 }
 
 /* Smooth placeholder transition */

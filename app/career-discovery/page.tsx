@@ -1,8 +1,18 @@
 "use client";
 
-import Link from "next/link";
-import { useState, useEffect } from "react";
-import { SchoolHeader } from "@/app/components/SchoolHeader";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { StepShell, OptionCard, ContinueButton } from "@/app/components/intake/StepShell";
+import { loadIntake, saveIntake } from "@/app/lib/intakeStorage";
+
+// The "not sure yet" quiz, on the same visual language as the intake it feeds
+// into. This used to be its own world — SchoolHeader, gray-950/school-600
+// Tailwind classes DESIGN.md never defined, FontAwesome <i> icons the app
+// never actually loads (see HANDOFF rule 8: five runtime dependencies, and
+// FontAwesome isn't one), and a results screen that linked into /pathway,
+// the classic 1.0 page. None of the quiz LOGIC changes here — same eight
+// questions, same /api/career-assessment call — only what it looks like and
+// where a result sends you.
 
 interface Career {
   title: string;
@@ -22,7 +32,7 @@ const QUESTIONS = [
   {
     id: 1,
     question: "What interests you most?",
-    type: "multiple",
+    type: "multiple" as const,
     options: [
       "Technology & Software",
       "Healthcare & Medicine",
@@ -39,7 +49,7 @@ const QUESTIONS = [
   {
     id: 2,
     question: "What work environment do you prefer?",
-    type: "multiple",
+    type: "multiple" as const,
     options: [
       "Office setting",
       "Remote work",
@@ -54,7 +64,7 @@ const QUESTIONS = [
   {
     id: 3,
     question: "What salary range are you aiming for?",
-    type: "single",
+    type: "single" as const,
     options: [
       "$30,000 - $50,000",
       "$50,000 - $75,000",
@@ -67,7 +77,7 @@ const QUESTIONS = [
   {
     id: 4,
     question: "What education level are you willing to pursue?",
-    type: "multiple",
+    type: "multiple" as const,
     options: [
       "High school diploma or equivalent",
       "Associate's degree",
@@ -80,7 +90,7 @@ const QUESTIONS = [
   {
     id: 5,
     question: "How important is work-life balance to you?",
-    type: "single",
+    type: "single" as const,
     options: [
       "Very important - I want regular hours",
       "Moderately important - Some flexibility is fine",
@@ -90,7 +100,7 @@ const QUESTIONS = [
   {
     id: 6,
     question: "What type of work do you enjoy?",
-    type: "multiple",
+    type: "multiple" as const,
     options: [
       "Problem-solving & analysis",
       "Creative & design work",
@@ -105,17 +115,13 @@ const QUESTIONS = [
   {
     id: 7,
     question: "How do you prefer to work?",
-    type: "single",
-    options: [
-      "Independently",
-      "In a team",
-      "Both equally",
-    ],
+    type: "single" as const,
+    options: ["Independently", "In a team", "Both equally"],
   },
   {
     id: 8,
     question: "What motivates you most in a career?",
-    type: "multiple",
+    type: "multiple" as const,
     options: [
       "High salary & financial security",
       "Making a positive impact",
@@ -129,373 +135,211 @@ const QUESTIONS = [
 ];
 
 export default function CareerDiscoveryPage() {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswer[]>([]);
   const [selectedAnswers, setSelectedAnswers] = useState<string[]>([]);
   const [careers, setCareers] = useState<Career[]>([]);
   const [loading, setLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
-  const [fadeIn, setFadeIn] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleAnswerSelect = (option: string) => {
-    const currentQuestion = QUESTIONS[currentStep];
-    
+  const currentQuestion = QUESTIONS[currentStep];
+
+  function handleAnswerSelect(option: string) {
     if (currentQuestion.type === "single") {
       setSelectedAnswers([option]);
+    } else if (selectedAnswers.includes(option)) {
+      setSelectedAnswers(selectedAnswers.filter((a) => a !== option));
     } else {
-      // Multiple selection
-      if (selectedAnswers.includes(option)) {
-        setSelectedAnswers(selectedAnswers.filter((a) => a !== option));
-      } else {
-        setSelectedAnswers([...selectedAnswers, option]);
-      }
+      setSelectedAnswers([...selectedAnswers, option]);
     }
-  };
+  }
 
-  const handleNext = () => {
+  function handleNext() {
     if (selectedAnswers.length === 0) return;
 
-    const currentQuestion = QUESTIONS[currentStep];
     const newAnswer: QuizAnswer = {
       question: currentQuestion.question,
       answer: currentQuestion.type === "single" ? selectedAnswers[0] : selectedAnswers,
     };
-
     const newAnswers = [...answers, newAnswer];
     setAnswers(newAnswers);
 
     if (currentStep < QUESTIONS.length - 1) {
-      // Fade out current question
-      setFadeIn(false);
-      setTimeout(() => {
-        setCurrentStep(currentStep + 1);
-        setSelectedAnswers([]);
-        // Fade in next question
-        setTimeout(() => setFadeIn(true), 50);
-      }, 300);
+      setCurrentStep(currentStep + 1);
+      setSelectedAnswers([]);
     } else {
-      // Last question - submit quiz
-      handleSubmit(newAnswers);
+      void handleSubmit(newAnswers);
     }
-  };
+  }
 
-  const handleBack = () => {
-    if (currentStep > 0) {
-      // Fade out current question
-      setFadeIn(false);
-      setTimeout(() => {
-        setCurrentStep(currentStep - 1);
-        // Restore previous answer
-        const prevAnswer = answers[currentStep - 1];
-        if (prevAnswer) {
-          setSelectedAnswers(
-            Array.isArray(prevAnswer.answer)
-              ? prevAnswer.answer
-              : [prevAnswer.answer]
-          );
-        } else {
-          setSelectedAnswers([]);
-        }
-        // Remove the last answer from answers array
-        setAnswers(answers.slice(0, -1));
-        // Fade in previous question
-        setTimeout(() => setFadeIn(true), 50);
-      }, 300);
-    }
-  };
+  function handleBack() {
+    if (currentStep === 0) return;
+    const prevAnswer = answers[currentStep - 1];
+    setSelectedAnswers(
+      prevAnswer ? (Array.isArray(prevAnswer.answer) ? prevAnswer.answer : [prevAnswer.answer]) : []
+    );
+    setAnswers(answers.slice(0, -1));
+    setCurrentStep(currentStep - 1);
+  }
 
-  const handleSubmit = async (finalAnswers: QuizAnswer[]) => {
+  async function handleSubmit(finalAnswers: QuizAnswer[]) {
     setLoading(true);
+    setError(null);
     try {
       const response = await fetch("/api/career-assessment", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ answers: finalAnswers }),
       });
-
-      if (!response.ok) {
-        throw new Error("Failed to get career recommendations");
-      }
-
+      if (!response.ok) throw new Error("Couldn't get career recommendations.");
       const data = await response.json();
       setCareers(data.careers || []);
       setShowResults(true);
-    } catch (error) {
-      console.error("Error submitting quiz:", error);
-      alert("Failed to get career recommendations. Please try again.");
+    } catch {
+      setError("Something went wrong getting your recommendations. Try again.");
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const handleRestart = () => {
+  function handleRestart() {
     setCurrentStep(0);
     setAnswers([]);
     setSelectedAnswers([]);
     setCareers([]);
     setShowResults(false);
-    setLoading(false);
-  };
+    setError(null);
+  }
 
-  const progress = ((currentStep + 1) / QUESTIONS.length) * 100;
-
-  // Fade in on mount and step changes
-  useEffect(() => {
-    setFadeIn(true);
-  }, [currentStep]);
-
-  if (showResults) {
-    return (
-      <div className="min-h-screen bg-gray-50">
-        {/* Header Bar - Centered Logo */}
-        <SchoolHeader />
-
-        {/* Results */}
-        <section className="px-6 md:px-8 pt-12 md:pt-16 pb-24 md:pb-32">
-          <div className="max-w-6xl mx-auto">
-            <div className="text-center mb-12">
-              <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-                Your Career Matches
-              </h1>
-              <p className="text-lg text-gray-700 mb-8">
-                Based on your answers, here are careers that align with your interests and preferences.
-              </p>
-              <button
-                onClick={handleRestart}
-                className="text-school-600 hover:text-school-700 font-medium"
-              >
-                Take the quiz again
-              </button>
-            </div>
-
-            {careers.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {careers.map((career, index) => (
-                  <div
-                    key={index}
-                    className="bg-white border border-gray-200 rounded-lg p-6 hover:border-school-500 hover:shadow-lg transition-all"
-                  >
-                    <h3 className="text-xl font-semibold text-gray-900 mb-3">
-                      {career.title}
-                    </h3>
-                    {career.description && (
-                      <p className="text-sm text-gray-600 mb-4">
-                        {career.description}
-                      </p>
-                    )}
-                    {career.matchReason && (
-                      <div className="mb-4 p-3 bg-school-50 rounded-md">
-                        <p className="text-xs font-medium text-school-900 mb-1">
-                          Why this matches you:
-                        </p>
-                        <p className="text-xs text-school-800">
-                          {career.matchReason}
-                        </p>
-                      </div>
-                    )}
-                    <div className="flex flex-col gap-2 pt-4 border-t border-gray-100">
-                      {career.salary && (
-                        <div className="flex items-center gap-2">
-                          <i className="fas fa-dollar-sign text-green-600 text-xs"></i>
-                          <span className="text-sm font-medium text-gray-700">
-                            {career.salary}
-                          </span>
-                        </div>
-                      )}
-                      {career.jobOutlook && (
-                        <div className="flex items-center gap-2">
-                          <i className="fas fa-chart-line text-school-600 text-xs"></i>
-                          <span className="text-sm text-gray-600">
-                            {career.jobOutlook}
-                          </span>
-                        </div>
-                      )}
-                      {career.competitiveness && (
-                        <div className="flex items-center gap-2">
-                          <i className="fas fa-trophy text-purple-600 text-xs"></i>
-                          <span className="text-sm text-gray-600">
-                            {career.competitiveness}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                    <div className="mt-4">
-                      <Link
-                        href={`/pathway?career=${encodeURIComponent(career.title)}`}
-                        className="inline-block w-full text-center px-4 py-2 bg-school-600 text-white rounded-md hover:bg-school-700 transition-colors text-sm font-medium"
-                      >
-                        View Career Pathway
-                      </Link>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-gray-600 mb-4">
-                  No career matches found. Please try again.
-                </p>
-                <button
-                  onClick={handleRestart}
-                  className="px-6 py-2 bg-school-600 text-white rounded-md hover:bg-school-700 transition-colors"
-                >
-                  Restart Quiz
-                </button>
-              </div>
-            )}
-          </div>
-        </section>
-      </div>
-    );
+  // Same seed-then-route CareerSearch uses on the landing page — the intake
+  // reads the stored career on mount and skips its own career question, so a
+  // quiz result lands straight on the job summary rather than asking again.
+  function planPathway(title: string) {
+    saveIntake({ ...loadIntake(), career: { raw: title, resolved: title } });
+    router.push("/start");
   }
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        {/* Header Bar - Centered Logo */}
-        <SchoolHeader />
-
-        {/* Loading State */}
-        <section className="px-6 md:px-8 pt-24 md:pt-32 pb-24 md:pb-32">
-          <div className="max-w-4xl mx-auto text-center">
-            <div className="flex items-center justify-center space-x-3 mb-4">
-              <svg
-                className="w-8 h-8 animate-spin"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  <linearGradient
-                    id="gemini-gradient"
-                    x1="0%"
-                    y1="0%"
-                    x2="100%"
-                    y2="0%"
-                  >
-                    <stop offset="0%" stopColor="#10b981" />
-                    <stop offset="100%" stopColor="#06b6d4" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-                  fill="url(#gemini-gradient)"
-                />
-              </svg>
-              <span className="text-green-600 font-medium text-xl">
-                Analyzing your answers...
-              </span>
-            </div>
-            <p className="text-gray-600">
-              We're finding the perfect careers for you based on your responses.
-            </p>
-          </div>
-        </section>
-      </div>
+      <StepShell stepNumber={1} question="">
+        <div className="flex flex-col items-center py-16 text-center">
+          <span className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+          <p className="mt-4 text-lg font-medium text-primary">Analyzing your answers…</p>
+          <p className="mt-1 text-on-surface-variant">
+            Finding careers that fit what you told us.
+          </p>
+        </div>
+      </StepShell>
     );
   }
 
-  const currentQuestion = QUESTIONS[currentStep];
+  if (showResults) {
+    return (
+      <StepShell stepNumber={1} question="">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-primary md:text-4xl">Your Career Matches</h1>
+          <p className="mt-3 text-on-surface-variant">
+            Based on your answers, here are careers that align with what you're looking for.
+          </p>
+          <button
+            type="button"
+            onClick={handleRestart}
+            className="mt-3 text-sm font-medium text-secondary hover:text-secondary/80"
+          >
+            Take the quiz again
+          </button>
+        </div>
+
+        {careers.length > 0 ? (
+          <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {careers.map((career) => (
+              /* Grid items already stretch to equal height; the buttons used
+                 to land at different heights only because nothing claimed the
+                 leftover space, so a card with a short title and a two-line
+                 match reason simply ran out of content sooner. The title
+                 reserves two lines, the description absorbs the slack, and
+                 the footer is pinned with mt-auto — every button lands on one
+                 line across the row no matter how much text a card has. */
+              <div
+                key={career.title}
+                className="flex flex-col rounded-xl bg-surface-lowest p-6 shadow-card transition-all duration-300 hover:-translate-y-1 hover:shadow-lift"
+              >
+                <h2 className="min-h-[3.5rem] text-lg font-semibold leading-snug text-on-surface">
+                  {career.title}
+                </h2>
+                {career.description && (
+                  <p className="mt-2 flex-1 text-sm text-on-surface-variant">{career.description}</p>
+                )}
+                {career.matchReason && (
+                  <div className="mt-3 rounded-lg bg-surface-container p-3">
+                    <p className="text-xs font-semibold text-primary">Why this matches you</p>
+                    <p className="mt-0.5 text-xs text-on-surface-variant">{career.matchReason}</p>
+                  </div>
+                )}
+                <div className="mt-auto pt-4">
+                  <div className="space-y-1.5 border-t border-outline-variant pt-4 text-sm text-on-surface-variant">
+                    {career.salary && <p>{career.salary}</p>}
+                    {career.jobOutlook && <p>{career.jobOutlook}</p>}
+                    {career.competitiveness && <p>{career.competitiveness}</p>}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => planPathway(career.title)}
+                    className="mt-5 w-full rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary/90"
+                  >
+                    Plan this pathway
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="mt-12 text-center">
+            <p className="text-on-surface-variant">No career matches found — try again.</p>
+            <button
+              type="button"
+              onClick={handleRestart}
+              className="mt-4 rounded-full bg-primary px-6 py-2.5 text-sm font-semibold text-on-primary hover:bg-primary/90"
+            >
+              Restart quiz
+            </button>
+          </div>
+        )}
+      </StepShell>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header Bar - Centered Logo */}
-      <SchoolHeader />
-
-      {/* Main Content */}
-      <section className="px-6 md:px-8 pt-12 md:pt-16 pb-24 md:pb-32">
-        <div className="max-w-3xl mx-auto">
-          {/* Progress Bar */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-medium text-gray-700">
-                Question {currentStep + 1} of {QUESTIONS.length}
-              </span>
-              <span className="text-sm text-gray-500">
-                {Math.round(progress)}% complete
-              </span>
-            </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className="bg-school-600 h-2 rounded-full transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              ></div>
-            </div>
-          </div>
-
-          {/* Question Card */}
-          <div
-            className={`bg-white rounded-lg border border-gray-200 p-8 md:p-12 shadow-sm mb-6 transition-opacity duration-300 ${
-              fadeIn ? "opacity-100" : "opacity-0"
-            }`}
-          >
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">
-              {currentQuestion.question}
-            </h2>
-
-            <div className="space-y-3">
-              {currentQuestion.options.map((option, index) => {
-                const isSelected = selectedAnswers.includes(option);
-                return (
-                  <button
-                    key={index}
-                    onClick={() => handleAnswerSelect(option)}
-                    className={`w-full text-left p-4 rounded-lg border-2 transition-all ${
-                      isSelected
-                        ? "border-school-500 bg-school-50 text-school-900"
-                        : "border-gray-200 bg-white text-gray-700 hover:border-gray-300 hover:bg-gray-50"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{option}</span>
-                      {isSelected && (
-                        <i className="fas fa-check-circle text-school-600"></i>
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {currentQuestion.type === "multiple" && (
-              <p className="mt-4 text-sm text-gray-500">
-                Select all that apply
-              </p>
-            )}
-          </div>
-
-          {/* Navigation Buttons */}
-          <div className="flex justify-between items-center">
-            <button
-              onClick={handleBack}
-              disabled={currentStep === 0}
-              className={`px-6 py-3 rounded-md font-medium transition-colors ${
-                currentStep === 0
-                  ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-              }`}
-            >
-              <i className="fas fa-arrow-left mr-2"></i>
-              Back
-            </button>
-
-            <button
-              onClick={handleNext}
-              disabled={selectedAnswers.length === 0}
-              className={`px-8 py-3 rounded-md font-medium transition-colors ${
-                selectedAnswers.length === 0
-                  ? "bg-school-200 text-white cursor-not-allowed"
-                  : "bg-school-600 text-white hover:bg-school-700"
-              }`}
-            >
-              {currentStep === QUESTIONS.length - 1 ? "See Results" : "Next"}
-              <i className="fas fa-arrow-right ml-2"></i>
-            </button>
-          </div>
-        </div>
-      </section>
-    </div>
+    <StepShell
+      stepNumber={currentStep + 1}
+      question={currentQuestion.question}
+      help={currentQuestion.type === "multiple" ? "Select all that apply." : undefined}
+      onBack={currentStep > 0 ? handleBack : undefined}
+      footer={
+        <ContinueButton
+          onClick={handleNext}
+          disabled={selectedAnswers.length === 0}
+          label={currentStep === QUESTIONS.length - 1 ? "See results" : "Continue"}
+        />
+      }
+    >
+      {error && (
+        <p className="mb-4 rounded-lg border border-error/30 bg-error-container/20 px-4 py-3 text-sm text-error">
+          {error}
+        </p>
+      )}
+      <div className="space-y-3">
+        {currentQuestion.options.map((option) => (
+          <OptionCard
+            key={option}
+            label={option}
+            selected={selectedAnswers.includes(option)}
+            onClick={() => handleAnswerSelect(option)}
+          />
+        ))}
+      </div>
+    </StepShell>
   );
 }

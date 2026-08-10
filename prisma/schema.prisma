@@ -1,0 +1,215 @@
+// The Account Creation data model.
+//
+// This is the first schema this project has ever needed — everything before
+// it was a committed JSON seed file, an in-memory cache, or sessionStorage
+// (see HANDOFF.md and app/lib/durableCache.ts). Accounts are the first
+// feature that genuinely requires uniqueness (email) and relations (a user
+// has many OAuth accounts), which a KV blob store can't enforce on its own.
+//
+// User/Account/Session/VerificationToken follow Auth.js's own required shape
+// verbatim (https://authjs.dev/getting-started/adapters/prisma) rather than a
+// project-specific reinterpretation — the adapter expects these exact models
+// and field names, and diverging from them is how "almost works" auth bugs
+// get introduced.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  createdAt     DateTime  @default(now())
+
+  /// Null for an OAuth-only user who never set a password.
+  passwordHash String?
+
+  /// PRD §1: "account type selection (Student, Career Changer, Professional)".
+  /// A plain string, not an enum — matches the same "don't over-model a small
+  /// fixed set" call already made for RouteArchetype in app/lib/routeArchetype.ts.
+  accountType String?
+
+  /// PRD §2 onboarding: interests/goals are free-form tags, not a fixed
+  /// taxonomy, so they're stored as string arrays rather than a join table.
+  interests String[] @default([])
+  goals     String[] @default([])
+
+  /// PRD §2: "Private, Mentors Only, Public". Defaults to the least exposure.
+  privacyVisibility String @default("private")
+
+  /// Where the account holder lives, so a signed-in student is asked once
+  /// rather than on every visit. Stored as the two fields the intake's
+  /// location step actually needs in order to skip itself — a postal code
+  /// resolves to city, region AND coordinates in one lookup (see
+  /// app/lib/postalCode.ts), so storing those derived values here as well
+  /// would only be a cache that can go stale against the lookup service.
+  ///
+  /// Both nullable and both genuinely optional: roughly sixty countries have
+  /// no postal system at all, and a signed-out visitor never reaches this row.
+  /// The intake asks for this itself whenever the account hasn't got it, which
+  /// is what keeps career research working with no account at all.
+  postalCode  String?
+  countryCode String?
+
+  /// The visitor's in-progress sessionStorage intake (app/lib/intake.ts's
+  /// IntakeAnswers), adopted into the account at signup so nothing already
+  /// answered is thrown away. Stored as opaque JSON — this is a snapshot of a
+  /// client-side type that already owns its own shape and versioning; the
+  /// database doesn't need to understand its internals, only to hold it.
+  savedIntake Json?
+
+  accounts            Account[]
+  sessions            Session[]
+  savedPathways       SavedPathway[]
+  passwordResetTokens PasswordResetToken[]
+}
+
+/// One row per linked OAuth provider (Google) or per credentials login —
+/// Auth.js's standard shape.
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+/// A pathway the student chose to keep, past the tab-scoped sessionStorage
+/// intake and the free-standing /plan screen. This is what makes the nav's
+/// "Pathways" link (repointed from /start, which is the intake wizard, not a
+/// saved-plan collection) mean something real.
+model SavedPathway {
+  id     String @id @default(cuid())
+  userId String
+
+  /// The canonical career title, matching careerCanonical.ts's output —
+  /// same value the generator itself keyed the pathway on.
+  career String
+
+  /// A floridaSchools.ts id ("mdc") for a catalog school, or an
+  /// "open:<slug>" id (see app/lib/schoolRef.ts) for an AI-discovered one.
+  /// Kept as a plain string rather than a foreign key: neither school kind
+  /// has a row in this database, so nothing to reference.
+  schoolId String
+
+  /// Denormalised on purpose. An AI-discovered school has no table row this
+  /// could join against, so the display name has to travel with the save —
+  /// same reasoning as SchoolRef.name being required rather than resolved.
+  schoolName String
+
+  /// The generated PathwayData exactly as /api/generate-pathway returned it.
+  /// Opaque JSON for the same reason User.savedIntake is: this is a snapshot
+  /// of a client-side type (app/lib/types.ts) that already owns its shape
+  /// and versioning, so the database only needs to hold it, not understand
+  /// it. Two committed route tests deep-equal PathwayData against fixtures
+  /// and 411 seed entries hold that exact shape (HANDOFF §14) — this column
+  /// must stay a byte-for-byte copy of what generation produced.
+  data Json
+
+  /// Student edits (reordered/added/removed steps, annotations), kept
+  /// separate from `data` rather than merged into it. Two things this makes
+  /// possible that merging would not: "reset to original" needs an original
+  /// to reset to, and an edit must never be mistaken for model output when
+  /// something downstream reads this row.
+  edits Json?
+
+  notes    String?
+  archived Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, archived])
+}
+
+/// One outstanding "I forgot my password" request. Without this table a
+/// forgotten password is a permanently dead account: the only credential is
+/// User.passwordHash, and bcrypt is one-way by design, so there is nothing to
+/// recover — only something to replace.
+///
+/// Deliberately NOT reusing Auth.js's VerificationToken, even though its
+/// shape (identifier/token/expires) looks close enough. That model belongs to
+/// the adapter, which creates and deletes rows in it on its own schedule for
+/// email sign-in links; sharing it would mean a password reset and an adapter
+/// flow silently consuming each other's rows. This is a different credential
+/// with different rules (single-use, invalidated in bulk after a reset), so it
+/// gets its own table.
+model PasswordResetToken {
+  id     String @id @default(cuid())
+  userId String
+
+  /// A SHA-256 hash of the token, never the token itself — the raw value
+  /// exists only in the email that carried it. A leaked database dump must not
+  /// be a set of working reset links, which is exactly what storing the raw
+  /// token would make it.
+  ///
+  /// SHA-256 rather than the bcrypt in app/lib/password.ts, and the reason is
+  /// the input, not laziness. bcrypt's cost factor buys resistance to guessing
+  /// a low-entropy human-chosen secret; this token is 32 CSPRNG bytes, which
+  /// is not guessable at any cost factor, so the stretching buys nothing.
+  /// What it would cost is real: bcrypt salts per row, so the hash of a
+  /// presented token can't be computed and looked up — verification would mean
+  /// scanning every outstanding row and running a deliberately slow compare
+  /// against each. A SHA-256 digest is a plain indexed equality lookup.
+  ///
+  /// Unique so a lookup is an index hit, and so a (vanishingly improbable)
+  /// collision surfaces as a write error rather than as two accounts sharing
+  /// one reset link.
+  tokenHash String @unique
+
+  /// Short by design (see RESET_TOKEN_TTL_MS in app/lib/passwordReset.ts). A
+  /// reset link sits in an inbox, which is exactly the place a stale one is
+  /// most likely to be found by someone who shouldn't have it.
+  expiresAt DateTime
+
+  /// Set the moment the token is spent. Single-use: a link that still works
+  /// after the password has been changed is a second, unattended key to the
+  /// account. Null means outstanding.
+  consumedAt DateTime?
+
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  /// Every query here is "this user's outstanding tokens" — issuing a new one
+  /// invalidates the rest, and a successful reset invalidates all of them.
+  @@index([userId])
+}

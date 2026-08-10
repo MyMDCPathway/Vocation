@@ -1,11 +1,37 @@
 # Vocation — Project Handoff
 
 Everything a new developer needs to work on this codebase safely. Written
-2026-07-25, last updated **2026-07-30** against commit `f662876` on `main`.
+2026-07-25, last updated **2026-08-10**, after merging `main`'s
+catalog-completion and transfer-agreement work into `Vocation-2.0`.
 
 Read the **Rules** section before writing code. Several of them exist because
 the obvious approach has already failed here in a way that wasn't visible until
 production.
+
+> **Three things in this file are now WRONG unless you read §15 first.**
+> This document was written when the app had no database and no accounts.
+> Both statements were true for months and are stated confidently in the
+> TL;DR and §5. They are no longer true:
+>
+> - **There IS a relational database** — Prisma 6.19.3 against Neon Postgres,
+>   for accounts only. §5's "no ORM, no migrations, no Prisma" still holds
+>   for *pathway caching*, which genuinely has no database.
+> - **There ARE user accounts** — Auth.js v5, email/password only (Google
+>   OAuth was removed — see the security-hardening pass this file's test
+>   count now reflects). §5's "no user accounts, no sessions, no PII stored
+>   anywhere" is out of date.
+> - **The test count is 1050+** — see §12 for the exact, current number.
+>
+> Everything else in §1–§13 still holds. §15 covers what changed.
+
+> **Design direction now comes from Google Stitch, not the impeccable skill.**
+> `DESIGN.md` and `.impeccable/design.json` are artifacts of the earlier
+> workflow. The palette and tokens they describe are still real and still live
+> in `app/globals.css`, but the sidecar is stale against `DESIGN.md` and
+> neither is the source of truth any more — the Stitch project ("Vocation
+> Design") is. If impeccable's hooks fire with findings about
+> `app/globals.css`, treat them as pre-existing noise from the retired
+> workflow rather than a signal about your change.
 
 > **All 61 Florida schools are done. The catalog-building project is complete.**
 > All **12 SUS public universities are done**, and all 21 private (SACSCOC)
@@ -803,9 +829,13 @@ Ave Maria, Bethune-Cookman, Eckerd, FMU, JU, Keiser, FSC, NSU, EWU). The
 catalog-building project (§13) is complete; what's left is maintenance as
 schools change their own offerings over time.
 
-**There is no traditional database.** Persistence is `data/seed-cache.json` (a
-committed JSON file, §5), an optional Redis/KV durable layer (§5.1), and a
-`vocation_school` cookie. Don't go looking for Prisma/Supabase/a schema.
+**Pathway data has no database; accounts do (§5, §15).** Everything the
+generator touches is `data/seed-cache.json` (a committed JSON file, §5), an
+optional Redis/KV durable layer (§5.1), and a `vocation_school` cookie — no
+schema, no migrations, don't go looking. Accounts are the one exception:
+Prisma 6.19.3 against Neon Postgres, holding `User` and Auth.js's session
+tables and nothing else. The intake and the whole plan flow still work with no
+account at all, and that's deliberate.
 
 **Selected school lives in a cookie, not localStorage, and this is load-bearing
 (§6).** The server renders the school-specific logo/colors/catalog from that
@@ -833,10 +863,11 @@ silently unreachable catalog.
 scheme is deliberately different from every other school's. That's a documented
 decision, not debt — don't unify it without reading why.
 
-**Known-dead code:** `app/page.tsx` still contains a full pathway-generation
-code path (`handleGeneratePathway`, `callAPI`, a hidden
-`#pathway-display` div) that nothing renders, and it does not send `school` to
-the API. Don't build on it; either delete it or wire it up properly (§8, §9).
+**~~Known-dead code in `app/page.tsx`~~ — RESOLVED.** This warned about a
+dead `handleGeneratePathway` / `callAPI` / `#pathway-display` block that also
+failed to send `school` to the API. None of it survives: the 2.0 landing page
+replaced that file wholesale. Kept as a struck-through line rather than
+deleted because §8 and §9 still reference it.
 
 **Before claiming something is fixed, verify it in an actual running browser.**
 Typecheck-clean and test-clean is not proof — the retired-Gemini-model bug and
@@ -844,9 +875,16 @@ the logo-flash bug both passed every automated check while still being broken.
 
 **Golden commands:**
 ```bash
-npm test          # 434 tests; 433 pass, 1 known pre-existing failure (§8)
+npm test          # 853 tests, all passing
 npm run build     # must compile; NEVER run this while `npm run dev` is up (§8)
 ```
+
+**`npm run build` runs `prisma generate` first, and must keep doing so.**
+Vercel restores `node_modules` from the previous deployment's cache, so
+`npm install` is a no-op and Prisma's postinstall never re-runs — the build
+then typechecks against a client generated on some earlier deploy. That
+shipped a red deployment once already (§15). It passes locally either way,
+because local `node_modules` has whatever you last generated by hand.
 
 ---
 
@@ -990,11 +1028,23 @@ School Logos/                 7.7MB of ORIGINAL source images. Committed (§9).
 
 ---
 
-## 5. "Database schema" — there is no relational database
+## 5. "Database schema" — pathway data has none, accounts do
 
-This is worth stating plainly because it's the most likely thing for a new
-developer to assume wrongly. **There is no ORM, no migrations, no Prisma, no
-Supabase, no SQL.** Persistence is three cache layers plus a cookie.
+> **Updated 2026-08-07.** This section used to open "there is no ORM, no
+> migrations, no Prisma, no Supabase, no SQL." That was true when written and
+> is still true of everything below it — but accounts were added since, and
+> they do use Prisma against Neon Postgres. See §15 for that half. The rest of
+> this section describes pathway persistence, which is unchanged.
+
+For **pathway data** — the generated pathways, career suggestions, and exam
+info that make up the actual product — there is no relational database. No
+ORM, no migrations, no SQL. Persistence is three cache layers plus a cookie.
+
+For **accounts**, there is one: `prisma/schema.prisma` defines `User` plus
+Auth.js's `Account`/`Session`/`VerificationToken` tables, and nothing else
+lives there. The two systems don't touch. A signed-out visitor can complete
+the entire intake and get a full plan, which is a deliberate constraint rather
+than an accident of ordering — see §15.
 
 ### `data/seed-cache.json` — 411 keys, 891 KB, committed to git
 
@@ -1083,7 +1133,11 @@ is ample), then `vercel env pull .env.local` so `export-cache` can reach it.
 
 - **The selected school** — a cookie (`vocation_school`), plus a mirrored
   `localStorage` write for migration. The cookie is authoritative; see §6.
-- **Nothing else.** No user accounts, no sessions, no PII stored anywhere.
+- **The in-progress intake** — `sessionStorage` under `vocation_intake`, which
+  dies with the tab on purpose (see `intakeStorage.ts`).
+- **Accounts, since 2026-08-05.** This bullet used to read "no user accounts,
+  no sessions, no PII stored anywhere." Signing up now stores a name, an email,
+  a bcrypt password hash, and the intake snapshot. §15 has the shape.
 
 ---
 
@@ -1256,21 +1310,32 @@ a button. A test asserts this holds for all 61 schools.
 
 ### Real bugs
 
-**`app/page.tsx` doesn't send the school to the API.** Line ~87 posts
-`{ career }` without `school`, so it would silently generate an MDC pathway
-regardless of selection. Currently harmless *only because that code path is
-dead* (see §9). If you revive the home-page generator, fix this first.
+**~~`app/page.tsx` doesn't send the school to the API~~ — GONE.** The dead
+home-page generator this described no longer exists; the 2.0 landing page
+replaced that file. Verified 2026-08-07: zero matches for
+`handleGeneratePathway`, `callAPI`, or `pathway-display` anywhere in
+`app/page.tsx`. Nothing to fix.
 
 **`career-discovery` is not school-aware.** The quiz posts only `answers`. It
 returns careers, not programs, so it's defensible — but if you make quiz
 results school-specific, this needs the school too.
 
-**One known failing test: `fiuCoverage.test.ts`.** Asserts >30% of post-MDC
-degree steps resolve to an FIU program; actual is 166/651 = 25.5%. It is
-**pre-existing and unrelated to the multi-school work** — the ratio has not
-moved across any of the last several batches. Either the threshold was set
-optimistically or FIU's catalog drifted. Don't "fix" it by lowering the number
-without checking which; it's a coverage floor doing its job.
+**No known failing tests, as of 2026-08-07** — all 853 pass. This paragraph
+used to describe two failures, both since resolved.
+
+`app/lib/fiuCoverage.test.ts` still exists and still runs. What was removed
+(commit `aed4e90`) is the single *ratio* assertion — ">30% of post-MDC degree
+steps resolve to an FIU program", against ~25% actual. The file now asserts
+directional properties instead: that there's seeded data to measure against,
+that bachelor's steps route to undergraduate programs, and that master's and
+doctoral steps route to graduate ones. Those catch a real regression without
+encoding a threshold nobody had measured.
+
+The original reasoning still applies to any future coverage floor: don't "fix"
+a failing floor by lowering the number until you know whether the threshold
+was set optimistically or the catalog drifted. Historical note — the second
+failure
+output for details.
 
 **Rate limiting is per-instance, not global.** Counters live in process memory,
 so on serverless the effective limit scales with warm instance count. It stops
@@ -1299,12 +1364,11 @@ the test passes while testing nothing. Use `_setSeedForTests({})`.
 
 ## 9. Unfinished work
 
-**Dead code in `app/page.tsx`.** `handleGeneratePathway`,
-`callAPI`, the comparison logic, and a `<div id="pathway-display" className="hidden">`
-are all left over from when the home page generated pathways. `careerInput` is
-never bound to a rendered input. Deleting it is safe and would remove the
-school-param bug above along with it. Left in place because deleting live-looking
-code deserves an explicit decision.
+**~~Dead code in `app/page.tsx`~~ — RESOLVED.** The 2.0 landing page rewrote
+that file; `handleGeneratePathway`, `callAPI`, `careerInput` and the hidden
+`#pathway-display` div are all gone, and the school-param bug went with them.
+The decision this entry asked for was made by the rewrite rather than
+explicitly, which is why it stayed listed here long after it was true.
 
 **26 of 28 catalogued schools have no seeded pathways.** Only MDC and Broward.
 Every request for the other 26 is a live Gemini call. **Prefer
@@ -1380,9 +1444,11 @@ responses to the console on every call. Harmless, noisy.
 ```bash
 npm install
 cp .env.example .env.local     # add GEMINI_API_KEY from aistudio.google.com
+                               # accounts also need DATABASE_URL + AUTH_SECRET
+npx prisma generate            # only needed by hand; `npm run build` does it
 npm run dev                    # http://localhost:3000
-npm test                       # 434 tests (433 pass, 1 known failure — §8)
-npm run build                  # production build
+npm test                       # 853 tests, all passing
+npm run build                  # production build (runs prisma generate first)
 ```
 
 **Growing the seed file — prefer this** (free, no dev server needed):
@@ -1420,7 +1486,7 @@ these figures.
 
 ---
 
-## 12. Test suite — 649 tests, 21 files
+## 12. Test suite — 1160 tests, 61 files
 
 | Area | Files | Notable coverage |
 |---|---|---|
@@ -2443,3 +2509,696 @@ pathway generated in a real browser with its program links checked. That last
 step caught bugs the first three missed every single time — including a 29-URL
 break in Daytona State's catalog where the school's own index linked to a dead
 path. Keep it.
+
+---
+
+## 14. The 2.0 flow — branch `Vocation-2.0`
+
+Everything above §13 describes `main`. This section describes the branch that
+inverts the product's entry point. Nothing above is invalidated: the catalog
+work, the prompt templates, the cache layers, and the school cookie are all
+unchanged and still load-bearing. What changed is what the app asks first.
+
+**Branch name:** `Vocation-2.0`. Git rejects spaces in ref names, so "Vocation
+2.0" isn't a legal branch. Unrelated to CHANGELOG's "Version 2.0.0".
+
+### Why
+
+1.0's flow was: **select school → Start → look up career**. A student who
+doesn't yet know what they want to study cannot answer the first question, and
+the school they'd name is often the wrong one for the career they land on.
+Worse, it produces one pathway when the honest answer is "here are three ways
+to do this and here's what each costs".
+
+2.0 asks the career first and derives the schools:
+
+```
+career ─▶ /api/refine-career ─┬─ specific? ──▶ skip the follow-up
+                              └─ vague? ─────▶ ask which kind
+   ▼
+location ▶ education ▶ finances ▶ desired schools ▶ priority ▶ mobility
+   ▼
+/api/plan-tracks  (no Gemini — pure catalog + geography)
+   ▼
+up to 3 schools ──▶ /api/generate-pathway ×N in parallel ──▶ /plan
+```
+
+### The pieces
+
+| File | What it does |
+|---|---|
+| `app/page.tsx` | Now the first question. Server component wrapping the wizard. |
+| `app/components/IntakeWizard.tsx` | The whole wizard. One question per screen. |
+| `app/lib/intake.ts` | Answer types + option tables. No logic. |
+| `app/lib/intakeStorage.ts` | sessionStorage, **not** a cookie — see below. |
+| `app/lib/geography.ts` | 61 school coordinates, 17 regions, distance. |
+| `app/lib/planTracks.ts` | Intake → schools. **Server only** (reads all catalogs). |
+| `app/lib/planTypes.ts` | The wire types, importable by the browser. |
+| `app/lib/planCost.ts` | Per-school cost model with an honesty `basis` field. |
+| `app/plan/page.tsx` | Three routes, priced, side by side. |
+| `app/api/refine-career/route.ts` | Is this career specific enough to plan? |
+| `app/api/plan-tracks/route.ts` | Thin wrapper over `resolveTracks`. |
+
+### Decisions worth not re-litigating
+
+**The intake is sessionStorage, not a cookie.** §6's cookie argument is about
+things the *server* must know before it paints — the school decides the logo
+and palette in `layout.tsx`. Nothing about the intake is needed before paint,
+so a cookie would ship someone's household income on every request for no
+benefit. sessionStorage also clears with the tab, which is the right lifetime
+for that data.
+
+**Three tracks reuse `/api/generate-pathway` rather than a new endpoint.** That
+route already has canonicalization, three cache layers, and correctly-ordered
+rate limiting. A "generate three at once" route would reimplement all of it and
+would put three sequential Gemini calls inside one serverless timeout. Tracks
+are de-duped *before* generation, so overlapping picks cost one call.
+
+**`planTracks.ts` is server-only and `planTypes.ts` exists because of it.**
+`resolveTracks` reads every catalog to score program relevance. `import type`
+from a client component would be erased and technically fine, but one careless
+edit away from dragging megabytes into the bundle. The types live in a file
+with no imports so that mistake is impossible rather than merely unlikely.
+
+**Cost figures carry a `basis`.** `listed` means a figure curated for that
+specific school in `universities.ts` (all 12 publics, 8 privates). `sector`
+means a band for the school's sector. Rule 1 says never invent school data —
+"Florida private universities typically run $25k–$45k a year" is a true claim
+about a sector; printing `$31,400` next to a school nobody looked up is not.
+The private band is deliberately wide. Don't narrow it without real numbers.
+
+**The paywall renders nothing, rather than blurring something.** Every figure
+on `/plan` is computed in the browser from data the browser already has. A CSS
+blur over real numbers is readable in two clicks of devtools, so the locked
+rows are skeletons describing what you'd get. **A real paid tier requires
+moving that computation to an authenticated server route** — you cannot gate it
+in a client component, and building it that way now would be the wrong thing to
+migrate later.
+
+### The bug this flow already produced
+
+**Relevance scoring must never gate the local track, and needs a broad match
+before it gates anything.** `relevanceScore` matches career-title words against
+program-title words by shared prefix ("nurse" → "Nursing"). Applied as a filter
+before picking the *closest* school, it sent a Miami student asking about
+pediatricians to **Eastern Florida State College, 184 miles away** — because
+exactly two schools in Florida list a program containing "Pediatric" (EFSC's
+Cardiac Sonography and SPC's Respiratory Care), neither of which is a route to
+becoming a pediatrician, and that fluke evicted MDC from the pool.
+
+Two rules came out of it, both now covered by tests in `planTracks.test.ts`:
+
+1. **"Closest to home" uses the unfiltered candidate list.** Proximity is the
+   track's definition; narrowing by anything else can only push it further away.
+2. **A relevance match counts only when it's broad** (`MIN_RELEVANT_SCHOOLS`,
+   currently 5). Token overlap is reliable when it fires across dozens of
+   schools and is noise when it fires on two. Below the floor, fall back to the
+   full pool and let the catalog-grounded prompt pick the program — which is
+   its job, and what 1.0 did.
+
+This is the same lesson as §2's core insight, one level up: constrain the model
+where you have real data, and don't invent constraints where you don't.
+
+### Part 2 — open-world schools
+
+The app plans against any school on earth, not just the 53 with scraped
+catalogs. Read this before touching `urlVerify.ts` or the open prompt.
+
+**The scraped catalogs are still the strongest thing here.** Nothing about §2
+is retracted. What changed is that "we have no catalog" now produces a weaker
+plan with a stated confidence level, instead of a refusal.
+
+**Grounding for open schools is verification, not constraint.** There is no
+program list to constrain the model to, so instead it must state the URL of
+each program's page, and the server fetches it before the student sees
+anything. A program whose page doesn't exist is reported as unconfirmed. That
+is the entire reason this is defensible — if you remove or weaken the fetch,
+you are back to 1.0's failure with a wider blast radius.
+
+**Soft 404s are the hard part.** Universities serve "page not found" with HTTP
+200 constantly. `looksLikeSoftNotFound` checks the `<title>` first (highest
+signal), then known phrasings, and `redirectedToRoot` catches the other common
+shape — a dead path bounced to the homepage. Body patterns are *phrases*, never
+a bare "404", because a real course page can mention Room 404 or BIOL 404.
+
+**`isPubliclyRoutable` is a security control, not tidiness.** These URLs come
+from an LLM whose input includes free text a student typed, and we fetch them
+server-side. That is an SSRF sink. `http://169.254.169.254/latest/meta-data/`
+is an ordinary-looking string for a model to emit and hands out cloud
+credentials to anything that can reach it. Do not relax this to "fix" a link.
+
+**URL variants are rewrites, not guesses.** When the exact URL fails, the
+verifier retries the *same path* with the page extension dropped and the
+trailing slash toggled. This came from a real miss: the model returned
+Heriot-Watt's `…/marine-biology.htm` when the live page is that path without
+the `.htm`, and all four degree steps lost their links over four characters.
+Every variant is still fetched and checked, and a test asserts no variant can
+reach a different program's path. **Don't widen this into pattern-guessing** —
+the moment a variant could reach a program the model didn't name, it stops
+being verification.
+
+**Aid estimation is US-only and must stay gated.** `estimateAid` models Pell,
+FAFSA, and Bright Futures. A student in Edinburgh was briefly told they'd
+"likely qualify for a partial Pell Grant". It now takes a country code and
+declines outside the US rather than describing a programme someone cannot
+apply to.
+
+**The catalog path was left byte-identical on purpose.** Two route tests
+deep-equal the response against their fixture, and 411 committed seed entries
+hold that shape. Provenance is read from the school record (`source`), not
+stamped onto the payload. If you add a field to catalog responses, expect those
+tests to fail and think about the seed file before you "fix" them.
+
+### Part 3 — the career profile
+
+A read-only screen between the career question and the planning questions:
+photos, day-to-day work, pay, hiring outlook, adjacent careers, resources.
+`/api/career-profile` + `careerPhotos.ts` + `CareerProfileStep.tsx`.
+
+**Never ask the model for an image URL.** This is the one rule of that file. A
+wrong *program* URL 404s and the verifier catches it; a wrong *image* URL
+resolves to a real photograph of something else, and no automated check can
+tell. Photos come from the Wikipedia article's own media list, which is
+editorially curated and freely licensed. The model picks the article title —
+something it's reliably good at — and nothing more.
+
+**Attribution is a legal requirement, not decoration.** Most of these images
+are CC BY-SA, which requires crediting the author and naming the licence. The
+`figcaption` is doing that. Commons stores the author as an HTML fragment, so
+it is stripped to text before rendering.
+
+**The two Wikimedia APIs spell filenames differently** and this already caused
+a silent total failure: `/page/media-list/` returns
+`File:Florence_Nightingale_(H_Hering).jpg`, the Commons `imageinfo` query
+returns `File:Florence Nightingale (H Hering).jpg`, and matching them literally
+never succeeds — so every career rendered with no photos while both requests
+returned 200. Titles are normalised before the join. **The unit tests used
+spaces on both sides and passed**; only running it caught this. Add the
+underscore form to any new fixture.
+
+**The prompt is deliberately unflattering.** A career page that only lists
+upsides is worse than useless — the student discovers the truth after paying
+for two years of study. `Competitive` and `Shrinking` are real demand values
+that render amber and red, and the prompt requires the unglamorous parts. Don't
+"improve" this into marketing copy.
+
+**Resources are dropped, not fallen back.** A program step can degrade to the
+school's course index; a dead licensing-board link has nowhere to go. Rule 7
+applies — it goes, and the count of what went is shown.
+
+### Part 9 — the visual language
+
+`globals.css` tokens + `Confetti.tsx` + `StepShell.tsx`.
+
+**Two palettes, on purpose.** `--school-*` retints at runtime from the selected
+school and is load-bearing on the pathway pages (§6). `--sand` / `--ink` /
+`--pop-*` are constant and are what the school-agnostic intake is built from.
+Don't merge them, and don't reach for `school-*` on an intake screen.
+
+**The confetti must stay inert.** `aria-hidden`, `pointer-events: none` on the
+field *and* each shape, `z-0` beneath `z-10` content. A decorative blob that
+eats a click on the career input is the failure mode here.
+
+**`.arc-top` needs its `overflow: hidden`.** The pseudo-element is 160% wide so
+the curve stays shallow at any width; without clipping, that overhang is real
+layout width and the whole document scrolls sideways — 1645px inside a 1265px
+window when it was missing.
+
+**There is no nav bar and that is a decision.** One thing to do per screen. The
+centred wordmark in `StepShell` is the only branding; if you add a header,
+you're re-adding the exit doors.
+
+**`hero` on StepShell** centres the content, drops the progress bar, and turns
+the confetti up. It's for the career screen only — a progress bar on the first
+screen tells a first-time visitor they're filling in a form before they've
+typed anything.
+
+### Part 8 — the evolving path rail
+
+`pathOutline.ts` + `PathRail.tsx`. The route sketch that sits beside every
+question from the career step onward.
+
+**The outline rides along on `/api/refine-career`.** It is NOT its own call.
+That route already classifies the archetype, so the skeleton comes back with
+it for free. Do not add a separate endpoint for this.
+
+**Enrichment is pure and local, and must stay that way.** `enrichOutline` takes
+the outline plus whatever answers exist and annotates — no fetch, no
+regeneration. Regenerating per answer would be five Gemini calls per intake and
+a spinner between every question. The model gives the skeleton once; the app
+sharpens it from what it already holds. The real costed plan is still generated
+at the end, and the rail says so in as many words.
+
+**`clearedBy` is optional on purpose and compared by RANK.** A master's clears
+a bachelor's step (rank), but an apprenticeship is cleared by nothing (no
+`clearedBy`). Inferring "steps before your level are done" from position would
+tell a graduate their electrical apprenticeship was behind them.
+
+**Every input to `enrichOutline` is optional** because it renders while the
+intake is half-answered. At question two nothing is cleared and nothing is
+annotated — that is correct, not a bug to paper over.
+
+**The rail lives in `StepShell`,** so every question gets it without wiring and
+the heading can't drift between screens. A step passing `wide` (the map) gets
+the rail underneath instead of beside, since there's no room.
+
+**JSX comments cannot go inside `{cond && ( … )}`.** Putting one there broke
+the entire build with an error pointing at the first element in the file, about
+thirty lines above the real mistake. Only one expression is allowed in that
+position.
+
+### Part 7 — route archetypes
+
+`routeArchetype.ts`. Read this before adding anything to the intake.
+
+**Not every career runs through college, and the app used to assume it did.**
+Asked about welding it returned a list of universities. The route is now
+classified at the career step — inside the existing `/api/refine-career` call,
+so it costs nothing extra — and every later question follows it.
+
+**`usesCollegeCatalog` gates the Florida merge.** The catalog is 53 *colleges*.
+Merging it into an apprenticeship, enlistment, or talent route is the original
+bug. Only `degree` and `credential` get it, because those are the routes that
+genuinely run through a degree-granting institution (a nurse earns their
+credential at a college; a welder does not).
+
+**`degree` is the fallback on purpose.** Unrecognised value, missing field, old
+cache entry — all resolve to `degree` via `archetypeProfile`. That's the
+recoverable wrong answer: a student shown a degree path for a job that doesn't
+need one has an expensive option they can decline; a future surgeon told they
+can start tomorrow does not. Don't "improve" this to a cheaper default.
+
+**The cache namespace is `refine2`, not `refine`.** Entries cached before
+classification existed carry no route, and serving one silently falls back to
+`degree` — handing welders universities again. If you ever change the shape of
+that response, bump the namespace rather than defaulting the new field.
+
+**The archetype is part of the find-schools cache key.** Same career, same
+city, different route ⇒ genuinely different providers. Leaving it out serves
+one route's answer to another.
+
+**The open-school prompt follows the archetype too.** It used to say "the
+starting program — always first, type 'degree'", which meant a welder sent to a
+union hall still got a diploma ladder back. It now takes the archetype and is
+explicit that forcing a degree onto a non-degree route pads the student's life
+by years. The archetype is part of the pathway cache key for the same reason.
+
+**The prompt must keep saying "print 0 where the route pays you."** Registered
+apprenticeships and military service pay a wage; quoting tuition for them is
+worse than quoting nothing. Verified: Ironworkers Local 272 and Pipefitters
+Local 725 both come back at 0.
+
+### Part 6 — the schools map
+
+`SchoolMap.tsx` + `leaflet`. Read this before touching either.
+
+**Leaflet is the one justified dependency.** Rule 8 is about not adding a
+package for something small; an interactive tile map is not small, and doing
+it by hand is reimplementing Leaflet. No API key, no account, OSM tiles free
+with attribution. **The attribution control is required by OSM's tile policy —
+do not remove it.**
+
+**Three Leaflet-in-Next gotchas, all already handled. Don't undo them:**
+
+1. **Import it dynamically.** Leaflet reads `window` at module evaluation, so a
+   top-level `import` crashes the server render.
+2. **Import its CSS statically.** Next only bundles statically-imported CSS; a
+   dynamic `import()` of a `.css` file silently does nothing, and the symptom
+   is a heap of unpositioned tiles rather than an error.
+3. **Never use the default marker icons.** They're PNGs referenced by relative
+   paths that bundlers rewrite and break — the classic "popups work, markers
+   invisible" bug. Pins are `divIcon` (plain HTML) throughout.
+
+**The `ready` flag is load-bearing.** Because Leaflet loads asynchronously, the
+map does not exist on the render where the schools arrive. Without `ready` in
+the deps, the marker effect ran once, found no map, returned early, and never
+re-ran — its dependency (the school list) had already settled. The result was a
+fully working, tiled, attributed map with zero pins. If you add an effect that
+touches the map, put `ready` in its dependency array.
+
+**(0, 0) is not a coordinate.** `hasUsableCoordinates` rejects Null Island
+because it's the signature of a model filling a required field it didn't know.
+A school that fails validation is still listed, just unpinned — being
+unplaceable says nothing about whether it's a good school.
+
+**Distance is computed per request, never stored.** The find-schools cache key
+is country/region/city/career and does NOT include the student's coordinates,
+so two students in one city share an entry. A stored distance would give the
+second one the first one's mileage. Coordinates are the durable fact.
+
+**Catalog and AI sources both return the same private schools.** The prompt
+excludes Florida's *public* institutions because we hold them, but Barry and UM
+are private and came back from both — listed twice, pinned twice. `dedupeByName`
+normalises and lets the catalog copy win. If you add another catalog region,
+expect the same collision.
+
+### Part 5 — location is four screens, not one
+
+`LocationStep.tsx` renders one of `"country" | "region" | "city" | "postal"`
+at a time via local `subStep` state, not one big form. This is still a single
+entry in the WIZARD's outer step list — `stepNumber`/`stepCount` passed in
+from `IntakeWizard` don't change across the four, same as they don't change
+while `SchoolsStep` is internally loading or searching.
+
+**Back is internal until it isn't.** `back()` inside `LocationStep` steps
+`postal → city → region → country`, and only at `country` does it call the
+`onBack` prop up to the wizard. Don't wire the wizard's own back button
+directly to any of the sub-screens — it has to go through this component's
+`back()` or the chain breaks.
+
+**Re-entering resumes at the last question, not the first.** The initial
+`subStep` is computed once from `value`: empty/partial answers start at
+`"country"`; a fully-answered location (the student went forward, then came
+back) starts at the last applicable sub-step, via `subStepsFor(countryCode)`.
+Getting this wrong means every "← Back" from the profile screen forces the
+student through country → region → city again just to reach postal.
+
+**Click-to-advance vs. click-to-fill is deliberate, not an oversight.**
+Country and region are single-pick lists — clicking one advances immediately,
+matching every other single-select question in the wizard (education level,
+budget priority). City and postal are free-text-capable, so a chip only fills
+the field and a real Continue click is still required — the same reason the
+career screen's example chips don't auto-submit.
+
+### Part 4 — postal codes and local pay
+
+**Step order is load-bearing.** `career → specifics? → location → profile → …`.
+The profile must come after *specifics* (so it describes the job they settled
+on, not figures spanning a GP and a neurosurgeon) **and** after *location* (so
+pay, demand, and the entry route are for their own market). Moving it earlier
+reverts a UK electrician from "£36,000, NVQ Level 3 plus the AM2 exam" to
+"$61,590, apprenticeship or trade school". The profile cache key includes the
+country, so markets don't collide.
+
+**It is not a ZIP code.** ZIP is a USPS trademark for a US-only system. The
+field is labelled per country (`postalLabel`) and hidden entirely for the ~60
+countries with no postal system (`usesPostalCode`). A test asserts no country
+outside the US ever renders the word "ZIP". If you add a country, you don't
+need to do anything — the default label is neutral.
+
+**The postal code exists to produce coordinates, not to be stored.** Before it,
+distance was computable only inside Florida: the app's only coordinates were
+its own `SCHOOL_COORDINATES` table and the student was placed by matching their
+city *name* against school cities. A resolved code gives real lat/lng anywhere,
+which is what makes "closest to home" mean something outside Florida. If you
+ever make the field required or drop the resolution, remove the field instead —
+collecting an address fragment we don't use is worse than not asking.
+
+**Correct postcodes fail without the truncation fallback.** Verified live:
+`EH8 9YL` misses and `EH8` hits; `M5V 2T6` misses and `M5V` hits; `1012 AB`
+misses and `1012` hits. UK, Canadian and Dutch data is keyed on the first
+segment only, so the naive lookup failed for exactly the people who typed their
+address correctly. `postalVariants` retries coarser forms, and every candidate
+is a **prefix** of what they typed — the worst case is a broader area that
+still contains them, never a different place. Don't widen this into
+pattern-guessing; the prefix property is what makes it safe, and a test asserts
+it.
+
+**Zippopotam covers ~60 countries and that's fine.** A miss degrades to the
+typed city, which is what the app did before. The upgrade path, if it ever
+matters, is a GeoNames postal dump shipped as static data — no third party in
+the request path.
+
+### What's still open
+
+- **No payment or auth**, so "Vocation Plus" is a labelled coming-soon panel.
+  Wiring it means auth + moving the itemization server-side (see above).
+- **Florida only.** Picking "I'm not in Florida" drops the local track and says
+  why, but out-of-state tuition isn't modeled — the figures shown are in-state.
+- **`/plan` ships every catalog to the browser** (232 kB first load), because
+  `ProgramLink` imports `catalogFor`. `/pathway` has always done this, so it's
+  pre-existing rather than new, but resolving program links server-side would
+  fix both pages at once.
+- **Graduate-level tuition uses undergraduate rates.** A generated M.D. step
+  prices at the university sector band, and medical school costs far more than
+  that. It's labelled a sector estimate, but it's the biggest known
+  understatement in the model.
+- **`career-discovery` and `/pathway` still use the 1.0 flow.** Both work and
+  are linked; folding the quiz into the intake as an "I don't know yet" branch
+  off question one is the obvious next step.
+- **Open-school link quality is the number to watch.** The Heriot-Watt run
+  verifies 2 of 2 after the variant fix, but that's one school. If you log the
+  verified/fallback/unverified tally over real traffic, that ratio tells you
+  whether the open prompt is worth its cost — and a school with a consistently
+  bad ratio is a candidate for scraping properly.
+- **Costs display in USD even for non-US schools.** The GBP figure is captured
+  in `SchoolRef.tuition.currency` and shown on the schools step, but `/plan`
+  converts to USD so tracks in different countries can be compared. Showing
+  both would be better.
+- **Graduate tuition still uses undergraduate rates** for catalog schools (see
+  part 1). Unchanged, and still the biggest known understatement.
+- **An M.S. step can link to a PhD program.** `ProgramLevel` buckets every
+  graduate credential together, so strict level matching doesn't separate
+  them — MDC's M.S. in Nursing offers "Nursing (PhD)" at FIU as its example
+  link. Pre-existing 1.0 behavior, visible on the new page, worth a finer
+  level tier if anyone cares.
+
+---
+
+## 15. Accounts, the aid rework, and the demand map
+
+Added 2026-08-05 → 2026-08-07, on `Vocation-2.0`. This section is what makes
+the TL;DR's and §5's "no database, no accounts" statements out of date.
+
+### Accounts (Auth.js v5 + Prisma + Neon)
+
+`prisma/schema.prisma` holds `User` and Auth.js's `Account`/`Session`/
+`VerificationToken`. Nothing about pathways or caching went into Postgres.
+
+**The Edge Runtime split is load-bearing and not obvious.** Next.js middleware
+always runs on the Edge Runtime, which cannot load bcryptjs (`setImmediate`)
+or Prisma's Postgres driver. Importing the full auth config into middleware
+produced explicit build warnings and a 140 kB middleware bundle. So there are
+two configs:
+
+- `app/lib/auth.config.ts` — Edge-safe. Empty `providers`, `pages` only.
+  **This is the one `middleware.ts` imports**, and it builds its own
+  `NextAuth(authConfig).auth` from it.
+- `app/lib/auth.ts` — the real config. Prisma adapter, Credentials provider,
+  conditionally-added Google. Used by everything that isn't middleware.
+
+Merging these back into one file re-breaks the build. Bundle went 140 kB →
+78.1 kB on the split.
+
+Other decisions worth not re-litigating:
+
+- **bcryptjs, not bcrypt.** Native bindings fail to build on Vercel.
+- **Middleware matcher covers `/onboarding` only.** The intake, the career
+  summary, and `/plan` must stay reachable with no account. Widening this
+  matcher is how you'd accidentally gate the product behind signup.
+- **The Credentials provider returns `null` uniformly** on every failure, so a
+  wrong password and an unknown email are indistinguishable. Don't "improve"
+  the error messages — that's email enumeration.
+- **`/api/signup` returns a deliberately vague 409** for the same reason.
+- **No password reset**, and no "forgot password" link. Absent on purpose, not
+  an oversight — there's no mail sender wired up, and a dead link is worse.
+- **Profile menu items are disabled stubs.** My Roadmap, Saved Careers,
+  Account Settings, Help Center all render `disabled` with a "Soon" badge
+  because none of them have a page behind them. Sign Out is the only item that
+  does anything.
+
+### Financial aid — dependency is derived, never asked
+
+The finances step used to ask "how are you covering costs?" with three
+options. That answer fed **nothing**: `estimateAid` took `(band, countryCode)`
+and never received it. Its only job was choosing whether the next question
+said "your household" or "you".
+
+It now asks the actual FAFSA independence criteria as a multi-select and
+derives the answer. **Do not simplify this back to "are you a dependent or an
+independent student?"** — independence is a fixed test, not a description of
+who pays your rent. A 19-year-old with a job, an apartment, and no parental
+support is still a *dependent* student who must report parent income. Asked
+plainly, they pick "independent", the estimate quotes a full Pell Grant, and
+the number is wrong by thousands in the direction that does the most damage.
+
+`estimateAid(band, {countryCode, dependencyFlags, householdSize})` now scores
+income against the federal poverty line for the household size, with Pell
+thresholds moved by dependency status. Two constants at the top of the aid
+section carry the poverty guidelines — they're reissued every January and
+nothing else needs to change when they move.
+
+- **Household size is collected but not required.** `isComplete` deliberately
+  doesn't gate on it; `estimateAid` falls back to the older income-only
+  brackets when it's missing, so intakes saved before this change still
+  generate.
+- **Number of family members in college was removed from the formula** in
+  2024-25. Old copy cited it. Don't re-add it.
+- **`PELL_MAX_ANNUAL = 7395` wants checking against the current award year.**
+
+### Location — ZIP or state, and the states are hardcoded
+
+`US_SUBDIVISIONS` in `countries.ts` ships the 50 states + DC. `/api/regions`
+is a **Gemini call**, so the most common path through the intake was paying a
+model generation for a list that hasn't changed since 1959. Other countries
+still use the route.
+
+- **The spellings are BLS-canonical on purpose.** "District of Columbia", not
+  "Washington, D.C." — these become `StudentLocation.subdivision` and get
+  matched by `findState()` against the BLS area table. The generated list said
+  "Washington, D.C.", which matched nothing, so DC students silently lost
+  their state wage figures.
+- **The city screen is gone.** It's ZIP or state. A state-only answer gets
+  state wage figures rather than metro ones; the panels already label which
+  they're showing.
+- **`isComplete` accepts city *or* subdivision.** It required city, which no
+  longer always exists.
+
+### The state demand map
+
+`fetchStateDemand()` in `blsStats.ts` + `/api/career-demand` + the `DemandMap`
+panel on the career summary. Shades all 51 areas by **location quotient**, not
+headcount — ranked by raw jobs this is just a population map with California
+and Texas on top of every occupation.
+
+- **`app/lib/usTileMap.ts` is a tile grid, not real geography.** Equal squares
+  keep DC, RI and NJ visible; real state shapes make area the loudest visual
+  variable. Costs no TopoJSON and no mapping library.
+- **Gated on `BLS_API_KEY`, and returns `null` without even calling fetch.**
+  Unregistered, BLS allows 25 queries/day for *everything*; one uncached map
+  spends five, which would starve the wage figures the page depends on. A test
+  asserts no request is made.
+- **Suppressed states must never render as cold.** BLS withholds estimates for
+  small cells. Missing states draw as dashed outlines labelled "not
+  published" — "no data" and "no jobs here" are different facts, and a student
+  might be about to move somewhere based on that square.
+
+### Environment
+
+`BLS_API_KEY` and `AUTH_SECRET` are both set in `.env.local` as of 2026-08-07.
+`AUTH_SECRET` still needs setting **on Vercel** before production, and Vercel
+scopes env vars per environment — Preview needs its own copy if you want login
+working on preview URLs.
+
+### What's still open here
+
+- **The two new `User` columns were applied with `prisma db push`**, so there's
+  no migration file recording `postalCode`/`countryCode`.
+- **`DemandMap` hardcodes `rgba(15, 118, 110, …)`** instead of reading
+  `--secondary`.
+- **The Google OAuth app is unregistered**, so that button is hidden until its
+  env vars exist — `auth.ts` adds the provider conditionally, and (as of a
+  later fix) the button itself checks live via `useGoogleAvailable`/
+  `getProviders()` rather than rendering unconditionally, which it used to do
+  despite this note. LinkedIn was removed entirely rather than fixed.
+- **A stale `MyMDCPathway-job-summary` worktree** may still exist on disk;
+  `git worktree list` will say.
+- ~~`DemandMap` hardcodes `rgba(15, 118, 110, …)`~~ — fixed in §16.
+- ~~The two new `User` columns have no migration file~~ — fixed in §16.
+
+---
+
+## 16. The 2.1 surfaces — schools, saved pathways, insights, roadmaps
+
+Added 2026-08-07 on `Vocation-2.0`, in nine commits from `7405d13` to
+`c04fc29`. Everything in §1–§15 still holds; this section is what's new.
+
+The through-line: the top bar's four links all went somewhere wrong.
+"Schools" went to `/pathway` (the classic 1.0 search page), "Pathways" went to
+`/start` (the intake wizard — a door into asking the question again, not a
+collection), and "Insights" went to `/career-discovery`, duplicating the link
+the hero already carries. Each now goes where its label says.
+
+### New routes
+
+| Route | What it is |
+|---|---|
+| `/schools` | Every Florida school, on a map, sortable by real federal figures, searchable by program |
+| `/pathways` | The signed-in student's saved plans |
+| `/pathways/[id]` | Editor: reorder, remove, annotate, reset to original |
+| `/insights` | BLS labour-market lookup. No Gemini call anywhere on it |
+| `/roadmaps/[career]` | Fixed, committed example routes. SSG, prerendered |
+| `/account/settings` | Name, privacy visibility, location |
+| `/help` | FAQ. Every answer restates a fact already true elsewhere in this file |
+
+### New libs, and why they're server-only
+
+`app/lib/scorecard.ts` reads `data/scorecard.json`; `app/lib/schoolDirectory.ts`
+merges `floridaSchools.ts` (identity) + `geography.ts` (coordinates) +
+`scorecard.ts` (federal figures) into one list. **Neither is imported by a
+client component, and `/schools` talks to `/api/schools` rather than importing
+them.** That's deliberate: `/plan` ships 232 kB because `ProgramLink` imports
+`catalogFor`, and this doesn't repeat it. See the bundle note below for where
+it *was* repeated.
+
+### The Scorecard snapshot
+
+`data/scorecard.json` is 377 real Florida institutions from the US Dept. of
+Education College Scorecard API, committed for the same three reasons
+`seed-cache.json` is (§5). Regenerate with `npm run fetch:scorecard --
+--state=FL`; needs `SCORECARD_API_KEY` (free, instant, api.data.gov/signup).
+
+**It is Florida-only on purpose, and this is a deliberate narrowing of the
+original plan.** That plan called for a ~6,000-school national pull to back a
+national map. `schoolDirectory.ts` only ever matches against `FLORIDA_SCHOOLS`,
+so a national snapshot would commit ~16× more data than the app can read —
+the same bloat `School Logos/` is already regretted for (§9). The national map
+was never built; `/schools` is 61 Florida schools and its own copy says so.
+`--state` is a per-run flag, so widening this later is one command.
+
+**Two matching rules worth not loosening.** `findScorecardMatch` is exact
+after normalization and scoped to a state, and returns `undefined` when two
+schools in one state share a name rather than picking one. A wrong match puts
+one school's real earnings under another school's name, which is worse than
+showing nothing — the same call rule 7 makes for program links. And sorting
+never invents a value: a school with no figure for the chosen sort lands after
+every school that has one, and a distance sort with no origin is **refused**
+(400) rather than returning an order that looks ranked and isn't.
+
+### SavedPathway — and why edits live in their own column
+
+`prisma/schema.prisma` gains `SavedPathway`. `data` holds the generation
+verbatim; `edits` holds what the student changed. Merging them would break two
+things: "reset to original" needs an original, and something reading this row
+later must be able to tell a student's edit from model output. `edits` is
+cleared with `Prisma.JsonNull`, **not** a plain `null` — a plain null is a
+no-op to Prisma's query engine, so reset would silently do nothing while
+reporting success. A test asserts the sentinel.
+
+**Every `/api/pathways` query is scoped to `session.user.id` in the `where`
+clause**, not loaded by id and checked after, and a row owned by someone else
+returns **404, never 403** — a 403 would confirm the id exists.
+
+**The editor cannot add a step.** Reorder, remove, annotate, reset — yes. But
+a student typing a plausible program name is exactly the failure §2 exists to
+prevent, and removing or reordering only ever subtracts from what the
+generator already grounded. Don't "improve" this into a free-text field.
+
+**Saving works signed-out.** The click stashes to `sessionStorage`
+(`pendingSaveStorage.ts`) and `PendingSaveAdopter` in `Providers.tsx` posts it
+once a session appears — mounted at the root, not on `/plan`, because signup
+redirects to `/onboarding` and never returns to `/plan`. Same reasoning
+`intakeAdoption.ts` already applies to the intake.
+
+### Motion
+
+One keyframe pair (`reveal` / `reveal-visible`) added to the system
+`globals.css` already had, inside the `prefers-reduced-motion` guard that
+already existed. `useReveal.ts` is the IntersectionObserver half;
+`RevealSection.tsx` is the one client boundary so `app/page.tsx` stays a
+server component. `StepShell` keys its question block on the step number,
+which replays the entrance on every step change — that one line gives the
+whole intake *and* the career quiz a transition without touching either.
+
+### Known issues this section introduced
+
+- **`/roadmaps/[career]` is 237 kB first load.** It reuses `PathwayFlow` →
+  `ProgramLink` → `catalogFor`, so it inherits the catalog-in-browser problem
+  `/plan` (253 kB) and `/pathway` (238 kB) already have. Pre-existing pattern,
+  newly extended. The fix is the one §14 already names: resolve program links
+  server-side, which would fix all three at once.
+- **`data/example-pathways.json` has not been read by a human.** Governance
+  for `seed-cache.json` (§5.1) says review before an entry becomes the
+  permanent answer; these three went live without it. One known wrinkle: the
+  nurse pathway's first step reads "Associate in Science in Nursing," which is
+  a paraphrase — MDC's catalog says `Nursing - R.N. (Generic Full-Time)` and
+  variants. The other two match catalog text verbatim.
+- **No component or page tests.** All 853 cover libs and API routes. Every
+  route in the table above is verified only by browser walkthrough.
+- **Saved Careers is still a disabled stub** in the account menu. It needs its
+  own schema concept — a bookmarked career is not a saved pathway — so it was
+  left honest rather than wired to an empty page.
+- **`refine-career` was NOT moved to a cheaper model**, though an earlier plan
+  proposed it. That call also produces the outline and classifies
+  `routeArchetype`, which its own prompt calls the single worst thing to get
+  wrong. Needs a real eval before any model swap, not a guess.
