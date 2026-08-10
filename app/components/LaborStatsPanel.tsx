@@ -76,7 +76,9 @@ export function LaborStatsPanel({ stats }: { stats: LaborStats }) {
       <p className="mt-1 text-sm text-on-surface-variant">
         Survey figures for{" "}
         <span className="font-medium text-on-surface">{stats.occupation.title}</span> — annual
-        wages, not model estimates.
+        wages, not model estimates. They describe people already working in
+        this occupation and aren&apos;t a prediction or guarantee of what
+        you&apos;ll earn.
       </p>
 
       {/* The headline: what the middle of the field earns where they live. */}

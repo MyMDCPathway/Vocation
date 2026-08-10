@@ -252,6 +252,33 @@ export function SchoolsBrowser() {
         </p>
       )}
 
+      {/* What the earnings column actually measures.
+          The figure is Scorecard's `10_yrs_after_entry.median`, and three
+          things about it are easy to read wrong from a number alone: it is
+          measured from ENTRY rather than graduation, it includes students who
+          never finished, and it is institution-wide rather than per-program.
+          A student comparing schools next to a career plan will otherwise
+          reasonably take it as "what graduates of this program earn", which
+          is a claim this data does not support. Stated once here, next to the
+          column it qualifies, rather than repeated on every card. */}
+      {scorecardMeta && scorecardMeta.available && (
+        <p className="mt-4 rounded-lg border border-outline-variant bg-surface-container px-4 py-3 text-sm text-on-surface-variant">
+          <strong className="font-medium text-on-surface">
+            About the earnings figures.
+          </strong>{" "}
+          &quot;Median earnings&quot; is the median for all federally-aided
+          students measured{" "}
+          <strong className="font-medium text-on-surface">
+            ten years after they entered the school
+          </strong>{" "}
+          — it includes students who never graduated, and it covers the whole
+          institution rather than any one program. It describes past students,
+          not a prediction of what you will earn, and it is not a guarantee of
+          any outcome. Source: {scorecardMeta.source}
+          {scorecardMeta.fetchedAt && <> (data retrieved {scorecardMeta.fetchedAt})</>}.
+        </p>
+      )}
+
       {/* Filter rail */}
       <div className="mt-8 flex flex-wrap items-end gap-4">
         <label className="flex flex-col gap-1 text-sm">

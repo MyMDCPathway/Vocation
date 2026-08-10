@@ -84,8 +84,21 @@ export function SchoolCard({ school, programMatchCount }: Props) {
 
         <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
           <div>
+            {/* Labelled with the measure, not just "Median earnings".
+                The underlying field is Scorecard's
+                `latest.earnings.10_yrs_after_entry.median`, which is a
+                different population from the one a bare "median earnings"
+                next to a career plan implies: it counts every federally-aided
+                student who ENTERED the institution ten years earlier,
+                including those who never graduated, across all programs — not
+                graduates of the program being planned. Saying so in the label
+                is what keeps the figure honest; the footnote in
+                SchoolsBrowser carries the full caveat and the vintage. */}
             <p className="text-xs font-semibold uppercase tracking-wider text-outline">
               Median earnings
+              <span className="block normal-case tracking-normal text-outline">
+                10 yrs after entry, all students
+              </span>
             </p>
             <p className="mt-0.5 font-medium text-on-surface">
               {/* != null, not truthy — a real $0 or 0% is a reported figure,
