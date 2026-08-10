@@ -78,6 +78,7 @@ async function handlePOST(request: NextRequest) {
     email?: unknown;
     password?: unknown;
     intake?: unknown;
+    agreedToTerms?: unknown;
   };
 
   try {
@@ -86,7 +87,7 @@ async function handlePOST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const { name, email, password, intake } = body;
+  const { name, email, password, intake, agreedToTerms } = body;
 
   if (
     typeof name !== "string" ||
@@ -98,6 +99,29 @@ async function handlePOST(request: NextRequest) {
   ) {
     return NextResponse.json(
       { error: "Name, email, and an 8+ character password are required." },
+      { status: 400 }
+    );
+  }
+
+  // The age-and-terms gate, enforced here and not only in the form.
+  //
+  // /signup renders a single checkbox covering both ("I'm 13 or older, and I
+  // agree to the Terms and Privacy Policy") and won't submit without it, but a
+  // client-side check is a courtesy, not a control — this endpoint is public and
+  // takes JSON from anyone. The under-13 half is the part that has to be real:
+  // COPPA turns on whether an operator *knowingly* collects from a child, so the
+  // refusal needs to live where accounts are actually created.
+  //
+  // Deliberately not stored. A column that reads `true` on every row is not
+  // evidence of anything, and a birth date would mean collecting a new piece of
+  // personal data about a minor in order to protect minors — the wrong trade.
+  // Refusing the write is the protection.
+  if (agreedToTerms !== true) {
+    return NextResponse.json(
+      {
+        error:
+          "You must confirm you're 13 or older and agree to the Terms and Privacy Policy.",
+      },
       { status: 400 }
     );
   }

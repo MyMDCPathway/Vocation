@@ -48,7 +48,9 @@ export default function SignupPage() {
       return;
     }
     if (!agreedToTerms) {
-      setError("You'll need to agree to the Terms and Privacy Policy to continue.");
+      setError(
+        "You'll need to confirm you're 13 or older and agree to the Terms and Privacy Policy to continue."
+      );
       return;
     }
 
@@ -62,7 +64,7 @@ export default function SignupPage() {
     const response = await fetch("/api/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password, intake }),
+      body: JSON.stringify({ name, email, password, intake, agreedToTerms }),
     });
 
     if (!response.ok) {
@@ -156,7 +158,7 @@ export default function SignupPage() {
                 className="mt-0.5 h-4 w-4 shrink-0 rounded border-outline-variant"
               />
               <span>
-                I agree to the{" "}
+                I&apos;m 13 or older, and I agree to the{" "}
                 <Link href="/terms" target="_blank" className="font-medium text-secondary hover:text-secondary/80">
                   Terms
                 </Link>{" "}

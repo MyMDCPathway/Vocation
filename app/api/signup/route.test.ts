@@ -25,6 +25,10 @@ const VALID_BODY = {
   name: "Jane Doe",
   email: "jane@example.com",
   password: "correct horse battery staple",
+  // The age-and-terms attestation the form sends. Part of the valid body
+  // rather than opted into per-test, so any future test that forgets it fails
+  // loudly instead of quietly exercising a path real signups can't reach.
+  agreedToTerms: true,
 };
 
 beforeEach(() => {
@@ -44,6 +48,29 @@ describe("POST /api/signup", () => {
     expect(response.status).toBe(200);
     expect(db.user.create).toHaveBeenCalledOnce();
     expect(adoptIntake).toHaveBeenCalledWith("user-1", undefined);
+  });
+
+  it("refuses to create an account without the 13+/terms attestation", async () => {
+    const { agreedToTerms, ...withoutAttestation } = VALID_BODY;
+    const response = await POST(makeRequest(withoutAttestation));
+
+    expect(response.status).toBe(400);
+    // Before any database work: an under-13 signup must not reach a write.
+    expect(db.user.findUnique).not.toHaveBeenCalled();
+    expect(db.user.create).not.toHaveBeenCalled();
+  });
+
+  it("does not accept a truthy non-true value as the attestation", async () => {
+    // The check is `!== true`, not falsiness — "false", 1, or "yes" arriving
+    // from a hand-rolled client must not read as consent.
+    for (const value of ["true", 1, "yes", {}]) {
+      vi.mocked(db.user.create).mockReset();
+      const response = await POST(
+        makeRequest({ ...VALID_BODY, agreedToTerms: value })
+      );
+      expect(response.status).toBe(400);
+      expect(db.user.create).not.toHaveBeenCalled();
+    }
   });
 
   it("rejects a short password before touching the database", async () => {
