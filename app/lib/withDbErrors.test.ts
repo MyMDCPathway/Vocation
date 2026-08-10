@@ -1,6 +1,13 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { withDbErrors } from "@/app/lib/withDbErrors";
+
+// Mocked at the module level rather than with vi.spyOn: the SDK's exports are
+// a frozen ES module namespace, so spyOn fails with "Cannot redefine property".
+vi.mock("@sentry/nextjs", () => ({
+  captureException: vi.fn(),
+}));
 
 /** Shaped like a real Prisma failure: the class name is what's checked. */
 function prismaError(name: string, code?: string) {
@@ -14,6 +21,9 @@ describe("withDbErrors", () => {
   beforeEach(() => {
     // The wrapper logs deliberately; keep the test output readable.
     vi.spyOn(console, "error").mockImplementation(() => {});
+    // Module mocks persist across tests; clear call history so each assertion
+    // sees only its own invocation.
+    vi.mocked(Sentry.captureException).mockClear();
   });
 
   afterEach(() => {
@@ -90,6 +100,31 @@ describe("withDbErrors", () => {
     const body = JSON.stringify(await res.json());
     expect(body).not.toContain("connection refused");
     expect(body).not.toContain("P2021");
+  });
+
+  it("reports the error to Sentry, since catching it hides it otherwise", async () => {
+    // Sentry's automatic instrumentation only sees what escapes the handler.
+    // Without an explicit capture here, wrapping these routes would have made
+    // database failures LESS visible than before it existed.
+    const boom = prismaError("PrismaClientKnownRequestError", "P1001");
+
+    await withDbErrors(async () => {
+      throw boom;
+    })();
+
+    expect(Sentry.captureException).toHaveBeenCalledWith(boom);
+  });
+
+  it("does not report Next's own control-flow throws to Sentry", async () => {
+    // redirect() and notFound() are normal app behaviour. Reporting them would
+    // fill the dashboard with noise on every redirect.
+    await expect(
+      withDbErrors(async () => {
+        throw Object.assign(new Error("next internal"), { digest: "NEXT_NOT_FOUND" });
+      })()
+    ).rejects.toThrow();
+
+    expect(Sentry.captureException).not.toHaveBeenCalled();
   });
 
   it("uses the same `error` key the rest of the app returns", async () => {

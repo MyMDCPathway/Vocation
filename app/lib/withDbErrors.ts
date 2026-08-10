@@ -13,6 +13,7 @@
 // unreachable" is to say so honestly and let the caller retry.
 
 import { NextResponse } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 
 /**
  * Prisma's error classes are all named PrismaClient*, and its known request
@@ -71,6 +72,13 @@ export function withDbErrors<A extends unknown[], R extends Response>(
     } catch (error) {
       // Before anything else: hand Next's own throws straight back.
       if (isFrameworkSignal(error)) throw error;
+
+      // Catching an error hides it from Sentry's automatic instrumentation,
+      // which only sees what escapes the handler. Without this line, wrapping
+      // these routes would have made every database failure LESS visible than
+      // before — a clean 503 to the caller and silence in the dashboard. Both
+      // branches report; the difference below is only what the caller is told.
+      Sentry.captureException(error);
 
       if (isDatabaseError(error)) {
         console.error(
