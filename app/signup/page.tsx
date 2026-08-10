@@ -5,9 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { loadIntake } from "@/app/lib/intakeStorage";
-import { GoogleSignInButton } from "@/app/components/auth/GoogleSignInButton";
 import { PasswordField } from "@/app/components/auth/PasswordField";
-import { useGoogleAvailable } from "@/app/lib/useGoogleAvailable";
 import { passwordStrength } from "@/app/lib/passwordStrength";
 
 // PRD §1 originally called for a two-step sign-up — basic info, then account
@@ -33,7 +31,6 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
-  const googleAvailable = useGoogleAvailable();
 
   async function createAccount(event: React.FormEvent) {
     event.preventDefault();
@@ -181,20 +178,6 @@ export default function SignupPage() {
               {submitting ? "Creating account…" : "Create Account"}
             </button>
           </form>
-
-          {googleAvailable && (
-            <>
-              <div className="mt-6 flex items-center gap-3">
-                <span className="h-px flex-1 bg-outline-variant" />
-                <span className="text-xs font-semibold uppercase tracking-wider text-outline">or</span>
-                <span className="h-px flex-1 bg-outline-variant" />
-              </div>
-
-              <div className="mt-6 space-y-3">
-                <GoogleSignInButton label="Sign up with Google" />
-              </div>
-            </>
-          )}
 
           <p className="mt-6 text-center text-sm text-on-surface-variant">
             Already have an account?{" "}

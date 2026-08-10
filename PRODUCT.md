@@ -100,10 +100,9 @@ Supporting context the product reads or produces:
   country code so it is never shown to someone who cannot apply.
 - An interactive map of schools.
 - A "what fits me" career quiz (1.0 flow).
-- **Accounts.** Email/password signup and login, plus Google OAuth (the
-  button only renders once its app credentials are actually configured —
-  see `.env.example` and `app/components/auth/GoogleSignInButton.tsx`).
-  A visitor's in-progress
+- **Accounts.** Email/password signup and login — the only auth method, by
+  choice: an unverified Google OAuth app would cap sign-ups at 100 people
+  until Google reviewed it. A visitor's in-progress
   sessionStorage intake is carried into the account at signup rather than
   discarded (`app/lib/intakeAdoption.ts`). Onboarding collects interests,
   goals, and a privacy setting (Private / Mentors Only / Public). Settings
