@@ -1486,7 +1486,7 @@ these figures.
 
 ---
 
-## 12. Test suite — TBD tests, TBD files
+## 12. Test suite — 1160 tests, 61 files
 
 | Area | Files | Notable coverage |
 |---|---|---|

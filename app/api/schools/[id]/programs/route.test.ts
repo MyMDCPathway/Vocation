@@ -32,17 +32,14 @@ describe("GET /api/schools/[id]/programs", () => {
     expect(body.programs.every((p: any) => p.name.toLowerCase().includes("nursing"))).toBe(true);
   });
 
-  it("falls back to real resource links, never a fabricated catalog, for a school with no scraped programs", async () => {
-    const response = await GET(makeRequest("cookman"), { params: { id: "cookman" } });
-    const body = await response.json();
-
-    expect(body.hasCatalog).toBe(false);
-    expect(body.programs).toEqual([]);
-    expect(body.resources.length).toBeGreaterThan(0);
-    for (const resource of body.resources) {
-      expect(resource.url).toMatch(/^https?:\/\//);
-    }
-  });
+  // A curated Florida school with schoolInfo.ts resources but no scraped
+  // catalog no longer exists in real data — HANDOFF.md's "All 61 Florida
+  // schools are done" is why. fallbackResources()'s hasSchoolInfo() branch
+  // (app/api/schools/[id]/programs/route.ts) stays in place as legitimate
+  // defensive code for a school added to schoolInfo.ts before its catalog is
+  // scraped, but nothing live exercises it today; the synthesized-school
+  // test below covers the fallback path that IS still real (Rule 1: never a
+  // fabricated catalog, real resource links only).
 
   it("404s on an unknown school", async () => {
     const response = await GET(makeRequest("not-a-real-school"), { params: { id: "not-a-real-school" } });
@@ -115,8 +112,10 @@ describe("GET /api/schools/[id]/programs", () => {
   it("never attaches earnings for a school with no program list to attach them to", async () => {
     // No catalog → no programs → nothing for earningsForProgram to run
     // against. Must not throw trying to resolve a Scorecard match for a
-    // school with nothing to match.
-    const response = await GET(makeRequest("cookman"), { params: { id: "cookman" } });
+    // school with nothing to match. Harvard (sc-166027) is the same
+    // synthesized, real-data, genuinely-catalog-less example the test above
+    // uses — every curated Florida school has a catalog now.
+    const response = await GET(makeRequest("sc-166027"), { params: { id: "sc-166027" } });
     const body = await response.json();
     expect(body.programs).toEqual([]);
   });

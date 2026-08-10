@@ -110,9 +110,24 @@ export async function POST(request: NextRequest) {
   // stronger signal than one with a single loosely-matching name.
   results.sort((a, b) => b.totalMatches - a.totalMatches);
 
+  let capped = results.slice(0, MAX_SCHOOLS);
+
+  // MDC is the app's home institution, not just another catalog — see this
+  // file's header on why it's carried separately at all. Ranking purely by
+  // match count let it drop off the cap entirely once enough other schools'
+  // catalogs (each naming several credential-level variants of the same
+  // program) outranked MDC's own, more consolidated listing. A search for
+  // "nursing" that finds 40 other schools and not the one the app is built
+  // around is a worse answer than one that's one slot longer, so MDC is
+  // pinned into the capped list whenever it has any real match at all.
+  const mdcRank = results.findIndex((r) => r.schoolId === "mdc");
+  if (mdcRank >= MAX_SCHOOLS) {
+    capped = [...capped.slice(0, MAX_SCHOOLS - 1), results[mdcRank]];
+  }
+
   return NextResponse.json({
     query: rawQuery.trim(),
-    results: results.slice(0, MAX_SCHOOLS),
+    results: capped,
     schoolsSearched: scrapedCatalogIds().length + 1, // +1 for MDC
   });
 }

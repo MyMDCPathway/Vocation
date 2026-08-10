@@ -27,8 +27,12 @@ describe("GET /api/schools", () => {
     const response = await GET(makeRequest("?catalogOnly=1"));
     const body = await response.json();
     expect(body.schools.every((s: any) => s.hasCatalog)).toBe(true);
-    // A school known to have no catalog must be excluded.
-    expect(body.schools.some((s: any) => s.id === "nova")).toBe(false);
+    // All 61 curated Florida schools have a real catalog now (see
+    // HANDOFF.md's "catalog-building project is complete") — the only
+    // schools left with hasCatalog: false are synthesized/national ones,
+    // never in the curated set. Harvard (unitId 166027, id "sc-166027") is
+    // the same real, committed-data example programs/route.test.ts uses.
+    expect(body.schools.some((s: any) => s.id === "sc-166027")).toBe(false);
   });
 
   it("filters by kind", async () => {
