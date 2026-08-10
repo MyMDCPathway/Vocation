@@ -6,6 +6,51 @@ import type { IntakeAnswers } from "@/app/lib/intake";
 import { checkIpLimit, clientIp } from "@/app/lib/rateLimit";
 import { isCommonPassword } from "@/app/lib/passwordStrength";
 
+// The largest intake this route will accept, in serialised characters.
+//
+// A real intake is small: a career line, an education level, a location, a
+// short outline. Even a fully-explored one with a batch of discovered schools
+// attached lands in the low kilobytes, so 32k is generous by an order of
+// magnitude and still refuses the interesting case — this route needs no
+// session, so anything on the internet can POST it, and without a ceiling the
+// `intake` key is an unauthenticated write of arbitrary size straight into a
+// JSONB column.
+const MAX_INTAKE_CHARS = 32_000;
+
+/**
+ * Whether `intake` is something we're willing to hand to `adoptIntake`.
+ *
+ * The rest of this body is treated as `unknown` and checked before use;
+ * `intake` used to be typed `IntakeAnswers` and trusted on the strength of
+ * that annotation alone, which is worth nothing at runtime — the client is
+ * whatever POSTed. So: absent is fine, a plain object within the size bound is
+ * fine, and everything else (a string, an array, a class instance, a blob
+ * that's really an upload) is a 400.
+ *
+ * This isn't field-by-field schema validation, because it doesn't need to be:
+ * adoptIntake persists an explicit allowlist of keys (see its ADOPTED_FIELDS),
+ * so unrecognised junk inside a well-formed object is dropped rather than
+ * stored. What this adds is the two things an allowlist can't do — refuse a
+ * value that isn't an object at all, and refuse one that's merely enormous.
+ */
+function isAcceptableIntake(
+  value: unknown
+): value is IntakeAnswers | null | undefined {
+  if (value === undefined || value === null) return true;
+  if (typeof value !== "object" || Array.isArray(value)) return false;
+
+  const prototype = Object.getPrototypeOf(value);
+  if (prototype !== Object.prototype && prototype !== null) return false;
+
+  try {
+    return JSON.stringify(value).length <= MAX_INTAKE_CHARS;
+  } catch {
+    // Deeply nested input can make stringify throw rather than return, and a
+    // structure that can't be serialised is not an intake either way.
+    return false;
+  }
+}
+
 // Creates the account itself — PRD §1's "Create Account" step. OAuth signup
 // (Google) never touches this route; Auth.js's own callback creates those
 // users directly via the Prisma adapter. This route exists only for the
@@ -30,7 +75,7 @@ export async function POST(request: NextRequest) {
     name?: unknown;
     email?: unknown;
     password?: unknown;
-    intake?: IntakeAnswers;
+    intake?: unknown;
   };
 
   try {
@@ -53,6 +98,12 @@ export async function POST(request: NextRequest) {
       { error: "Name, email, and an 8+ character password are required." },
       { status: 400 }
     );
+  }
+
+  // Rejected before the bcrypt hash and before either database call, so a
+  // malformed or oversized blob costs an attacker a parse and nothing else.
+  if (!isAcceptableIntake(intake)) {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
   // Checked here, not just in the client's strength meter — a client-only
