@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCached, setCached, cacheKey } from "@/app/lib/apiCache";
 import { getDurable, setDurable } from "@/app/lib/durableCache";
 import { resolveCareer } from "@/app/lib/careerCanonical";
+import {
+  BLOCKED_CAREER_MESSAGE,
+  MAX_CAREER_INPUT,
+  TOO_LONG_MESSAGE,
+} from "@/app/lib/careerPolicy";
 import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
 import { geminiUrl } from "@/app/lib/geminiModel";
 import { logCacheMiss } from "@/app/lib/missLog";
@@ -37,6 +42,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (career.length > MAX_CAREER_INPUT) {
+      return NextResponse.json({ error: TOO_LONG_MESSAGE }, { status: 400 });
+    }
+
     // Two kinds of school now reach this route, and the difference decides
     // which prompt runs and whether the result gets URL-checked:
     //
@@ -63,7 +72,20 @@ export async function POST(request: NextRequest) {
     // Collapse the many ways a student might spell the same job ("RN",
     // "nurse", "Registered Nurse") onto one title, so they share a single
     // generated pathway instead of one per spelling.
-    const canonicalCareer = resolveCareer(career).canonical;
+    const resolved = resolveCareer(career);
+
+    // Ahead of the cache, the rate limiter, and the model call, in that order
+    // of importance: a refused search must cost nothing, must not spend the
+    // visitor's allowance, and must not be served from an entry generated
+    // before this check existed.
+    if (resolved.blocked) {
+      return NextResponse.json(
+        { error: BLOCKED_CAREER_MESSAGE, blocked: true },
+        { status: 400 }
+      );
+    }
+
+    const canonicalCareer = resolved.canonical;
 
     // Return a previously generated pathway for the same career without
     // spending a Gemini request (avoids the free-tier rate limit on repeats).

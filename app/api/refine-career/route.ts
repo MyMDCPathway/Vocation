@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCached, setCached, cacheKey } from "@/app/lib/apiCache";
 import { getDurable, setDurable } from "@/app/lib/durableCache";
 import { resolveCareer } from "@/app/lib/careerCanonical";
+import {
+  BLOCKED_CAREER_MESSAGE,
+  MAX_CAREER_INPUT,
+  TOO_LONG_MESSAGE,
+} from "@/app/lib/careerPolicy";
 import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
 import { geminiUrl } from "@/app/lib/geminiModel";
 import { logCacheMiss } from "@/app/lib/missLog";
@@ -27,6 +32,11 @@ const apiKey = process.env.GEMINI_API_KEY;
 const RESPONSE_SCHEMA = {
   type: "OBJECT",
   properties: {
+    legitimate: {
+      type: "BOOLEAN",
+      description:
+        "False when this is not a lawful occupation we should be building an education plan for. True for every real job, including unglamorous, dangerous, and poorly paid ones.",
+    },
     needsSpecifics: {
       type: "BOOLEAN",
       description:
@@ -131,6 +141,7 @@ const RESPONSE_SCHEMA = {
     },
   },
   required: [
+    "legitimate",
     "needsSpecifics",
     "question",
     "helpText",
@@ -143,7 +154,17 @@ const RESPONSE_SCHEMA = {
 
 const SYSTEM_PROMPT = `You are a career advisor helping a student turn a rough idea into a plannable goal.
 
-You will be given what a student typed as the career they want. Decide ONE thing first: is this specific enough to build an education plan around?
+You will be given what a student typed as the career they want.
+
+BEFORE ANYTHING ELSE — set legitimate.
+
+Set legitimate to false only when the input names something we should not be writing an education plan for at all: contract violence, illegal drug trade, human trafficking, commercial sexual services, or fraud and theft as the occupation itself. Set it to false for phrasings that mean those things without naming them plainly.
+
+Set legitimate to TRUE for everything else, and read that literally. Dangerous jobs, dirty jobs, badly paid jobs, jobs with no formal training, jobs you personally would not recommend, and jobs adjacent to crime but on the right side of it — police officer, prison guard, bail bondsman, criminal defence lawyer, forensic toxicologist, drug and alcohol counsellor, ethical hacker, penetration tester, anti-money-laundering analyst, bartender, tattoo artist, mortician, exterminator, oil rig worker, professional gambler — are all real occupations and all get true. Wrongly refusing a student's actual career is a worse failure than any of the rest of this response, and it is the failure this field most easily causes. When you are unsure, the answer is true.
+
+When legitimate is false, nothing else in the response is read: return false, an empty question, an empty helpText, an empty options array, 'direct-entry', an empty routeReason, and an empty outline.
+
+Then decide ONE thing: is this specific enough to build an education plan around?
 
 ALREADY SPECIFIC — set needsSpecifics to false:
 - Named credentials with one training route: BCBA, Dental Hygienist, Registered Nurse, CPA, Paralegal, Radiologic Technologist, Air Traffic Controller, Electrician.
@@ -187,6 +208,24 @@ outline is 4-6 steps from a standing start to actually doing the job. It is show
 
 Respond only with JSON matching the provided schema.`;
 
+/**
+ * Return a cache hit, unless what's stored is a refusal.
+ *
+ * Refusals share the career's cache key so a repeated attempt costs nothing,
+ * which means every read has to tell the two apart. Both cache layers go
+ * through here for that reason — the durable layer outlives a deploy, so a
+ * refusal written today is still a refusal after the next cold start.
+ */
+function servedFromCache(entry: unknown): NextResponse {
+  if ((entry as { blocked?: boolean })?.blocked) {
+    return NextResponse.json(
+      { error: BLOCKED_CAREER_MESSAGE, blocked: true },
+      { status: 400 }
+    );
+  }
+  return NextResponse.json(entry);
+}
+
 export async function POST(request: NextRequest) {
   if (!apiKey) {
     return NextResponse.json({ error: "API key not configured" }, { status: 500 });
@@ -202,9 +241,26 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (career.length > MAX_CAREER_INPUT) {
+      return NextResponse.json({ error: TOO_LONG_MESSAGE }, { status: 400 });
+    }
+
     // Same canonicalization as every other route, so "RN", "nurse", and "I
     // want to be a nurse" share one answer instead of three.
-    const canonicalCareer = resolveCareer(career).canonical;
+    const resolved = resolveCareer(career);
+
+    // This is the route the wizard hits FIRST for every career, so refusing
+    // here is what stops a blocked search reaching any of the others. Ahead of
+    // the cache, the rate limiter, and the model call: it must cost nothing and
+    // must not spend the visitor's allowance.
+    if (resolved.blocked) {
+      return NextResponse.json(
+        { error: BLOCKED_CAREER_MESSAGE, blocked: true },
+        { status: 400 }
+      );
+    }
+
+    const canonicalCareer = resolved.canonical;
 
     // "refine2", not "refine": entries cached before route classification
     // existed have no archetype, and serving one would silently fall back to
@@ -214,13 +270,13 @@ export async function POST(request: NextRequest) {
     const key = cacheKey("refine2", canonicalCareer);
     const cached = getCached(key);
     if (cached) {
-      return NextResponse.json(cached);
+      return servedFromCache(cached);
     }
 
     const durable = await getDurable(key);
     if (durable) {
       setCached(key, durable);
-      return NextResponse.json(durable);
+      return servedFromCache(durable);
     }
 
     // Limits apply only past the cache, matching the pipeline order the rest
@@ -286,6 +342,25 @@ export async function POST(request: NextRequest) {
     }
 
     const parsed = JSON.parse(text);
+
+    // The second pass. The static list in careerPolicy.ts catches the plain
+    // spellings; this catches the euphemisms and the phrasings nobody thought
+    // to write down, and it costs nothing extra because this call was already
+    // being made for every career the wizard sees.
+    //
+    // The refusal is cached under the same key as a real answer, so a second
+    // attempt at the same wording is free rather than billing again. It's
+    // stored as a bare marker rather than a Refinement so it can't be mistaken
+    // for one — see servedFromCache.
+    if (parsed.legitimate === false) {
+      const refusal = { blocked: true as const };
+      setCached(key, refusal);
+      await setDurable(key, refusal);
+      return NextResponse.json(
+        { error: BLOCKED_CAREER_MESSAGE, blocked: true },
+        { status: 400 }
+      );
+    }
 
     // A "needs specifics" answer with no options is unusable — the wizard
     // would render an empty question. Downgrade it to "already specific"

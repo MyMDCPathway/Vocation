@@ -4,6 +4,13 @@ import { getDurable, setDurable } from "@/app/lib/durableCache";
 import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
 import { geminiUrl } from "@/app/lib/geminiModel";
 import { logCacheMiss } from "@/app/lib/missLog";
+import { normalizeCareer } from "@/app/lib/careerCanonical";
+import {
+  blockedCareer,
+  BLOCKED_CAREER_MESSAGE,
+  MAX_CAREER_INPUT,
+  TOO_LONG_MESSAGE,
+} from "@/app/lib/careerPolicy";
 
 // Server-side only - never exposed to the browser
 const apiKey = process.env.GEMINI_API_KEY;
@@ -27,6 +34,18 @@ export async function POST(request: NextRequest) {
         {
           error: "Exam name parameter is required and must be a non-empty string.",
         },
+        { status: 400 }
+      );
+    }
+
+    // The exam name is interpolated straight into the prompt below and never
+    // touches resolveCareer, so it carries its own copy of the two checks.
+    if (examName.length > MAX_CAREER_INPUT) {
+      return NextResponse.json({ error: TOO_LONG_MESSAGE }, { status: 400 });
+    }
+    if (blockedCareer(normalizeCareer(examName))) {
+      return NextResponse.json(
+        { error: BLOCKED_CAREER_MESSAGE, blocked: true },
         { status: 400 }
       );
     }

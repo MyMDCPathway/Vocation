@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { loadIntake, saveIntake } from "@/app/lib/intakeStorage";
+import { normalizeCareer } from "@/app/lib/careerCanonical";
+import { blockedCareer, BLOCKED_CAREER_MESSAGE } from "@/app/lib/careerPolicy";
 
 /**
  * The landing page's career field — the real entry to the intake.
@@ -20,11 +22,23 @@ import { loadIntake, saveIntake } from "@/app/lib/intakeStorage";
  */
 export function CareerSearch({ examples }: { examples: string[] }) {
   const [career, setCareer] = useState("");
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
   function start(value: string) {
     const raw = value.trim();
     if (!raw) return;
+
+    // Answered here rather than a page later. The server refuses this anyway —
+    // careerPolicy is the same module /api/refine-career consults, so the two
+    // can't disagree — but routing to /start only to bounce back would read as
+    // the app losing the answer it had just been given.
+    if (blockedCareer(normalizeCareer(raw))) {
+      setError(BLOCKED_CAREER_MESSAGE);
+      return;
+    }
+
+    setError(null);
     // Merge rather than replace: a returning visitor may already have answers
     // stored, and blowing them away because they retyped a career would throw
     // away a half-finished intake.
@@ -67,7 +81,10 @@ export function CareerSearch({ examples }: { examples: string[] }) {
               name="career"
               type="text"
               value={career}
-              onChange={(event) => setCareer(event.target.value)}
+              onChange={(event) => {
+                setCareer(event.target.value);
+                setError(null);
+              }}
               placeholder="e.g. Registered Nurse"
               autoComplete="off"
               className="w-full rounded-full border border-outline-variant bg-surface-lowest py-3 pl-10 pr-4 text-base text-on-surface placeholder:text-outline focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
@@ -95,6 +112,12 @@ export function CareerSearch({ examples }: { examples: string[] }) {
             </svg>
           </button>
         </div>
+
+        {error && (
+          <p role="alert" className="mt-4 text-sm font-medium text-red-600">
+            {error}
+          </p>
+        )}
       </form>
 
       <div className="mt-5 flex flex-wrap items-center gap-2">
@@ -105,7 +128,10 @@ export function CareerSearch({ examples }: { examples: string[] }) {
           <button
             key={example}
             type="button"
-            onClick={() => setCareer(example)}
+            onClick={() => {
+              setCareer(example);
+              setError(null);
+            }}
             className="rounded-full bg-surface-low px-3 py-1 text-xs font-semibold text-primary transition-colors hover:bg-surface-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
           >
             {example}

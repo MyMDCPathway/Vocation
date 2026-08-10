@@ -5,6 +5,13 @@ import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
 import { generateJson } from "@/app/lib/geminiJson";
 import { logCacheMiss } from "@/app/lib/missLog";
 import { hasUsableCoordinates, openSchoolId, type SchoolRef } from "@/app/lib/schoolRef";
+import { normalizeCareer } from "@/app/lib/careerCanonical";
+import {
+  blockedCareer,
+  BLOCKED_CAREER_MESSAGE,
+  MAX_CAREER_INPUT,
+  TOO_LONG_MESSAGE,
+} from "@/app/lib/careerPolicy";
 
 // Find one specific school the student asked for by name.
 //
@@ -122,6 +129,35 @@ export async function POST(request: NextRequest) {
         { error: "Type at least three characters to search for a school." },
         { status: 400 }
       );
+    }
+    if (search.length > MAX_CAREER_INPUT) {
+      return NextResponse.json(
+        { error: "That's too long to be a school name." },
+        { status: 400 }
+      );
+    }
+
+    // `career` reaches the prompt verbatim below and, unlike every other route,
+    // never passes through resolveCareer — so it needs both checks written out
+    // here. It was previously interpolated with no type check at all, which
+    // made it the one field where anything at all could be put in front of the
+    // model.
+    if (career !== undefined && typeof career !== "string") {
+      return NextResponse.json(
+        { error: "Career must be a string." },
+        { status: 400 }
+      );
+    }
+    if (typeof career === "string") {
+      if (career.length > MAX_CAREER_INPUT) {
+        return NextResponse.json({ error: TOO_LONG_MESSAGE }, { status: 400 });
+      }
+      if (blockedCareer(normalizeCareer(career))) {
+        return NextResponse.json(
+          { error: BLOCKED_CAREER_MESSAGE, blocked: true },
+          { status: 400 }
+        );
+      }
     }
 
     // Keyed on the search text alone, not the career: the school's location,

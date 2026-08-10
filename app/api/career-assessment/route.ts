@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
 import { geminiUrl } from "@/app/lib/geminiModel";
+import { normalizeCareer } from "@/app/lib/careerCanonical";
+import {
+  blockedCareer,
+  BLOCKED_CAREER_MESSAGE,
+  MAX_ASSESSMENT_ANSWERS,
+  MAX_ASSESSMENT_FIELD,
+} from "@/app/lib/careerPolicy";
 
 // Server-side only - never exposed to the browser
 const apiKey = process.env.GEMINI_API_KEY;
@@ -30,8 +37,59 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Quiz answers are unique per submission, so there is nothing to cache
-    // here — every request spends a Gemini call and the limits always apply.
+    // Nothing on this route is cached — quiz answers are unique per
+    // submission — so every request without exception spends a Gemini call.
+    // That makes it the one place where the caller alone decides how big a
+    // billed prompt gets, and the only defence is refusing an oversized
+    // submission before making the call. Hence the caps on both the number of
+    // rows and the length of each string in them.
+    if (answers.length > MAX_ASSESSMENT_ANSWERS) {
+      return NextResponse.json(
+        { error: `Send at most ${MAX_ASSESSMENT_ANSWERS} answers.` },
+        { status: 400 }
+      );
+    }
+
+    const fields: string[] = [];
+    for (const item of answers as QuizAnswer[]) {
+      if (!item || typeof item !== "object") {
+        return NextResponse.json(
+          { error: "Each answer must have a question and an answer." },
+          { status: 400 }
+        );
+      }
+      const parts = Array.isArray(item.answer)
+        ? [item.question, ...item.answer]
+        : [item.question, item.answer];
+      for (const part of parts) {
+        if (typeof part !== "string") {
+          return NextResponse.json(
+            { error: "Questions and answers must be strings." },
+            { status: 400 }
+          );
+        }
+        if (part.length > MAX_ASSESSMENT_FIELD) {
+          return NextResponse.json(
+            { error: `Keep each answer under ${MAX_ASSESSMENT_FIELD} characters.` },
+            { status: 400 }
+          );
+        }
+        fields.push(part);
+      }
+    }
+
+    // Both sides of every row are concatenated into the prompt below, so the
+    // policy runs across all of them. There is no career field on this route
+    // to check instead — the free text IS the input.
+    if (fields.some((field) => blockedCareer(normalizeCareer(field)))) {
+      return NextResponse.json(
+        { error: BLOCKED_CAREER_MESSAGE, blocked: true },
+        { status: 400 }
+      );
+    }
+
+    // Only now, with the submission known to be a sane size, does anything
+    // get spent.
     const limited = enforceGenerationLimits(request);
     if (limited) return limited;
     recordGeneration();
