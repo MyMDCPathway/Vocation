@@ -10,14 +10,10 @@ import { useSession, signOut } from "next-auth/react";
 //
 // Notifications stays a disabled stub in both states — there's no
 // notification system yet. The standalone Settings gear is gone: it was
-// redundant with "Account Settings" now living inside the profile menu below,
-// and neither one is a real page yet either way (see PRODUCT.md's
-// "explicitly undecided" — Settings Dashboard is a named next milestone, not
-// built). My Roadmap, Saved Careers, and Help Center are the same story: real
-// intent, no page behind them yet, so they render disabled and say so —
-// exactly the same "visible but honest" treatment the old stub icons used,
-// just moved into the menu. Sign Out is the one item in this whole menu that
-// actually does something.
+// redundant with "Account Settings" now living inside the profile menu below.
+// Every item in that menu goes somewhere real; placeholders that only promised
+// a future page have been taken back out rather than left to advertise
+// themselves.
 function BellIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="h-[18px] w-[18px]">
@@ -56,10 +52,6 @@ function RoadmapIcon() {
       <path d="M3 9h18M8 4v5" />
     </>
   );
-}
-
-function SavedIcon() {
-  return menuIcon(<path d="M6 3h12a1 1 0 0 1 1 1v16l-7-4-7 4V4a1 1 0 0 1 1-1Z" />);
 }
 
 function SettingsIcon() {
@@ -102,39 +94,22 @@ function MenuItem({
   icon,
   label,
   href,
-  disabled,
   onNavigate,
 }: {
   icon: React.ReactNode;
   label: string;
-  href?: string;
-  disabled?: boolean;
+  href: string;
   onNavigate?: () => void;
 }) {
-  const className = `flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm font-medium transition-colors ${
-    disabled ? "cursor-not-allowed text-outline/70" : "text-on-surface hover:bg-surface-container"
-  }`;
-
-  if (href && !disabled) {
-    return (
-      <Link href={href} onClick={onNavigate} className={className}>
-        {icon}
-        {label}
-      </Link>
-    );
-  }
-
   return (
-    <button
-      type="button"
-      disabled={disabled}
-      title={disabled ? `${label} — coming soon` : undefined}
-      className={className}
+    <Link
+      href={href}
+      onClick={onNavigate}
+      className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm font-medium text-on-surface transition-colors hover:bg-surface-container"
     >
       {icon}
       {label}
-      {disabled && <span className="ml-auto text-xs text-outline">Soon</span>}
-    </button>
+    </Link>
   );
 }
 
@@ -189,11 +164,6 @@ function ProfileMenu({ name, email }: { name: string | null | undefined; email: 
               href="/pathways"
               onNavigate={() => setOpen(false)}
             />
-            {/* Saved Careers needs its own concept — a bookmarked career
-                profile, distinct from a saved pathway — that no schema here
-                models yet. Left disabled rather than wired to a page with
-                nothing real behind it. */}
-            <MenuItem icon={<SavedIcon />} label="Saved Careers" disabled />
             <MenuItem
               icon={<SettingsIcon />}
               label="Account Settings"
