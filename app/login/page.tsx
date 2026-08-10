@@ -12,11 +12,11 @@ import { PasswordField } from "@/app/components/auth/PasswordField";
 // hasn't verified caps sign-ups at 100 people, which is a worse launch than
 // no social login at all.
 //
-// "Forgot password" is named in the PRD but deliberately absent here: this
-// plan's scope is account creation, not a reset flow, and a link to a page
-// that doesn't exist is exactly the kind of promised-but-missing control this
-// project avoids everywhere else (see PRODUCT.md). It's a named follow-up,
-// not an oversight.
+// "Forgot password" was held back while account creation was the whole scope,
+// on the rule that a link to a page which doesn't exist is exactly the kind of
+// promised-but-missing control this project avoids (see PRODUCT.md). The reset
+// flow now exists — /forgot-password through /reset-password — so the link
+// below points at something real.
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -86,6 +86,12 @@ export default function LoginPage() {
             {submitting ? "Logging in…" : "Log in"}
           </button>
         </form>
+
+        <p className="mt-4 text-center text-sm">
+          <Link href="/forgot-password" className="font-medium text-secondary hover:text-secondary/80">
+            Forgot password?
+          </Link>
+        </p>
 
         <p className="mt-6 text-center text-sm text-on-surface-variant">
           New here?{" "}
