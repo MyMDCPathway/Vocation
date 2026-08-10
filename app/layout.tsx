@@ -9,9 +9,9 @@ import { SCHOOL_COOKIE_NAME } from '@/app/lib/schoolStorage'
 import { scaleToCssVars } from '@/app/lib/schoolTheme'
 
 export const metadata: Metadata = {
-  title: 'Vocation | Career Planning for Miami Dade College',
-  description: 'Plan your complete educational journey from Miami Dade College to your dream career. AI-powered pathway generation with programs, transfers, and certifications.',
-  keywords: 'Vocation, Miami Dade College, MDC, career planning, educational pathway',
+  title: 'Vocation | Education & Career Pathway Planning',
+  description: 'Plan your complete educational journey to your dream career. AI-powered pathway generation with programs, transfers, and certifications across Florida colleges and beyond.',
+  keywords: 'Vocation, career planning, educational pathway, college transfer, career pathway',
 }
 
 export default function RootLayout({

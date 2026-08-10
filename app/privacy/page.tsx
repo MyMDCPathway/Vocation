@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Privacy Policy | Vocation',
-  description: 'Privacy Policy for Vocation - Career Planning for Miami Dade College',
+  description: 'Privacy Policy for Vocation - Education & Career Pathway Planning',
 }
 
 export default function PrivacyPolicy() {
@@ -12,7 +12,7 @@ export default function PrivacyPolicy() {
         <h1 className="text-4xl font-bold text-on-surface mb-8">Privacy Policy</h1>
         
         <div className="prose prose-slate max-w-none space-y-6 text-on-surface-variant">
-          <p className="text-sm text-outline">Last updated: {new Date().toLocaleDateString()}</p>
+          <p className="text-sm text-outline">Last updated: August 10, 2026</p>
           
           <section>
             <h2 className="text-2xl font-semibold text-on-surface mt-8 mb-4">1. Information We Collect</h2>
@@ -63,8 +63,8 @@ export default function PrivacyPolicy() {
           <section>
             <h2 className="text-2xl font-semibold text-on-surface mt-8 mb-4">6. Your Rights</h2>
             <p>
-              You have the right to request access to, correction of, or deletion of your personal information. 
-              Contact us at <a href="mailto:advisement@mdc.edu" className="text-primary hover:underline">advisement@mdc.edu</a>.
+              You have the right to request access to, correction of, or deletion of your personal information.
+              Contact us at <a href="mailto:privacy@vocation.bz" className="text-primary hover:underline">privacy@vocation.bz</a>.
             </p>
           </section>
 
@@ -80,7 +80,7 @@ export default function PrivacyPolicy() {
             <h2 className="text-2xl font-semibold text-on-surface mt-8 mb-4">8. Contact Us</h2>
             <p>
               If you have questions about this Privacy Policy, please contact us at{' '}
-              <a href="mailto:advisement@mdc.edu" className="text-primary hover:underline">advisement@mdc.edu</a>.
+              <a href="mailto:privacy@vocation.bz" className="text-primary hover:underline">privacy@vocation.bz</a>.
             </p>
           </section>
         </div>

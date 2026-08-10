@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Terms of Service | Vocation',
-  description: 'Terms of Service for Vocation - Career Planning for Miami Dade College',
+  description: 'Terms of Service for Vocation - Education & Career Pathway Planning',
 }
 
 export default function TermsOfService() {
@@ -12,12 +12,21 @@ export default function TermsOfService() {
         <h1 className="text-4xl font-bold text-on-surface mb-8">Terms of Service</h1>
         
         <div className="prose prose-slate max-w-none space-y-6 text-on-surface-variant">
-          <p className="text-sm text-outline">Last updated: {new Date().toLocaleDateString()}</p>
+          <p className="text-sm text-outline">Last updated: August 10, 2026</p>
           
+          <section>
+            <p className="bg-surface-variant border border-outline rounded-lg p-4 text-sm">
+              <strong>Independent project notice:</strong> Vocation is an independent project and is not affiliated
+              with, endorsed by, or sponsored by Miami Dade College or any other educational institution. Program,
+              transfer, and earnings data referenced by the service are drawn from institutions&apos; own public
+              catalogs and government data sources; their inclusion does not imply any partnership.
+            </p>
+          </section>
+
           <section>
             <h2 className="text-2xl font-semibold text-on-surface mt-8 mb-4">1. Acceptance of Terms</h2>
             <p>
-              By accessing and using Vocation, you accept and agree to be bound by the terms and provision of this agreement. 
+              By accessing and using Vocation, you accept and agree to be bound by the terms and provision of this agreement.
               If you do not agree to these terms, please do not use this service.
             </p>
           </section>
@@ -25,9 +34,9 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-2xl font-semibold text-on-surface mt-8 mb-4">2. Description of Service</h2>
             <p>
-              Vocation is an AI-powered educational planning tool that generates personalized career pathways for 
-              Miami Dade College students. The service provides informational suggestions and should not be considered 
-              official academic advice.
+              Vocation is an independently-built AI-powered educational planning tool that generates personalized
+              career pathways using publicly available program and transfer data. The service provides informational
+              suggestions and should not be considered official academic advice.
             </p>
           </section>
 
@@ -71,9 +80,9 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-2xl font-semibold text-on-surface mt-8 mb-4">6. Limitation of Liability</h2>
             <p>
-              Vocation and Miami Dade College shall not be liable for any indirect, incidental, special, consequential, 
-              or punitive damages resulting from your use of or inability to use the service, including but not limited 
-              to decisions made based on AI-generated content.
+              Vocation shall not be liable for any indirect, incidental, special, consequential, or punitive damages
+              resulting from your use of or inability to use the service, including but not limited to decisions made
+              based on AI-generated content.
             </p>
           </section>
 
@@ -88,8 +97,10 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-2xl font-semibold text-on-surface mt-8 mb-4">8. Intellectual Property</h2>
             <p>
-              All content, features, and functionality of Vocation are owned by Miami Dade College and are protected 
-              by copyright, trademark, and other intellectual property laws.
+              All content, features, and functionality of Vocation are owned by the operator of Vocation and are
+              protected by copyright, trademark, and other intellectual property laws. Program names, transfer
+              agreements, and other institutional data referenced by the service remain the property of their
+              respective institutions.
             </p>
           </section>
 
@@ -105,7 +116,7 @@ export default function TermsOfService() {
             <h2 className="text-2xl font-semibold text-on-surface mt-8 mb-4">10. Contact Information</h2>
             <p>
               For questions about these Terms of Service, please contact us at{' '}
-              <a href="mailto:advisement@mdc.edu" className="text-primary hover:underline">advisement@mdc.edu</a>.
+              <a href="mailto:privacy@vocation.bz" className="text-primary hover:underline">privacy@vocation.bz</a>.
             </p>
           </section>
         </div>

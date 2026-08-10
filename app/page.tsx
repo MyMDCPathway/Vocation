@@ -620,9 +620,9 @@ export default async function Home() {
             <div>
               <Wordmark />
               <p className="mt-3 max-w-sm text-sm leading-relaxed text-on-surface-variant">
-                Built at Miami Dade College. Plans against 53 Florida
-                institutions in depth, and any school in the world with
-                verification.
+                An independent project, not affiliated with or endorsed by any
+                school. Plans against 53 Florida institutions in depth, and
+                any school in the world with verification.
               </p>
             </div>
 
