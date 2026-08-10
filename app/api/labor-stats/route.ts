@@ -9,6 +9,8 @@ import {
 } from "@/app/lib/careerPolicy";
 import { matchOccupation } from "@/app/lib/blsOccupations";
 import { resolveAreas } from "@/app/lib/blsAreas";
+import { checkIpLimit, clientIp } from "@/app/lib/rateLimit";
+import { RATE_LIMIT_CONFIG } from "@/app/api/rate-limit-config";
 import { fetchLaborStats, type LaborStats } from "@/app/lib/blsStats";
 import type { StatsStatus } from "@/app/lib/careerProfileTypes";
 
@@ -90,6 +92,27 @@ export async function POST(request: NextRequest) {
     if (durable) {
       setCached(key, durable);
       return NextResponse.json(durable);
+    }
+
+    // Past here costs a request against BLS's registration key, which is
+    // capped at 500/day for the whole app — not per visitor. The cache key is
+    // (occupation, area), a large but walkable space, so an unauthenticated
+    // caller could force a miss on every request and burn the day's allowance.
+    // When it's gone blsStats.ts swallows the failure and the whole site
+    // quietly falls back to model estimates until midnight.
+    //
+    // Deliberately after both cache layers: reading an already-fetched
+    // occupation stays free and unthrottled, exactly as generate-pathway
+    // orders its own limiter.
+    const ipLimit = checkIpLimit(
+      `bls:${clientIp(request)}`,
+      RATE_LIMIT_CONFIG.maxBlsLookupsPerIP
+    );
+    if (!ipLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many labor-statistics lookups. Try again in a few minutes." },
+        { status: 429, headers: { "Retry-After": String(ipLimit.retryAfterSeconds ?? 60) } }
+      );
     }
 
     const stats = await fetchLaborStats(occupation, areas);
