@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
+import { withDbErrors } from "@/app/lib/withDbErrors";
 import { checkIpLimit, clientIp } from "@/app/lib/rateLimit";
 import { sendPasswordResetEmail } from "@/app/lib/email";
 import {
@@ -45,7 +46,8 @@ const SAME_ANSWER = {
  */
 const MAX_REQUESTS_PER_IP = 5;
 
-export async function POST(request: NextRequest) {
+export const POST = withDbErrors(handlePOST);
+async function handlePOST(request: NextRequest) {
   // Keyed under its own prefix, not the bare IP — sharing one bucket with
   // signup or the Gemini routes would mean unrelated features locking each
   // other out, which is the same reasoning /api/signup's own limiter uses.

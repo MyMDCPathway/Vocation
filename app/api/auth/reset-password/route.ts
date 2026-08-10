@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
+import { withDbErrors } from "@/app/lib/withDbErrors";
 import { hashPassword } from "@/app/lib/password";
 import { passwordStrength } from "@/app/lib/passwordStrength";
 import { checkIpLimit, clientIp } from "@/app/lib/rateLimit";
@@ -27,7 +28,8 @@ const INVALID_TOKEN =
  */
 const MAX_ATTEMPTS_PER_IP = 10;
 
-export async function POST(request: NextRequest) {
+export const POST = withDbErrors(handlePOST);
+async function handlePOST(request: NextRequest) {
   const ipLimit = checkIpLimit(
     `reset-password:${clientIp(request)}`,
     MAX_ATTEMPTS_PER_IP

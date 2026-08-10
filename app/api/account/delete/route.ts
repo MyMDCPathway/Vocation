@@ -3,6 +3,7 @@ import { auth } from "@/app/lib/auth";
 import { db } from "@/app/lib/db";
 import { verifyPassword } from "@/app/lib/password";
 import { checkIpLimit, clientIp } from "@/app/lib/rateLimit";
+import { withDbErrors } from "@/app/lib/withDbErrors";
 
 // Permanent account deletion — the other half of what /privacy promises.
 //
@@ -25,7 +26,8 @@ import { checkIpLimit, clientIp } from "@/app/lib/rateLimit";
 // account ten times.
 const MAX_ATTEMPTS_PER_WINDOW = 10;
 
-export async function POST(request: NextRequest) {
+export const POST = withDbErrors(handlePOST);
+async function handlePOST(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/app/lib/auth";
 import { db } from "@/app/lib/db";
+import { withDbErrors } from "@/app/lib/withDbErrors";
 
 const VALID_VISIBILITY = ["private", "mentors_only", "public"];
 
@@ -12,7 +13,8 @@ const VALID_VISIBILITY = ["private", "mentors_only", "public"];
 // wipe onboarding data nobody meant to touch. This route only ever writes
 // the fields it's actually given.
 
-export async function GET() {
+export const GET = withDbErrors(handleGET);
+async function handleGET() {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });
@@ -30,7 +32,8 @@ export async function GET() {
   return NextResponse.json(user);
 }
 
-export async function PATCH(request: NextRequest) {
+export const PATCH = withDbErrors(handlePATCH);
+async function handlePATCH(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });

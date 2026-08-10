@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/app/lib/db";
+import { withDbErrors } from "@/app/lib/withDbErrors";
 import { hashPassword } from "@/app/lib/password";
 import { adoptIntake } from "@/app/lib/intakeAdoption";
 import type { IntakeAnswers } from "@/app/lib/intake";
@@ -56,7 +57,8 @@ function isAcceptableIntake(
 // users directly via the Prisma adapter. This route exists only for the
 // email/password path, where nothing else will hash the password or check
 // for an existing email first.
-export async function POST(request: NextRequest) {
+export const POST = withDbErrors(handlePOST);
+async function handlePOST(request: NextRequest) {
   // Same per-IP sliding-window limiter the Gemini routes use, but under its
   // own "signup:" key rather than the bare IP — sharing one bucket would mean
   // a student who'd already spent their 10 pathway-generation requests this
