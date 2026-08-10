@@ -77,7 +77,7 @@ async function handlePOST(request: NextRequest) {
     return NextResponse.json(
       {
         error:
-          "This account signs in with Google and has no password to confirm with. Email advisement@mdc.edu and we'll delete it for you.",
+          "This account signs in with Google and has no password to confirm with. Email privacy@vocation.bz and we'll delete it for you.",
       },
       { status: 409 }
     );
