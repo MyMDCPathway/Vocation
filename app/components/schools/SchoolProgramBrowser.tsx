@@ -2,7 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import { loadIntake, saveIntake } from "@/app/lib/intakeStorage";
+import { directorySchoolToRef, type DirectorySchoolLike } from "@/app/lib/schoolRef";
+import { usStateName } from "@/app/lib/usStates";
 
 // "What do you want to study at [School]?" — the school-first flow's second
 // screen. Search box with the school's own real program catalog underneath
@@ -21,6 +24,7 @@ interface Program {
   name: string;
   url: string;
   level: string | null;
+  matchedInterest: string | null;
 }
 
 interface Resource {
@@ -34,6 +38,10 @@ interface BrowserState {
   hasCatalog: boolean;
   programs: Program[];
   resources: Resource[];
+  // The school's own real identity, once loaded — carried into the intake
+  // by planPathway so this flow doesn't quietly drop the school in favor of
+  // just the career (see intake.ts's desiredSchools).
+  school: DirectorySchoolLike | null;
 }
 
 interface Career {
@@ -56,17 +64,37 @@ const LEVEL_LABELS: Record<string, string> = {
 
 export function SchoolProgramBrowser({ schoolId }: { schoolId: string }) {
   const router = useRouter();
+  const { status: sessionStatus } = useSession();
   const [query, setQuery] = useState("");
+  const [interestSlugs, setInterestSlugs] = useState<string[]>([]);
   const [state, setState] = useState<BrowserState>({
     status: "loading",
     schoolName: "",
     hasCatalog: false,
     programs: [],
     resources: [],
+    school: null,
   });
 
   const [selectedProgram, setSelectedProgram] = useState<Program | null>(null);
   const [careersState, setCareersState] = useState<CareersState | null>(null);
+
+  // Fetched once per sign-in — the same slugs onboarding collected, read
+  // back so the program list can push a signed-in user's own interests to
+  // the top (see /api/schools/[id]/programs's `interests` param).
+  useEffect(() => {
+    if (sessionStatus !== "authenticated") return;
+    let cancelled = false;
+    fetch("/api/onboarding")
+      .then((response) => response.json())
+      .then((body) => {
+        if (!cancelled) setInterestSlugs(Array.isArray(body.interests) ? body.interests : []);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionStatus]);
 
   useEffect(() => {
     let cancelled = false;
@@ -74,6 +102,7 @@ export function SchoolProgramBrowser({ schoolId }: { schoolId: string }) {
 
     const params = new URLSearchParams();
     if (query.trim()) params.set("q", query.trim());
+    if (interestSlugs.length) params.set("interests", interestSlugs.join(","));
 
     const timeout = setTimeout(async () => {
       try {
@@ -87,6 +116,7 @@ export function SchoolProgramBrowser({ schoolId }: { schoolId: string }) {
             hasCatalog: body.hasCatalog,
             programs: body.programs ?? [],
             resources: body.resources ?? [],
+            school: body.school ?? null,
           });
         }
       } catch {
@@ -98,7 +128,7 @@ export function SchoolProgramBrowser({ schoolId }: { schoolId: string }) {
       cancelled = true;
       clearTimeout(timeout);
     };
-  }, [schoolId, query]);
+  }, [schoolId, query, interestSlugs.join("|")]);
 
   async function selectProgram(program: Program) {
     setSelectedProgram(program);
@@ -118,7 +148,17 @@ export function SchoolProgramBrowser({ schoolId }: { schoolId: string }) {
   }
 
   function planPathway(careerTitle: string) {
-    saveIntake({ ...loadIntake(), career: { raw: careerTitle, resolved: careerTitle } });
+    const school = state.school;
+    saveIntake({
+      ...loadIntake(),
+      career: { raw: careerTitle, resolved: careerTitle },
+      // Carries the school through so /start's own school-picker step (see
+      // IntakeWizard's `steps` memo) is skipped rather than asking again —
+      // the student already chose it, right here.
+      desiredSchools: school
+        ? [directorySchoolToRef(school, school.state ? usStateName(school.state) : "")]
+        : undefined,
+    });
     router.push("/start");
   }
 
@@ -271,7 +311,14 @@ export function SchoolProgramBrowser({ schoolId }: { schoolId: string }) {
                 onClick={() => selectProgram(program)}
                 className="flex w-full items-center justify-between gap-4 px-4 py-3 text-left text-sm font-medium text-on-surface transition-colors hover:bg-surface-container"
               >
-                <span>{program.name}</span>
+                <span className="min-w-0">
+                  {program.name}
+                  {program.matchedInterest && (
+                    <span className="ml-2 inline-block rounded-full bg-secondary-container px-2 py-0.5 align-middle text-[11px] font-semibold text-secondary">
+                      {program.matchedInterest}
+                    </span>
+                  )}
+                </span>
                 {program.level && (
                   <span className="shrink-0 rounded-full bg-surface-container px-2.5 py-0.5 text-xs font-semibold text-on-surface-variant">
                     {LEVEL_LABELS[program.level] ?? program.level}

@@ -30,7 +30,6 @@ export async function POST(request: NextRequest) {
     name?: unknown;
     email?: unknown;
     password?: unknown;
-    accountType?: unknown;
     intake?: IntakeAnswers;
   };
 
@@ -40,7 +39,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const { name, email, password, accountType, intake } = body;
+  const { name, email, password, intake } = body;
 
   if (
     typeof name !== "string" ||
@@ -68,16 +67,6 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // PRD §1: "Student, Career Changer, Professional" — validated against the
-  // fixed set rather than stored as whatever string the client sent, so a
-  // typo'd or malicious value can't end up driving onboarding/settings logic
-  // that expects one of these three.
-  const validAccountTypes = ["student", "career_changer", "professional"];
-  const normalizedAccountType =
-    typeof accountType === "string" && validAccountTypes.includes(accountType)
-      ? accountType
-      : null;
-
   const existing = await db.user.findUnique({ where: { email } });
   if (existing) {
     // Deliberately vague — matches the Credentials provider's own refusal to
@@ -97,7 +86,6 @@ export async function POST(request: NextRequest) {
       name,
       email,
       passwordHash,
-      accountType: normalizedAccountType,
     },
   });
 

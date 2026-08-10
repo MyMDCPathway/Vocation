@@ -3,6 +3,8 @@ import { CareerSearch } from "@/app/components/landing/CareerSearch";
 import { AuthControls } from "@/app/components/AuthControls";
 import { RevealSection } from "@/app/components/shared/RevealSection";
 import { listCuratedInterests } from "@/app/lib/interests";
+import { auth } from "@/app/lib/auth";
+import { db } from "@/app/lib/db";
 
 // The landing page, in the Empowered Clarity world (see DESIGN.md).
 //
@@ -243,12 +245,45 @@ function FlagStepIcon() {
 
 const HOW_IT_WORKS_ICONS = [SearchStepIcon, RoadmapStepIcon, FlagStepIcon];
 
-export default function Home() {
+/** "STEM", "STEM and Healthcare", "STEM, Healthcare, and Business" — never a
+ *  dangling Oxford comma on a two-item list. */
+function formatList(items: string[]): string {
+  if (items.length === 1) return items[0];
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
+}
+
+export default async function Home() {
   const year = new Date().getFullYear();
   // Server Component — safe to read the committed BLS occupation table
   // directly rather than through /api/interests, since this never ships to
   // the browser bundle (see interests.ts's own header on that discipline).
   const interests = listCuratedInterests();
+
+  // Same discipline, extended to auth: a Server Component can read the
+  // session and the DB directly without a round trip through an API route,
+  // and neither ships to the client bundle either. onboarding's interests
+  // picker (app/onboarding/page.tsx) is the only writer of this column.
+  const session = await auth();
+  const savedInterests = session?.user?.id
+    ? ((await db.user.findUnique({
+        where: { id: session.user.id },
+        select: { interests: true },
+      }))?.interests ?? [])
+    : [];
+
+  // Array.prototype.sort is stable, so ties (two matched, or two unmatched
+  // tiles) keep their original relative order rather than shuffling.
+  const orderedInterests = savedInterests.length
+    ? [...interests].sort((a, b) => {
+        const aMatched = savedInterests.includes(a.slug) ? 0 : 1;
+        const bMatched = savedInterests.includes(b.slug) ? 0 : 1;
+        return aMatched - bMatched;
+      })
+    : interests;
+  const matchedLabels = interests
+    .filter((interest) => savedInterests.includes(interest.slug))
+    .map((interest) => interest.label);
 
   return (
     <div className="flex min-h-screen flex-col bg-surface">
@@ -362,7 +397,9 @@ export default function Home() {
                   Browse by Interest
                 </h2>
                 <p className="mt-2 max-w-2xl text-on-surface-variant">
-                  Not sure what to search? Pick an area and see the real jobs in it.
+                  {matchedLabels.length > 0
+                    ? `Because you're interested in ${formatList(matchedLabels)} — pick up where you left off, or explore something new.`
+                    : "Not sure what to search? Pick an area and see the real jobs in it."}
                 </p>
               </div>
               <Link
@@ -387,7 +424,7 @@ export default function Home() {
             </div>
 
             <div className="mt-10 grid grid-cols-1 gap-6 md:grid-cols-3">
-              {interests.map((interest) => {
+              {orderedInterests.map((interest) => {
                 const Icon = INTEREST_ICONS[interest.slug];
                 return (
                   <Link

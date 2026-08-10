@@ -247,55 +247,6 @@ export const BUDGET_PRIORITIES: {
   },
 ];
 
-/**
- * How far the student will go for the *job*, not the degree.
- *
- * This is the question that changes the advice most and gets asked least.
- * Plenty of careers are only realistically enterable through a rural posting,
- * an unglamorous market, or an overseas assignment, and a student who rules
- * those out has a materially different path than one who doesn't.
- */
-export interface WorkMobility {
-  /** Rural, small-town, or designated underserved areas. */
-  rural: boolean;
-  /** Elsewhere in the US. */
-  relocate: boolean;
-  /** Outside the country. */
-  international: boolean;
-}
-
-export const MOBILITY_OPTIONS: {
-  id: keyof WorkMobility;
-  label: string;
-  detail: string;
-  /**
-   * How the option reads inside "Open to …" on the plan summary.
-   *
-   * Written out rather than lowercasing `label`, because that turned
-   * "Anywhere in the US" into "anywhere in the us".
-   */
-  summaryLabel: string;
-}[] = [
-  {
-    id: "rural",
-    label: "Rural or underserved areas",
-    detail: "Small towns and shortage areas — often the fastest way in, and where loan-forgiveness programs live",
-    summaryLabel: "rural areas",
-  },
-  {
-    id: "relocate",
-    label: "Relocating for the right role",
-    detail: "You'd move to another part of the country",
-    summaryLabel: "relocating",
-  },
-  {
-    id: "international",
-    label: "Working abroad",
-    detail: "You'd work in another country, at least for a while",
-    summaryLabel: "working abroad",
-  },
-];
-
 /** Where the student lives, anywhere on earth. */
 export interface StudentLocation {
   /** ISO 3166-1 alpha-2. */
@@ -335,15 +286,18 @@ export interface IntakeAnswers {
   /**
    * The schools the student named, stored whole rather than by id.
    *
-   * An AI-discovered school exists in no table we ship — its name, URLs, and
-   * tuition come back from one discovery call and nothing can look them up
-   * again later. Keeping the record means a plan can still be generated for
-   * it after a refresh.
+   * An AI-discovered (non-Florida-curated) school exists in no table we
+   * ship — its name, URLs, and tuition come back from one lookup and
+   * nothing can look them up again later. Keeping the record means a plan
+   * can still be generated for it after a refresh.
    *
-   * No longer set by the intake itself (the dedicated schools step was
-   * removed — /plan's own Closest/Cheapest/named tracks already do this
-   * ranking). Populated by the school-first flow instead: picking a school
-   * before picking a career.
+   * Set by either of two routes into the same field: the school-first flow
+   * (/schools/[id] → SchoolProgramBrowser, picking a school before a career)
+   * or the intake's own "Have a school in mind?" step
+   * (SchoolPickerStep.tsx), which only runs when this is still empty when
+   * the wizard reaches it — so a student is never asked twice. Either way,
+   * /plan's own Closest/Cheapest/named tracks (planTracks.ts's pickDesired)
+   * are what actually turn a named school into a route.
    */
   desiredSchools?: SchoolRef[];
   /**
@@ -355,16 +309,9 @@ export interface IntakeAnswers {
    */
   discoveredSchools?: SchoolRef[];
   budgetPriority?: BudgetPriority;
-  mobility?: WorkMobility;
 }
 
 export const EMPTY_INTAKE: IntakeAnswers = {};
-
-export const NO_MOBILITY: WorkMobility = {
-  rural: false,
-  relocate: false,
-  international: false,
-};
 
 /**
  * The wizard's steps, in order.
@@ -388,7 +335,6 @@ export const INTAKE_STEPS = [
   "education",
   "finances",
   "priority",
-  "mobility",
 ] as const;
 
 export type IntakeStep = (typeof INTAKE_STEPS)[number];
@@ -411,8 +357,7 @@ export function isComplete(answers: IntakeAnswers): boolean {
       // estimate and estimateAid falls back cleanly without it, so it's an
       // improvement to a plan rather than a precondition for one — and
       // intakes saved before it was asked still generate.
-      answers.budgetPriority &&
-      answers.mobility
+      answers.budgetPriority
   );
 }
 
@@ -430,11 +375,6 @@ export function summarize(answers: IntakeAnswers): string[] {
     );
     if (priority) parts.push(priority.label);
   }
-
-  const willing = MOBILITY_OPTIONS.filter(
-    (option) => answers.mobility?.[option.id]
-  ).map((option) => option.summaryLabel);
-  if (willing.length) parts.push(`Open to ${willing.join(", ")}`);
 
   return parts;
 }

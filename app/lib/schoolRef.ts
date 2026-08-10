@@ -121,3 +121,58 @@ export function openSchoolId(name: string): string {
 export function schoolLocationLabel(school: SchoolRef): string {
   return [school.city, school.subdivision].filter(Boolean).join(", ");
 }
+
+/** Must match schoolDirectory.ts's own SYNTHESIZED_PREFIX — duplicated
+ *  rather than imported because that file's module graph pulls in the
+ *  multi-megabyte national Scorecard snapshot, which must never reach a
+ *  client bundle (see its own header). This constant alone is safe to ship;
+ *  the file it mirrors is not. */
+const DIRECTORY_SYNTHESIZED_PREFIX = "sc-";
+
+/** The subset of DirectorySchool this needs — not the type itself, so a
+ *  client component can build one without importing schoolDirectory.ts. */
+export interface DirectorySchoolLike {
+  id: string;
+  name: string;
+  city: string;
+  state: string | null;
+  kind: SchoolKindRef;
+  hasCatalog: boolean;
+  website?: string | null;
+  latitude?: number;
+  longitude?: number;
+  distanceMiles: number | null;
+}
+
+/**
+ * Turns a school picked from the directory (/schools, or an intake step
+ * built on the same data) into a SchoolRef the rest of the app already knows
+ * how to plan against.
+ *
+ * A curated Florida school keeps its own id and, if we hold a scraped
+ * catalog for it, source: "catalog" — completely unchanged from before.
+ * A synthesized (Scorecard-only) school gets remapped to the "open:" id
+ * scheme /api/find-schools already gives every AI-discovered school, so it
+ * flows through the exact same tested path (isOpenSchool, /api/generate-
+ * pathway's open-prompt-plus-URL-verification branch) rather than a new one
+ * built just for this.
+ */
+export function directorySchoolToRef(
+  school: DirectorySchoolLike,
+  subdivision: string
+): SchoolRef {
+  const curated = !school.id.startsWith(DIRECTORY_SYNTHESIZED_PREFIX);
+  return {
+    id: curated ? school.id : openSchoolId(school.name),
+    name: school.name,
+    city: school.city,
+    subdivision,
+    countryCode: "US",
+    kind: school.kind,
+    source: curated && school.hasCatalog ? "catalog" : "ai",
+    website: school.website ?? undefined,
+    latitude: school.latitude,
+    longitude: school.longitude,
+    distanceMiles: school.distanceMiles,
+  };
+}

@@ -9,8 +9,6 @@ import {
   EDUCATION_LEVELS,
   HOUSEHOLD_SIZES,
   INCOME_BANDS,
-  MOBILITY_OPTIONS,
-  NO_MOBILITY,
   householdQuestion,
   incomeQuestion,
   isIndependent,
@@ -19,7 +17,6 @@ import {
   type EducationLevel,
   type IncomeBand,
   type IntakeAnswers,
-  type WorkMobility,
 } from "@/app/lib/intake";
 import { DEFAULT_COUNTRY } from "@/app/lib/countries";
 import type { RouteArchetype } from "@/app/lib/routeArchetype";
@@ -28,6 +25,7 @@ import { loadIntake, saveIntake } from "@/app/lib/intakeStorage";
 import { ContinueButton, OptionCard, StepShell } from "@/app/components/intake/StepShell";
 import { LocationStep } from "@/app/components/intake/LocationStep";
 import { CareerProfileStep } from "@/app/components/intake/CareerProfileStep";
+import { SchoolPickerStep } from "@/app/components/intake/SchoolPickerStep";
 import { PathRail } from "@/app/components/intake/PathRail";
 
 // The 2.0 intake, front to back.
@@ -49,7 +47,6 @@ interface Refinement {
   question: string;
   helpText: string;
   options: RefineOption[];
-  mobilityNote: string;
   /** How people actually get into this job — steers every later question. */
   routeArchetype?: RouteArchetype;
   routeReason?: string;
@@ -61,10 +58,10 @@ type Step =
   | "specifics"
   | "location"
   | "profile"
+  | "schools"
   | "education"
   | "finances"
-  | "priority"
-  | "mobility";
+  | "priority";
 
 // Chosen to advertise the range of ROUTES, not just a list of jobs: a
 // degree, a trade, a credential, a certification, a talent path. Someone who
@@ -175,9 +172,15 @@ export default function IntakeWizard() {
     // know where they live, so its wage figures are national. See
     // resolveAreas — no location means national-only, never a metro figure
     // labelled as theirs.
-    list.push("profile", "location", "education", "finances", "priority", "mobility");
+    list.push("profile", "location");
+    // Skipped when a school was already named — either via the school-first
+    // flow (/schools/[id]) before landing here, or by finishing this exact
+    // step on an earlier pass through the wizard. Asking twice would look
+    // like the first answer didn't take.
+    if (!answers.desiredSchools?.length) list.push("schools");
+    list.push("education", "finances", "priority");
     return list;
-  }, [refinement, skipCareer]);
+  }, [refinement, skipCareer, answers.desiredSchools]);
 
   const stepNumber = Math.max(1, steps.indexOf(step) + 1);
 
@@ -299,10 +302,8 @@ export default function IntakeWizard() {
 
   // --- Finishing -----------------------------------------------------------
 
-  const finish = (mobility: WorkMobility) => {
-    const complete: IntakeAnswers = { ...answers, mobility };
-    setAnswers(complete);
-    saveIntake(complete);
+  const finish = () => {
+    saveIntake(answers);
     router.push("/plan");
   };
 
@@ -524,6 +525,21 @@ export default function IntakeWizard() {
     );
   }
 
+  if (step === "schools") {
+    return (
+      <SchoolPickerStep
+        answers={answers}
+        stepNumber={stepNumber}
+        rail={rail}
+        onBack={back}
+        onDone={(school) => {
+          patch({ desiredSchools: school ? [school] : undefined });
+          advance();
+        }}
+      />
+    );
+  }
+
   if (step === "education") {
     return (
       <StepShell
@@ -678,6 +694,18 @@ export default function IntakeWizard() {
         rail={rail}
         help="We'll still show you every route â€” this just decides which one leads."
         onBack={back}
+        // Selecting a card highlights it but no longer advances immediately
+        // — matches the "education" step's pattern (pick, then Continue),
+        // so returning here to review or change an answer has an actual
+        // button to press rather than an empty footer. This is also the
+        // wizard's last step (see the removed "mobility" step, which asked
+        // where the student would work but never fed that answer into
+        // anything downstream), so Continue finishes the intake.
+        footer={
+          answers.budgetPriority ? (
+            <ContinueButton onClick={finish} label="See my plan" />
+          ) : undefined
+        }
       >
         <div className="grid gap-3">
           {BUDGET_PRIORITIES.map((priority) => (
@@ -686,54 +714,10 @@ export default function IntakeWizard() {
               label={priority.label}
               detail={priority.detail}
               selected={answers.budgetPriority === priority.id}
-              onClick={() => {
-                patch({ budgetPriority: priority.id as BudgetPriority });
-                advance();
-              }}
+              onClick={() => patch({ budgetPriority: priority.id as BudgetPriority })}
             />
           ))}
         </div>
-      </StepShell>
-    );
-  }
-
-  if (step === "mobility") {
-    const career = answers.career?.resolved ?? "this career";
-    const mobility = answers.mobility ?? NO_MOBILITY;
-    const toggle = (key: keyof WorkMobility) =>
-      patch({ mobility: { ...mobility, [key]: !mobility[key] } });
-
-    return (
-      <StepShell
-        stepNumber={stepNumber}
-        question={`Once you're qualified, where would you work as a ${career.toLowerCase()}?`}
-        rail={rail}
-        help={
-          refinement?.mobilityNote ||
-          "Pick everything you'd genuinely consider. Ruling nothing out opens up faster routes in."
-        }
-        onBack={back}
-        footer={<ContinueButton onClick={() => finish(mobility)} label="See my plan" />}
-      >
-        <div className="grid gap-3">
-          {MOBILITY_OPTIONS.map((option) => (
-            <OptionCard
-              key={option.id}
-              label={option.label}
-              detail={option.detail}
-              selected={mobility[option.id]}
-              onClick={() => toggle(option.id)}
-            />
-          ))}
-        </div>
-
-        <button
-          type="button"
-          onClick={() => finish(NO_MOBILITY)}
-          className="mt-6 text-sm text-outline underline hover:text-primary"
-        >
-          None of these â€” I want to stay where I am
-        </button>
       </StepShell>
     );
   }

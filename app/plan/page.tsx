@@ -200,14 +200,32 @@ export default function PlanPage() {
   // did" call intakeAdoption.ts makes for the intake itself.
   const saveTrack = async (track: PlanTrack) => {
     const state = states[track.school.id];
-    if (state?.status !== "done" || !career) return;
+    // Reachable only once the render below has already confirmed answers is
+    // non-null (there's no save control before then) — guarded again here
+    // because TypeScript can't see across that closure boundary.
+    if (state?.status !== "done" || !career || !answers) return;
 
     const option = state.data.pathways[state.selected];
     const payload = {
       career,
       schoolId: track.school.id,
       schoolName: track.school.name,
-      data: { title: option.title, steps: option.steps, confidence: state.data.confidence },
+      data: {
+        title: option.title,
+        steps: option.steps,
+        confidence: state.data.confidence,
+        verification: state.data.verification,
+        // The exact school this route was built against, and the answers
+        // CostPanel needs — together, enough to re-render the actual
+        // generated pathway page later rather than just its step list.
+        school: track.school,
+        costInputs: {
+          incomeBand: answers.incomeBand,
+          countryCode: answers.location?.countryCode,
+          dependencyFlags: answers.dependencyFlags,
+          householdSize: answers.householdSize,
+        },
+      },
     };
 
     if (sessionStatus !== "authenticated") {

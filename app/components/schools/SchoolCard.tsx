@@ -14,8 +14,14 @@ import type { DirectorySchool } from "@/app/lib/schoolDirectory";
 
 const KIND_LABELS: Record<DirectorySchool["kind"], string> = {
   "state-college": "Florida College System",
-  "public-university": "State University",
+  "public-university": "Public",
   private: "Private",
+  // Neither is ever assigned by schoolDirectory.ts today (a synthesized
+  // school only ever gets "public-university", "private", or "unknown" —
+  // see kindFromOwnership) — included so this Record stays exhaustive
+  // against the full SchoolKindRef union other AI-discovered schools use.
+  "community-college": "Community College",
+  unknown: "Type not reported",
 };
 
 function formatPercent(value: number): string {
@@ -66,7 +72,7 @@ export function SchoolCard({ school, programMatchCount }: Props) {
           {school.name}
         </p>
         <p className="mt-0.5 text-sm text-on-surface-variant">
-          {school.city}, FL · {KIND_LABELS[school.kind]}
+          {[school.city, school.state].filter(Boolean).join(", ")} · {KIND_LABELS[school.kind]}
           {school.distanceMiles !== null && ` · ${formatMiles(school.distanceMiles)}`}
         </p>
 

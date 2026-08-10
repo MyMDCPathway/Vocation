@@ -101,6 +101,29 @@ function jobsForGroups(groups: string[]): Occupation[] {
   return OCCUPATIONS.filter((o) => set.has(majorGroup(o.code)));
 }
 
+/**
+ * Which of a user's stored interest slugs (curated, e.g. "stem", or a raw
+ * SOC major-group code from the browse-all page) a real SOC code falls
+ * under — the label to show, or null if it matches none of them.
+ *
+ * Used by /api/projections to flag "in your Healthcare interest" on the BLS
+ * trending tables. A code can only ever land in one of a user's slugs: the
+ * six curated interests' groups are disjoint by construction (see
+ * CURATED_INTERESTS above), and a raw industry slug is exactly one group.
+ */
+export function matchedInterestLabel(socCode: string, slugs: string[]): string | null {
+  const group = majorGroup(socCode);
+  for (const slug of slugs) {
+    const curated = CURATED_INTERESTS.find((interest) => interest.slug === slug);
+    if (curated) {
+      if (curated.groups.includes(group)) return curated.label;
+      continue;
+    }
+    if (slug === group && SOC_MAJOR_GROUPS[slug]) return SOC_MAJOR_GROUPS[slug];
+  }
+  return null;
+}
+
 export interface InterestSummary {
   slug: string;
   label: string;

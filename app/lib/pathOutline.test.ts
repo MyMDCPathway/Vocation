@@ -5,7 +5,7 @@ import {
   outlineDurationHint,
   type OutlineStep,
 } from "@/app/lib/pathOutline";
-import { NO_MOBILITY, type IntakeAnswers } from "@/app/lib/intake";
+import type { IntakeAnswers } from "@/app/lib/intake";
 
 const step = (over: Partial<OutlineStep>): OutlineStep => ({
   label: "Step",
@@ -26,7 +26,6 @@ const DEGREE_OUTLINE: OutlineStep[] = [
 
 const answers = (over: Partial<IntakeAnswers> = {}): IntakeAnswers => ({
   career: { raw: "doctor", resolved: "Pediatrician" },
-  mobility: NO_MOBILITY,
   ...over,
 });
 

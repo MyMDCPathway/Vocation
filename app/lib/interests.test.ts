@@ -3,6 +3,7 @@ import {
   listCuratedInterests,
   listAllIndustries,
   getInterestDetail,
+  matchedInterestLabel,
   CURATED_INTERESTS,
   SOC_MAJOR_GROUPS,
 } from "@/app/lib/interests";
@@ -66,5 +67,28 @@ describe("getInterestDetail", () => {
     // An empty array here would render as "no jobs in this field" — a real
     // claim about the labor market. null lets the caller render 404 instead.
     expect(getInterestDetail("not-a-real-interest")).toBeNull();
+  });
+});
+
+describe("matchedInterestLabel", () => {
+  it("finds the curated interest whose group covers the code", () => {
+    // 291141 = Registered Nurses, SOC major group 29 (Healthcare Practitioners).
+    expect(matchedInterestLabel("291141", ["stem", "healthcare"])).toBe("Healthcare");
+  });
+
+  it("resolves a raw SOC major-group slug the same way the browse-all page does", () => {
+    expect(matchedInterestLabel("472111", ["51"])).toBeNull(); // Electricians is group 47, not 51
+    expect(matchedInterestLabel("472111", ["47"])).toBe(SOC_MAJOR_GROUPS["47"]);
+  });
+
+  it("returns null when the code matches none of the given slugs", () => {
+    // 211018 (Substance Abuse... Counselors) is group 21, none of the six
+    // curated interests cover it — see interests.test.ts's own disjointness
+    // check above for why that's expected, not a gap.
+    expect(matchedInterestLabel("211018", ["stem", "healthcare", "business"])).toBeNull();
+  });
+
+  it("returns null for an empty slug list", () => {
+    expect(matchedInterestLabel("291141", [])).toBeNull();
   });
 });

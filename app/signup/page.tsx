@@ -10,9 +10,12 @@ import { PasswordField } from "@/app/components/auth/PasswordField";
 import { useGoogleAvailable } from "@/app/lib/useGoogleAvailable";
 import { passwordStrength } from "@/app/lib/passwordStrength";
 
-// PRD §1: "Create Account — two-step initial sign-up. Basic info (Name,
-// Email, Password) followed by account type selection (Student, Career
-// Changer, Professional)."
+// PRD §1 originally called for a two-step sign-up — basic info, then account
+// type selection (Student, Career Changer, Professional). That second step
+// is gone: accountType was write-only (saved to the User row, read back by
+// nothing — the same class of dead capability as onboarding's old privacy
+// step, see app/onboarding/page.tsx). One screen collects everything this
+// account actually needs.
 //
 // The Stitch mock for this screen paired the form with a side panel quoting
 // "Dr. Elena Rostova, Head of Career Strategy, Vocation AI" — a person and
@@ -20,27 +23,22 @@ import { passwordStrength } from "@/app/lib/passwordStrength";
 // testimonials and no named people on this product; the panel below carries
 // real, already-approved copy instead (the same claim the landing page makes),
 // not an invented endorsement.
-const ACCOUNT_TYPES = [
-  { id: "student", label: "Student" },
-  { id: "career_changer", label: "Career Changer" },
-  { id: "professional", label: "Professional" },
-] as const;
 
 export default function SignupPage() {
-  const [step, setStep] = useState<1 | 2>(1);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [accountType, setAccountType] = useState<(typeof ACCOUNT_TYPES)[number]["id"] | null>(null);
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const router = useRouter();
   const googleAvailable = useGoogleAvailable();
 
-  function goToStepTwo(event: React.FormEvent) {
+  async function createAccount(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
+
     // Mirrors the server's own check in /api/signup/route.ts — this is a
     // convenience that saves a round trip, never the actual enforcement.
     const strength = passwordStrength(password);
@@ -48,19 +46,15 @@ export default function SignupPage() {
       setError(strength.feedback);
       return;
     }
-    setStep(2);
-  }
-
-  async function createAccount() {
-    if (!accountType) {
-      setError("Pick the option closest to where you are right now.");
+    if (password !== confirmPassword) {
+      setError("Those passwords don't match.");
       return;
     }
     if (!agreedToTerms) {
       setError("You'll need to agree to the Terms and Privacy Policy to continue.");
       return;
     }
-    setError(null);
+
     setSubmitting(true);
 
     // Carries a visitor's in-progress intake into the new account, so
@@ -71,7 +65,7 @@ export default function SignupPage() {
     const response = await fetch("/api/signup", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password, accountType, intake }),
+      body: JSON.stringify({ name, email, password, intake }),
     });
 
     if (!response.ok) {
@@ -107,122 +101,86 @@ export default function SignupPage() {
             Start navigating your professional future today.
           </p>
 
-          {step === 1 && (
-            <form onSubmit={goToStepTwo} className="mt-6 space-y-4">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-on-surface-variant">
-                  Full name
-                </label>
-                <input
-                  id="name"
-                  required
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Jane Doe"
-                  className="mt-1 w-full rounded border border-outline-variant bg-surface-lowest px-3 py-2 text-on-surface focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-on-surface-variant">
-                  Email address
-                </label>
-                <input
-                  id="email"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="jane@example.com"
-                  className="mt-1 w-full rounded border border-outline-variant bg-surface-lowest px-3 py-2 text-on-surface focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-                />
-              </div>
-
-              <PasswordField
-                id="password"
-                label="Password"
-                value={password}
-                onChange={setPassword}
-                placeholder="Create a secure password"
-                autoComplete="new-password"
-                helpText="Must be at least 8 characters long."
-                showStrength
-              />
-
-              {error && <p className="text-sm text-error">{error}</p>}
-
-              <button
-                type="submit"
-                className="w-full rounded-md bg-primary py-2.5 text-sm font-medium text-on-primary transition-colors hover:bg-primary-container"
-              >
-                Continue
-              </button>
-            </form>
-          )}
-
-          {step === 2 && (
-            <div className="mt-6 space-y-4">
-              <p className="text-sm font-medium text-on-surface-variant">
-                I identify primarily as a:
-              </p>
-              <div className="grid grid-cols-3 gap-3">
-                {ACCOUNT_TYPES.map((type) => (
-                  <button
-                    key={type.id}
-                    type="button"
-                    onClick={() => setAccountType(type.id)}
-                    aria-pressed={accountType === type.id}
-                    className={`rounded-md border p-4 text-center text-sm font-medium transition-colors ${
-                      accountType === type.id
-                        ? "border-secondary bg-secondary/10 text-secondary"
-                        : "border-outline-variant text-on-surface hover:bg-surface-container"
-                    }`}
-                  >
-                    {type.label}
-                  </button>
-                ))}
-              </div>
-
-              <label className="flex items-start gap-2 text-sm text-on-surface-variant">
-                <input
-                  type="checkbox"
-                  checked={agreedToTerms}
-                  onChange={(e) => setAgreedToTerms(e.target.checked)}
-                  className="mt-0.5 h-4 w-4 shrink-0 rounded border-outline-variant"
-                />
-                <span>
-                  I agree to the{" "}
-                  <Link href="/terms" target="_blank" className="font-medium text-secondary hover:text-secondary/80">
-                    Terms
-                  </Link>{" "}
-                  and{" "}
-                  <Link href="/privacy" target="_blank" className="font-medium text-secondary hover:text-secondary/80">
-                    Privacy Policy
-                  </Link>
-                  .
-                </span>
+          <form onSubmit={createAccount} className="mt-6 space-y-4">
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-on-surface-variant">
+                Full name
               </label>
-
-              {error && <p className="text-sm text-error">{error}</p>}
-
-              <button
-                type="button"
-                onClick={createAccount}
-                disabled={submitting || !agreedToTerms}
-                className="w-full rounded-md bg-primary py-2.5 text-sm font-medium text-on-primary transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {submitting ? "Creating account…" : "Create Account"}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setStep(1)}
-                className="w-full text-sm font-medium text-on-surface-variant hover:text-primary"
-              >
-                Back
-              </button>
+              <input
+                id="name"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Jane Doe"
+                className="mt-1 w-full rounded border border-outline-variant bg-surface-lowest px-3 py-2 text-on-surface focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              />
             </div>
-          )}
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-on-surface-variant">
+                Email address
+              </label>
+              <input
+                id="email"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="jane@example.com"
+                className="mt-1 w-full rounded border border-outline-variant bg-surface-lowest px-3 py-2 text-on-surface focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+              />
+            </div>
+
+            <PasswordField
+              id="password"
+              label="Password"
+              value={password}
+              onChange={setPassword}
+              placeholder="Create a secure password"
+              autoComplete="new-password"
+              helpText="Must be at least 8 characters long."
+              showStrength
+            />
+
+            <PasswordField
+              id="confirm-password"
+              label="Confirm password"
+              value={confirmPassword}
+              onChange={setConfirmPassword}
+              placeholder="Type it again"
+              autoComplete="new-password"
+            />
+
+            <label className="flex items-start gap-2 text-sm text-on-surface-variant">
+              <input
+                type="checkbox"
+                checked={agreedToTerms}
+                onChange={(e) => setAgreedToTerms(e.target.checked)}
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-outline-variant"
+              />
+              <span>
+                I agree to the{" "}
+                <Link href="/terms" target="_blank" className="font-medium text-secondary hover:text-secondary/80">
+                  Terms
+                </Link>{" "}
+                and{" "}
+                <Link href="/privacy" target="_blank" className="font-medium text-secondary hover:text-secondary/80">
+                  Privacy Policy
+                </Link>
+                .
+              </span>
+            </label>
+
+            {error && <p className="text-sm text-error">{error}</p>}
+
+            <button
+              type="submit"
+              disabled={submitting || !agreedToTerms}
+              className="w-full rounded-md bg-primary py-2.5 text-sm font-medium text-on-primary transition-colors hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {submitting ? "Creating account…" : "Create Account"}
+            </button>
+          </form>
 
           {googleAvailable && (
             <>

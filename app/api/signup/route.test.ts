@@ -25,7 +25,6 @@ const VALID_BODY = {
   name: "Jane Doe",
   email: "jane@example.com",
   password: "correct horse battery staple",
-  accountType: "student",
 };
 
 beforeEach(() => {

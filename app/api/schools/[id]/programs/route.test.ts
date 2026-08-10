@@ -48,4 +48,41 @@ describe("GET /api/schools/[id]/programs", () => {
     const response = await GET(makeRequest("not-a-real-school"), { params: { id: "not-a-real-school" } });
     expect(response.status).toBe(404);
   });
+
+  it("falls back to the school's own real website for a synthesized national school", async () => {
+    // Harvard University, unitId 166027 — real, from data/scorecard.json.
+    // No scraped catalog and no curated schoolInfo.ts entry, so the only
+    // honest fallback is the one real link Scorecard gives us.
+    const response = await GET(makeRequest("sc-166027"), { params: { id: "sc-166027" } });
+    const body = await response.json();
+
+    expect(body.hasCatalog).toBe(false);
+    expect(body.programs).toEqual([]);
+    expect(body.resources.length).toBe(1);
+    expect(body.resources[0].url).toMatch(/^https:\/\/.*harvard\.edu/i);
+  });
+
+  it("tags matchedInterest: null on every program with no interests param", async () => {
+    const response = await GET(makeRequest("mdc"), { params: { id: "mdc" } });
+    const body = await response.json();
+    expect(body.programs.every((p: any) => p.matchedInterest === null)).toBe(true);
+  });
+
+  it("flags and reorders programs that fall inside a requested interest", async () => {
+    const response = await GET(makeRequest("mdc", "?interests=healthcare"), { params: { id: "mdc" } });
+    const body = await response.json();
+
+    // MDC's real nursing program resolves to Registered Nurses (see
+    // programCareers.test.ts) — Healthcare. Matched by substring rather than
+    // the exact catalog key, since dedup-by-URL picks whichever nursing
+    // alias happens to appear first in mdc-programs.ts.
+    const nursing = body.programs.find((p: any) => /nursing.*r\.n\./i.test(p.name));
+    expect(nursing).toBeDefined();
+    expect(nursing.matchedInterest).toBe("Healthcare");
+
+    // Every matched program sorts before every unmatched one.
+    const firstUnmatchedIndex = body.programs.findIndex((p: any) => p.matchedInterest === null);
+    const lastMatchedIndex = body.programs.map((p: any) => p.matchedInterest !== null).lastIndexOf(true);
+    expect(lastMatchedIndex).toBeLessThan(firstUnmatchedIndex);
+  });
 });

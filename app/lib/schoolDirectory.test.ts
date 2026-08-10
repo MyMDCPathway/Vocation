@@ -1,5 +1,10 @@
 import { describe, it, expect, afterEach } from "vitest";
-import { listDirectorySchools, sortDirectorySchools } from "@/app/lib/schoolDirectory";
+import {
+  listDirectorySchools,
+  listDirectoryStates,
+  getDirectorySchoolById,
+  sortDirectorySchools,
+} from "@/app/lib/schoolDirectory";
 import { _setSnapshotForTests } from "@/app/lib/scorecard";
 import { FLORIDA_SCHOOLS } from "@/app/lib/floridaSchools";
 import { SCHOOLS_WITH_CATALOG } from "@/app/lib/schoolCatalogs";
@@ -94,6 +99,76 @@ describe("listDirectorySchools", () => {
     const schools = listDirectorySchools();
     const mdc = schools.find((s) => s.id === "mdc")!;
     expect(mdc.scorecard?.medianEarnings10yr).toBe(38000);
+  });
+});
+
+describe("listDirectorySchools national scope", () => {
+  it("defaults to Florida only, unchanged from before national scope existed", () => {
+    const schools = listDirectorySchools();
+    expect(schools.every((s) => s.state === "FL")).toBe(true);
+    expect(schools.length).toBe(FLORIDA_SCHOOLS.length);
+  });
+
+  it("scope 'ALL' includes real non-Florida schools, synthesized with no invented identity", () => {
+    const schools = listDirectorySchools(undefined, "ALL");
+    expect(schools.length).toBeGreaterThan(FLORIDA_SCHOOLS.length);
+
+    const harvard = schools.find((s) => s.name === "Harvard University")!;
+    expect(harvard).toBeDefined();
+    expect(harvard.id).toBe("sc-166027");
+    expect(harvard.state).toBe("MA");
+    expect(harvard.city).toBe("Cambridge");
+    expect(harvard.hasCatalog).toBe(false);
+    expect(harvard.kind).toBe("private"); // ownership 2
+    expect(harvard.logo).toBeUndefined();
+    // Real coordinates, not the Florida hand-compiled table.
+    expect(harvard.latitude).toBeCloseTo(42.374471, 3);
+    expect(harvard.longitude).toBeCloseTo(-71.118313, 3);
+  });
+
+  it("never lists the same physical school twice under two ids", () => {
+    const schools = listDirectorySchools(undefined, "ALL");
+    const mdcMatches = schools.filter((s) => s.name === "Miami Dade College");
+    expect(mdcMatches.length).toBe(1);
+    expect(mdcMatches[0].id).toBe("mdc"); // the curated identity wins, not a synthesized duplicate
+  });
+
+  it("scoping to a specific non-Florida state returns only that state's real schools", () => {
+    const schools = listDirectorySchools(undefined, "GA");
+    expect(schools.length).toBeGreaterThan(0);
+    expect(schools.every((s) => s.state === "GA")).toBe(true);
+    expect(schools.every((s) => s.id.startsWith("sc-"))).toBe(true);
+  });
+});
+
+describe("listDirectoryStates", () => {
+  it("returns every real state the national snapshot covers, including Florida", () => {
+    const states = listDirectoryStates();
+    expect(states).toContain("FL");
+    expect(states).toContain("MA");
+    expect(states.length).toBeGreaterThan(45);
+    expect(states).toEqual([...states].sort());
+  });
+});
+
+describe("getDirectorySchoolById", () => {
+  it("resolves a curated Florida school by its existing id", () => {
+    const mdc = getDirectorySchoolById("mdc");
+    expect(mdc).not.toBeNull();
+    expect(mdc!.name).toBe("Miami Dade College");
+    expect(mdc!.hasCatalog).toBe(true);
+  });
+
+  it("resolves a synthesized national school by its sc-<unitId> id", () => {
+    const harvard = getDirectorySchoolById("sc-166027");
+    expect(harvard).not.toBeNull();
+    expect(harvard!.name).toBe("Harvard University");
+    expect(harvard!.state).toBe("MA");
+  });
+
+  it("returns null for an unknown id of either shape", () => {
+    expect(getDirectorySchoolById("not-a-real-school")).toBeNull();
+    expect(getDirectorySchoolById("sc-999999999")).toBeNull();
   });
 });
 

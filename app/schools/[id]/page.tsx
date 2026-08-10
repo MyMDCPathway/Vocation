@@ -3,14 +3,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AuthControls } from "@/app/components/AuthControls";
 import { SchoolProgramBrowser } from "@/app/components/schools/SchoolProgramBrowser";
-import { getSchoolById } from "@/app/lib/floridaSchools";
+import { getDirectorySchoolById } from "@/app/lib/schoolDirectory";
 
 // The school-first door: pick a school on /schools, land here to say what
 // you want to study there — instead of "Plan a pathway here" dropping you
 // on /start's career question, throwing away the school you just picked.
+//
+// Resolves both curated Florida schools and synthesized (Scorecard-only,
+// no catalog) national schools by the same id — see getDirectorySchoolById.
 
 export function generateMetadata({ params }: { params: { id: string } }): Metadata {
-  const school = getSchoolById(params.id);
+  const school = getDirectorySchoolById(params.id);
   return {
     title: school ? `Study at ${school.name} | Vocation` : "Vocation",
   };
@@ -21,7 +24,7 @@ function Wordmark() {
 }
 
 export default function SchoolProgramsPage({ params }: { params: { id: string } }) {
-  if (!getSchoolById(params.id)) notFound();
+  if (!getDirectorySchoolById(params.id)) notFound();
 
   return (
     <div className="flex min-h-screen flex-col bg-surface">

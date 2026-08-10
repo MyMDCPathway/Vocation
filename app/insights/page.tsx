@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
 import { AuthControls } from "@/app/components/AuthControls";
 import { LaborStatsPanel, NoStatsNote } from "@/app/components/LaborStatsPanel";
 import { DemandMap } from "@/app/components/shared/DemandMap";
@@ -42,13 +43,17 @@ interface ProjectionsMeta {
   blsLastModified: string;
 }
 
+/** matchedInterest: which of the signed-in user's stored interests this
+ *  occupation's real SOC code falls under, or null — resolved server-side by
+ *  /api/projections (see matchedInterestLabel in app/lib/interests.ts), never
+ *  guessed here. */
 type ProjectionsState =
   | { status: "loading" }
   | { status: "unavailable" }
   | {
       status: "ok";
-      fastestGrowing: FastestGrowingOccupation[];
-      mostNewJobs: MostNewJobsOccupation[];
+      fastestGrowing: (FastestGrowingOccupation & { matchedInterest: string | null })[];
+      mostNewJobs: (MostNewJobsOccupation & { matchedInterest: string | null })[];
       meta: ProjectionsMeta;
     };
 
@@ -65,19 +70,34 @@ function Wordmark() {
 }
 
 export default function InsightsPage() {
+  const { status: sessionStatus } = useSession();
   const [career, setCareer] = useState("");
   const [submittedCareer, setSubmittedCareer] = useState<string | null>(null);
   const [result, setResult] = useState<ResultState>({ status: "idle" });
   const [projections, setProjections] = useState<ProjectionsState>({ status: "loading" });
 
   useEffect(() => {
+    // Waits for the session to settle rather than firing twice — a
+    // signed-out-then-authenticated flash would mean the unpersonalized
+    // request's response could land after the personalized one and clobber it.
+    if (sessionStatus === "loading") return;
     let cancelled = false;
-    fetch("/api/projections")
-      .then((response) => {
+
+    (async () => {
+      try {
+        let interestSlugs: string[] = [];
+        if (sessionStatus === "authenticated") {
+          const onboardingResponse = await fetch("/api/onboarding");
+          const onboardingBody = await onboardingResponse.json().catch(() => ({}));
+          interestSlugs = Array.isArray(onboardingBody.interests) ? onboardingBody.interests : [];
+        }
+
+        const query = interestSlugs.length
+          ? `?interests=${encodeURIComponent(interestSlugs.join(","))}`
+          : "";
+        const response = await fetch(`/api/projections${query}`);
         if (!response.ok) throw new Error();
-        return response.json();
-      })
-      .then((body) => {
+        const body = await response.json();
         if (cancelled) return;
         setProjections({
           status: "ok",
@@ -85,14 +105,15 @@ export default function InsightsPage() {
           mostNewJobs: body.mostNewJobs ?? [],
           meta: body.meta,
         });
-      })
-      .catch(() => {
+      } catch {
         if (!cancelled) setProjections({ status: "unavailable" });
-      });
+      }
+    })();
+
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [sessionStatus]);
 
   async function search(value: string) {
     const trimmed = value.trim();
@@ -196,6 +217,16 @@ export default function InsightsPage() {
 
         {result.status === "idle" && projections.status === "ok" && (
           <div className="mt-14 space-y-10">
+            {[...projections.fastestGrowing, ...projections.mostNewJobs].some(
+              (row) => row.matchedInterest
+            ) && (
+              <p className="-mb-4 text-sm text-on-surface-variant">
+                <span className="rounded-full bg-secondary-container px-2 py-0.5 text-[11px] font-semibold text-secondary">
+                  Tagged
+                </span>{" "}
+                rows fall inside interests from your profile.
+              </p>
+            )}
             <div>
               <h2 className="text-lg font-semibold text-primary">
                 Fastest growing careers, {projections.meta.projectionPeriod}
@@ -218,8 +249,13 @@ export default function InsightsPage() {
                       <span className="w-5 shrink-0 text-sm font-semibold text-outline">
                         {index + 1}
                       </span>
-                      <span className="flex-1 text-sm font-medium text-on-surface">
+                      <span className="min-w-0 flex-1 text-sm font-medium text-on-surface">
                         {row.occupation}
+                        {row.matchedInterest && (
+                          <span className="ml-2 inline-block rounded-full bg-secondary-container px-2 py-0.5 align-middle text-[11px] font-semibold text-secondary">
+                            {row.matchedInterest}
+                          </span>
+                        )}
                       </span>
                       <span className="shrink-0 text-sm font-semibold text-secondary">
                         +{row.growthRatePercent}%
@@ -255,8 +291,13 @@ export default function InsightsPage() {
                       <span className="w-5 shrink-0 text-sm font-semibold text-outline">
                         {index + 1}
                       </span>
-                      <span className="flex-1 text-sm font-medium text-on-surface">
+                      <span className="min-w-0 flex-1 text-sm font-medium text-on-surface">
                         {row.occupation}
+                        {row.matchedInterest && (
+                          <span className="ml-2 inline-block rounded-full bg-secondary-container px-2 py-0.5 align-middle text-[11px] font-semibold text-secondary">
+                            {row.matchedInterest}
+                          </span>
+                        )}
                       </span>
                       <span className="shrink-0 text-sm font-semibold text-secondary">
                         +{count.format(row.newJobs)} jobs

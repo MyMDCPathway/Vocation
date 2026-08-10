@@ -84,6 +84,14 @@ export function listScorecardByState(stateCode: string): ScorecardSchool[] {
   return SNAPSHOT.schools.filter((school) => school.state === upper);
 }
 
+/** Every institution the committed snapshot holds, unfiltered — the source
+ *  schoolDirectory.ts synthesizes non-Florida (and un-curated Florida)
+ *  entries from, now that this snapshot is a national pull rather than
+ *  Florida-only. */
+export function listAllScorecardSchools(): ScorecardSchool[] {
+  return SNAPSHOT.schools;
+}
+
 /** Lowercased, punctuation-stripped, whitespace-collapsed — good enough to
  *  compare Scorecard's IPEDS name against floridaSchools.ts's own, not
  *  loose enough to blur two different institutions into one match. */

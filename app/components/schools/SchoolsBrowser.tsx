@@ -4,12 +4,16 @@ import { useEffect, useMemo, useState } from "react";
 import dynamic from "next/dynamic";
 import { SchoolCard } from "@/app/components/schools/SchoolCard";
 import type { DirectorySchool, SchoolSortKey } from "@/app/lib/schoolDirectory";
-import type { SchoolKind } from "@/app/lib/floridaSchools";
+import type { SchoolKindRef } from "@/app/lib/schoolRef";
 import type { SchoolRef } from "@/app/lib/schoolRef";
+import { usStateName } from "@/app/lib/usStates";
 
-// The Schools browser: every Florida school we know, on a map and in a
-// sortable grid, with a program search that answers "which schools teach X"
-// rather than making a student guess a school name first.
+// The Schools browser: Florida in depth by default (every school we
+// curate, real catalogs, logos, brand colors), with a state picker that
+// opens onto every other real institution the US Dept. of Education's
+// College Scorecard tracks nationally — see schoolDirectory.ts for how a
+// non-curated school still gets real identity (name, city, coordinates,
+// ranking figures) with none invented (no logo, no brand color, no catalog).
 //
 // The map is loaded lazily and client-only (ssr: false) — it touches
 // `window` at import time (see SchoolMap.tsx's own header), the same reason
@@ -27,10 +31,10 @@ const SORT_OPTIONS: { key: SchoolSortKey; label: string }[] = [
   { key: "price", label: "Lowest net price" },
 ];
 
-const KIND_OPTIONS: { value: SchoolKind | "all"; label: string }[] = [
+const KIND_OPTIONS: { value: SchoolKindRef | "all"; label: string }[] = [
   { value: "all", label: "All kinds" },
   { value: "state-college", label: "Florida College System" },
-  { value: "public-university", label: "State universities" },
+  { value: "public-university", label: "Public" },
   { value: "private", label: "Private" },
 ];
 
@@ -53,7 +57,7 @@ function toSchoolRef(school: DirectorySchool): SchoolRef {
     id: school.id,
     name: school.name,
     city: school.city,
-    subdivision: "Florida",
+    subdivision: school.state ? usStateName(school.state) : "",
     countryCode: "US",
     kind: school.kind,
     source: school.hasCatalog ? "catalog" : "ai",
@@ -66,14 +70,19 @@ function toSchoolRef(school: DirectorySchool): SchoolRef {
 export function SchoolsBrowser() {
   const [schools, setSchools] = useState<DirectorySchool[]>([]);
   const [total, setTotal] = useState(0);
+  const [states, setStates] = useState<string[]>([]);
   const [scorecardMeta, setScorecardMeta] = useState<ScorecardMeta | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [sort, setSort] = useState<SchoolSortKey>("name");
-  const [kind, setKind] = useState<SchoolKind | "all">("all");
+  const [kind, setKind] = useState<SchoolKindRef | "all">("all");
   const [catalogOnly, setCatalogOnly] = useState(false);
   const [nameQuery, setNameQuery] = useState("");
+  // "FL" is the out-of-the-box scope — this product's home turf, unchanged
+  // from before national scope existed. "ALL" or any other real 2-letter
+  // code opens onto Scorecard's national data — see /api/schools's `state`.
+  const [state, setState] = useState("FL");
 
   const [origin, setOrigin] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(false);
@@ -97,6 +106,7 @@ export function SchoolsBrowser() {
       // Distance without an origin 400s server-side — fall back to name
       // until "Use my location" actually resolves one.
       params.set("sort", sort === "distance" && !origin ? "name" : sort);
+      params.set("state", state);
       if (kind !== "all") params.set("kind", kind);
       if (catalogOnly) params.set("catalogOnly", "1");
       if (nameQuery.trim()) params.set("q", nameQuery.trim());
@@ -113,6 +123,7 @@ export function SchoolsBrowser() {
         if (!cancelled) {
           setSchools(body.schools ?? []);
           setTotal(body.total ?? 0);
+          setStates(body.states ?? []);
           setScorecardMeta(body.scorecard ?? null);
         }
       } catch (err: any) {
@@ -125,7 +136,7 @@ export function SchoolsBrowser() {
     return () => {
       cancelled = true;
     };
-  }, [sort, kind, catalogOnly, nameQuery, origin]);
+  }, [sort, kind, catalogOnly, nameQuery, origin, state]);
 
   // --- Program search ---------------------------------------------------
 
@@ -205,16 +216,31 @@ export function SchoolsBrowser() {
 
   const mapSchools = useMemo(() => displayed.map(toSchoolRef), [displayed]);
 
+  const scopeLabel =
+    state === "FL" ? "Florida" : state === "ALL" ? "the US" : usStateName(state);
+
   return (
     <div className="mx-auto w-full max-w-[1400px] px-5 py-10 md:px-16">
       <h1 className="text-2xl font-bold tracking-tight text-primary sm:text-4xl">
-        Every Florida school we know
+        {state === "FL" ? "Every Florida school we know" : `Schools in ${scopeLabel}`}
       </h1>
       <p className="mt-3 max-w-2xl text-on-surface-variant">
-        {total || "61"} institutions — state colleges, state universities, and
-        SACSCOC-accredited private schools. "Full catalog" schools have a real,
-        scraped program list; every other school's plan is generated and its
-        program links are verified before you see them.
+        {state === "FL" ? (
+          <>
+            {total || "61"} institutions — state colleges, state universities,
+            and SACSCOC-accredited private schools. &quot;Full catalog&quot;
+            schools have a real, scraped program list; every other school&apos;s
+            plan is generated and its program links are verified before you
+            see them.
+          </>
+        ) : (
+          <>
+            {total} real institutions from the US Dept. of Education&apos;s
+            College Scorecard. Florida schools carry a scraped program
+            catalog; every other school links to its own real site until a
+            plan is generated for it.
+          </>
+        )}
       </p>
 
       {scorecardMeta && !scorecardMeta.available && (
@@ -228,6 +254,25 @@ export function SchoolsBrowser() {
 
       {/* Filter rail */}
       <div className="mt-8 flex flex-wrap items-end gap-4">
+        <label className="flex flex-col gap-1 text-sm">
+          <span className="font-medium text-on-surface-variant">State</span>
+          <select
+            value={state}
+            onChange={(e) => setState(e.target.value)}
+            className="w-44 rounded-lg border border-outline-variant bg-surface-lowest px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40"
+          >
+            <option value="FL">Florida</option>
+            <option value="ALL">All states</option>
+            {states
+              .filter((code) => code !== "FL")
+              .map((code) => (
+                <option key={code} value={code}>
+                  {usStateName(code)}
+                </option>
+              ))}
+          </select>
+        </label>
+
         <label className="flex flex-col gap-1 text-sm">
           <span className="font-medium text-on-surface-variant">Search by name</span>
           <input
@@ -254,7 +299,7 @@ export function SchoolsBrowser() {
           <span className="font-medium text-on-surface-variant">Kind</span>
           <select
             value={kind}
-            onChange={(e) => setKind(e.target.value as SchoolKind | "all")}
+            onChange={(e) => setKind(e.target.value as SchoolKindRef | "all")}
             className="rounded-lg border border-outline-variant bg-surface-lowest px-3 py-2 text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/40"
           >
             {KIND_OPTIONS.map((opt) => (

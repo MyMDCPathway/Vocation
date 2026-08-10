@@ -6,8 +6,9 @@ import { passwordStrength } from "@/app/lib/passwordStrength";
 // A password input with a show/hide toggle — standard practice on every
 // major site's account forms, and a real accessibility/usability win: typing
 // a password blind into a tiny box is the single most common source of
-// signup/login typos, and this repo's own signup flow has no "confirm
-// password" field to catch one.
+// signup/login typos. Signup renders two of these (password, confirm
+// password) and checks they match client-side before submitting; the show/hide
+// toggle here is what makes actually comparing them by eye possible.
 //
 // showStrength (signup only, not login) renders passwordStrength()'s meter
 // live as the student types — client-side feedback that mirrors, but never

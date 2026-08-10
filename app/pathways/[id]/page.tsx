@@ -5,17 +5,28 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { icons } from "@/app/lib/icons";
-import type { PathwayStep, SavedPathwayData } from "@/app/lib/types";
+import type { PathwayOption, PathwayStep, SavedPathwayData } from "@/app/lib/types";
+import { PathwayFlow } from "@/app/components/plan/PathwayFlow";
+import { ConfidenceBanner } from "@/app/components/plan/ConfidenceBanner";
+import { CostPanel } from "@/app/components/plan/CostPanel";
 
-// Editing a saved plan.
+// A saved plan: the actual generated pathway page, saved — not just its step
+// list. A row saved with `data.school` (every row saved since this existed)
+// gets the real preview below: the same PathwayFlow timeline, confidence
+// banner, and cost breakdown /plan showed when it was generated, live-synced
+// to whatever editing below has done to the steps. A row saved before this
+// existed has no `data.school` and falls back to the plain step list that's
+// all this page has ever rendered — never a broken or half-populated preview.
 //
 // Reorder, remove, annotate, reset-to-original — all real, all wired to
-// /api/pathways/[id]. Deliberately NOT here: adding a new step. A student
-// typing in a program name that sounds plausible is exactly the failure §2
-// of the whole app exists to prevent (HANDOFF's core insight: constrain the
-// model's output space, don't trust free text). Removing and reordering only
-// ever subtract from or reshuffle what the generator already verified —
-// never introduces anything new.
+// /api/pathways/[id], and unchanged by any of the above: the same StepCard
+// editor works on the same draftSteps regardless of which preview sits above
+// it. Deliberately NOT here: adding a new step. A student typing in a
+// program name that sounds plausible is exactly the failure §2 of the whole
+// app exists to prevent (HANDOFF's core insight: constrain the model's
+// output space, don't trust free text). Removing and reordering only ever
+// subtract from or reshuffle what the generator already verified — never
+// introduces anything new.
 
 interface SavedPathwayRow {
   id: string;
@@ -247,7 +258,7 @@ export default function SavedPathwayPage() {
   return (
     <div className="flex min-h-screen flex-col bg-surface">
       <header className="border-b border-outline-variant bg-surface px-5 py-4 md:px-16">
-        <div className="mx-auto flex w-full max-w-3xl items-center justify-between">
+        <div className="mx-auto flex w-full max-w-5xl items-center justify-between">
           <Link href="/" className="text-lg font-bold tracking-tight text-primary">
             <Wordmark />
           </Link>
@@ -257,7 +268,7 @@ export default function SavedPathwayPage() {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-3xl flex-1 px-5 py-10 md:px-16">
+      <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-10 md:px-16">
         {error && (
           <p className="mb-6 rounded-lg border border-error/30 bg-error-container/20 px-4 py-3 text-sm text-error">
             {error}
@@ -274,7 +285,45 @@ export default function SavedPathwayPage() {
             <h1 className="mt-3 text-2xl font-bold text-primary sm:text-3xl">{pathway.data.title}</h1>
             <p className="mt-1 text-on-surface-variant">{pathway.schoolName}</p>
 
-            <div className="mt-8 space-y-4">
+            {pathway.data.school && (
+              <>
+                <ConfidenceBanner
+                  school={pathway.data.school}
+                  verification={pathway.data.verification}
+                />
+                <div className="mt-6">
+                  <PathwayFlow
+                    pathway={
+                      {
+                        title: pathway.data.title,
+                        isPrimary: true,
+                        steps: draftSteps,
+                      } satisfies PathwayOption
+                    }
+                    school={pathway.data.school}
+                    showStepCosts
+                  />
+                </div>
+                {draftSteps.length > 0 && (
+                  <div className="mt-8">
+                    <CostPanel
+                      pathway={{ title: pathway.data.title, isPrimary: true, steps: draftSteps }}
+                      school={pathway.data.school}
+                      incomeBand={pathway.data.costInputs?.incomeBand}
+                      countryCode={pathway.data.costInputs?.countryCode}
+                      dependencyFlags={pathway.data.costInputs?.dependencyFlags}
+                      householdSize={pathway.data.costInputs?.householdSize}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+
+            <h2 className="mt-10 text-lg font-semibold text-primary">Edit this route</h2>
+            <p className="mt-1 text-sm text-on-surface-variant">
+              Reorder or remove steps — the route above updates as you do.
+            </p>
+            <div className="mt-4 space-y-4">
               {draftSteps.map((step, index) => (
                 <StepCard
                   key={index}

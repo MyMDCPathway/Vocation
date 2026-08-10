@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { annualUsdMidpoint, resolveTracks } from "@/app/lib/planTracks";
-import { NO_MOBILITY, type IntakeAnswers } from "@/app/lib/intake";
+import type { IntakeAnswers } from "@/app/lib/intake";
 import type { SchoolRef } from "@/app/lib/schoolRef";
 
 // A complete intake, so each test only states the answer it's actually about.
@@ -14,7 +14,6 @@ const intake = (over: Partial<IntakeAnswers> = {}): IntakeAnswers => ({
   householdSize: 4,
   desiredSchools: [],
   budgetPriority: "balanced",
-  mobility: NO_MOBILITY,
   ...over,
 });
 

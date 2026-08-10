@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { AuthControls } from "@/app/components/AuthControls";
+import { loadIntake, saveIntake } from "@/app/lib/intakeStorage";
 import type { SavedPathwayData } from "@/app/lib/types";
 
 // The saved-plan collection. Nav "Pathways" points here now — not /start,
@@ -53,20 +55,117 @@ function SignedOutPrompt() {
   );
 }
 
+interface CuratedInterest {
+  slug: string;
+  label: string;
+  description: string;
+  jobCount: number;
+}
+
+/**
+ * "Based on your interests…" — onboarding's interests/goals were write-only
+ * until now (see app/onboarding/page.tsx); this is where that data pays off.
+ * Renders nothing if the account skipped onboarding's suggestions or hasn't
+ * onboarded, so a user with nothing stored just sees the plain empty state
+ * below it, unchanged.
+ */
+function ProfileSuggestions() {
+  const router = useRouter();
+  const [interests, setInterests] = useState<CuratedInterest[]>([]);
+  const [goals, setGoals] = useState<string[]>([]);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [onboardingRes, interestsRes] = await Promise.all([
+          fetch("/api/onboarding"),
+          fetch("/api/interests"),
+        ]);
+        const onboarding = await onboardingRes.json().catch(() => ({}));
+        const interestsBody = await interestsRes.json().catch(() => ({}));
+        if (cancelled) return;
+
+        const storedSlugs: string[] = Array.isArray(onboarding.interests) ? onboarding.interests : [];
+        const curated: CuratedInterest[] = interestsBody.curated ?? [];
+        setInterests(curated.filter((interest) => storedSlugs.includes(interest.slug)));
+        setGoals(Array.isArray(onboarding.goals) ? onboarding.goals : []);
+      } catch {
+        // Best-effort — the plain "Plan a route" empty state still works.
+      } finally {
+        if (!cancelled) setLoaded(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  function planPathway(title: string) {
+    saveIntake({ ...loadIntake(), career: { raw: title, resolved: title } });
+    router.push("/start");
+  }
+
+  if (!loaded || (interests.length === 0 && goals.length === 0)) return null;
+
+  return (
+    <div className="mx-auto mt-12 max-w-2xl text-left">
+      {goals.length > 0 && (
+        <div>
+          <p className="text-sm font-semibold text-on-surface-variant">Based on your career goals</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {goals.map((title) => (
+              <button
+                key={title}
+                type="button"
+                onClick={() => planPathway(title)}
+                className="rounded-full bg-surface-lowest px-4 py-2 text-sm font-medium text-primary shadow-card transition-all hover:-translate-y-0.5 hover:shadow-lift"
+              >
+                Plan a route to {title}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {interests.length > 0 && (
+        <div className="mt-6">
+          <p className="text-sm font-semibold text-on-surface-variant">Based on your interests</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {interests.map((interest) => (
+              <Link
+                key={interest.slug}
+                href={`/interests/${interest.slug}`}
+                className="rounded-full bg-surface-lowest px-4 py-2 text-sm font-medium text-primary shadow-card transition-all hover:-translate-y-0.5 hover:shadow-lift"
+              >
+                Browse {interest.label} careers ({interest.jobCount})
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function EmptyState() {
   return (
-    <div className="mx-auto mt-16 max-w-md text-center">
-      <h1 className="text-2xl font-bold text-primary">No saved pathways yet</h1>
-      <p className="mt-3 text-on-surface-variant">
-        Plan a route on any career, then save the option that fits — it'll
-        show up here, editable any time.
-      </p>
-      <Link
-        href="/start"
-        className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary/90"
-      >
-        Plan a route
-      </Link>
+    <div className="mt-16">
+      <div className="mx-auto max-w-md text-center">
+        <h1 className="text-2xl font-bold text-primary">No saved pathways yet</h1>
+        <p className="mt-3 text-on-surface-variant">
+          Plan a route on any career, then save the option that fits — it'll
+          show up here, editable any time.
+        </p>
+        <Link
+          href="/start"
+          className="mt-6 inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary transition-colors hover:bg-primary/90"
+        >
+          Plan a route
+        </Link>
+      </div>
+      <ProfileSuggestions />
     </div>
   );
 }
@@ -85,7 +184,13 @@ function PathwayCard({ pathway }: { pathway: SavedPathwayRow }) {
       <p className="mt-1 text-sm text-on-surface-variant">{pathway.schoolName}</p>
       <p className="mt-3 text-xs text-outline">
         {stepCount} step{stepCount === 1 ? "" : "s"} ·{" "}
-        {pathway.data.confidence === "catalog" ? "Full catalog" : "AI-sourced"}
+        {/* school.source is the reliable signal (ConfidenceBanner uses the
+            same field) — data.confidence isn't consistently populated by
+            /api/generate-pathway for a catalog-sourced response, so it's
+            only the fallback for a row saved before `school` existed. */}
+        {(pathway.data.school?.source ?? pathway.data.confidence) === "catalog"
+          ? "Full catalog"
+          : "AI-sourced"}
       </p>
     </Link>
   );

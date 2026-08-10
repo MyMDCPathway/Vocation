@@ -66,11 +66,6 @@ const RESPONSE_SCHEMA = {
         required: ["label", "detail", "commitment"],
       },
     },
-    mobilityNote: {
-      type: "STRING",
-      description:
-        "One sentence on how willingness to work in rural areas, relocate, or work abroad affects entry into THIS career specifically. Concrete and factual, or empty string if it genuinely doesn't matter for this career.",
-    },
     routeArchetype: {
       type: "STRING",
       enum: [
@@ -140,7 +135,6 @@ const RESPONSE_SCHEMA = {
     "question",
     "helpText",
     "options",
-    "mobilityNote",
     "routeArchetype",
     "routeReason",
     "outline",
@@ -162,8 +156,6 @@ NEEDS NARROWING — set needsSpecifics to true:
 The test is strictly practical: would two different answers produce DIFFERENT degrees, DIFFERENT exams, or DIFFERENT numbers of years? If they'd produce the same plan, it is already specific. Do not ask a question just to seem thorough — a needless question is worse than no question.
 
 When you do ask, the options must be real, distinct jobs a person actually holds, not categories. Order them from most common to least common.
-
-For mobilityNote, say something concrete and true about how location flexibility affects this specific career — rural shortage areas and loan repayment for healthcare, overseas postings for military and energy work, market concentration for finance or entertainment. If location genuinely doesn't change anything for this career, return an empty string rather than filler.
 
 CLASSIFY THE ROUTE — this is the other half of your job.
 
@@ -306,7 +298,6 @@ export async function POST(request: NextRequest) {
       question: parsed.question || "",
       helpText: parsed.helpText || "",
       options,
-      mobilityNote: parsed.mobilityNote || "",
       // Normalised through archetypeProfile so an unrecognised value can
       // never reach the rest of the app — the enum constrains the model, but
       // the fallback is what makes that guarantee rather than a hope.

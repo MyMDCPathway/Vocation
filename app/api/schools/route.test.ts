@@ -73,11 +73,38 @@ describe("GET /api/schools", () => {
   it("reports scorecard availability honestly", async () => {
     const response = await GET(makeRequest(""));
     const body = await response.json();
-    // data/scorecard.json now holds a real committed Florida pull, so a
+    // data/scorecard.json now holds a real committed national pull, so a
     // real request against it reports real availability — see
     // scorecard.test.ts for the explicit true/false cases via
     // _setSnapshotForTests, which don't depend on the committed file.
     expect(body.scorecard.available).toBe(true);
     expect(body.scorecard.count).toBeGreaterThan(0);
+  });
+
+  it("includes the full list of real states regardless of the current filter", async () => {
+    const response = await GET(makeRequest(""));
+    const body = await response.json();
+    expect(body.states).toContain("FL");
+    expect(body.states).toContain("MA");
+    expect(body.states.length).toBeGreaterThan(45);
+  });
+
+  it("scope 'ALL' returns real schools outside Florida", async () => {
+    const totalsResponse = await GET(makeRequest("?state=ALL"));
+    const totalsBody = await totalsResponse.json();
+    expect(totalsBody.total).toBeGreaterThan(FLORIDA_SCHOOLS.length);
+
+    // Name search narrows past pagination to confirm a specific real
+    // non-Florida school is actually reachable, not just counted.
+    const response = await GET(makeRequest("?state=ALL&q=Harvard%20University"));
+    const body = await response.json();
+    expect(body.schools.some((s: any) => s.name === "Harvard University")).toBe(true);
+  });
+
+  it("a specific non-Florida state returns only that state's real schools", async () => {
+    const response = await GET(makeRequest("?state=GA&limit=200"));
+    const body = await response.json();
+    expect(body.total).toBeGreaterThan(0);
+    expect(body.schools.every((s: any) => s.state === "GA")).toBe(true);
   });
 });

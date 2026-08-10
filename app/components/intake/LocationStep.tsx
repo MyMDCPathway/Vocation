@@ -160,6 +160,12 @@ export function LocationStep({
       return;
     }
 
+    // Drop the PREVIOUS code's resolved place immediately, not just once the
+    // new lookup comes back. Leaving it in place for the ~600ms debounce
+    // window is how a submit fired mid-lookup (see continueFromPostal) could
+    // attach an old postal code's city and coordinates to a new one — the
+    // literal bug this comment is fixing.
+    setPlace(null);
     let cancelled = false;
     setPostalState("looking");
 
@@ -196,7 +202,17 @@ export function LocationStep({
 
   const finish = (
     finalCity: string,
-    resolved?: PostalPlace | null,
+    /**
+     * The resolved place backing this submission, or null.
+     *
+     * Deliberately NOT defaulted to the outer `place` state when omitted —
+     * that fallback used to let a stale, already-superseded lookup (a
+     * PREVIOUS postal code's city and coordinates) attach itself to a
+     * DIFFERENT submission, e.g. a manually-picked region inheriting an
+     * earlier zip's lat/lng. Every caller now passes exactly the place (or
+     * null) that submission is actually for.
+     */
+    resolved: PostalPlace | null,
     /**
      * The state just clicked, passed in rather than read from state.
      *
@@ -208,16 +224,15 @@ export function LocationStep({
      */
     chosenSubdivision?: string
   ) => {
-    const from = resolved ?? place;
     onDone({
       countryCode,
       // A resolved postal code knows the region better than a dropdown does,
       // but only fills a gap — never overrides a choice the student made.
-      subdivision: (chosenSubdivision ?? subdivision).trim() || from?.subdivision || "",
+      subdivision: (chosenSubdivision ?? subdivision).trim() || resolved?.subdivision || "",
       city: finalCity.trim(),
       postalCode: normalizePostalCode(postal) || undefined,
-      latitude: from?.latitude,
-      longitude: from?.longitude,
+      latitude: resolved?.latitude,
+      longitude: resolved?.longitude,
     });
   };
 
@@ -225,8 +240,13 @@ export function LocationStep({
    * The one-field path: a resolved code carries town, region and coordinates,
    * so there is nothing left to ask. Anything else drops to picking a state,
    * rather than finishing with a location we couldn't place.
+   *
+   * Refuses while a lookup for the CURRENTLY typed code is still in flight —
+   * without this, pressing Enter right after typing (which isn't gated by
+   * the Continue button's `disabled`) could fire before that lookup resolves.
    */
   const continueFromPostal = () => {
+    if (postalState === "looking") return;
     if (place) {
       finish(place.city, place);
       return;
@@ -319,7 +339,17 @@ export function LocationStep({
 
         <button
           type="button"
-          onClick={() => setSubStep("region")}
+          onClick={() => {
+            // Abandoning the postal code for a manual pick — clear it rather
+            // than leaving it to ride along as `postalCode` on an answer it
+            // no longer describes. Without this, a resolved-then-discarded
+            // code (e.g. a Kansas ZIP typed last time and never touched this
+            // time) could pair with a freshly, manually chosen state that
+            // has nothing to do with it.
+            setPostal("");
+            setPlace(null);
+            setSubStep("region");
+          }}
           className="mt-6 block text-sm text-outline underline hover:text-primary"
         >
           I&apos;d rather pick my area

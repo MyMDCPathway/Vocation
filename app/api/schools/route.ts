@@ -1,23 +1,31 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   listDirectorySchools,
+  listDirectoryStates,
   sortDirectorySchools,
   type SchoolSortKey,
 } from "@/app/lib/schoolDirectory";
 import { scorecardAvailable, scorecardMeta } from "@/app/lib/scorecard";
-import type { SchoolKind } from "@/app/lib/floridaSchools";
+import type { SchoolKindRef } from "@/app/lib/schoolRef";
 
-// The list /schools renders: every Florida school, optionally filtered and
-// sorted, with real distance and Scorecard figures folded in server-side —
-// see schoolDirectory.ts for why this can't just be a client import of the
-// catalogs (232 kB, per /plan's own known cost — HANDOFF §14).
+// The list /schools renders: every Florida school by default, or (via
+// `state`) every real school nationwide the US Dept. of Education's College
+// Scorecard tracks — see schoolDirectory.ts for why this can't just be a
+// client import of the catalogs (232 kB, per /plan's own known cost —
+// HANDOFF §14).
 //
 // GET, not POST: this is a read with no side effects and no free-text model
 // input to worry about smuggling into a body, so query params are the
 // simpler and more cacheable shape.
 
 const SORT_KEYS: readonly SchoolSortKey[] = ["distance", "earnings", "completion", "price", "name"];
-const KINDS: readonly SchoolKind[] = ["state-college", "public-university", "private"];
+const KINDS: readonly SchoolKindRef[] = [
+  "state-college",
+  "public-university",
+  "private",
+  "community-college",
+  "unknown",
+];
 
 function parseSort(value: string | null): SchoolSortKey {
   return (SORT_KEYS as readonly string[]).includes(value ?? "")
@@ -37,10 +45,13 @@ export async function GET(request: NextRequest) {
   const sort = parseSort(params.get("sort"));
   const kindParam = params.get("kind");
   const kind = (KINDS as readonly string[]).includes(kindParam ?? "")
-    ? (kindParam as SchoolKind)
+    ? (kindParam as SchoolKindRef)
     : null;
   const catalogOnly = params.get("catalogOnly") === "1";
   const query = (params.get("q") ?? "").trim().toLowerCase();
+  // "FL" (default) is unchanged existing behavior; "ALL" or a two-letter
+  // code opts into the national scope — see listDirectorySchools.
+  const state = (params.get("state") ?? "FL").trim() || "FL";
 
   const lat = parseFloat2(params.get("lat"));
   const lng = parseFloat2(params.get("lng"));
@@ -61,7 +72,7 @@ export async function GET(request: NextRequest) {
   const offsetParam = Number(params.get("offset"));
   const offset = Number.isFinite(offsetParam) && offsetParam >= 0 ? offsetParam : 0;
 
-  let schools = listDirectorySchools(origin);
+  let schools = listDirectorySchools(origin, state);
 
   if (kind) schools = schools.filter((s) => s.kind === kind);
   if (catalogOnly) schools = schools.filter((s) => s.hasCatalog);
@@ -73,6 +84,10 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     schools: page,
     total: sorted.length,
+    // The full national list of states, regardless of the current filter —
+    // populates the state-picker dropdown, which needs every option even
+    // while a single state is selected.
+    states: listDirectoryStates(),
     scorecard: { available: scorecardAvailable(), ...scorecardMeta() },
   });
 }

@@ -8,6 +8,30 @@ const VALID_VISIBILITY = ["private", "mentors_only", "public"];
 // visibility (Private, Mentors Only, Public)." Saves the onboarding step onto
 // the same User row the signup route created — there's no separate profile
 // table to keep in sync.
+
+// What onboarding collected, read back for /pathways' empty state — see that
+// page for why interests/goals stopped being write-only. Deliberately not
+// folded into /api/account/settings: that route is the settings-page editor
+// and only ever writes the fields it's given, whereas this one is read-only
+// and specific to what onboarding itself set.
+export async function GET() {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Not signed in." }, { status: 401 });
+  }
+
+  const user = await db.user.findUnique({
+    where: { id: session.user.id },
+    select: { interests: true, goals: true },
+  });
+
+  if (!user) {
+    return NextResponse.json({ error: "Not found." }, { status: 404 });
+  }
+
+  return NextResponse.json(user);
+}
+
 export async function POST(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {

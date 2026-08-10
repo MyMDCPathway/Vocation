@@ -1,6 +1,8 @@
 // Shared domain types for the pathway / career-planning features.
 
 import type { VerificationStatus } from "@/app/lib/urlVerify";
+import type { DependencyFlag, IncomeBand } from "@/app/lib/intake";
+import type { SchoolRef } from "@/app/lib/schoolRef";
 
 /** What the server found when it fetched the URL the model proposed. */
 export interface StepLink {
@@ -71,9 +73,33 @@ export interface CareerPathway {
  * still open. `confidence` travels with it because the catalog-vs-AI
  * distinction stays true (or false) regardless of which steps get edited
  * later; it doesn't need re-deriving from the school id at read time.
+ *
+ * `verification`, `school`, and `costInputs` are what let /pathways/[id]
+ * render the actual generated pathway page — PathwayFlow, ConfidenceBanner,
+ * CostPanel — rather than a plain step list, i.e. "literally save the
+ * generated pathway page." All three are optional because a row saved
+ * before this existed has none of them; the read side renders the plain
+ * list for those rather than assuming fields that were never written.
  */
 export interface SavedPathwayData {
   title: string;
   steps: PathwayStep[];
   confidence?: "catalog" | "ai";
+  verification?: {
+    verified: number;
+    fallback: number;
+    unverified: number;
+  };
+  /** The exact school this route was generated against — ConfidenceBanner
+   *  and CostPanel's tuition estimate both need the full reference, not
+   *  just the id/name already stored alongside `data` on the row. */
+  school?: SchoolRef;
+  /** What CostPanel needs to reproduce the same aid estimate it showed on
+   *  /plan — the household's answers, not anything about the school. */
+  costInputs?: {
+    incomeBand?: IncomeBand;
+    countryCode?: string;
+    dependencyFlags?: DependencyFlag[];
+    householdSize?: number;
+  };
 }
