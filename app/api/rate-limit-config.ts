@@ -26,6 +26,28 @@ export const RATE_LIMIT_CONFIG = {
   // against this at all.
   maxGenerationsPerIP: 40,
 
+  // Failed logins from one IP per window, after which /login stops answering
+  // that address at all. Counted in loginLimit.ts, which explains the design;
+  // the numbers live here so both login ceilings can be read side by side.
+  //
+  // Deliberately much higher than maxRequestsPerIP. A signup attempt is a
+  // one-off; a login is something the same person repeats, mistypes, and
+  // retries, and a campus or library NAT stacks several of those people behind
+  // one address — the same reason maxGenerationsPerIP is 40 rather than 10.
+  // 25 wrong passwords in a quarter hour is still nothing like a real person
+  // fumbling a login, and a script reaches it in under a second.
+  maxFailedLoginsPerIP: 25,
+
+  // Failed logins against one email address per window, after which attempts
+  // on that address are deliberately slowed. NOT a lockout — nothing an
+  // attacker can do to someone else's email address may deny that person their
+  // own account. See loginLimit.ts for why the two buckets answer differently.
+  //
+  // Lower than the IP ceiling because it is scoped to one account: eight wrong
+  // passwords covers a genuinely forgetful user's session, and past that the
+  // most likely explanation is that someone is guessing.
+  maxFailedLoginsPerAccount: 8,
+
   // Time window in milliseconds (15 minutes)
   windowMs: 15 * 60 * 1000,
 
