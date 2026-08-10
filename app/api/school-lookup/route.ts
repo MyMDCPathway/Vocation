@@ -5,7 +5,8 @@ import { enforceGenerationLimits, recordGeneration } from "@/app/lib/rateLimit";
 import { generateJson } from "@/app/lib/geminiJson";
 import { logCacheMiss } from "@/app/lib/missLog";
 import { hasUsableCoordinates, openSchoolId, type SchoolRef } from "@/app/lib/schoolRef";
-import { normalizeCareer } from "@/app/lib/careerCanonical";
+import { normalizeCareer, resolveCareer } from "@/app/lib/careerCanonical";
+import { careerIsLegitimate } from "@/app/lib/careerLegitimacy";
 import {
   blockedCareer,
   BLOCKED_CAREER_MESSAGE,
@@ -153,6 +154,18 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: TOO_LONG_MESSAGE }, { status: 400 });
       }
       if (blockedCareer(normalizeCareer(career))) {
+        return NextResponse.json(
+          { error: BLOCKED_CAREER_MESSAGE, blocked: true },
+          { status: 400 }
+        );
+      }
+
+      // Layer two, same as the other Gemini routes. The verdict is keyed on
+      // resolveCareer's canonical form even though the prompt below still
+      // receives the student's own wording — the key only has to match the
+      // one refine-career publishes under, or this route would pay for a
+      // check the wizard already answered.
+      if (!(await careerIsLegitimate(resolveCareer(career).canonical, apiKey))) {
         return NextResponse.json(
           { error: BLOCKED_CAREER_MESSAGE, blocked: true },
           { status: 400 }

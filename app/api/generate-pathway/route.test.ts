@@ -9,6 +9,16 @@ async function loadRoute() {
   // resolve from the same post-reset module registry as the route's own.
   const { _setSeedForTests } = await import("@/app/lib/apiCache");
   _setSeedForTests({});
+
+  // Publish the career-policy verdict the way the wizard's refine-career call
+  // does, so these tests exercise the pathway generation rather than paying
+  // for a legitimacy check first. Without it the route makes two Gemini calls
+  // on a cold career and every mockResolvedValueOnce chain below shifts by one.
+  const { recordLegitimacy } = await import("@/app/lib/careerLegitimacy");
+  for (const career of ["Registered Nurse", "Welder"]) {
+    await recordLegitimacy(career, true);
+  }
+
   return await import("@/app/api/generate-pathway/route");
 }
 
