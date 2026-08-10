@@ -3,6 +3,7 @@ import { auth } from "@/app/lib/auth";
 import { db } from "@/app/lib/db";
 import { resolveCareer } from "@/app/lib/careerCanonical";
 import { BLOCKED_CAREER_MESSAGE, MAX_CAREER_INPUT } from "@/app/lib/careerPolicy";
+import { withDbErrors } from "@/app/lib/withDbErrors";
 
 // The saved-plan collection /pathways reads and writes to.
 //
@@ -13,7 +14,8 @@ import { BLOCKED_CAREER_MESSAGE, MAX_CAREER_INPUT } from "@/app/lib/careerPolicy
 // deliberate). Ownership is enforced by scoping every query to
 // session.user.id, never by trusting an id the client sends.
 
-export async function GET(request: NextRequest) {
+export const GET = withDbErrors(handleGET);
+async function handleGET(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });
@@ -32,7 +34,8 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ pathways });
 }
 
-export async function POST(request: NextRequest) {
+export const POST = withDbErrors(handlePOST);
+async function handlePOST(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });

@@ -237,6 +237,27 @@ const securityHeaders = [
 const nextConfig = {
   reactStrictMode: true,
 
+  experimental: {
+    // Required on Next 14 for instrumentation.ts to run at all (stable from
+    // 15). That file is what boots Sentry on the server and edge runtimes.
+    instrumentationHook: true,
+  },
+
+  webpack(config) {
+    // @sentry/node reaches OpenTelemetry, which loads its instrumentation via
+    // a dynamic require() that webpack can't follow — so every build prints
+    // "Critical dependency: require function is used in a way in which
+    // dependencies cannot be statically extracted". It's a known upstream
+    // warning and nothing here is broken by it, but a build that always warns
+    // is a build nobody reads the warnings from. Scoped to that one module so
+    // a genuinely new warning still shows up.
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings ?? []),
+      { module: /node_modules[\\/]require-in-the-middle/ },
+    ]
+    return config
+  },
+
   async headers() {
     return [
       {
@@ -251,4 +272,48 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig
+// Sentry is wrapped on only when a DSN exists.
+//
+// Two reasons this is conditional rather than unconditional. A clone of this
+// repo with no Sentry account gets the plain config and an unchanged build —
+// no webpack plugin, no source-map step, no warnings about a missing auth
+// token. And `tunnelRoute` below adds a real route to the app, which there is
+// no reason to serve if nothing is reporting to it.
+//
+// WHY tunnelRoute AT ALL. Sentry's browser SDK normally POSTs directly to
+// https://<org>.ingest.sentry.io, which this app's CSP forbids: connect-src is
+// 'self' and nothing else, deliberately (see the note above it — the
+// third-party APIs are all called from server code, so none of them are
+// listed). Adding an ingest host there would be the first exception to that
+// rule. Tunnelling routes the events through our own origin instead, so the
+// policy is untouched — and as a side effect the reports survive ad blockers,
+// which block Sentry's domain by default.
+const withSentry = (config) => {
+  if (!process.env.NEXT_PUBLIC_SENTRY_DSN && !process.env.SENTRY_DSN) return config
+
+  const { withSentryConfig } = require('@sentry/nextjs')
+
+  return withSentryConfig(config, {
+    org: process.env.SENTRY_ORG,
+    project: process.env.SENTRY_PROJECT,
+
+    // The plugin is chatty on every build; let it speak in CI, where someone
+    // is reading, and stay quiet locally.
+    silent: !process.env.CI,
+
+    // Same-origin path the browser SDK posts events to. Must not collide with
+    // an existing route — /monitoring is free (checked against app/).
+    tunnelRoute: '/monitoring',
+
+    // Uploading source maps needs an auth token. Without one, skip the upload
+    // rather than failing the build: a deploy should not break because
+    // observability is half-configured. Stack traces will be minified until
+    // SENTRY_AUTH_TOKEN is set.
+    sourcemaps: { disable: !process.env.SENTRY_AUTH_TOKEN },
+
+    // Strips Sentry's own debug logging out of the client bundle.
+    disableLogger: true,
+  })
+}
+
+module.exports = withSentry(nextConfig)

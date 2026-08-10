@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
+import { withDbErrors } from "@/app/lib/withDbErrors";
 import { auth } from "@/app/lib/auth";
 import { db } from "@/app/lib/db";
 
@@ -15,7 +16,8 @@ async function loadOwned(id: string, userId: string) {
   return db.savedPathway.findFirst({ where: { id, userId } });
 }
 
-export async function GET(
+export const GET = withDbErrors(handleGET);
+async function handleGET(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -32,7 +34,8 @@ export async function GET(
   return NextResponse.json({ pathway });
 }
 
-export async function PATCH(
+export const PATCH = withDbErrors(handlePATCH);
+async function handlePATCH(
   request: NextRequest,
   { params }: { params: { id: string } }
 ) {
@@ -105,7 +108,8 @@ export async function PATCH(
   return NextResponse.json({ pathway });
 }
 
-export async function DELETE(
+export const DELETE = withDbErrors(handleDELETE);
+async function handleDELETE(
   _request: NextRequest,
   { params }: { params: { id: string } }
 ) {

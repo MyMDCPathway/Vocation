@@ -26,6 +26,22 @@ export const RATE_LIMIT_CONFIG = {
   // against this at all.
   maxGenerationsPerIP: 40,
 
+  // Uncached BLS lookups from one IP per window.
+  //
+  // BLS's registration key is capped at 500 requests/day for the whole app,
+  // not per visitor, and /api/labor-stats and /api/career-demand were the two
+  // routes with no limiter at all. Their cache keys — (occupation, area) and
+  // (occupation) — are a large enough space to walk, so an unauthenticated
+  // caller could force a miss every time and exhaust the day's allowance. When
+  // it's gone, blsStats.ts swallows the failure and every wage figure on the
+  // site silently degrades to a model estimate until midnight.
+  //
+  // 30 rather than the Gemini routes' 40: a student's plan page makes a
+  // handful of these, not a dozen, and only uncached ones count. This bounds
+  // one address rather than defeating a distributed caller — the honest
+  // ceiling is still BLS's own daily quota.
+  maxBlsLookupsPerIP: 30,
+
   // Failed logins from one IP per window, after which /login stops answering
   // that address at all. Counted in loginLimit.ts, which explains the design;
   // the numbers live here so both login ceilings can be read side by side.

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/app/lib/auth";
 import { db } from "@/app/lib/db";
+import { withDbErrors } from "@/app/lib/withDbErrors";
 import { normalizePostalCode } from "@/app/lib/postalCode";
 
 // Where the account holder lives, remembered across visits.
@@ -16,7 +17,8 @@ import { normalizePostalCode } from "@/app/lib/postalCode";
 // best-effort conveniences: every caller treats a failure here as "ask the
 // question", which is the pre-account behaviour and a perfectly good outcome.
 
-export async function GET() {
+export const GET = withDbErrors(handleGET);
+async function handleGET() {
   const session = await auth();
   if (!session?.user?.id) {
     // Not an error worth reporting. A signed-out visitor having no saved
@@ -36,7 +38,8 @@ export async function GET() {
   });
 }
 
-export async function POST(request: NextRequest) {
+export const POST = withDbErrors(handlePOST);
+async function handlePOST(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });

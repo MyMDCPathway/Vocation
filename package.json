@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "prisma generate && node scripts/migrate-on-deploy.mjs && next build",
     "start": "next start",
     "lint": "next lint",
     "seed": "node scripts/seed-pathways.mjs",
@@ -37,6 +37,7 @@
     "@neon/config": "^0.13.2",
     "@neon/env": "^0.13.3",
     "@prisma/client": "^6.19.3",
+    "@sentry/nextjs": "^10.69.0",
     "@vercel/analytics": "^2.0.1",
     "bcryptjs": "^3.0.3",
     "leaflet": "^1.9.4",

@@ -201,13 +201,26 @@ function PathwayPageContent() {
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
+          // A platform-level failure (504 from a killed function, 502 from a
+          // proxy) returns an HTML body, not ours. Parsing that unguarded threw
+          // a SyntaxError, which is neither AbortError nor rateLimited, so it
+          // fell into the retry branch below and ran all three attempts — and
+          // the route calls recordGeneration() before Gemini on each one, so a
+          // single slow request cost three generations against the daily cap.
+          // Every other fetch in this app already guards .json() this way.
+          const errorData = await response.json().catch(() => ({}) as any);
           const err = new Error(
             errorData.error || `HTTP error! status: ${response.status}`
           );
           // Rate limited: retrying immediately only burns more quota, so
           // surface the "please wait" message to the user right away.
           if (response.status === 429) {
+            (err as any).rateLimited = true;
+          }
+          // Same reasoning for upstream failures. A 502/503/504 means Gemini or
+          // the platform is unwell; three more immediate attempts make that
+          // worse and spend the student's allowance doing it.
+          if (response.status >= 500) {
             (err as any).rateLimited = true;
           }
           throw err;

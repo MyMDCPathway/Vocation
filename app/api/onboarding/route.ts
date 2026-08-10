@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/app/lib/auth";
 import { db } from "@/app/lib/db";
+import { withDbErrors } from "@/app/lib/withDbErrors";
 
 const VALID_VISIBILITY = ["private", "mentors_only", "public"];
 
@@ -14,7 +15,8 @@ const VALID_VISIBILITY = ["private", "mentors_only", "public"];
 // folded into /api/account/settings: that route is the settings-page editor
 // and only ever writes the fields it's given, whereas this one is read-only
 // and specific to what onboarding itself set.
-export async function GET() {
+export const GET = withDbErrors(handleGET);
+async function handleGET() {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });
@@ -32,7 +34,8 @@ export async function GET() {
   return NextResponse.json(user);
 }
 
-export async function POST(request: NextRequest) {
+export const POST = withDbErrors(handlePOST);
+async function handlePOST(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });

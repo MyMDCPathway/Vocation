@@ -9,6 +9,8 @@ import {
 } from "@/app/lib/careerPolicy";
 import { matchOccupation } from "@/app/lib/blsOccupations";
 import { fetchStateDemand, type StateDemandMap } from "@/app/lib/blsStats";
+import { checkIpLimit, clientIp } from "@/app/lib/rateLimit";
+import { RATE_LIMIT_CONFIG } from "@/app/api/rate-limit-config";
 
 // Where in the country a job actually is, state by state.
 //
@@ -71,6 +73,21 @@ export async function POST(request: NextRequest) {
     if (durable) {
       setCached(key, durable);
       return NextResponse.json(durable);
+    }
+
+    // The most expensive BLS call the app makes — 102 series across three
+    // requests — against a key capped at 500/day for everyone. Limited here,
+    // after both cache layers, so a repeat occupation stays free; see
+    // maxBlsLookupsPerIP for why this bounds an address rather than an attack.
+    const ipLimit = checkIpLimit(
+      `bls:${clientIp(request)}`,
+      RATE_LIMIT_CONFIG.maxBlsLookupsPerIP
+    );
+    if (!ipLimit.allowed) {
+      return NextResponse.json(
+        { error: "Too many labor-statistics lookups. Try again in a few minutes." },
+        { status: 429, headers: { "Retry-After": String(ipLimit.retryAfterSeconds ?? 60) } }
+      );
     }
 
     const demand = await fetchStateDemand(occupation.code);

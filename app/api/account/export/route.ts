@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/app/lib/auth";
 import { db } from "@/app/lib/db";
 import { checkIpLimit, clientIp } from "@/app/lib/rateLimit";
+import { withDbErrors } from "@/app/lib/withDbErrors";
 
 // "Download your data" — the half of /privacy that the app promised but never
 // implemented. A privacy policy that says an account holder can get their data
@@ -19,7 +20,8 @@ import { checkIpLimit, clientIp } from "@/app/lib/rateLimit";
 // it five times in a quarter of an hour.
 const MAX_EXPORTS_PER_WINDOW = 5;
 
-export async function GET(request: NextRequest) {
+export const GET = withDbErrors(handleGET);
+async function handleGET(request: NextRequest) {
   const session = await auth();
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Not signed in." }, { status: 401 });

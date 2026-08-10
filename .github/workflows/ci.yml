@@ -1,0 +1,44 @@
+# Run the tests somewhere other than the author's laptop.
+#
+# HANDOFF records a red deployment that shipped once because Vercel served a
+# cached node_modules and the failure never surfaced locally. The suite is
+# 1100+ tests and takes under a minute; the only reason it wasn't already
+# enforced is that nothing was enforcing it.
+#
+# No secrets and no database: every test mocks Prisma and stubs fetch, so this
+# runs on a bare checkout. If a future test needs a real service, give it a
+# fixture rather than a secret here — a CI job that can reach production is a
+# worse problem than an untested path.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # Types for the generated client. No database is contacted — generate
+      # reads prisma/schema.prisma and writes node_modules/.prisma.
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Test
+        run: npm test

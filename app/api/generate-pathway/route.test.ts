@@ -117,6 +117,101 @@ describe("POST /api/generate-pathway", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
+  it("does not serve a forged open-school entry to a legitimate request (cache poisoning regression)", async () => {
+    // The attack this guards: /api/generate-pathway is unauthenticated and
+    // openSchoolId() is a deterministic slug, so an attacker can compute the
+    // exact key a real visitor will later hit. The cache key used to be
+    // schoolId + archetype + career only, so a request carrying fabricated
+    // details under a real school's name overwrote the durable entry every
+    // later visitor got served. Keyed by content, the two can't collide.
+    const poisoned = { title: "POISONED", pathways: [] };
+    const legitimate = { title: "Registered Nurse", pathways: [] };
+
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          candidates: [{ content: { parts: [{ text: JSON.stringify(poisoned) }] } }],
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          candidates: [{ content: { parts: [{ text: JSON.stringify(legitimate) }] } }],
+        }),
+      });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { POST } = await loadRoute();
+    const school = "open:example-university";
+    const name = "Example University";
+
+    const attacker = await POST(
+      makeRequest({
+        career: "Registered Nurse",
+        school,
+        schoolRef: { name, city: "Nowhere", programsUrl: "https://attacker.example/x" },
+      })
+    );
+    expect(attacker.status).toBe(200);
+    expect((await attacker.json()).title).toBe("POISONED");
+
+    // Same school, same career — but the real details a real lookup produces.
+    const victim = await POST(
+      makeRequest({
+        career: "Registered Nurse",
+        school,
+        schoolRef: { name, city: "Springfield", programsUrl: "https://example.edu/programs" },
+      })
+    );
+    expect(victim.status).toBe(200);
+    expect((await victim.json()).title).toBe("Registered Nurse");
+  });
+
+  it("rejects an open-school ref whose name does not match its id", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { POST } = await loadRoute();
+    const res = await POST(
+      makeRequest({
+        career: "Nurse",
+        school: "open:harvard-university",
+        schoolRef: { name: "Some Other School" },
+      })
+    );
+
+    expect(res.status).toBe(400);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("does not let an unvalidated routeArchetype mint unlimited cache keys", async () => {
+    // routeArchetype went into the cache key unvalidated, so any random
+    // string was a guaranteed miss and a guaranteed Gemini generation.
+    // Unknown values must normalize to the default and share its entry.
+    const data = { title: "Welder", pathways: [] };
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        candidates: [{ content: { parts: [{ text: JSON.stringify(data) }] } }],
+      }),
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const { POST } = await loadRoute();
+    const schoolRef = { name: "Example University", city: "Springfield" };
+    const base = { career: "Welder", school: "open:example-university", schoolRef };
+
+    await POST(makeRequest({ ...base, routeArchetype: "degree" }));
+    await POST(makeRequest({ ...base, routeArchetype: "not-an-archetype" }));
+    await POST(makeRequest({ ...base, routeArchetype: "also-fake-" + "x".repeat(50) }));
+
+    // Only the first should have reached Gemini; the rest normalize to
+    // "degree" and hit its cache entry.
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
   it("rejects a missing school rather than silently generating an MDC pathway", async () => {
     // The pre-selection identity is a neutral, non-school default (see
     // floridaSchools.ts), so a request that omits `school` must be rejected
