@@ -209,6 +209,41 @@ describe("prefers-reduced-motion opt-out", () => {
   );
 });
 
+describe("generation progress ring", () => {
+  it("is indeterminate: no percentage-driven animation", () => {
+    // generate-pathway is one HTTP round trip with no point where the server
+    // reports a real completion percentage, so nothing here should encode
+    // one. A regression here would mean someone added a stroke-dashoffset
+    // percentage calculation back in, which is exactly the fabricated-progress
+    // shape this component was built to avoid.
+    const ring = ruleIndex(CSS, "generation-ring");
+    const pulse = ruleIndex(CSS, "generation-pulse");
+    expect(ring).toBeGreaterThan(-1);
+    expect(pulse).toBeGreaterThan(-1);
+
+    const ringRule = CSS.slice(ring, CSS.indexOf("}", ring));
+    expect(ringRule).toMatch(/infinite/);
+  });
+
+  it("is covered by prefers-reduced-motion", () => {
+    const { body } = mediaBlock(CSS, "prefers-reduced-motion: reduce");
+    expect(body).toMatch(/\.generation-ring\s*[,{\n]/);
+    expect(body).toMatch(/\.generation-pulse\s*[,{\n]/);
+    expect(body).toMatch(/animation:\s*none/);
+  });
+
+  it("the component holds on the last stage instead of looping", () => {
+    const component = readFileSync(
+      path.join(process.cwd(), "app", "components", "GenerationProgress.tsx"),
+      "utf8"
+    );
+    // Math.min(i + 1, stages.length - 1) is the specific shape that holds;
+    // a naive (i + 1) % stages.length would loop back and re-describe a
+    // step already passed while the request is still in flight.
+    expect(component).toMatch(/Math\.min\([^)]*stages\.length\s*-\s*1\)/);
+  });
+});
+
 describe("no-JavaScript fallback", () => {
   it("shows .reveal sections when scripting is unavailable", () => {
     // .reveal is the only entrance state applied by JS (useReveal adds

@@ -529,6 +529,42 @@ h1, .display {
   animation: spin 1s linear infinite;
 }
 
+/* Generation progress ring — deliberately indeterminate.
+ *
+ * generate-pathway is one HTTP round trip (career-legitimacy check, cache
+ * lookup, a Gemini call, URL verification for uncatalogued schools) with no
+ * point where the server reports "40% done" to the client. A percentage here
+ * would have to be invented, and the comment on .pathway-timeline-node above
+ * already states this codebase's answer to that: "a fabricated progress
+ * state would be worse than no state at all." So this sweeps continuously —
+ * real motion that means "still working," never a number that could sit at
+ * 60% while the request is already done, or hit 100% while it isn't. */
+@keyframes generation-ring-sweep {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.generation-ring {
+  animation: generation-ring-sweep 1.4s linear infinite;
+}
+
+@keyframes generation-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.15;
+    transform: scale(1.08);
+  }
+}
+
+.generation-pulse {
+  animation: generation-pulse 2.2s ease-in-out infinite;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -721,6 +757,15 @@ h1, .display {
     animation: none;
     opacity: 1;
     transform: none;
+  }
+
+  /* Neither of these hides content while animating — the ring's default
+     rest state is already fully drawn and the pulse's is already visible —
+     so switching motion off alone is enough. No opacity/transform to
+     restore, unlike the entrance animations above. */
+  .generation-ring,
+  .generation-pulse {
+    animation: none;
   }
 }
 

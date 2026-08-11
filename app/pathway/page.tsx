@@ -20,6 +20,7 @@ import { FLORIDA_UNIVERSITIES } from "@/app/lib/universities";
 import { ExamStepComponent } from "@/app/components/ExamStep";
 import { calculateStepCostRange, calculatePathwayCostRange, formatCostRange } from "@/app/lib/cost";
 import { SchoolHeader } from "@/app/components/SchoolHeader";
+import { GenerationProgress } from "@/app/components/GenerationProgress";
 
 // Comparing a second career doubles the Gemini calls for that session. Off
 // for now to hold down token spend — flip back on when that's not a concern.
@@ -688,91 +689,34 @@ function PathwayPageContent() {
 
         {/* Loading indicator while fetching career suggestions - Centered */}
         {!pathwayData && !showCareerOptions && loadingSuggestions && (
-          <div className="flex flex-col items-center justify-center min-h-[400px]">
-            <div className="flex items-center justify-center space-x-3 mb-4">
-              {/* Gemini Star/Sparkle Icon */}
-              <svg
-                className="w-8 h-8 animate-spin-slow"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#10b981" />
-                    <stop offset="100%" stopColor="#06b6d4" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-                  fill="url(#gemini-gradient)"
-                />
-              </svg>
-              <span className="text-green-600 font-medium text-xl">
-                Generating Careers
-              </span>
-            </div>
-          </div>
+          <GenerationProgress
+            stages={["Looking at real careers that match this"]}
+          />
         )}
 
         {/* Loading Indicator for Pathway Generation - Centered */}
         {!pathwayData && !showCareerOptions && !loadingSuggestions && loading && (
-          <div className="flex flex-col items-center justify-center min-h-[400px]">
-            <div className="flex items-center justify-center space-x-3">
-              {/* Gemini Star/Sparkle Icon */}
-              <svg
-                className="w-8 h-8 animate-spin-slow"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <defs>
-                  <linearGradient id="gemini-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="#10b981" />
-                    <stop offset="100%" stopColor="#06b6d4" />
-                  </linearGradient>
-                </defs>
-                <path
-                  d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-                  fill="url(#gemini-gradient)"
-                />
-              </svg>
-              <span className="text-green-600 font-medium text-xl">
-                Generating pathway
-              </span>
-            </div>
-          </div>
+          <GenerationProgress
+            stages={[
+              "Reviewing your request",
+              "Building your personalized pathway",
+              "Double-checking program details",
+            ]}
+          />
         )}
 
         {/* Overlay shown while generating an additional career to compare — the
             existing pathway is still mounted, so without this the screen would
             appear blank during the wait. */}
         {loading && pathwayData && (
-          <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-white/85 backdrop-blur-sm">
-            <svg
-              className="w-10 h-10 animate-spin-slow"
-              viewBox="0 0 24 24"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <defs>
-                <linearGradient id="gemini-gradient-overlay" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#10b981" />
-                  <stop offset="100%" stopColor="#06b6d4" />
-                </linearGradient>
-              </defs>
-              <path
-                d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"
-                fill="url(#gemini-gradient-overlay)"
-              />
-            </svg>
-            <span className="text-green-600 font-medium text-xl mt-4">
-              Please wait — generating pathway
-            </span>
-            <span className="text-gray-500 text-sm mt-1">
-              This can take a few seconds.
-            </span>
-          </div>
+          <GenerationProgress
+            fixed
+            stages={[
+              "Reviewing your request",
+              "Building your personalized pathway",
+              "Double-checking program details",
+            ]}
+          />
         )}
 
         {/* Search Section - Only show when NOT showing career options, NOT loading suggestions, NOT generating pathway, and NOT auto-generating from URL */}
