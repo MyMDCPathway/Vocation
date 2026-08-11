@@ -80,6 +80,12 @@
   --error-container: #ffdad6;
   --on-error-container: #93000a;
 
+  /* Entrance easing. A long, decelerating tail rather than the browser's
+     `ease-out`: motion covers most of its distance early and settles slowly,
+     which reads as something arriving and coming to rest instead of a linear
+     slide that stops. Used by the site-entry fade and the hero sequence. */
+  --ease-entry: cubic-bezier(0.16, 1, 0.3, 1);
+
   /* Shadow is feedback, not a resting state (DESIGN.md "The
      Shadow-Is-Feedback Rule") — soft and diffused, never a resting card. */
   --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04);
@@ -212,7 +218,46 @@ h1, .display {
  * that starts from a static `opacity: 0` and relies on `forwards` to undo it
  * has a blank-page failure mode; this one has none. */
 .site-enter {
-  animation: reveal 0.5s ease-out;
+  animation: reveal 0.5s var(--ease-entry);
+}
+
+/* The landing hero's arrival sequence.
+ *
+ * `.site-enter` above fades the whole document as one block, which is safe but
+ * flat — nothing arrives in any order, so there's nothing to perceive. These
+ * five classes let the hero assemble instead: heading, then subheading, then
+ * the search, the divider, and the quiz link, each ~90ms behind the last.
+ *
+ * `backwards` is the load-bearing keyword, and the reason this doesn't
+ * reintroduce the blank-page failure mode `.site-enter` was written to avoid.
+ * Staggering normally means hiding an element during its delay with a static
+ * `opacity: 0` undone by `forwards` — and then any failure to run the
+ * animation strands it invisible forever (that's what `.flowchart-step` and
+ * `.reveal` do, and why both need rescuing in the opt-out below).
+ * `backwards` applies the keyframe's `from` state during the delay ONLY, then
+ * hands the element back to its own default styles. There is no static
+ * opacity anywhere here, so an element that never animates is simply visible.
+ *
+ * Delays stop at 0.42s: the last item starts before the first has settled, so
+ * the sequence reads as one movement rather than five separate ones. */
+.hero-enter-1 {
+  animation: reveal 0.5s var(--ease-entry) 0.06s backwards;
+}
+
+.hero-enter-2 {
+  animation: reveal 0.5s var(--ease-entry) 0.15s backwards;
+}
+
+.hero-enter-3 {
+  animation: reveal 0.5s var(--ease-entry) 0.24s backwards;
+}
+
+.hero-enter-4 {
+  animation: reveal 0.5s var(--ease-entry) 0.33s backwards;
+}
+
+.hero-enter-5 {
+  animation: reveal 0.5s var(--ease-entry) 0.42s backwards;
 }
 
 /* New Flowchart Styles */
@@ -652,6 +697,11 @@ h1, .display {
    put opacity back or it strands the content it was meant to make calmer. */
 @media (prefers-reduced-motion: reduce) {
   .site-enter,
+  .hero-enter-1,
+  .hero-enter-2,
+  .hero-enter-3,
+  .hero-enter-4,
+  .hero-enter-5,
   .fade-in,
   .fade-in-delay-1,
   .fade-in-delay-2,

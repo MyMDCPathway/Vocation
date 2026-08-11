@@ -25,6 +25,11 @@ const LAYOUT = readFileSync(
 /** The classes the reduced-motion opt-out claims to cover. */
 const REDUCED_MOTION_CLASSES = [
   "site-enter",
+  "hero-enter-1",
+  "hero-enter-2",
+  "hero-enter-3",
+  "hero-enter-4",
+  "hero-enter-5",
   "fade-in",
   "fade-in-delay-1",
   "fade-in-delay-2",
@@ -103,6 +108,73 @@ describe("site entry animation", () => {
     const ms = Number(duration![1]) * 1000;
     expect(ms).toBeGreaterThanOrEqual(300);
     expect(ms).toBeLessThanOrEqual(600);
+  });
+});
+
+describe("landing hero entry sequence", () => {
+  const HERO_CLASSES = [
+    "hero-enter-1",
+    "hero-enter-2",
+    "hero-enter-3",
+    "hero-enter-4",
+    "hero-enter-5",
+  ];
+
+  it.each(HERO_CLASSES)(
+    ".%s staggers with `backwards`, never a static opacity",
+    (className) => {
+      // The whole reason a delayed entrance is safe here. `backwards` applies
+      // the keyframe's `from` state during the delay only, then hands the
+      // element back to its own styles — so an animation that never runs
+      // leaves visible content. A static `opacity: 0` undone by `forwards`
+      // (what .flowchart-step and .reveal do) strands it instead.
+      const start = ruleIndex(CSS, className);
+      expect(start, `.${className} rule not found`).toBeGreaterThan(-1);
+      const rule = CSS.slice(start, CSS.indexOf("}", start));
+
+      expect(rule).toMatch(/\bbackwards\b/);
+      expect(rule).not.toMatch(/opacity\s*:\s*0/);
+      expect(rule).not.toMatch(/\bforwards\b/);
+      expect(rule).not.toMatch(/\bboth\b/);
+    }
+  );
+
+  it("runs the sequence in order, each step behind the last", () => {
+    // A stagger whose delays aren't monotonic isn't a sequence, it's a pile.
+    const delays = HERO_CLASSES.map((className) => {
+      const start = ruleIndex(CSS, className);
+      const rule = CSS.slice(start, CSS.indexOf("}", start));
+      // Second time value in the shorthand is the delay, after the duration.
+      const times = [...rule.matchAll(/(\d*\.?\d+)s/g)].map((m) =>
+        Number(m[1])
+      );
+      expect(times.length).toBeGreaterThanOrEqual(2);
+      return times[1];
+    });
+
+    const sorted = [...delays].sort((a, b) => a - b);
+    expect(delays).toEqual(sorted);
+    expect(new Set(delays).size).toBe(delays.length);
+  });
+
+  it("finishes promptly enough to not feel like a loading screen", () => {
+    // Last delay + its duration is the moment the hero is fully settled.
+    const last = ruleIndex(CSS, "hero-enter-5");
+    const rule = CSS.slice(last, CSS.indexOf("}", last));
+    const times = [...rule.matchAll(/(\d*\.?\d+)s/g)].map((m) => Number(m[1]));
+    const [duration, delay] = times;
+
+    expect((duration + delay) * 1000).toBeLessThanOrEqual(1200);
+  });
+
+  it("is applied to the hero, not left defined and unused", () => {
+    const page = readFileSync(
+      path.join(process.cwd(), "app", "page.tsx"),
+      "utf8"
+    );
+    for (const className of HERO_CLASSES) {
+      expect(page, `${className} unused`).toContain(className);
+    }
   });
 });
 

@@ -336,23 +336,23 @@ export default async function Home() {
             heading carries its own weight. */}
         <section className="px-5 pb-20 pt-16 text-center md:px-16 md:pb-28 md:pt-24">
           <div className="mx-auto max-w-3xl">
-            <h1 className="text-2xl font-bold leading-[1.15] tracking-[-0.02em] text-primary sm:text-5xl">
+            <h1 className="hero-enter-1 text-2xl font-bold leading-[1.15] tracking-[-0.02em] text-primary sm:text-5xl">
               Your Path to the Career You Want,
               <br />
               <span className="text-secondary">Simplified.</span>
             </h1>
 
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-on-surface-variant">
+            <p className="hero-enter-2 mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-on-surface-variant">
               Discover tailored roadmaps, required certifications, and the real
               programs that get you there — from where you are to where you
               want to be. Grounded clarity, step by step.
             </p>
 
-            <div className="mx-auto mt-8 max-w-2xl text-left">
+            <div className="hero-enter-3 mx-auto mt-8 max-w-2xl text-left">
               <CareerSearch examples={EXAMPLE_CAREERS} />
             </div>
 
-            <div className="mx-auto mt-6 flex max-w-2xl items-center gap-4">
+            <div className="hero-enter-4 mx-auto mt-6 flex max-w-2xl items-center gap-4">
               <span className="h-px flex-1 bg-outline-variant" />
               <span className="text-xs font-semibold uppercase tracking-wider text-outline">
                 or
@@ -362,7 +362,7 @@ export default async function Home() {
 
             <Link
               href="/career-discovery"
-              className="mx-auto mt-6 flex max-w-2xl items-center justify-center gap-2 rounded-full border border-outline-variant bg-surface-low px-6 py-3 text-sm font-medium tracking-[0.05em] text-primary transition-colors hover:bg-surface-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              className="hero-enter-5 mx-auto mt-6 flex max-w-2xl items-center justify-center gap-2 rounded-full border border-outline-variant bg-surface-low px-6 py-3 text-sm font-medium tracking-[0.05em] text-primary transition-colors hover:bg-surface-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               <svg
                 viewBox="0 0 24 24"
