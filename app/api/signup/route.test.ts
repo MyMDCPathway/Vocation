@@ -111,7 +111,12 @@ describe("POST /api/signup", () => {
     const blocked = await POST(makeRequest({ ...VALID_BODY, email: "one-more@example.com" }, "198.51.100.9"));
     expect(blocked.status).toBe(429);
     expect(db.user.create).toHaveBeenCalledTimes(10);
-  });
+    // hashPassword isn't mocked here, so this is 10 real bcrypt hashes, not a
+    // mocked instant loop. Comfortably under a second per hash on most
+    // machines, but the default 5000ms test timeout has been observed to trip
+    // under background load (a running dev server, a busy CI runner) — this
+    // widens the budget rather than weakening what the test actually proves.
+  }, 15_000);
 
   it("accepts a plain-object intake and passes it to adoptIntake", async () => {
     vi.mocked(db.user.findUnique).mockResolvedValue(null);
@@ -170,5 +175,7 @@ describe("POST /api/signup", () => {
 
     const fromAnotherIp = await POST(makeRequest({ ...VALID_BODY, email: "other@example.com" }, "198.51.100.11"));
     expect(fromAnotherIp.status).toBe(200);
-  });
+    // Same real-bcrypt-loop reasoning as the test above: 11 genuine hashes,
+    // not mocked, so this gets the same widened budget.
+  }, 15_000);
 });
