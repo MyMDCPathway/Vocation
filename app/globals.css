@@ -83,8 +83,11 @@
   /* Entrance easing. A long, decelerating tail rather than the browser's
      `ease-out`: motion covers most of its distance early and settles slowly,
      which reads as something arriving and coming to rest instead of a linear
-     slide that stops. Used by the site-entry fade and the hero sequence. */
-  --ease-entry: cubic-bezier(0.16, 1, 0.3, 1);
+     slide that stops. easeOutQuart rather than the expo-style curve this
+     started with — expo front-loads so hard the motion is basically over in
+     the first third, which read as abrupt; quart spends longer gliding.
+     Used by the site-entry fade and the hero sequence. */
+  --ease-entry: cubic-bezier(0.25, 1, 0.5, 1);
 
   /* Shadow is feedback, not a resting state (DESIGN.md "The
      Shadow-Is-Feedback Rule") — soft and diffused, never a resting card. */
@@ -218,7 +221,9 @@ h1, .display {
  * that starts from a static `opacity: 0` and relies on `forwards` to undo it
  * has a blank-page failure mode; this one has none. */
 .site-enter {
-  animation: reveal 0.5s var(--ease-entry);
+  /* 0.6s is the ceiling of the 300-600ms window the motion tests pin — the
+     slowest this base fade is allowed to be before it gates the whole page. */
+  animation: reveal 0.6s var(--ease-entry);
 }
 
 /* The landing hero's arrival sequence.
@@ -238,26 +243,29 @@ h1, .display {
  * hands the element back to its own default styles. There is no static
  * opacity anywhere here, so an element that never animates is simply visible.
  *
- * Delays stop at 0.42s: the last item starts before the first has settled, so
- * the sequence reads as one movement rather than five separate ones. */
+ * Delays stop at 0.5s and each element glides for 0.7s: the last item starts
+ * well before the first has settled, so the sequence reads as one unhurried
+ * movement rather than five separate ones. The last element settles at 1.2s
+ * exactly — the ceiling the motion tests hold so arrival never reads as a
+ * loading screen. */
 .hero-enter-1 {
-  animation: reveal 0.5s var(--ease-entry) 0.06s backwards;
+  animation: reveal 0.7s var(--ease-entry) 0.1s backwards;
 }
 
 .hero-enter-2 {
-  animation: reveal 0.5s var(--ease-entry) 0.15s backwards;
+  animation: reveal 0.7s var(--ease-entry) 0.2s backwards;
 }
 
 .hero-enter-3 {
-  animation: reveal 0.5s var(--ease-entry) 0.24s backwards;
+  animation: reveal 0.7s var(--ease-entry) 0.3s backwards;
 }
 
 .hero-enter-4 {
-  animation: reveal 0.5s var(--ease-entry) 0.33s backwards;
+  animation: reveal 0.7s var(--ease-entry) 0.4s backwards;
 }
 
 .hero-enter-5 {
-  animation: reveal 0.5s var(--ease-entry) 0.42s backwards;
+  animation: reveal 0.7s var(--ease-entry) 0.5s backwards;
 }
 
 /* New Flowchart Styles */
