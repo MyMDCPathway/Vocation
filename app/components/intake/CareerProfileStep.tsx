@@ -12,6 +12,7 @@ import {
   type VoiceTone,
 } from "@/app/lib/careerProfileTypes";
 import { ContinueButton, StepShell } from "@/app/components/intake/StepShell";
+import { GenerationProgress } from "@/app/components/GenerationProgress";
 import { LaborStatsPanel, NoStatsNote } from "@/app/components/LaborStatsPanel";
 import { DemandMap } from "@/app/components/shared/DemandMap";
 import { leadWageArea } from "@/app/lib/blsStats";
@@ -221,11 +222,13 @@ export function CareerProfileStep({
       footer={<ContinueButton onClick={onNext} label="Explore pathways" />}
     >
       {loading && (
-        <div className="space-y-4" aria-live="polite">
-          <div className="h-48 animate-pulse rounded-xl bg-surface-container" />
-          <div className="h-4 w-3/4 animate-pulse rounded bg-surface-container" />
-          <div className="h-4 w-1/2 animate-pulse rounded bg-surface-container" />
-        </div>
+        <GenerationProgress
+          stages={[
+            "Checking real wage data",
+            "Learning what the job is actually like",
+            "Verifying the resources it found",
+          ]}
+        />
       )}
 
       {error && !loading && (
