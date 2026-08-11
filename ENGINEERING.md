@@ -175,9 +175,9 @@ Worth being honest about:
 
 ---
 
-## The team
+## Built by
 
-Built by **Christian Orozco**, **Gerald Gelats**, and **Sean Valencia** — started as a Miami Dade College hackathon project and carried well past it into a deployed application with real users.
+Started as a Miami Dade College hackathon project and carried well past it into a deployed application with real users.
 
 Commit history is public on the repository for anyone who wants the detail.
 
