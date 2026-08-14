@@ -381,6 +381,17 @@ export default async function Home() {
               </svg>
               Not sure yet? Take the career quiz
             </Link>
+
+            {/* Shares hero-enter-5 with the quiz link above rather than taking
+                a sixth delay step. The stagger's last element already settles
+                at 1.2s, which is the ceiling globals.motion.test.ts holds so
+                arrival never reads as a loading screen — a sixth step would
+                push past it for a link that isn't part of the main journey. */}
+            <FeedbackLink
+              flow="home"
+              label="Have feedback? Tell us what you think"
+              className="hero-enter-5 mx-auto mt-4 flex max-w-2xl items-center justify-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-medium tracking-[0.05em] text-white transition-colors hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+            />
           </div>
         </section>
 
