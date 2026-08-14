@@ -378,6 +378,21 @@ export default function Home() {
                 Start
               </Link>
             )}
+
+            {/* The way out of 1.0. Start (above) goes deeper into classic, so
+                this can't point there too — it's the door back to the current
+                version for anyone who arrived here from the comparison link on
+                the home page and wants to return. Rendered outside the
+                school-picked branch on purpose: leaving shouldn't require
+                having chosen a school first. */}
+            <div className="mt-6">
+              <Link
+                href="/"
+                className="text-sm font-medium text-gray-600 underline underline-offset-2 hover:text-gray-900 transition"
+              >
+                ← Back to current search
+              </Link>
+            </div>
           </div>
         </div>
       </section>
