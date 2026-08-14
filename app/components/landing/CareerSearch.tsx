@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { loadIntake, saveIntake } from "@/app/lib/intakeStorage";
 import { normalizeCareer } from "@/app/lib/careerCanonical";
@@ -137,6 +138,18 @@ export function CareerSearch({ examples }: { examples: string[] }) {
             {example}
           </button>
         ))}
+
+        {/* Not one of the `examples` — those set the field, this leaves for a
+            different search entirely. Loud on purpose: 1.0 is only reachable
+            by deliberately choosing it, so almost nobody sees it, and the
+            feedback survey can't compare the two flows if one of them has no
+            traffic to compare. See app/lib/feedback.ts. */}
+        <Link
+          href="/pathway"
+          className="ml-auto rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
+        >
+          Classic search →
+        </Link>
       </div>
     </div>
   );

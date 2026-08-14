@@ -353,6 +353,24 @@ export default async function Home() {
               <CareerSearch examples={EXAMPLE_CAREERS} />
             </div>
 
+            {/* Sits between the search card and the OR divider on purpose:
+                it's the last thing read before committing to the guided flow,
+                which is the only moment someone might still choose the other
+                one. Asking plainly because 1.0 gets almost no traffic, and a
+                flow nobody uses can't be compared against a flow everybody
+                does — see app/lib/feedback.ts. */}
+            <p className="hero-enter-4 mx-auto mt-4 max-w-2xl text-sm text-on-surface-variant">
+              Please try out the{" "}
+              <Link
+                href="/pathway"
+                className="font-semibold text-blue-600 underline underline-offset-2 transition-colors hover:text-blue-700"
+              >
+                classic search
+              </Link>{" "}
+              too — we&apos;re comparing it against this one and your take
+              genuinely decides which stays.
+            </p>
+
             <div className="hero-enter-4 mx-auto mt-6 flex max-w-2xl items-center gap-4">
               <span className="h-px flex-1 bg-outline-variant" />
               <span className="text-xs font-semibold uppercase tracking-wider text-outline">
@@ -389,7 +407,7 @@ export default async function Home() {
                 push past it for a link that isn't part of the main journey. */}
             <FeedbackLink
               flow="home"
-              label="Have feedback? Tell us what you think"
+              label="Please give feedback by clicking here"
               className="hero-enter-5 mx-auto mt-4 flex max-w-2xl items-center justify-center gap-2 rounded-full bg-blue-600 px-6 py-3 text-sm font-medium tracking-[0.05em] text-white transition-colors hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
             />
           </div>
