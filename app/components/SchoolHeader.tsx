@@ -24,7 +24,7 @@ export function SchoolHeader() {
             somewhere that couldn't do the thing it promised. /classic is where
             the picker actually lives now. */}
         <Link
-          href="/classic"
+          href="/classic/home"
           aria-label={`${school.name} — change school`}
           title={`${school.name} — change school`}
           className="rounded-lg px-2 py-1 hover:bg-gray-100 transition"
