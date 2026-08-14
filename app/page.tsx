@@ -87,7 +87,7 @@ const FOOTER_LINKS = [
   { href: "/privacy", label: "Privacy" },
   { href: "/terms", label: "Terms" },
   { href: "/team", label: "Meet the team" },
-  { href: "/pathway", label: "Classic search" },
+  { href: "/classic", label: "Classic search" },
 ];
 
 function Wordmark() {
@@ -362,13 +362,12 @@ export default async function Home() {
             <p className="hero-enter-4 mx-auto mt-4 max-w-2xl text-sm text-on-surface-variant">
               Please try out the{" "}
               <Link
-                href="/pathway"
+                href="/classic"
                 className="font-semibold text-blue-600 underline underline-offset-2 transition-colors hover:text-blue-700"
               >
                 classic search
               </Link>{" "}
-              too — we&apos;re comparing it against this one and your take
-              genuinely decides which stays.
+              too, I&apos;m comparing it against this one to see which feels better.
             </p>
 
             <div className="hero-enter-4 mx-auto mt-6 flex max-w-2xl items-center gap-4">

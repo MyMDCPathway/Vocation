@@ -145,7 +145,7 @@ export function CareerSearch({ examples }: { examples: string[] }) {
             feedback survey can't compare the two flows if one of them has no
             traffic to compare. See app/lib/feedback.ts. */}
         <Link
-          href="/pathway"
+          href="/classic"
           className="ml-auto rounded-full bg-blue-600 px-3 py-1 text-xs font-semibold text-white transition-colors hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600"
         >
           Classic search →

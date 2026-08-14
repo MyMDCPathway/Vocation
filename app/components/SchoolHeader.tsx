@@ -18,10 +18,15 @@ export function SchoolHeader() {
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="max-w-7xl mx-auto flex items-center justify-center">
+        {/* /classic, not /. The title has always said "change school on the
+            home page", but the home page stopped having a school picker when
+            2.0 inverted the flow to career-first — so this sent students
+            somewhere that couldn't do the thing it promised. /classic is where
+            the picker actually lives now. */}
         <Link
-          href="/"
-          aria-label={`${school.name} — back to home`}
-          title={`${school.name} — change school on the home page`}
+          href="/classic"
+          aria-label={`${school.name} — change school`}
+          title={`${school.name} — change school`}
           className="rounded-lg px-2 py-1 hover:bg-gray-100 transition"
         >
           <SchoolMark school={school} size="lg" />
