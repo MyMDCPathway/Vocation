@@ -16,6 +16,7 @@ import { PathwayFlow } from "@/app/components/plan/PathwayFlow";
 import { CostPanel } from "@/app/components/plan/CostPanel";
 import { ConfidenceBanner } from "@/app/components/plan/ConfidenceBanner";
 import { LocalPayPanel } from "@/app/components/plan/LocalPayPanel";
+import { FeedbackLink } from "@/app/components/FeedbackLink";
 
 type SaveState = "idle" | "saving" | "saved" | "error";
 
@@ -446,6 +447,13 @@ export default function PlanPage() {
             <Link href="/team" className="transition-colors hover:text-primary">
               Meet the team
             </Link>
+            {/* `guided`, not `home` — this page is only reachable by finishing
+                the 2.0 intake, so a response from here is attributable. That
+                attribution is the whole comparison; see app/lib/feedback.ts. */}
+            <FeedbackLink
+              flow="guided"
+              className="transition-colors hover:text-primary"
+            />
           </div>
           <p className="mt-4 text-xs leading-relaxed text-outline">
             <strong>Disclaimer:</strong> pathways and costs are AI-generated

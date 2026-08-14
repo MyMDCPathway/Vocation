@@ -5,6 +5,7 @@ import { RevealSection } from "@/app/components/shared/RevealSection";
 import { listCuratedInterests } from "@/app/lib/interests";
 import { auth } from "@/app/lib/auth";
 import { db } from "@/app/lib/db";
+import { FeedbackLink } from "@/app/components/FeedbackLink";
 
 // The landing page, in the Empowered Clarity world (see DESIGN.md).
 //
@@ -636,6 +637,9 @@ export default async function Home() {
                   {link.label}
                 </Link>
               ))}
+              {/* Last in the row, and outside FOOTER_LINKS, because it leaves
+                  the site — every other entry here is an internal route. */}
+              <FeedbackLink flow="home" />
             </nav>
           </div>
 

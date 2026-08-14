@@ -21,6 +21,7 @@ import { ExamStepComponent } from "@/app/components/ExamStep";
 import { calculateStepCostRange, calculatePathwayCostRange, formatCostRange } from "@/app/lib/cost";
 import { SchoolHeader } from "@/app/components/SchoolHeader";
 import { GenerationProgress } from "@/app/components/GenerationProgress";
+import { FeedbackLink } from "@/app/components/FeedbackLink";
 
 // Comparing a second career doubles the Gemini calls for that session. Off
 // for now to hold down token spend — flip back on when that's not a concern.
@@ -1575,7 +1576,15 @@ function PathwayPageContent() {
 
           {/* Bottom Bar */}
           <div className="mt-8 pt-6 border-t border-gray-200 text-center text-xs text-gray-500">
-            <p>© {new Date().getFullYear()} Vocation. All rights reserved.</p>
+            {/* `classic`, and this is the half of the comparison that's hard to
+                collect: /pathway is only reached by deliberately choosing
+                "Classic search", so responses from here are both rarer and
+                self-selected. See app/lib/feedback.ts. */}
+            <FeedbackLink
+              flow="classic"
+              className="text-xs text-gray-500 underline transition-colors hover:text-primary"
+            />
+            <p className="mt-3">© {new Date().getFullYear()} Vocation. All rights reserved.</p>
             <p className="mt-1">Powered by Google Gemini AI</p>
           </div>
         </div>

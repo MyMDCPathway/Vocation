@@ -91,6 +91,7 @@ export default function PrivacyPolicy() {
               <li><strong>Resend</strong> — sends transactional email (e.g. password resets); we do not send marketing email</li>
               <li><strong>Sentry</strong> — error monitoring, configured with no session replay and no default personal data collection</li>
               <li><strong>Google (Gemini)</strong> — generates career pathway content, as described above</li>
+              <li><strong>Google Forms</strong> — hosts our optional feedback survey. The survey is anonymous and does not ask for your name or email; we only receive what you choose to type into it.</li>
             </ul>
             <p className="mt-4">
               We do not otherwise share your personal information with third parties, except
